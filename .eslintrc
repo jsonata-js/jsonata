@@ -1,0 +1,46 @@
+{
+  // This is a set of basic and sensible rules that should not change except at major ESLint versions
+  "extends": "eslint:recommended",
+
+  // Environments that we run in
+  "env": {
+    "node": true,
+    "mocha": true,
+    "es6": true
+  },
+
+  // Extra plugins required
+  "plugins": [
+    "ideal" // for tabs in file
+  ],
+
+  // Additional rules
+  "rules": {
+    "array-bracket-spacing": ["error", "never"],
+    "dot-notation": "error",
+    "ideal/no-tabs-in-file": "error",
+    "indent": ["error", 4, {"SwitchCase": 1}],
+    "max-len": ["error", 1000, {"ignoreComments": true}],
+    "new-cap": ["error", {"capIsNewExceptions": ["Router"]}],
+    "no-console": "off",
+    "no-floating-decimal": "error",
+    "no-lonely-if": "error",
+    "no-spaced-func": "error",
+    "no-throw-literal": "off",
+    "no-trailing-spaces": "error",
+    "no-use-before-define": ["error", {"functions": false}],
+    "no-useless-call": "error",
+    "no-with": "error",
+    "operator-linebreak": ["error", "after"],
+    "require-jsdoc": ["error", {
+      "require": {
+        "ClassDeclaration": true,
+        "MethodDefinition": true,
+        "FunctionDeclaration": true
+      }
+    }],
+    "semi": ["error", "always"],
+    "strict": ["error", "global"],
+    "valid-jsdoc": ["error", {"requireReturn": false}]
+  }
+}

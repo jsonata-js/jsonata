@@ -1,0 +1,6 @@
+/karma.conf.js
+node_modules/
+coverage/
+npm-debug.log
+doc/
+.idea
