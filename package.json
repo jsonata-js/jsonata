@@ -1,7 +1,12 @@
 {
   "name": "jsonata",
-  "version": "1.0.1",
+  "version": "1.0.2",
+  "description" : "JSON query and transformation language",
   "main": "jsonata.js",
+  "repository": {
+    "type":"git",
+    "url":"https://github.com/jsonata-js/jsonata.git"
+  },
   "scripts": {
     "pretest": "npm run lint",
     "test": "node ./node_modules/istanbul/lib/cli.js cover --report cobertura --report html ./node_modules/mocha/bin/_mocha -- --reporter mocha-jenkins-reporter \"test/**/*.js\"",
@@ -12,8 +17,7 @@
     "postlint": "npm run doc",
     "doc": "jsdoc --configure jsdoc.json ."
   },
-  "author": "",
-  "license": "",
+  "license": "MIT",
   "devDependencies": {
     "chai": "^3.4.1",
     "eslint": "^3.6.0",
@@ -23,5 +27,8 @@
     "license-checker": "^6.0.0",
     "mocha": "^3.0.2",
     "mocha-jenkins-reporter": "^0.2.4"
+  },
+  "engines": {
+    "node": ">= 4.4"
   }
 }
