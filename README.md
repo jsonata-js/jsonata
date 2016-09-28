@@ -1,4 +1,8 @@
 # JSONata
+
+[![Build Status](https://travis-ci.org/jsonata-js/jsonata.svg)](https://travis-ci.org/jsonata-js/jsonata)
+[![Coverage Status](https://coveralls.io/repos/github/jsonata-js/jsonata/badge.svg?branch=master)](https://coveralls.io/github/jsonata-js/jsonata?branch=master)
+
 JSON query and transformation language
 
 ##Introduction
@@ -13,7 +17,7 @@ and operators, and also the ability to format the output into any arbitrary JSON
 In node.js:
 ```
 var jsonata = require("jsonata");
-var data = { "example": [ {"value": 4}, {"value": 7}, , {"value": 13}] };
+var data = { "example": [ {"value": 4}, {"value": 7}, {"value": 13}] };
 var expression = "$sum(example.value)";
 var result = jsonata(expression).evaluate(data);  // returns 24
 ```
