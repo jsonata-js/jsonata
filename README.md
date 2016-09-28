@@ -6,8 +6,17 @@ The primary purpose of this language is to extract values from JSON documents, w
 additional capabilities to combine these values using a set of basic functions
 and operators, and also the ability to format the output into any arbitrary JSON structure.
 
-##Quick Start
+##Install
 - `npm install jsonata`
+
+##Usage
+In node.js:
+```
+var jsonata = require("jsonata");
+var data = { "example": [ {"value": 4}, {"value": 7}, , {"value": 13}] };
+var expression = "$sum(example.value)";
+var result = jsonata(expression).evaluate(data);  // returns 24
+```
 
 
 
@@ -28,5 +37,5 @@ For example:
 Tutorial [tutorial.md](tutorial.md)
 Function library [functions.md](functions.md)
 
-## Contributing changes
+## Contributing
 See the [CONTRIBUTING.md](CONTRIBUTING.md) for details of how to contribute to this repo.
