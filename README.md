@@ -18,10 +18,40 @@ var expression = "$sum(example.value)";
 var result = jsonata(expression).evaluate(data);  // returns 24
 ```
 
-
+In a browser:
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JSONata test</title>
+    <script src="lib/jsonata.js"></script>
+</head>
+<body>
+<button onclick="alert(jsonata('[1..10]').evaluate())">Click me</button>
+</body>
+</html>
+```
 
 ##Tutorial
 A tutorial on the JSONata language is available [here](tutorial.md)
+
+##Developers
+If you want to run the latest code from git, here's how to get started:
+
+2. Clone the code:
+
+        git clone ttps://github.com/jsonata-js/jsonata.git
+        cd jsonata
+
+3. Install the development dependencies (there are no runtime dependencies):
+
+        npm install
+
+4. Run the tests
+
+        npm t
+
 
 ##Errors
 
