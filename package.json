@@ -1,11 +1,11 @@
 {
   "name": "jsonata",
   "version": "1.0.3",
-  "description" : "JSON query and transformation language",
+  "description": "JSON query and transformation language",
   "main": "jsonata.js",
   "repository": {
-    "type":"git",
-    "url":"https://github.com/jsonata-js/jsonata.git"
+    "type": "git",
+    "url": "https://github.com/jsonata-js/jsonata.git"
   },
   "scripts": {
     "pretest": "npm run lint",
@@ -13,16 +13,20 @@
     "posttest": "istanbul check-coverage -statement 100 -branch 100 -function 100 -line 100",
     "lint": "eslint .",
     "postlint": "npm run doc",
-    "doc": "jsdoc --configure jsdoc.json ."
+    "doc": "jsdoc --configure jsdoc.json .",
+    "cover": "istanbul cover _mocha",
+    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "license": "MIT",
   "devDependencies": {
     "chai": "^3.4.1",
+    "coveralls": "^2.11.14",
     "eslint": "^3.6.0",
     "eslint-plugin-ideal": "^0.1.3",
     "istanbul": "^0.4.5",
     "jsdoc": "^3.4.0",
-    "mocha": "^3.0.2"
+    "mocha": "^3.0.2",
+    "mocha-lcov-reporter": "^1.2.0"
   },
   "engines": {
     "node": ">= 4.4"
