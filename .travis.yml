@@ -1,7 +1,11 @@
 language: node_js
 node_js:
-  - "6"
-  - "5"
-  - "4.4"
+- '6'
+- '5'
+- '4.4'
 after_success:
-  - npm run coveralls
+- npm run coveralls
+deploy:
+  provider: npm
+  api_key:
+    secure: MjuG/osSRXunW5N0o/vKJTJl+CTAdYC9pt4pwtAl3eAPdMvsFuEFufendCh21yR9XtubW+LpwOOXXI2LX5jFObWLIChytsB1jprTErhgqonV96raGHaPNISnmhsqL+wLOxh4DRlOE8e/zLZqbH5G5SyUlOI7UT8A1EznjKe49NHXBOjADDCNH+h6OzXZ+GoK0uL1WLqjqoz1StgKCFld2drHVIhhLoZrWS4DQX1m6BIZueffswWyhjBSw93GPtuU4pdJuD55b9WQid2+0IEgMLBs++A91kVjRJ9Jqn5Jhr4tFUw1+q2qTENrv/T98WhCNIHHeGDi2uAAszAVQgbc42rt+nThYk/QZkXO1kgkR00+LGFi8ASGkc8sMV5QsYfN5wBNmGfJD/OS2alL06Qb09JadAfxjHaQgK/XajKILeydKwJc85eDCR+RvZqI6v0ZqdzsL5a1cqB6KMwmqTpvU/NPvagOoLg09TFoaCxheqhnDzzPddiUBMDfl2CmIdR4yhmyn87PfamtgrdA9kPnXM3xf2YGw6HUc/EjqowER8tsd0zSzIHqruBxboFnSOm07UP7zNjXnXid6ZmLCmukFCIaWJ91Zf7lP1CcHh/aycuMr4ZxTki8eO9Y1Ax4UNhVKZsNOwY6PCt09IcGfkL4hhlkrU92M+pYm329Z4iGXJs=
