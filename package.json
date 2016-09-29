@@ -1,6 +1,6 @@
 {
   "name": "jsonata",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "JSON query and transformation language",
   "main": "jsonata.js",
   "repository": {
@@ -18,6 +18,7 @@
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "license": "MIT",
+  "keywords" : ["JSON", "query", "transformation", "transform", "mapping", "path"],
   "devDependencies": {
     "chai": "^3.4.1",
     "coveralls": "^2.11.14",
