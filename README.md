@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.org/jsonata-js/jsonata.svg)](https://travis-ci.org/jsonata-js/jsonata)
 [![Coverage Status](https://coveralls.io/repos/github/jsonata-js/jsonata/badge.svg?branch=master)](https://coveralls.io/github/jsonata-js/jsonata?branch=master)
 [![Dependency Status](https://david-dm.org/jsonata-js/jsonata.svg)](https://david-dm.org/jsonata-js/jsonata)
+[![Dev Dependency Status](https://david-dm.org/jsonata-js/jsonata/dev-status.svg)](https://david-dm.org/jsonata-js/jsonata?type=dev)
 
 JSON query and transformation language
 
