@@ -14,7 +14,7 @@ and operators, and also the ability to format the output into any arbitrary JSON
 - `npm install jsonata`
 
 ##Usage
-In node.js:
+In node.js (works in v4.4 and later):
 ```
 var jsonata = require("jsonata");
 var data = { "example": [ {"value": 4}, {"value": 7}, {"value": 13}] };
@@ -22,7 +22,7 @@ var expression = "$sum(example.value)";
 var result = jsonata(expression).evaluate(data);  // returns 24
 ```
 
-In a browser:
+In a browser (works in latest Chrome, Firefox, Safari):
 ```
 <!DOCTYPE html>
 <html lang="en">
@@ -45,7 +45,7 @@ If you want to run the latest code from git, here's how to get started:
 
 2. Clone the code:
 
-        git clone ttps://github.com/jsonata-js/jsonata.git
+        git clone https://github.com/jsonata-js/jsonata.git
         cd jsonata
 
 3. Install the development dependencies (there are no runtime dependencies):
