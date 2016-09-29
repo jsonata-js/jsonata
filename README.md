@@ -1,8 +1,9 @@
 # JSONata
 
-[![Download Status](http://img.shields.io/npm/dt/jsonata.svg)](https://www.npmjs.org/package/jsonata)
 [![Build Status](https://travis-ci.org/jsonata-js/jsonata.svg)](https://travis-ci.org/jsonata-js/jsonata)
 [![Coverage Status](https://coveralls.io/repos/github/jsonata-js/jsonata/badge.svg?branch=master)](https://coveralls.io/github/jsonata-js/jsonata?branch=master)
+[![Dependency Status](https://david-dm.org/jsonata-js/jsonata.svg)](https://david-dm.org/jsonata-js/jsonata)
+[![Download Status](http://img.shields.io/npm/dt/jsonata.svg)](https://www.npmjs.org/package/jsonata)
 
 JSON query and transformation language
 
