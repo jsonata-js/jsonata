@@ -1764,6 +1764,14 @@ function getNativeFunctionArguments(func) {
  */
 function functionSum(args) {
     var total = 0;
+
+    if(arguments.length != 1) {
+        throw {
+            message: 'The sum function expects one argument',
+            stack: (new Error()).stack
+        };
+    }
+
     if (typeof args !== 'undefined') {
         if (!Array.isArray(args)) {
             args = [args];
@@ -1778,6 +1786,11 @@ function functionSum(args) {
                 };
             }
         });
+    } else {
+        throw {
+            message: "undefined value passed to function $sum()",
+            stack: (new Error()).stack
+        };
     }
     return total;
 }

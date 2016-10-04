@@ -64,6 +64,12 @@ See [substr](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/G
    - All other values cause an error to be thrown.
 
 - `$sum(array)`
+
+   Sums up the numbers in the `array` using the following rules
+   - Numbers are unchanged
+   - Strings that contain a sequence of characters that represent a legal JSON number are converted to that number
+   - If zero or more than 1 argument is passed in the function will throw an error
+        
 - `$abs(number)`
 - `$max(array)`
 - `$min(array)`
