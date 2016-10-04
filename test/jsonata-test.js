@@ -852,6 +852,18 @@ describe('Evaluator - numeric operators', function () {
         });
     });
 
+    describe('1/(10e300 * 10e100) ', function () {
+        it('should throw error', function () {
+            var expr = jsonata('1/(10e300 * 10e100) ');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({value: Infinity})
+              .to.have.property('message').to.match(/Number out of range/);
+        });
+    });
+
+
 });
 
 describe('Evaluator - comparison operators', function () {
@@ -1868,6 +1880,51 @@ $string({
         });
     });
 
+    describe('$string(1/0)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$string(1/0)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 8, value: Infinity})
+              .to.have.property('message').to.match(/Attempting to invoke string function on Infinity or NaN/);
+        });
+    });
+
+    describe('$string({"inf": 1/0})', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$string({"inf": 1/0})');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 8, value: Infinity})
+              .to.have.property('message').to.match(/Number out of range/);
+        });
+    });
+
+    describe('$string(2,3)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$string(2,3)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 8})
+              .to.have.property('message').to.match(/The string function expects one argument/);
+        });
+    });
+
+    describe('$string()', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$string()');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 8})
+              .to.have.property('message').to.match(/The string function expects one argument/);
+        });
+    });
+
+
 });
 
 describe('Evaluator - functions: substring', function () {
@@ -2052,6 +2109,291 @@ describe('Evaluator - functions: uppercase', function () {
 
 });
 
+describe('Evaluator - functions: number', function () {
+
+    describe('$number(0)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$number(0)');
+            var result = expr.evaluate();
+            var expected = 0;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$number(10)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$number(10)');
+            var result = expr.evaluate();
+            var expected = 10;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$number(-0.05)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$number(-0.05)');
+            var result = expr.evaluate();
+            var expected = -0.05;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$number("0")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$number("0")');
+            var result = expr.evaluate();
+            var expected = 0;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$number("-0.05")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$number("-0.05")');
+            var result = expr.evaluate();
+            var expected = -0.05;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$number("1e2")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$number("1e2")');
+            var result = expr.evaluate();
+            var expected = 100;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$number("1.0e-2")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$number("1.0e-2")');
+            var result = expr.evaluate();
+            var expected = 0.01;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$number("1e0")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$number("1e0")');
+            var result = expr.evaluate();
+            var expected = 1;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$number("10e500")', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$number("10e500")');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 8})
+              .to.have.property('message').to.match(/Number out of range/);
+        });
+    });
+
+    describe('$number("Hello world")', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$number("Hello world")');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 8})
+              .to.have.property('message').to.match(/Unable to cast value to a number/);
+        });
+    });
+
+    describe('$number("1/2")', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$number("1/2")');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 8})
+              .to.have.property('message').to.match(/Unable to cast value to a number/);
+        });
+    });
+
+    describe('$number("1234 hello")', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$number("1234 hello")');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 8})
+              .to.have.property('message').to.match(/Unable to cast value to a number/);
+        });
+    });
+
+    describe('$number("")', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$number("")');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 8})
+              .to.have.property('message').to.match(/Unable to cast value to a number/);
+        });
+    });
+
+    describe('$number(true)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$number(true)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 8})
+              .to.have.property('message').to.match(/Unable to cast value to a number/);
+        });
+    });
+
+    describe('$number(false)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$number(false)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 8})
+              .to.have.property('message').to.match(/Unable to cast value to a number/);
+        });
+    });
+
+    describe('$number(null)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$number(null)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 8})
+              .to.have.property('message').to.match(/Unable to cast value to a number/);
+        });
+    });
+
+    describe('$number([])', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$number([])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 8})
+              .to.have.property('message').to.match(/Unable to cast value to a number/);
+        });
+    });
+
+    describe('$number("[1]")', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$number("[1]")');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 8})
+              .to.have.property('message').to.match(/Unable to cast value to a number/);
+        });
+    });
+
+    describe('$number([1,2])', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$number([1,2])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 8})
+              .to.have.property('message').to.match(/Unable to cast value to a number/);
+        });
+    });
+
+    describe('$number(["hello"])', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$number(["hello"])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 8})
+              .to.have.property('message').to.match(/Unable to cast value to a number/);
+        });
+    });
+
+    describe('$number(["2"])', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$number(["2"])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 8})
+              .to.have.property('message').to.match(/Unable to cast value to a number/);
+        });
+    });
+
+    describe('$number({})', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$number({})');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 8})
+              .to.have.property('message').to.match(/Unable to cast value to a number/);
+        });
+    });
+
+    describe('$number({"hello":"world"})', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$number({"hello":"world"})');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 8})
+              .to.have.property('message').to.match(/Unable to cast value to a number/);
+        });
+    });
+
+    describe('$number($number)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$number($number)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 8})
+              .to.have.property('message').to.match(/Unable to cast value to a number/);
+        });
+    });
+
+    describe('$number(function(){5})', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$number(function(){5})');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 8})
+              .to.have.property('message').to.match(/Unable to cast value to a number/);
+        });
+    });
+
+    describe('$number()', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$number()');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 8})
+              .to.have.property('message').to.match(/The number function expects one argument/);
+        });
+    });
+
+    describe('$number(1,2)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$number(1,2)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 8})
+              .to.have.property('message').to.match(/The number function expects one argument/);
+        });
+    });
+
+});
+
 describe('Evaluator - functions: boolean', function () {
 
     describe('$boolean("Hello World")', function () {
@@ -2166,7 +2508,7 @@ describe('Evaluator - functions: boolean', function () {
         it('should return result object', function () {
             var expr = jsonata('$boolean([0,0])');
             var result = expr.evaluate(testdata2);
-            var expected = true;
+            var expected = false;
             assert.equal(JSON.stringify(result), JSON.stringify(expected));
         });
     });
@@ -2258,6 +2600,28 @@ describe('Evaluator - functions: boolean', function () {
             var result = expr.evaluate(testdata2);
             var expected = false;
             assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$boolean(2,3)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$boolean(2,3)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 9})
+              .to.have.property('message').to.match(/The boolean function expects one argument/);
+        });
+    });
+
+    describe('$boolean()', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$boolean()');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 9})
+              .to.have.property('message').to.match(/The boolean function expects one argument/);
         });
     });
 

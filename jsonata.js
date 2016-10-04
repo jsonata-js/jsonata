@@ -756,7 +756,16 @@ var parser = function (source) {
  * @returns {boolean} True if n is a finite number
  */
 function isNumeric(n) {
-    return !isNaN(parseFloat(n)) && isFinite(n);
+    var num = parseFloat(n);
+    var isNum =  !isNaN(num);
+    if(isNum && !isFinite(num)) {
+        throw {
+            message: "Number out of range",
+            value: n,
+            stack: (new Error()).stack
+        };
+    }
+    return isNum;
 }
 
 /**
@@ -1780,17 +1789,31 @@ function functionSum(args) {
  */
 function functionString(arg) {
     var str;
+
+    if(arguments.length != 1) {
+        throw {
+            message: 'The string function expects one argument',
+            stack: (new Error()).stack
+        };
+    }
+
     if (typeof arg === 'string') {
         // already a string
         str = arg;
     } else if(typeof arg === 'function' || (arg && arg.lambda === true && arg.environment && arg.arguments && arg.body)) {
         // functions (built-in and lambda convert to empty string
         str = '';
+    } else if (typeof arg === 'number' && !isFinite(arg)) {
+        throw {
+            message: "Attempting to invoke string function on Infinity or NaN",
+            value: arg,
+            stack: (new Error()).stack
+        };
     } else
         str = JSON.stringify(arg, function (key, val) {
-            return (typeof val !== 'undefined' && val !== null && val.toPrecision) ? Number(val.toPrecision(13)) :
+            return (typeof val !== 'undefined' && val !== null && val.toPrecision && isNumeric(val)) ? Number(val.toPrecision(13)) :
                 (val && val.lambda === true && val.environment && val.arguments && val.body) ? '' :
-                    (typeof val === 'function') ? '' : val;
+                  (typeof val === 'function') ? '' : val;
         });
     return str;
 }
@@ -1990,6 +2013,37 @@ function functionUppercase(str) {
 }
 
 /**
+ * Cast argument to number
+ * @param {Object} arg - Argument
+ * @returns {Number} numeric value of argument
+ */
+function functionNumber(arg) {
+    var result;
+
+    if(arguments.length != 1) {
+        throw {
+            message: 'The number function expects one argument',
+            stack: (new Error()).stack
+        };
+    }
+
+    if (typeof arg === 'number') {
+        // already a number
+        result = arg;
+    } else if(typeof arg === 'string' && /^-?(0|([1-9][0-9]*))(\.[0-9]+)?([Ee][-+]?[0-9]+)?$/.test(arg) && isNumeric(arg)) {
+        result = parseFloat(arg);
+    } else {
+        throw {
+            message: "Unable to cast value to a number",
+            value: arg,
+            stack: (new Error()).stack
+        };
+    }
+    return result;
+}
+
+
+/**
  * Evaluate an input and return a boolean
  * @param {*} arg - Arguments
  * @returns {boolean} Boolean
@@ -2003,12 +2057,21 @@ function functionBoolean(arg) {
     // array: empty -> false; length > 1 -> true
     // object: empty -> false; non-empty -> true
     // function -> false
+
+    if(arguments.length != 1) {
+        throw {
+            message: 'The boolean function expects one argument',
+            stack: (new Error()).stack
+        };
+    }
+
     var result = false;
     if (Array.isArray(arg)) {
         if (arg.length == 1) {
             result = functionBoolean(arg[0]);
         } else if (arg.length > 1) {
-            result = true; // TODO might want an existential comparison here instead
+            var trues = arg.filter(function(val) {return functionBoolean(val);});
+            result = trues.length > 0;
         }
     } else if (typeof arg === 'string') {
         if (arg.length > 0) {
@@ -2227,6 +2290,7 @@ staticFrame.bind('substringBefore', functionSubstringBefore);
 staticFrame.bind('substringAfter', functionSubstringAfter);
 staticFrame.bind('lowercase', functionLowercase);
 staticFrame.bind('uppercase', functionUppercase);
+staticFrame.bind('number', functionNumber);
 staticFrame.bind('boolean', functionBoolean);
 staticFrame.bind('not', functionNot);
 staticFrame.bind('map', functionMap);

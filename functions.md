@@ -6,7 +6,11 @@ This is work in progress. Some of these functions have been implemented, but mos
 #### String functions
 - `$string(arg)`
 
-   Casts the `arg` parameter to a string
+   Casts the `arg` parameter to a string using the following casting rules
+   - Strings are unchanged
+   - Functions are converted to an empty string
+   - Numeric infinity and NaN throw an error because they cannot be represented as a JSON number
+   - All other values are converted to a JSON string using the [JSON.stringify](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) function
    
 - `$length(str)`
 
@@ -54,7 +58,10 @@ See [substr](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/G
 
 - `$number(arg)`
 
-  Cast the value of `arg` to a number
+   Casts the `arg` parameter to a number using the following casting rules
+   - Numbers are unchanged
+   - Strings that contain a sequence of characters that represent a legal JSON number are converted to that number
+   - All other values cause an error to be thrown.
 
 - `$sum(array)`
 - `$abs(number)`
@@ -75,7 +82,23 @@ See [substr](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/G
 
 - `$boolean(arg)`
 
-  Casts the argument to a Boolean
+  Casts the argument to a Boolean using the following rules:
+  
+  | Argument type|Result|
+  | -------------|------|
+  | Boolean| unchanged|
+  | string: empty| `false`|
+  | string: non-empty| `true`|
+  | number: 0 | `false`|
+  | number: non-zero | `true`|
+  | null | `false`|
+  | array: empty| `false`|
+  | array: contains a member that casts to `true`|  `true`|
+  | array: all members cast to `false`|  `false`|
+  | object: empty | `false`|
+  | object: non-empty | `true`|
+  | function | `false`|
+
 
 - `$not(arg)`
 
@@ -115,3 +138,8 @@ See [substr](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/G
   
   Returns an object containing the union of the two `object` parameters.  If an entry in the second object 
   has the same key as an entry in the first, then the value will be overridden by the second.
+  
+#### Higher-order functions
+
+- `$map`
+
