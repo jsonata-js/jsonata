@@ -1796,6 +1796,93 @@ function functionSum(args) {
 }
 
 /**
+ * Count function
+ * @param {Object} args - Arguments
+ * @returns {number} Number of elements in the array
+ */
+function functionCount(args) {
+    var total = 0;
+
+    if(arguments.length != 1) {
+        throw {
+            message: 'The count function expects one argument',
+            stack: (new Error()).stack
+        };
+    }
+
+    if (typeof args !== 'undefined') {
+        if (!Array.isArray(args)) {
+            args = [args];
+        }
+        total = args.length;
+    } else {
+        throw {
+            message: "undefined value passed to function $count()",
+            stack: (new Error()).stack
+        };
+    }
+    return total;
+}
+
+/**
+ * Max function
+ * @param {Object} args - Arguments
+ * @returns {number} Max element in the array
+ */
+function functionMax(args) {
+    var max;
+
+    if(arguments.length != 1) {
+        throw {
+            message: 'The max function expects one argument',
+            stack: (new Error()).stack
+        };
+    }
+
+    if (typeof args !== 'undefined') {
+        if (!Array.isArray(args)) {
+            args = [args];
+        }
+        max = Math.max.apply(Math, args);
+    } else {
+        throw {
+            message: "undefined value passed to function $max()",
+            stack: (new Error()).stack
+        };
+    }
+    return max;
+}
+
+/**
+ * Min function
+ * @param {Object} args - Arguments
+ * @returns {number} Max element in the array
+ */
+function functionMin(args) {
+    var min;
+
+    if(arguments.length != 1) {
+        throw {
+            message: 'The min function expects one argument',
+            stack: (new Error()).stack
+        };
+    }
+
+    if (typeof args !== 'undefined') {
+        if (!Array.isArray(args)) {
+            args = [args];
+        }
+        min = Math.min.apply(Math, args);
+    } else {
+        throw {
+            message: "undefined value passed to function $min()",
+            stack: (new Error()).stack
+        };
+    }
+    return min;
+}
+
+/**
  * Stingify arguments
  * @param {Object} arg - Arguments
  * @returns {String} String from arguments
@@ -2297,6 +2384,10 @@ function createFrame(enclosingEnvironment) {
 var staticFrame = createFrame(null);
 
 staticFrame.bind('sum', functionSum);
+staticFrame.bind('count', functionCount);
+staticFrame.bind('max', functionMax);
+staticFrame.bind('min', functionMin);
+//staticFrame.bind('average', functionAverage);
 staticFrame.bind('string', functionString);
 staticFrame.bind('substring', functionSubstring);
 staticFrame.bind('substringBefore', functionSubstringBefore);

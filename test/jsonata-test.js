@@ -1626,7 +1626,6 @@ describe('Evaluator - variables', function () {
             assert.equal(JSON.stringify(result), JSON.stringify(expected));
         });
     });
-
 });
 
 
@@ -1701,7 +1700,7 @@ describe('Evaluator - functions: sum', function () {
         it('should throw an error', function () {
             var expr = jsonata('$sum()');
             expect(function () {
-                expr.evaluate(testdata2);
+                expr.evaluate();
             }).to.throw()
                 .to.deep.contain({position: 5})
                 .to.have.property('message').to.match(/The sum function expects one argument/);
@@ -1712,7 +1711,7 @@ describe('Evaluator - functions: sum', function () {
         it('should throw an error', function () {
             var expr = jsonata('$sum([],[])');
             expect(function () {
-                expr.evaluate(testdata2);
+                expr.evaluate();
             }).to.throw()
                 .to.deep.contain({position: 5})
                 .to.have.property('message').to.match(/The sum function expects one argument/);
@@ -1723,7 +1722,7 @@ describe('Evaluator - functions: sum', function () {
         it('should throw an error', function () {
             var expr = jsonata('$sum([1,2,3],[])');
             expect(function () {
-                expr.evaluate(testdata2);
+                expr.evaluate();
             }).to.throw()
                 .to.deep.contain({position: 5})
                 .to.have.property('message').to.match(/The sum function expects one argument/);
@@ -1734,7 +1733,7 @@ describe('Evaluator - functions: sum', function () {
         it('should throw an error', function () {
             var expr = jsonata('$sum([],[],[])');
             expect(function () {
-                expr.evaluate(testdata2);
+                expr.evaluate();
             }).to.throw()
                 .to.deep.contain({position: 5})
                 .to.have.property('message').to.match(/The sum function expects one argument/);
@@ -1745,7 +1744,7 @@ describe('Evaluator - functions: sum', function () {
         it('should throw an error', function () {
             var expr = jsonata('$sum([1,2],[],[])');
             expect(function () {
-                expr.evaluate(testdata2);
+                expr.evaluate();
             }).to.throw()
                 .to.deep.contain({position: 5})
                 .to.have.property('message').to.match(/The sum function expects one argument/);
@@ -1756,16 +1755,407 @@ describe('Evaluator - functions: sum', function () {
         it('should throw an error', function () {
             var expr = jsonata('$sum(undefined)');
             expect(function () {
-                expr.evaluate(testdata2);
+                expr.evaluate();
             }).to.throw()
                 .to.deep.contain({position: 5})
                 .to.have.property('message').to.match(/undefined value/);
         });
     });
+});
 
+describe('Evaluator - functions: count', function () {
 
+    describe('$count(Account.Order.Product.(Price * Quantity))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$count(Account.Order.Product.(Price * Quantity))');
+            var result = expr.evaluate(testdata2);
+            var expected = 4;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Account.Order.$count(Product.(Price * Quantity))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.$count(Product.(Price * Quantity))');
+            var result = expr.evaluate(testdata2);
+            var expected = [2, 2];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Account.Order.(OrderID & ": " & $count(Product.(Price*Quantity)))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.(OrderID & ": " & $count(Product.(Price*Quantity)))');
+            var result = expr.evaluate(testdata2);
+            var expected = ["order103: 2","order104: 2"];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$count([])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$count([])');
+            var result = expr.evaluate();
+            var expected = 0;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$count([1,2,3])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$count([1,2,3])');
+            var result = expr.evaluate();
+            var expected = 3;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$count(["1","2","3"])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$count(["1","2","3"])');
+            var result = expr.evaluate();
+            var expected = 3;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$count(["1","2",3])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$count(["1","2",3])');
+            var result = expr.evaluate();
+            var expected = 3;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$count(1)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$count(1)');
+            var result = expr.evaluate();
+            var expected = 1;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$count([],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$count([],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 7})
+                .to.have.property('message').to.match(/The count function expects one argument/);
+        });
+    });
+
+    describe('$count([1,2,3],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$count([1,2,3],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 7})
+                .to.have.property('message').to.match(/The count function expects one argument/);
+        });
+    });
+
+    describe('$count([],[],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$count([],[],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 7})
+                .to.have.property('message').to.match(/The count function expects one argument/);
+        });
+    });
+
+    describe('$count([1,2],[],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$count([1,2],[],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 7})
+                .to.have.property('message').to.match(/The count function expects one argument/);
+        });
+    });
+
+    describe('$count(undefined)', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$count(undefined)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 7})
+                .to.have.property('message').to.match(/undefined value/);
+        });
+    });
 
 });
+
+describe('Evaluator - functions: max', function () {
+
+    describe('$max(Account.Order.Product.(Price * Quantity))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$max(Account.Order.Product.(Price * Quantity))');
+            var result = expr.evaluate(testdata2);
+            var expected = 137.8;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Account.Order.$max(Product.(Price * Quantity))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.$max(Product.(Price * Quantity))');
+            var result = expr.evaluate(testdata2);
+            var expected = [68.9,137.8];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Account.Order.(OrderID & ": " & $count(Product.(Price*Quantity)))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.(OrderID & ": " & $count(Product.(Price*Quantity)))');
+            var result = expr.evaluate(testdata2);
+            var expected = ["order103: 2","order104: 2"];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$max([])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$max([])');
+            var result = expr.evaluate();
+            var expected = null;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$max([1,2,3])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$max([1,2,3])');
+            var result = expr.evaluate();
+            var expected = 3;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+
+    describe('$max(["1","2","3"])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$max(["1","2","3"])');
+            var result = expr.evaluate();
+            var expected = 3;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$max(["1","2",3])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$max(["1","2",3])');
+            var result = expr.evaluate();
+            var expected = 3;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$max(1)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$max(1)');
+            var result = expr.evaluate();
+            var expected = 1;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$max([],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$max([],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/The max function expects one argument/);
+        });
+    });
+
+    describe('$max([1,2,3],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$max([1,2,3],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/The max function expects one argument/);
+        });
+    });
+
+    describe('$max([],[],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$max([],[],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/The max function expects one argument/);
+        });
+    });
+
+    describe('$max([1,2],[],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$max([1,2],[],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/The max function expects one argument/);
+        });
+    });
+
+    describe('$max(undefined)', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$max(undefined)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/undefined value/);
+        });
+    });
+});
+
+describe('Evaluator - functions: min', function () {
+
+    describe('$min(Account.Order.Product.(Price * Quantity))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$min(Account.Order.Product.(Price * Quantity))');
+            var result = expr.evaluate(testdata2);
+            var expected = 21.67;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Account.Order.$min(Product.(Price * Quantity))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.$min(Product.(Price * Quantity))');
+            var result = expr.evaluate(testdata2);
+            var expected = [21.67,107.99];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Account.Order.(OrderID & ": " & $min(Product.(Price*Quantity)))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.(OrderID & ": " & $min(Product.(Price*Quantity)))');
+            var result = expr.evaluate(testdata2);
+            var expected = ["order103: 21.67","order104: 107.99"];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$min([])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$min([])');
+            var result = expr.evaluate();
+            var expected = null;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$min([1,2,3])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$min([1,2,3])');
+            var result = expr.evaluate();
+            var expected = 1;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+
+    describe('$min(["1","2","3"])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$min(["1","2","3"])');
+            var result = expr.evaluate();
+            var expected = 1;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$min(["1","2",3])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$min(["1","2",3])');
+            var result = expr.evaluate();
+            var expected = 1;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$min(1)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$min(1)');
+            var result = expr.evaluate();
+            var expected = 1;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$min([],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$min([],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/The min function expects one argument/);
+        });
+    });
+
+    describe('$min([1,2,3],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$min([1,2,3],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/The min function expects one argument/);
+        });
+    });
+
+    describe('$min([],[],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$min([],[],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/The min function expects one argument/);
+        });
+    });
+
+    describe('$min([1,2],[],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$min([1,2],[],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/The min function expects one argument/);
+        });
+    });
+
+    describe('$min(undefined)', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$min(undefined)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/undefined value/);
+        });
+    });
+});
+
 
 describe('Evaluator - functions: string', function () {
 
