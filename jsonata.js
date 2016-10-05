@@ -2013,6 +2013,137 @@ function functionUppercase(str) {
 }
 
 /**
+ * length of a string
+ * @param {String} str - string
+ * @returns {Number} The number of characters in the string
+ */
+function functionLength(str) {
+    if(arguments.length != 1) {
+        throw {
+            message: 'The length function expects one argument',
+            stack: (new Error()).stack
+        };
+    }
+
+    // undefined inputs always return undefined
+    if(typeof str === 'undefined') {
+        return undefined;
+    }
+
+    // otherwise it must be a string
+    if(typeof str !== 'string') {
+        throw {
+            message: 'Type error: argument of length function must evaluate to a string',
+            stack: (new Error()).stack,
+            value: str
+        };
+    }
+
+    return str.length;
+}
+
+/**
+ * Split a string into an array of substrings
+ * @param {String} str - string
+ * @param {String} separator - the token that splits the string
+ * @param {Integer} limit - max number of substrings (optional)
+ * @returns {Array} The array of string
+ */
+function functionSplit(str, separator, limit) {
+    if(arguments.length != 2 && arguments.length != 3) {
+        throw {
+            message: 'The split function expects two or three arguments',
+            stack: (new Error()).stack
+        };
+    }
+
+    // undefined inputs always return undefined
+    if(typeof str === 'undefined') {
+        return undefined;
+    }
+
+    // otherwise it must be a string
+    if(typeof str !== 'string') {
+        throw {
+            message: 'Type error: first argument of split function must evaluate to a string',
+            stack: (new Error()).stack,
+            value: str
+        };
+    }
+
+    // separator must be a string
+    if(typeof separator !== 'string') {
+        throw {
+            message: 'Type error: second argument of split function must evaluate to a string',
+            stack: (new Error()).stack,
+            value: separator
+        };
+    }
+
+    // limit, if specified, must be a number
+    if(typeof limit !== 'undefined' && (typeof limit !== 'number' || limit < 0)) {
+        throw {
+            message: 'Type error: third argument of split function must evaluate to a positive number',
+            stack: (new Error()).stack,
+            value: limit
+        };
+    }
+
+    return str.split(separator, limit);
+}
+
+/**
+ * Join an array of strings
+ * @param {Array} strs - array of string
+ * @param {String} separator - the token that splits the string (optional)
+ * @returns {String} The concatenated string
+ */
+function functionJoin(strs, separator) {
+    if(arguments.length != 1 && arguments.length != 2) {
+        throw {
+            message: 'The join function expects one or two arguments',
+            stack: (new Error()).stack
+        };
+    }
+
+    // undefined inputs always return undefined
+    if(typeof strs === 'undefined') {
+        return undefined;
+    }
+
+    if(!Array.isArray(strs)) {
+        strs = [strs];
+    }
+
+    // it must be an array of strings
+    var nonStrings = strs.filter(function(val) {return (typeof val !== 'string');});
+    if(nonStrings.length > 0) {
+        throw {
+            message: 'Type error: first argument of join function must be an array of strings',
+            stack: (new Error()).stack,
+            value: nonStrings
+        };
+    }
+
+
+    // if separator is not specified, default to empty string
+    if(typeof separator === 'undefined') {
+        separator = "";
+    }
+
+    // separator, if specified, must be a string
+    if(typeof separator !== 'string') {
+        throw {
+            message: 'Type error: second argument of split function must evaluate to a string',
+            stack: (new Error()).stack,
+            value: separator
+        };
+    }
+
+    return strs.join(separator);
+}
+
+/**
  * Cast argument to number
  * @param {Object} arg - Argument
  * @returns {Number} numeric value of argument
@@ -2310,6 +2441,9 @@ staticFrame.bind('substringBefore', functionSubstringBefore);
 staticFrame.bind('substringAfter', functionSubstringAfter);
 staticFrame.bind('lowercase', functionLowercase);
 staticFrame.bind('uppercase', functionUppercase);
+staticFrame.bind('length', functionLength);
+staticFrame.bind('split', functionSplit);
+staticFrame.bind('join', functionJoin);
 staticFrame.bind('number', functionNumber);
 staticFrame.bind('boolean', functionBoolean);
 staticFrame.bind('not', functionNot);
