@@ -1822,7 +1822,7 @@ function functionString(arg) {
  * Create substring based on character number and length
  * @param {String} str - String to evaluate
  * @param {Integer} start - Character number to start substring
- * @param {Integer} length - Number of characters in substring
+ * @param {Integer} [length] - Number of characters in substring
  * @returns {string|*} Substring
  */
 function functionSubstring(str, start, length) {
@@ -2046,7 +2046,7 @@ function functionLength(str) {
  * Split a string into an array of substrings
  * @param {String} str - string
  * @param {String} separator - the token that splits the string
- * @param {Integer} limit - max number of substrings (optional)
+ * @param {Integer} [limit] - max number of substrings
  * @returns {Array} The array of string
  */
 function functionSplit(str, separator, limit) {
@@ -2095,7 +2095,7 @@ function functionSplit(str, separator, limit) {
 /**
  * Join an array of strings
  * @param {Array} strs - array of string
- * @param {String} separator - the token that splits the string (optional)
+ * @param {String} [separator] - the token that splits the string
  * @returns {String} The concatenated string
  */
 function functionJoin(strs, separator) {
