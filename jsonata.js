@@ -2223,6 +2223,26 @@ function functionAppend(arg1, arg2) {
 }
 
 /**
+ * Determines if the argument is undefined
+ * @param {*} arg - argument
+ * @returns {boolean} False if argument undefined, otherwise true
+ */
+function functionExists(arg){
+    if (arguments.length != 1) {
+        throw {
+            message: 'The exists function expects one argument',
+            stack: (new Error()).stack
+        };
+    }
+
+    if (typeof arg === 'undefined') {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+/**
  * Create frame
  * @param {Object} enclosingEnvironment - Enclosing environment
  * @returns {{bind: bind, lookup: lookup}} Created frame
@@ -2298,6 +2318,7 @@ staticFrame.bind('reduce', functionFoldLeft);
 staticFrame.bind('keys', functionKeys);
 staticFrame.bind('lookup', functionLookup);
 staticFrame.bind('append', functionAppend);
+staticFrame.bind('exists', functionExists);
 
 /**
  * JSONata

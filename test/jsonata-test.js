@@ -2705,6 +2705,240 @@ describe('Evaluator - functions: append', function () {
 
 });
 
+
+describe('Evaluator - functions: exists', function () {
+
+    describe('$exists("Hello World")', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists("Hello World")');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists("")', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists("")');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(true)', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists(true)');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(false)', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists(false)');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(0)', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists(0)');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(-0.5)', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists(-0.5)');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(null)', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists(null)');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists([])', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists([])');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists([0])', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists([0])');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists([1,2,3])', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists([1,2,3])');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists([[]])', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists([[]])');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists([[null]])', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists([[null]])');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists([[[true]]])', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists([[[true]]])');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists({})', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists({})');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists({"hello":"world"})', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists({"hello":"world"})');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(Account)', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists(Account)');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(Account.Order.Product.Price)', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists(Account.Order.Product.Price)');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists($exists)', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists($exists)');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(function(){true})', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists(function(){true})');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(blah)', function () {
+        it('should return false', function () {
+            var expr = jsonata('$exists(blah)');
+            var result = expr.evaluate(testdata2);
+            var expected = false;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(Account.blah)', function () {
+        it('should return false', function () {
+            var expr = jsonata('$exists(Account.blah)');
+            var result = expr.evaluate(testdata2);
+            var expected = false;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(Account.Order[2])', function () {
+        it('should return false', function () {
+            var expr = jsonata('$exists(Account.Order[2])');
+            var result = expr.evaluate(testdata2);
+            var expected = false;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(Account.Order[0].blah)', function () {
+        it('should return false', function () {
+            var expr = jsonata('$exists(Account.Order[0].blah)');
+            var result = expr.evaluate(testdata2);
+            var expected = false;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(2,3)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$exists(2,3)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/The exists function expects one argument/);
+        });
+    });
+
+    describe('$exists()', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$exists()');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/The exists function expects one argument/);
+        });
+    });
+
+});
+
 describe('Evaluator - errors', function () {
 
     describe('"s" - 1', function () {
