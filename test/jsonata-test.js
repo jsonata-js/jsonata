@@ -2156,6 +2156,136 @@ describe('Evaluator - functions: min', function () {
     });
 });
 
+describe('Evaluator - functions: average', function () {
+
+    describe('$average(Account.Order.Product.(Price * Quantity))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$average(Account.Order.Product.(Price * Quantity))');
+            var result = expr.evaluate(testdata2);
+            var expected = 84.09;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Account.Order.$average(Product.(Price * Quantity))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.$average(Product.(Price * Quantity))');
+            var result = expr.evaluate(testdata2);
+            var expected = [45.285000000000004,122.89500000000001];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Account.Order.(OrderID & ": " & $average(Product.(Price*Quantity)))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.(OrderID & ": " & $average(Product.(Price*Quantity)))');
+            var result = expr.evaluate(testdata2);
+            var expected = ["order103: 45.285","order104: 122.895"];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$average([])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$average([])');
+            var result = expr.evaluate();
+            var expected = null;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$average([1,2,3])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$average([1,2,3])');
+            var result = expr.evaluate();
+            var expected = 2;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+
+    describe('$average(["1","2","3"])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$average(["1","2","3"])');
+            var result = expr.evaluate();
+            var expected = 2;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$average(["1","2",3])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$average(["1","2",3])');
+            var result = expr.evaluate();
+            var expected = 2;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$average(1)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$average(1)');
+            var result = expr.evaluate();
+            var expected = 1;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$average([],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$average([],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 9})
+                .to.have.property('message').to.match(/The average function expects one argument/);
+        });
+    });
+
+    describe('$average([1,2,3],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$average([1,2,3],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 9})
+                .to.have.property('message').to.match(/The average function expects one argument/);
+        });
+    });
+
+    describe('$average([],[],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$average([],[],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 9})
+                .to.have.property('message').to.match(/The average function expects one argument/);
+        });
+    });
+
+    describe('$average([1,2],[],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$average([1,2],[],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 9})
+                .to.have.property('message').to.match(/The average function expects one argument/);
+        });
+    });
+
+    describe('$average(undefined)', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$average(undefined)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 9})
+                .to.have.property('message').to.match(/undefined value/);
+        });
+    });
+});
 
 describe('Evaluator - functions: string', function () {
 
