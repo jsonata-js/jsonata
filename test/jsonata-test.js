@@ -1685,7 +1685,7 @@ describe('Evaluator - functions: sum', function () {
                 expr.evaluate(testdata2);
             }).to.throw()
                 .to.deep.contain({position: 5})
-                .to.have.property('message').to.match(/non-numeric value passed to function/);
+                .to.have.property('message').to.match(/Type error: argument of sum function must be an array of numbers/);
         });
     });
 
@@ -1693,7 +1693,7 @@ describe('Evaluator - functions: sum', function () {
         it('should throw an error', function () {
             var expr = jsonata('$sum(undefined)');
             var result = expr.evaluate();
-            var expected = 0;
+            var expected = undefined;
             assert.equal(JSON.stringify(result), JSON.stringify(expected));
         });
     });
@@ -1878,18 +1878,22 @@ describe('Evaluator - functions: max', function () {
     describe('$max(["1","2","3"])', function () {
         it('should return result object', function () {
             var expr = jsonata('$max(["1","2","3"])');
-            var result = expr.evaluate();
-            var expected = 3;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/Type error: argument of max function must be an array of numbers/);
         });
     });
 
     describe('$max(["1","2",3])', function () {
         it('should return result object', function () {
             var expr = jsonata('$max(["1","2",3])');
-            var result = expr.evaluate();
-            var expected = 3;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/Type error: argument of max function must be an array of numbers/);
         });
     });
 
@@ -1898,6 +1902,15 @@ describe('Evaluator - functions: max', function () {
             var expr = jsonata('$max(1)');
             var result = expr.evaluate();
             var expected = 1;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$max([-1,-5])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$max([-1,-5])');
+            var result = expr.evaluate();
+            var expected = -1;
             assert.equal(JSON.stringify(result), JSON.stringify(expected));
         });
     });
@@ -2007,18 +2020,22 @@ describe('Evaluator - functions: min', function () {
     describe('$min(["1","2","3"])', function () {
         it('should return result object', function () {
             var expr = jsonata('$min(["1","2","3"])');
-            var result = expr.evaluate();
-            var expected = 1;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/Type error: argument of min function must be an array of numbers/);
         });
     });
 
     describe('$min(["1","2",3])', function () {
         it('should return result object', function () {
             var expr = jsonata('$min(["1","2",3])');
-            var result = expr.evaluate();
-            var expected = 1;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/Type error: argument of min function must be an array of numbers/);
         });
     });
 
@@ -2136,18 +2153,22 @@ describe('Evaluator - functions: average', function () {
     describe('$average(["1","2","3"])', function () {
         it('should return result object', function () {
             var expr = jsonata('$average(["1","2","3"])');
-            var result = expr.evaluate();
-            var expected = 2;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 9})
+                .to.have.property('message').to.match(/Type error: argument of average function must be an array of numbers/);
         });
     });
 
     describe('$average(["1","2",3])', function () {
         it('should return result object', function () {
             var expr = jsonata('$average(["1","2",3])');
-            var result = expr.evaluate();
-            var expected = 2;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 9})
+                .to.have.property('message').to.match(/Type error: argument of average function must be an array of numbers/);
         });
     });
 
