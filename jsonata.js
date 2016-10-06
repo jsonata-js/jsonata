@@ -1764,22 +1764,170 @@ function getNativeFunctionArguments(func) {
  */
 function functionSum(args) {
     var total = 0;
-    if (typeof args !== 'undefined') {
-        if (!Array.isArray(args)) {
-            args = [args];
-        }
-        args.forEach(function (item) {
-            if (isNumeric(item)) {
-                total += parseFloat(item);
-            } else {
-                throw {
-                    message: "non-numeric value passed to function $sum()",
-                    stack: (new Error()).stack
-                };
-            }
-        });
+
+    if (arguments.length != 1) {
+        throw {
+            message: 'The sum function expects one argument',
+            stack: (new Error()).stack
+        };
     }
+
+    // undefined inputs always return undefined
+    if(typeof args === 'undefined') {
+        return undefined;
+    }
+
+    if(!Array.isArray(args)) {
+        args = [args];
+    }
+
+    // it must be an array of numbers
+    var nonNumerics = args.filter(function(val) {return (typeof val !== 'number');});
+    if(nonNumerics.length > 0) {
+        throw {
+            message: 'Type error: argument of sum function must be an array of numbers',
+            stack: (new Error()).stack,
+            value: nonNumerics
+        };
+    }
+    args.forEach(function(num){total += num;});
     return total;
+}
+
+/**
+ * Count function
+ * @param {Object} args - Arguments
+ * @returns {number} Number of elements in the array
+ */
+function functionCount(args) {
+    if (arguments.length != 1) {
+        throw {
+            message: 'The count function expects one argument',
+            stack: (new Error()).stack
+        };
+    }
+
+    // undefined inputs always return undefined
+    if(typeof args === 'undefined') {
+        return 0;
+    }
+
+    if(!Array.isArray(args)) {
+        args = [args];
+    }
+
+    return args.length;
+}
+
+/**
+ * Max function
+ * @param {Object} args - Arguments
+ * @returns {number} Max element in the array
+ */
+function functionMax(args) {
+    var max;
+
+    if (arguments.length != 1) {
+        throw {
+            message: 'The max function expects one argument',
+            stack: (new Error()).stack
+        };
+    }
+
+    // undefined inputs always return undefined
+    if(typeof args === 'undefined') {
+        return undefined;
+    }
+
+    if(!Array.isArray(args)) {
+        args = [args];
+    }
+
+    // it must be an array of numbers
+    var nonNumerics = args.filter(function(val) {return (typeof val !== 'number');});
+    if(nonNumerics.length > 0) {
+        throw {
+            message: 'Type error: argument of max function must be an array of numbers',
+            stack: (new Error()).stack,
+            value: nonNumerics
+        };
+    }
+    max = Math.max.apply(Math, args);
+    return max;
+}
+
+/**
+ * Min function
+ * @param {Object} args - Arguments
+ * @returns {number} Min element in the array
+ */
+function functionMin(args) {
+    var min;
+
+    if (arguments.length != 1) {
+        throw {
+            message: 'The min function expects one argument',
+            stack: (new Error()).stack
+        };
+    }
+
+    // undefined inputs always return undefined
+    if(typeof args === 'undefined') {
+        return undefined;
+    }
+
+    if(!Array.isArray(args)) {
+        args = [args];
+    }
+
+    // it must be an array of numbers
+    var nonNumerics = args.filter(function(val) {return (typeof val !== 'number');});
+    if(nonNumerics.length > 0) {
+        throw {
+            message: 'Type error: argument of min function must be an array of numbers',
+            stack: (new Error()).stack,
+            value: nonNumerics
+        };
+    }
+    min = Math.min.apply(Math, args);
+    return min;
+}
+
+/**
+ * Average function
+ * @param {Object} args - Arguments
+ * @returns {number} Average element in the array
+ */
+function functionAverage(args) {
+    var total = 0;
+
+    if (arguments.length != 1) {
+        throw {
+            message: 'The average function expects one argument',
+            stack: (new Error()).stack
+        };
+    }
+
+    // undefined inputs always return undefined
+    if(typeof args === 'undefined') {
+        return undefined;
+    }
+
+    if(!Array.isArray(args)) {
+        args = [args];
+    }
+
+    // it must be an array of numbers
+    var nonNumerics = args.filter(function(val) {return (typeof val !== 'number');});
+    if(nonNumerics.length > 0) {
+        throw {
+            message: 'Type error: argument of average function must be an array of numbers',
+            stack: (new Error()).stack,
+            value: nonNumerics
+        };
+    }
+    args.forEach(function(num){total += num;});
+    return total/args.length;
 }
 
 /**
@@ -1813,7 +1961,7 @@ function functionString(arg) {
         str = JSON.stringify(arg, function (key, val) {
             return (typeof val !== 'undefined' && val !== null && val.toPrecision && isNumeric(val)) ? Number(val.toPrecision(13)) :
                 (val && val.lambda === true && val.environment && val.arguments && val.body) ? '' :
-                  (typeof val === 'function') ? '' : val;
+                    (typeof val === 'function') ? '' : val;
         });
     return str;
 }
@@ -2435,6 +2583,10 @@ function createFrame(enclosingEnvironment) {
 var staticFrame = createFrame(null);
 
 staticFrame.bind('sum', functionSum);
+staticFrame.bind('count', functionCount);
+staticFrame.bind('max', functionMax);
+staticFrame.bind('min', functionMin);
+staticFrame.bind('average', functionAverage);
 staticFrame.bind('string', functionString);
 staticFrame.bind('substring', functionSubstring);
 staticFrame.bind('substringBefore', functionSubstringBefore);

@@ -261,8 +261,8 @@ describe('Evaluator - simple literals', function () {
             expect(function () {
                 jsonata('10e1000');
             }).to.throw()
-              .to.deep.contain({position: 0, token: '10e1000'})
-              .to.have.property('message').to.match(/Number out of range:/);
+                .to.deep.contain({position: 0, token: '10e1000'})
+                .to.have.property('message').to.match(/Number out of range:/);
         });
     });
 
@@ -320,8 +320,8 @@ world`;
             expect(function () {
                 jsonata('"\\y"');
             }).to.throw()
-              .to.deep.contain({position: 2, token: 'y'})
-              .to.have.property('message').to.match(/unsupported escape sequence:/);
+                .to.deep.contain({position: 2, token: 'y'})
+                .to.have.property('message').to.match(/unsupported escape sequence:/);
         });
     });
 
@@ -330,8 +330,8 @@ world`;
             expect(function () {
                 jsonata('"\\u"');
             }).to.throw()
-              .to.deep.contain({position: 2})
-              .to.have.property('message').to.match(/The escape sequence \\u must be followed by 4 hex digits/);
+                .to.deep.contain({position: 2})
+                .to.have.property('message').to.match(/The escape sequence \\u must be followed by 4 hex digits/);
         });
     });
 
@@ -340,8 +340,8 @@ world`;
             expect(function () {
                 jsonata('"\\u123t"');
             }).to.throw()
-              .to.deep.contain({position: 2})
-              .to.have.property('message').to.match(/The escape sequence \\u must be followed by 4 hex digits/);
+                .to.deep.contain({position: 2})
+                .to.have.property('message').to.match(/The escape sequence \\u must be followed by 4 hex digits/);
         });
     });
 
@@ -858,8 +858,8 @@ describe('Evaluator - numeric operators', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({value: Infinity})
-              .to.have.property('message').to.match(/Number out of range/);
+                .to.deep.contain({value: Infinity})
+                .to.have.property('message').to.match(/Number out of range/);
         });
     });
 
@@ -1661,9 +1661,11 @@ describe('Evaluator - functions: sum', function () {
     describe('$sum()', function () {
         it('should return result object', function () {
             var expr = jsonata('$sum()');
-            var result = expr.evaluate();
-            var expected = 0;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(function () {
+                expr.evaluate(testdata2);
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/The sum function expects one argument/);
         });
     });
 
@@ -1682,8 +1684,785 @@ describe('Evaluator - functions: sum', function () {
             expect(function () {
                 expr.evaluate(testdata2);
             }).to.throw()
-              .to.deep.contain({position: 5})
-              .to.have.property('message').to.match(/non-numeric value passed to function/);
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/Type error: argument of sum function must be an array of numbers/);
+        });
+    });
+
+    describe('$sum(undefined)', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$sum(undefined)');
+            var result = expr.evaluate();
+            var expected = undefined;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+});
+
+describe('Evaluator - functions: count', function () {
+
+    describe('$count(Account.Order.Product.(Price * Quantity))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$count(Account.Order.Product.(Price * Quantity))');
+            var result = expr.evaluate(testdata2);
+            var expected = 4;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Account.Order.$count(Product.(Price * Quantity))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.$count(Product.(Price * Quantity))');
+            var result = expr.evaluate(testdata2);
+            var expected = [2, 2];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Account.Order.(OrderID & ": " & $count(Product.(Price*Quantity)))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.(OrderID & ": " & $count(Product.(Price*Quantity)))');
+            var result = expr.evaluate(testdata2);
+            var expected = ["order103: 2","order104: 2"];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$count([])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$count([])');
+            var result = expr.evaluate();
+            var expected = 0;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$count([1,2,3])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$count([1,2,3])');
+            var result = expr.evaluate();
+            var expected = 3;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$count(["1","2","3"])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$count(["1","2","3"])');
+            var result = expr.evaluate();
+            var expected = 3;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$count(["1","2",3])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$count(["1","2",3])');
+            var result = expr.evaluate();
+            var expected = 3;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$count(1)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$count(1)');
+            var result = expr.evaluate();
+            var expected = 1;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$count([],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$count([],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 7})
+                .to.have.property('message').to.match(/The count function expects one argument/);
+        });
+    });
+
+    describe('$count([1,2,3],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$count([1,2,3],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 7})
+                .to.have.property('message').to.match(/The count function expects one argument/);
+        });
+    });
+
+    describe('$count([],[],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$count([],[],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 7})
+                .to.have.property('message').to.match(/The count function expects one argument/);
+        });
+    });
+
+    describe('$count([1,2],[],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$count([1,2],[],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 7})
+                .to.have.property('message').to.match(/The count function expects one argument/);
+        });
+    });
+
+    describe('$count(undefined)', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$count(undefined)');
+            var result = expr.evaluate();
+            var expected = 0;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+});
+
+describe('Evaluator - functions: max', function () {
+
+    describe('$max(Account.Order.Product.(Price * Quantity))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$max(Account.Order.Product.(Price * Quantity))');
+            var result = expr.evaluate(testdata2);
+            var expected = 137.8;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Account.Order.$max(Product.(Price * Quantity))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.$max(Product.(Price * Quantity))');
+            var result = expr.evaluate(testdata2);
+            var expected = [68.9,137.8];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Account.Order.(OrderID & ": " & $count(Product.(Price*Quantity)))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.(OrderID & ": " & $count(Product.(Price*Quantity)))');
+            var result = expr.evaluate(testdata2);
+            var expected = ["order103: 2","order104: 2"];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$max([])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$max([])');
+            var result = expr.evaluate();
+            var expected = null;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$max([1,2,3])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$max([1,2,3])');
+            var result = expr.evaluate();
+            var expected = 3;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+
+    describe('$max(["1","2","3"])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$max(["1","2","3"])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/Type error: argument of max function must be an array of numbers/);
+        });
+    });
+
+    describe('$max(["1","2",3])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$max(["1","2",3])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/Type error: argument of max function must be an array of numbers/);
+        });
+    });
+
+    describe('$max(1)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$max(1)');
+            var result = expr.evaluate();
+            var expected = 1;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$max([-1,-5])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$max([-1,-5])');
+            var result = expr.evaluate();
+            var expected = -1;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$max([],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$max([],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/The max function expects one argument/);
+        });
+    });
+
+    describe('$max([1,2,3],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$max([1,2,3],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/The max function expects one argument/);
+        });
+    });
+
+    describe('$max([],[],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$max([],[],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/The max function expects one argument/);
+        });
+    });
+
+    describe('$max([1,2],[],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$max([1,2],[],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/The max function expects one argument/);
+        });
+    });
+
+    describe('$max(undefined)', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$max(undefined)');
+            var result = expr.evaluate();
+            var expected = undefined;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+});
+
+describe('Evaluator - functions: min', function () {
+
+    describe('$min(Account.Order.Product.(Price * Quantity))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$min(Account.Order.Product.(Price * Quantity))');
+            var result = expr.evaluate(testdata2);
+            var expected = 21.67;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Account.Order.$min(Product.(Price * Quantity))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.$min(Product.(Price * Quantity))');
+            var result = expr.evaluate(testdata2);
+            var expected = [21.67,107.99];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Account.Order.(OrderID & ": " & $min(Product.(Price*Quantity)))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.(OrderID & ": " & $min(Product.(Price*Quantity)))');
+            var result = expr.evaluate(testdata2);
+            var expected = ["order103: 21.67","order104: 107.99"];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$min([])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$min([])');
+            var result = expr.evaluate();
+            var expected = null;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$min([1,2,3])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$min([1,2,3])');
+            var result = expr.evaluate();
+            var expected = 1;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+
+    describe('$min(["1","2","3"])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$min(["1","2","3"])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/Type error: argument of min function must be an array of numbers/);
+        });
+    });
+
+    describe('$min(["1","2",3])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$min(["1","2",3])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/Type error: argument of min function must be an array of numbers/);
+        });
+    });
+
+    describe('$min(1)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$min(1)');
+            var result = expr.evaluate();
+            var expected = 1;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$min([],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$min([],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/The min function expects one argument/);
+        });
+    });
+
+    describe('$min([1,2,3],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$min([1,2,3],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/The min function expects one argument/);
+        });
+    });
+
+    describe('$min([],[],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$min([],[],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/The min function expects one argument/);
+        });
+    });
+
+    describe('$min([1,2],[],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$min([1,2],[],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/The min function expects one argument/);
+        });
+    });
+
+    describe('$min(undefined)', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$min(undefined)');
+            var result = expr.evaluate();
+            var expected = undefined;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+});
+
+describe('Evaluator - functions: average', function () {
+
+    describe('$average(Account.Order.Product.(Price * Quantity))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$average(Account.Order.Product.(Price * Quantity))');
+            var result = expr.evaluate(testdata2);
+            var expected = 84.09;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Account.Order.$average(Product.(Price * Quantity))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.$average(Product.(Price * Quantity))');
+            var result = expr.evaluate(testdata2);
+            var expected = [45.285000000000004,122.89500000000001];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Account.Order.(OrderID & ": " & $average(Product.(Price*Quantity)))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.(OrderID & ": " & $average(Product.(Price*Quantity)))');
+            var result = expr.evaluate(testdata2);
+            var expected = ["order103: 45.285","order104: 122.895"];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$average([])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$average([])');
+            var result = expr.evaluate();
+            var expected = null;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$average([1,2,3])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$average([1,2,3])');
+            var result = expr.evaluate();
+            var expected = 2;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+
+    describe('$average(["1","2","3"])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$average(["1","2","3"])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 9})
+                .to.have.property('message').to.match(/Type error: argument of average function must be an array of numbers/);
+        });
+    });
+
+    describe('$average(["1","2",3])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$average(["1","2",3])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 9})
+                .to.have.property('message').to.match(/Type error: argument of average function must be an array of numbers/);
+        });
+    });
+
+    describe('$average(1)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$average(1)');
+            var result = expr.evaluate();
+            var expected = 1;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$average([],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$average([],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 9})
+                .to.have.property('message').to.match(/The average function expects one argument/);
+        });
+    });
+
+    describe('$average([1,2,3],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$average([1,2,3],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 9})
+                .to.have.property('message').to.match(/The average function expects one argument/);
+        });
+    });
+
+    describe('$average([],[],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$average([],[],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 9})
+                .to.have.property('message').to.match(/The average function expects one argument/);
+        });
+    });
+
+    describe('$average([1,2],[],[])', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$average([1,2],[],[])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 9})
+                .to.have.property('message').to.match(/The average function expects one argument/);
+        });
+    });
+
+    describe('$average(undefined)', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$average(undefined)');
+            var result = expr.evaluate();
+            var expected = undefined;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+});
+
+describe('Evaluator - functions: exists', function () {
+
+    describe('$exists("Hello World")', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists("Hello World")');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists("")', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists("")');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(true)', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists(true)');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(false)', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists(false)');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(0)', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists(0)');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(-0.5)', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists(-0.5)');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(null)', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists(null)');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists([])', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists([])');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists([0])', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists([0])');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists([1,2,3])', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists([1,2,3])');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists([[]])', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists([[]])');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists([[null]])', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists([[null]])');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists([[[true]]])', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists([[[true]]])');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists({})', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists({})');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists({"hello":"world"})', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists({"hello":"world"})');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(Account)', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists(Account)');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(Account.Order.Product.Price)', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists(Account.Order.Product.Price)');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists($exists)', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists($exists)');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(function(){true})', function () {
+        it('should return true', function () {
+            var expr = jsonata('$exists(function(){true})');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(blah)', function () {
+        it('should return false', function () {
+            var expr = jsonata('$exists(blah)');
+            var result = expr.evaluate(testdata2);
+            var expected = false;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(Account.blah)', function () {
+        it('should return false', function () {
+            var expr = jsonata('$exists(Account.blah)');
+            var result = expr.evaluate(testdata2);
+            var expected = false;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(Account.Order[2])', function () {
+        it('should return false', function () {
+            var expr = jsonata('$exists(Account.Order[2])');
+            var result = expr.evaluate(testdata2);
+            var expected = false;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(Account.Order[0].blah)', function () {
+        it('should return false', function () {
+            var expr = jsonata('$exists(Account.Order[0].blah)');
+            var result = expr.evaluate(testdata2);
+            var expected = false;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$exists(2,3)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$exists(2,3)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/The exists function expects one argument/);
+        });
+    });
+
+    describe('$exists()', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$exists()');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/The exists function expects one argument/);
         });
     });
 
@@ -1886,8 +2665,8 @@ $string({
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 8, value: Infinity})
-              .to.have.property('message').to.match(/Attempting to invoke string function on Infinity or NaN/);
+                .to.deep.contain({position: 8, value: Infinity})
+                .to.have.property('message').to.match(/Attempting to invoke string function on Infinity or NaN/);
         });
     });
 
@@ -1897,8 +2676,8 @@ $string({
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 8, value: Infinity})
-              .to.have.property('message').to.match(/Number out of range/);
+                .to.deep.contain({position: 8, value: Infinity})
+                .to.have.property('message').to.match(/Number out of range/);
         });
     });
 
@@ -1908,8 +2687,8 @@ $string({
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 8})
-              .to.have.property('message').to.match(/The string function expects one argument/);
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/The string function expects one argument/);
         });
     });
 
@@ -1919,8 +2698,8 @@ $string({
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 8})
-              .to.have.property('message').to.match(/The string function expects one argument/);
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/The string function expects one argument/);
         });
     });
 
@@ -2104,6 +2883,447 @@ describe('Evaluator - functions: uppercase', function () {
             var result = expr.evaluate(testdata2);
             var expected = undefined;
             assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+});
+
+describe('Evaluator - functions: length', function () {
+
+    describe('$length("")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$length("")');
+            var result = expr.evaluate();
+            var expected = 0;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$length("hello")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$length("hello")');
+            var result = expr.evaluate();
+            var expected = 5;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$length(missing)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$length(missing)');
+            var result = expr.evaluate();
+            var expected = undefined;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$length("\\u03BB-calculus")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$length("\\u03BB-calculus")');
+            var result = expr.evaluate();
+            var expected = 10;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$length("\\uD834\\uDD1E")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$length("\\uD834\\uDD1E")');
+            var result = expr.evaluate();
+            var expected = 2;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$length("𝄞")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$length("𝄞")');
+            var result = expr.evaluate();
+            var expected = 2;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$length("超明體繁")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$length("超明體繁")');
+            var result = expr.evaluate();
+            var expected = 4;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$length("\\t")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$length("\\t")');
+            var result = expr.evaluate();
+            var expected = 1;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$length("\\n")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$length("\\n")');
+            var result = expr.evaluate();
+            var expected = 1;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$length(1234)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$length(1234)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 8, value: 1234})
+                .to.have.property('message').to.match(/Type error: argument of length function must evaluate to a string/);
+        });
+    });
+
+    describe('$length(null)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$length(null)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 8, value: null})
+                .to.have.property('message').to.match(/Type error: argument of length function must evaluate to a string/);
+        });
+    });
+
+    describe('$length(true)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$length(true)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 8, value: true})
+                .to.have.property('message').to.match(/Type error: argument of length function must evaluate to a string/);
+        });
+    });
+
+    describe('$length(["str"])', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$length(["str"])');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/Type error: argument of length function must evaluate to a string/);
+        });
+    });
+
+    describe('$length()', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$length()');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/The length function expects one argument/);
+        });
+    });
+
+    describe('$length("Hello", "World")', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$length()');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/The length function expects one argument/);
+        });
+    });
+
+});
+
+describe('Evaluator - functions: split', function () {
+
+    describe('$split("Hello World", " ")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$split("Hello World", " ")');
+            var result = expr.evaluate();
+            var expected = ["Hello", "World"];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$split("Hello", " ")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$split("Hello", " ")');
+            var result = expr.evaluate();
+            var expected = ["Hello"];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$split("Hello  World", " ")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$split("Hello  World", " ")');
+            var result = expr.evaluate();
+            var expected = ["Hello", "", "World"];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$split("Hello", "")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$split("Hello", "")');
+            var result = expr.evaluate();
+            var expected = ["H", "e", "l", "l", "o"];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$sum($split("12345", "").$number($))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$sum($split("12345", "").$number($))');
+            var result = expr.evaluate();
+            var expected = 15;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$split("a, b, c, d", ", ")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$split("a, b, c, d", ", ")');
+            var result = expr.evaluate();
+            var expected = ["a", "b", "c", "d"];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$split("a, b, c, d", ", ", 2)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$split("a, b, c, d", ", ", 2)');
+            var result = expr.evaluate();
+            var expected = ["a", "b"];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$split("a, b, c, d", ", ", 2.5)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$split("a, b, c, d", ", ", 2.5)');
+            var result = expr.evaluate();
+            var expected = ["a", "b"];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$split("a, b, c, d", ", ", 10)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$split("a, b, c, d", ", ", 10)');
+            var result = expr.evaluate();
+            var expected = ["a", "b", "c", "d"];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$split("a, b, c, d", ", ", 0)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$split("a, b, c, d", ", ", 0)');
+            var result = expr.evaluate();
+            var expected = [];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$split(nothing, " ")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$split(nothing, " ")');
+            var result = expr.evaluate();
+            var expected = undefined;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$split("a, b, c, d", ", ", -3)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$split("a, b, c, d", ", ", -3)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 7, value: -3})
+                .to.have.property('message').to.match(/Type error: third argument of split function must evaluate to a positive number/);
+        });
+    });
+
+    describe('$split("a, b, c, d", ", ", null)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$split("a, b, c, d", ", ", null)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 7, value: null})
+                .to.have.property('message').to.match(/Type error: third argument of split function must evaluate to a positive number/);
+        });
+    });
+
+    describe('$split("a, b, c, d", ", ", "2")', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$split("a, b, c, d", ", ", "2")');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 7, value: "2"})
+                .to.have.property('message').to.match(/Type error: third argument of split function must evaluate to a positive number/);
+        });
+    });
+
+    describe('$split("a, b, c, d", true)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$split("a, b, c, d", true)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 7, value: true})
+                .to.have.property('message').to.match(/Type error: second argument of split function must evaluate to a string/);
+        });
+    });
+
+    describe('$split(12345, 3)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$split(12345, 3)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 7, value: 12345})
+                .to.have.property('message').to.match(/Type error: first argument of split function must evaluate to a string/);
+        });
+    });
+
+    describe('$split(12345)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$split(12345)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 7})
+                .to.have.property('message').to.match(/The split function expects two or three arguments/);
+        });
+    });
+
+
+});
+
+describe('Evaluator - functions: join', function () {
+
+    describe('$join("hello")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$join("hello")');
+            var result = expr.evaluate();
+            var expected = "hello";
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$join(["hello"])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$join(["hello"])');
+            var result = expr.evaluate();
+            var expected = "hello";
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$join(["hello", "world"])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$join(["hello", "world"])');
+            var result = expr.evaluate();
+            var expected = "helloworld";
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$join(["hello", "world"], ", ")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$join(["hello", "world"], ", ")');
+            var result = expr.evaluate();
+            var expected = "hello, world";
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$join([], ", ")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$join([], ", ")');
+            var result = expr.evaluate();
+            var expected = "";
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$join(Account.Order.Product.Description.Colour, ", ")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$join(Account.Order.Product.Description.Colour, ", ")');
+            var result = expr.evaluate(testdata2);
+            var expected = "Purple, Orange, Purple, Black";
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$join(Account.Order.Product.Description.Colour, no.sep)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$join(Account.Order.Product.Description.Colour, no.sep)');
+            var result = expr.evaluate(testdata2);
+            var expected = "PurpleOrangePurpleBlack";
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$join(Account.blah.Product.Description.Colour, ", ")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$join(Account.blah.Product.Description.Colour, ", ")');
+            var result = expr.evaluate(testdata2);
+            var expected = undefined;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$join(true, ", ")', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$join(true, ", ")');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 6})
+                .to.have.property('message').to.match(/Type error: first argument of join function must be an array of strings/);
+        });
+    });
+
+    describe('$join([1,2,3], ", ")', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$join([1,2,3], ", ")');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 6})
+                .to.have.property('message').to.match(/Type error: first argument of join function must be an array of strings/);
+        });
+    });
+
+    describe('$join(["hello"], 3)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$join(["hello"], 3)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 6})
+                .to.have.property('message').to.match(/Type error: second argument of split function must evaluate to a string/);
+        });
+    });
+
+    describe('$join()', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$join()');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 6})
+                .to.have.property('message').to.match(/The join function expects one or two arguments/);
         });
     });
 
@@ -2630,8 +3850,8 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 8})
-              .to.have.property('message').to.match(/Number out of range/);
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/Number out of range/);
         });
     });
 
@@ -2641,8 +3861,8 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 8})
-              .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/Unable to cast value to a number/);
         });
     });
 
@@ -2652,8 +3872,8 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 8})
-              .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/Unable to cast value to a number/);
         });
     });
 
@@ -2663,8 +3883,8 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 8})
-              .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/Unable to cast value to a number/);
         });
     });
 
@@ -2674,8 +3894,8 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 8})
-              .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/Unable to cast value to a number/);
         });
     });
 
@@ -2685,8 +3905,8 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 8})
-              .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/Unable to cast value to a number/);
         });
     });
 
@@ -2696,8 +3916,8 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 8})
-              .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/Unable to cast value to a number/);
         });
     });
 
@@ -2707,8 +3927,8 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 8})
-              .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/Unable to cast value to a number/);
         });
     });
 
@@ -2718,8 +3938,8 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 8})
-              .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/Unable to cast value to a number/);
         });
     });
 
@@ -2729,8 +3949,8 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 8})
-              .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/Unable to cast value to a number/);
         });
     });
 
@@ -2740,8 +3960,8 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 8})
-              .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/Unable to cast value to a number/);
         });
     });
 
@@ -2751,8 +3971,8 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 8})
-              .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/Unable to cast value to a number/);
         });
     });
 
@@ -2762,8 +3982,8 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 8})
-              .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/Unable to cast value to a number/);
         });
     });
 
@@ -2773,8 +3993,8 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 8})
-              .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/Unable to cast value to a number/);
         });
     });
 
@@ -2784,8 +4004,8 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 8})
-              .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/Unable to cast value to a number/);
         });
     });
 
@@ -2795,8 +4015,8 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 8})
-              .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/Unable to cast value to a number/);
         });
     });
 
@@ -2806,8 +4026,8 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 8})
-              .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/Unable to cast value to a number/);
         });
     });
 
@@ -2817,8 +4037,8 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 8})
-              .to.have.property('message').to.match(/The number function expects one argument/);
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/The number function expects one argument/);
         });
     });
 
@@ -2828,8 +4048,8 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 8})
-              .to.have.property('message').to.match(/The number function expects one argument/);
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/The number function expects one argument/);
         });
     });
 
@@ -3050,8 +4270,8 @@ describe('Evaluator - functions: boolean', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 9})
-              .to.have.property('message').to.match(/The boolean function expects one argument/);
+                .to.deep.contain({position: 9})
+                .to.have.property('message').to.match(/The boolean function expects one argument/);
         });
     });
 
@@ -3061,8 +4281,8 @@ describe('Evaluator - functions: boolean', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 9})
-              .to.have.property('message').to.match(/The boolean function expects one argument/);
+                .to.deep.contain({position: 9})
+                .to.have.property('message').to.match(/The boolean function expects one argument/);
         });
     });
 
@@ -3388,8 +4608,8 @@ describe('Evaluator - errors', function () {
             expect(function () {
                 expr.evaluate(testdata2);
             }).to.throw()
-              .to.deep.contain({position: 5, token: '-', value: 's'})
-              .to.have.property('message').to.match(/LHS of - operator/);
+                .to.deep.contain({position: 5, token: '-', value: 's'})
+                .to.have.property('message').to.match(/LHS of - operator/);
         });
     });
 
@@ -3399,8 +4619,8 @@ describe('Evaluator - errors', function () {
             expect(function () {
                 expr.evaluate(testdata2);
             }).to.throw()
-              .to.deep.contain({position: 3, token: '+', value: null})
-              .to.have.property('message').to.match(/RHS of \+ operator/);
+                .to.deep.contain({position: 3, token: '+', value: null})
+                .to.have.property('message').to.match(/RHS of \+ operator/);
         });
     });
 
@@ -3410,8 +4630,8 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('"no closing quote');
                 expr.evaluate(testdata2);
             }).to.throw()
-              .to.deep.contain({position: 17})
-              .to.have.property('message').to.match(/no terminating quote/);
+                .to.deep.contain({position: 17})
+                .to.have.property('message').to.match(/no terminating quote/);
         });
     });
 
@@ -3421,8 +4641,8 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('- "s"');
                 expr.evaluate(testdata2);
             }).to.throw()
-              .to.deep.contain({position: 1, token: '-', value: 's'})
-              .to.have.property('message').to.match(/Cannot negate a non-numeric value/);
+                .to.deep.contain({position: 1, token: '-', value: 's'})
+                .to.have.property('message').to.match(/Cannot negate a non-numeric value/);
         });
     });
 
@@ -3432,8 +4652,8 @@ describe('Evaluator - errors', function () {
             expect(function () {
                 expr.evaluate(testdata2);
             }).to.throw()
-              .to.deep.contain({position: 8})
-              .to.have.property('message').to.match(/Attempted to invoke a non-function/);
+                .to.deep.contain({position: 8})
+                .to.have.property('message').to.match(/Attempted to invoke a non-function/);
         });
     });
 
@@ -3443,8 +4663,8 @@ describe('Evaluator - errors', function () {
             expect(function () {
                 expr.evaluate(testdata2);
             }).to.throw()
-              .to.deep.contain({position: 4, token: 'sum'})
-              .to.have.property('message').to.match(/Attempted to invoke a non-function .* Did you mean/);
+                .to.deep.contain({position: 4, token: 'sum'})
+                .to.have.property('message').to.match(/Attempted to invoke a non-function .* Did you mean/);
         });
     });
 
@@ -3453,8 +4673,8 @@ describe('Evaluator - errors', function () {
             expect(function () {
                 jsonata('[1,2)');
             }).to.throw()
-              .to.deep.contain({position: 5, token: ')', value: ']'})
-              .to.have.property('message').to.match(/Syntax error: expected .* got/);
+                .to.deep.contain({position: 5, token: ')', value: ']'})
+                .to.have.property('message').to.match(/Syntax error: expected .* got/);
         });
     });
 
@@ -3463,8 +4683,8 @@ describe('Evaluator - errors', function () {
             expect(function () {
                 jsonata('[1:2]');
             }).to.throw()
-              .to.deep.contain({position: 3, token: ':', value: ']'})
-              .to.have.property('message').to.match(/Syntax error: expected .* got/);
+                .to.deep.contain({position: 3, token: ':', value: ']'})
+                .to.have.property('message').to.match(/Syntax error: expected .* got/);
         });
     });
 
@@ -3473,8 +4693,8 @@ describe('Evaluator - errors', function () {
             expect(function () {
                 jsonata('[1!2]');
             }).to.throw()
-              .to.deep.contain({position: 3, token: '!'})
-              .to.have.property('message').to.match(/Unknown operator/);
+                .to.deep.contain({position: 3, token: '!'})
+                .to.have.property('message').to.match(/Unknown operator/);
         });
     });
 
@@ -3483,8 +4703,8 @@ describe('Evaluator - errors', function () {
             expect(function () {
                 jsonata('@ bar');
             }).to.throw()
-              .to.deep.contain({position: 1, token: '@'})
-              .to.have.property('message').to.match(/Unknown operator/);
+                .to.deep.contain({position: 1, token: '@'})
+                .to.have.property('message').to.match(/Unknown operator/);
         });
     });
 
@@ -3494,8 +4714,8 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('2(blah)');
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 2})
-              .to.have.property('message').to.match(/Attempted to invoke a non-function/);
+                .to.deep.contain({position: 2})
+                .to.have.property('message').to.match(/Attempted to invoke a non-function/);
         });
     });
 
@@ -3505,8 +4725,8 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('2()');
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 2})
-              .to.have.property('message').to.match(/Attempted to invoke a non-function/);
+                .to.deep.contain({position: 2})
+                .to.have.property('message').to.match(/Attempted to invoke a non-function/);
         });
     });
 
@@ -3515,7 +4735,7 @@ describe('Evaluator - errors', function () {
             expect(function () {
                 jsonata('1=');
             }).to.throw()
-              .to.have.property('message').to.match(/Syntax error: unexpected end of expression/);
+                .to.have.property('message').to.match(/Syntax error: unexpected end of expression/);
         });
     });
 
@@ -3524,8 +4744,8 @@ describe('Evaluator - errors', function () {
             expect(function () {
                 jsonata('function(x){$x}(3)');
             }).to.throw()
-              .to.deep.contain({position: 10, token: 'x'})
-              .to.have.property('message').to.match(/of function definition must be a variable name/);
+                .to.deep.contain({position: 10, token: 'x'})
+                .to.have.property('message').to.match(/of function definition must be a variable name/);
         });
     });
 
@@ -3535,8 +4755,8 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('x:=1');
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 3, token: ':=', value: 'x'})
-              .to.have.property('message').to.match(/Left hand side of := must be a variable name/);
+                .to.deep.contain({position: 3, token: ':=', value: 'x'})
+                .to.have.property('message').to.match(/Left hand side of := must be a variable name/);
         });
     });
 
@@ -3546,8 +4766,8 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('$foo()');
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 5})
-              .to.have.property('message').to.match(/Attempted to invoke a non-function/);
+                .to.deep.contain({position: 5})
+                .to.have.property('message').to.match(/Attempted to invoke a non-function/);
         });
     });
 
@@ -3557,8 +4777,8 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('55=>5');
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 5, token: 5})
-              .to.have.property('message').to.match(/Syntax error:/);
+                .to.deep.contain({position: 5, token: 5})
+                .to.have.property('message').to.match(/Syntax error:/);
         });
     });
 
@@ -3568,8 +4788,8 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('Ssum(:)');
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 6, token: ':'})
-              .to.have.property('message').to.match(/Syntax error:/);
+                .to.deep.contain({position: 6, token: ':'})
+                .to.have.property('message').to.match(/Syntax error:/);
         });
     });
 
@@ -3579,8 +4799,8 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('[1,2,3]{$+$_}[true]');
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 14})
-              .to.have.property('message').to.match(/A predicate cannot follow an aggregate in a step/);
+                .to.deep.contain({position: 14})
+                .to.have.property('message').to.match(/A predicate cannot follow an aggregate in a step/);
         });
     });
 
@@ -3590,8 +4810,8 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('[1,2,3]{$+$_}{$+$_}');
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 14})
-              .to.have.property('message').to.match(/Each step can only have one aggregator/);
+                .to.deep.contain({position: 14})
+                .to.have.property('message').to.match(/Each step can only have one aggregator/);
         });
     });
 
@@ -3837,8 +5057,8 @@ describe('Evaluator - range operator', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 7, token: '..', value: 1.1})
-              .to.have.property('message').to.match(/LHS of range operator \(\.\.\) must evaluate to an integer/);
+                .to.deep.contain({position: 7, token: '..', value: 1.1})
+                .to.have.property('message').to.match(/LHS of range operator \(\.\.\) must evaluate to an integer/);
         });
     });
 
@@ -3848,8 +5068,8 @@ describe('Evaluator - range operator', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 5, token: '..', value: 5.5})
-              .to.have.property('message').to.match(/RHS of range operator \(\.\.\) must evaluate to an integer/);
+                .to.deep.contain({position: 5, token: '..', value: 5.5})
+                .to.have.property('message').to.match(/RHS of range operator \(\.\.\) must evaluate to an integer/);
         });
     });
 
@@ -3961,8 +5181,8 @@ describe('Evaluator - object constructor', function () {
             expect(function () {
                 expr.evaluate(testdata2);
             }).to.throw()
-              .to.deep.contain({position: 23, value: 858383})
-              .to.have.property('message').to.match(/Key in object structure must evaluate to a string/);
+                .to.deep.contain({position: 23, value: 858383})
+                .to.have.property('message').to.match(/Key in object structure must evaluate to a string/);
         });
     });
 
@@ -3972,8 +5192,8 @@ describe('Evaluator - object constructor', function () {
             expect(function () {
                 expr.evaluate(testdata2);
             }).to.throw()
-              .to.deep.contain({position: 24, value: 858383})
-              .to.have.property('message').to.match(/Key in object structure must evaluate to a string/);
+                .to.deep.contain({position: 24, value: 858383})
+                .to.have.property('message').to.match(/Key in object structure must evaluate to a string/);
         });
     });
 
@@ -4706,8 +5926,8 @@ describe('Evaluator - Tail recursion', function () {
 )             `);
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 84})
-              .to.have.property('message').to.match(/Stack overflow error:/);
+                .to.deep.contain({position: 84})
+                .to.have.property('message').to.match(/Stack overflow error:/);
         });
     });
 
@@ -4760,15 +5980,15 @@ describe('Evaluator - Tail recursion', function () {
                 `);
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 49})
-              .to.have.property('message').to.match(/Stack overflow error:/);
+                .to.deep.contain({position: 49})
+                .to.have.property('message').to.match(/Stack overflow error:/);
         });
     });
 
     describe('mutually recursive - odd/even, tail calls', function () {
         it('should return result object', function () {
             var expr = jsonata(
-              `
+                `
         (
           $even := function($n) { $n = 0 ? true : $odd($n-1) }; 
           $odd := function($n) { $n = 0 ? false : $even($n-1) }; 
@@ -4965,8 +6185,8 @@ describe('Evaluator - Partial function application', function () {
             expect(function () {
                 expr.evaluate(expr);
             }).to.throw()
-              .to.deep.contain({position: 10, token: 'substring'})
-              .to.have.property('message').to.match(/Attempted to partially apply a non-function .* Did you mean/);
+                .to.deep.contain({position: 10, token: 'substring'})
+                .to.have.property('message').to.match(/Attempted to partially apply a non-function .* Did you mean/);
         });
     });
 
@@ -4976,8 +6196,8 @@ describe('Evaluator - Partial function application', function () {
             expect(function () {
                 expr.evaluate(expr);
             }).to.throw()
-              .to.deep.contain({position: 8, token: 'unknown'})
-              .to.have.property('message').to.match(/Attempted to partially apply a non-function/);
+                .to.deep.contain({position: 8, token: 'unknown'})
+                .to.have.property('message').to.match(/Attempted to partially apply a non-function/);
         });
     });
 
@@ -5187,8 +6407,8 @@ describe('HOF - reduce', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 26})
-              .to.have.property('message').to.match(/The first argument of the reduce function must be a function of arity 2/);
+                .to.deep.contain({position: 26})
+                .to.have.property('message').to.match(/The first argument of the reduce function must be a function of arity 2/);
         });
     });
 
@@ -5588,8 +6808,8 @@ describe('#evaluate', function () {
                 expect(function () {
                     jsonata('$lowercase("Missing close brackets"').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({token: '(end)', value: ')'})
-                  .to.have.property('message').to.match(/Syntax error: expected \'\)\' before end of expression/);
+                    .to.deep.contain({token: '(end)', value: ')'})
+                    .to.have.property('message').to.match(/Syntax error: expected \'\)\' before end of expression/);
             });
 
             it('unsupported function, e.g. $unknown()', function () {
@@ -5600,8 +6820,8 @@ describe('#evaluate', function () {
                 };
 
                 expect(evaluate).to.throw()
-                  .to.deep.contain({position: 9, token: 'unknown'})
-                  .to.have.property('message').to.match(/Attempted to invoke a non-function/);
+                    .to.deep.contain({position: 9, token: 'unknown'})
+                    .to.have.property('message').to.match(/Attempted to invoke a non-function/);
             });
 
             it('unsupported function, e.g. $decrypt()', function () {
@@ -5615,8 +6835,8 @@ describe('#evaluate', function () {
                 };
 
                 expect(evaluate).to.throw()
-                  .to.deep.contain({position: 9, token: 'decrypt'})
-                  .to.have.property('message').to.match(/Attempted to invoke a non-function/);
+                    .to.deep.contain({position: 9, token: 'decrypt'})
+                    .to.have.property('message').to.match(/Attempted to invoke a non-function/);
             });
 
             it('unsupported function, e.g. this.authentication()', function () {
@@ -5627,8 +6847,8 @@ describe('#evaluate', function () {
                 };
 
                 expect(evaluate).to.throw()
-                  .to.deep.contain({position: 20, token: 'authentication'})
-                  .to.have.property('message').to.match(/Attempted to invoke a non-function/);
+                    .to.deep.contain({position: 20, token: 'authentication'})
+                    .to.have.property('message').to.match(/Attempted to invoke a non-function/);
             });
 
             it('field in function does not exist', function () {
@@ -5657,32 +6877,32 @@ describe('#evaluate', function () {
                 expect(function () {
                     jsonata('$lowercase("Coca", "Cola")').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 11, token: 'lowercase'})
-                  .to.have.property('message').to.match(/The lowercase function expects one argument/);
+                    .to.deep.contain({position: 11, token: 'lowercase'})
+                    .to.have.property('message').to.match(/The lowercase function expects one argument/);
             });
 
             it('$lowercase(Salary) - Field <NAME> is null', function () {
                 expect(function () {
                     jsonata('$lowercase(Salary)').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 11, token: 'lowercase', value: null})
-                  .to.have.property('message').to.match(/Type error: argument of lowercase function must evaluate to a string/);
+                    .to.deep.contain({position: 11, token: 'lowercase', value: null})
+                    .to.have.property('message').to.match(/Type error: argument of lowercase function must evaluate to a string/);
             });
 
             it('$lowercase(20) - Function lowercase expects a string argument', function () {
                 expect(function () {
                     jsonata('$lowercase(20)').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 11, token: 'lowercase', value: 20})
-                  .to.have.property('message').to.match(/Type error: argument of lowercase function must evaluate to a string/);
+                    .to.deep.contain({position: 11, token: 'lowercase', value: 20})
+                    .to.have.property('message').to.match(/Type error: argument of lowercase function must evaluate to a string/);
             });
 
             it('$lowercase(20.55) - Function lowercase expects a string argument', function () {
                 expect(function () {
                     jsonata('$lowercase(20.55)').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 11, token: 'lowercase', value: 20.55})
-                  .to.have.property('message').to.match(/Type error: argument of lowercase function must evaluate to a string/);
+                    .to.deep.contain({position: 11, token: 'lowercase', value: 20.55})
+                    .to.have.property('message').to.match(/Type error: argument of lowercase function must evaluate to a string/);
             });
 
 
@@ -5690,16 +6910,16 @@ describe('#evaluate', function () {
                 expect(function () {
                     jsonata('$lowercase(Employment)').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 11, token: 'lowercase'})
-                  .to.have.property('message').to.match(/Type error: argument of lowercase function must evaluate to a string/);
+                    .to.deep.contain({position: 11, token: 'lowercase'})
+                    .to.have.property('message').to.match(/Type error: argument of lowercase function must evaluate to a string/);
             });
 
             it('$lowercase(Qualifications) - Does not expect an array', function () {
                 expect(function () {
                     jsonata('$lowercase(Qualifications)').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 11, token: 'lowercase'})
-                  .to.have.property('message').to.match(/Type error: argument of lowercase function must evaluate to a string/);
+                    .to.deep.contain({position: 11, token: 'lowercase'})
+                    .to.have.property('message').to.match(/Type error: argument of lowercase function must evaluate to a string/);
             });
         });
 
@@ -5708,56 +6928,56 @@ describe('#evaluate', function () {
                 expect(function () {
                     jsonata('$uppercase("Coca", "Cola")').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 11, token: 'uppercase'})
-                  .to.have.property('message').to.match(/The uppercase function expects one argument/);
+                    .to.deep.contain({position: 11, token: 'uppercase'})
+                    .to.have.property('message').to.match(/The uppercase function expects one argument/);
             });
 
             it('$uppercase(Salary) - Field <NAME> is null', function () {
                 expect(function () {
                     jsonata('$uppercase(Salary)').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 11, token: 'uppercase', value: null})
-                  .to.have.property('message').to.match(/Type error: argument of uppercase function must evaluate to a string/);
+                    .to.deep.contain({position: 11, token: 'uppercase', value: null})
+                    .to.have.property('message').to.match(/Type error: argument of uppercase function must evaluate to a string/);
             });
 
             it('$uppercase(20) - Function uppercase expects a string argument', function () {
                 expect(function () {
                     jsonata('$uppercase(28)').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 11, token: 'uppercase', value: 28})
-                  .to.have.property('message').to.match(/Type error: argument of uppercase function must evaluate to a string/);
+                    .to.deep.contain({position: 11, token: 'uppercase', value: 28})
+                    .to.have.property('message').to.match(/Type error: argument of uppercase function must evaluate to a string/);
             });
 
             it('$uppercase(20.55) - Function uppercase expects a string argument', function () {
                 expect(function () {
                     jsonata('$uppercase(20.55)').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 11, token: 'uppercase', value: 20.55})
-                  .to.have.property('message').to.match(/Type error: argument of uppercase function must evaluate to a string/);
+                    .to.deep.contain({position: 11, token: 'uppercase', value: 20.55})
+                    .to.have.property('message').to.match(/Type error: argument of uppercase function must evaluate to a string/);
             });
 
             it('$uppercase(Cars) - Function uppercase expects a string argument', function () {
                 expect(function () {
                     jsonata('$uppercase(Cars)').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 11, token: 'uppercase', value: 3})
-                  .to.have.property('message').to.match(/Type error: argument of uppercase function must evaluate to a string/);
+                    .to.deep.contain({position: 11, token: 'uppercase', value: 3})
+                    .to.have.property('message').to.match(/Type error: argument of uppercase function must evaluate to a string/);
             });
 
             it('$uppercase(Employment) - Does not expect an object', function () {
                 expect(function () {
                     jsonata('$uppercase(Employment)').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 11, token: 'uppercase'})
-                  .to.have.property('message').to.match(/Type error: argument of uppercase function must evaluate to a string/);
+                    .to.deep.contain({position: 11, token: 'uppercase'})
+                    .to.have.property('message').to.match(/Type error: argument of uppercase function must evaluate to a string/);
             });
 
             it('$uppercase(Qualifications) - Does not expect an array', function () {
                 expect(function () {
                     jsonata('$uppercase(Qualifications)').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 11, token: 'uppercase'})
-                  .to.have.property('message').to.match(/Type error: argument of uppercase function must evaluate to a string/);
+                    .to.deep.contain({position: 11, token: 'uppercase'})
+                    .to.have.property('message').to.match(/Type error: argument of uppercase function must evaluate to a string/);
             });
         });
 
@@ -5766,64 +6986,64 @@ describe('#evaluate', function () {
                 expect(function () {
                     jsonata('$substringBefore("Coca" & "ca")').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 17, token: 'substringBefore'})
-                  .to.have.property('message').to.match(/The substringBefore function expects two arguments/);
+                    .to.deep.contain({position: 17, token: 'substringBefore'})
+                    .to.have.property('message').to.match(/The substringBefore function expects two arguments/);
             });
 
             it('$substringBefore(Salary,"xx") - Field <NAME> is null', function () {
                 expect(function () {
                     jsonata('$substringBefore(Salary,"xx")').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 17, token: 'substringBefore', value: null})
-                  .to.have.property('message').to.match(/Type error: first argument of substringBefore function must evaluate to a string/);
+                    .to.deep.contain({position: 17, token: 'substringBefore', value: null})
+                    .to.have.property('message').to.match(/Type error: first argument of substringBefore function must evaluate to a string/);
             });
 
             it('$substringBefore(22,"xx") - Function substringBefore expects 2 string arguments', function () {
                 expect(function () {
                     jsonata('$substringBefore(22,"xx")').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 17, token: 'substringBefore', value: 22})
-                  .to.have.property('message').to.match(/Type error: first argument of substringBefore function must evaluate to a string/);
+                    .to.deep.contain({position: 17, token: 'substringBefore', value: 22})
+                    .to.have.property('message').to.match(/Type error: first argument of substringBefore function must evaluate to a string/);
             });
 
             it('$substringBefore(22.55,"xx") - Function substringBefore expects 2 string arguments', function () {
                 expect(function () {
                     jsonata('$substringBefore(22.55,"xx")').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 17, token: 'substringBefore', value: 22.55})
-                  .to.have.property('message').to.match(/Type error: first argument of substringBefore function must evaluate to a string/);
+                    .to.deep.contain({position: 17, token: 'substringBefore', value: 22.55})
+                    .to.have.property('message').to.match(/Type error: first argument of substringBefore function must evaluate to a string/);
             });
 
             it('$substringBefore("22",0) - Function substringBefore expects 2 string arguments', function () {
                 expect(function () {
                     jsonata('$substringBefore("22",2)').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 17, token: 'substringBefore', value: 2})
-                  .to.have.property('message').to.match(/Type error: second argument of substringBefore function must evaluate to a string/);
+                    .to.deep.contain({position: 17, token: 'substringBefore', value: 2})
+                    .to.have.property('message').to.match(/Type error: second argument of substringBefore function must evaluate to a string/);
             });
 
             it('$substringBefore("22.55",5) - Function substringBefore expects 2 string arguments', function () {
                 expect(function () {
                     jsonata('$substringBefore("22.55",5)').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 17, token: 'substringBefore', value: 5})
-                  .to.have.property('message').to.match(/Type error: second argument of substringBefore function must evaluate to a string/);
+                    .to.deep.contain({position: 17, token: 'substringBefore', value: 5})
+                    .to.have.property('message').to.match(/Type error: second argument of substringBefore function must evaluate to a string/);
             });
 
             it('$substringBefore(Employment,"xx") - Does not expect an object', function () {
                 expect(function () {
                     jsonata('$substringBefore(Employment,"xx")').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 17, token: 'substringBefore'})
-                  .to.have.property('message').to.match(/Type error: first argument of substringBefore function must evaluate to a string/);
+                    .to.deep.contain({position: 17, token: 'substringBefore'})
+                    .to.have.property('message').to.match(/Type error: first argument of substringBefore function must evaluate to a string/);
             });
 
             it('$substringBefore(Qualifications,"xx") - Does not expect an array', function () {
                 expect(function () {
                     jsonata('$substringBefore(Qualifications,"xx")').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 17, token: 'substringBefore'})
-                  .to.have.property('message').to.match(/Type error: first argument of substringBefore function must evaluate to a string/);
+                    .to.deep.contain({position: 17, token: 'substringBefore'})
+                    .to.have.property('message').to.match(/Type error: first argument of substringBefore function must evaluate to a string/);
             });
         });
 
@@ -5832,64 +7052,64 @@ describe('#evaluate', function () {
                 expect(function () {
                     jsonata('$substringAfter("Coca" & "ca")').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 16, token: 'substringAfter'})
-                  .to.have.property('message').to.match(/The substringAfter function expects two arguments/);
+                    .to.deep.contain({position: 16, token: 'substringAfter'})
+                    .to.have.property('message').to.match(/The substringAfter function expects two arguments/);
             });
 
             it('$substringAfter(Salary,"xx") - Field <NAME> is null', function () {
                 expect(function () {
                     jsonata('$substringAfter(Salary,"xx")').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 16, token: 'substringAfter', value: null})
-                  .to.have.property('message').to.match(/Type error: first argument of substringAfter function must evaluate to a string/);
+                    .to.deep.contain({position: 16, token: 'substringAfter', value: null})
+                    .to.have.property('message').to.match(/Type error: first argument of substringAfter function must evaluate to a string/);
             });
 
             it('$substringAfter(22,"xx") - Function substringAfter expects 2 string arguments', function () {
                 expect(function () {
                     jsonata('$substringAfter(22,"xx")').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 16, token: 'substringAfter', value: 22})
-                  .to.have.property('message').to.match(/Type error: first argument of substringAfter function must evaluate to a string/);
+                    .to.deep.contain({position: 16, token: 'substringAfter', value: 22})
+                    .to.have.property('message').to.match(/Type error: first argument of substringAfter function must evaluate to a string/);
             });
 
             it('$substringAfter(22.55,"xx") - Function substringAfter expects 2 string arguments', function () {
                 expect(function () {
                     jsonata('$substringAfter(22.55,"xx")').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 16, token: 'substringAfter', value: 22.55})
-                  .to.have.property('message').to.match(/Type error: first argument of substringAfter function must evaluate to a string/);
+                    .to.deep.contain({position: 16, token: 'substringAfter', value: 22.55})
+                    .to.have.property('message').to.match(/Type error: first argument of substringAfter function must evaluate to a string/);
             });
 
             it('$substringAfter("22",0) - Function substringAfter expects 2 string arguments', function () {
                 expect(function () {
                     jsonata('$substringAfter("22",2)').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 16, token: 'substringAfter', value: 2})
-                  .to.have.property('message').to.match(/Type error: second argument of substringAfter function must evaluate to a string/);
+                    .to.deep.contain({position: 16, token: 'substringAfter', value: 2})
+                    .to.have.property('message').to.match(/Type error: second argument of substringAfter function must evaluate to a string/);
             });
 
             it('$substringAfter("22.55",5) - Function substringAfter expects 2 string arguments', function () {
                 expect(function () {
                     jsonata('$substringAfter("22.55",5)').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 16, token: 'substringAfter', value: 5})
-                  .to.have.property('message').to.match(/Type error: second argument of substringAfter function must evaluate to a string/);
+                    .to.deep.contain({position: 16, token: 'substringAfter', value: 5})
+                    .to.have.property('message').to.match(/Type error: second argument of substringAfter function must evaluate to a string/);
             });
 
             it('$substringAfter(Employment,"xx") - Does not expect an object', function () {
                 expect(function () {
                     jsonata('$substringAfter(Employment,"xx")').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 16, token: 'substringAfter'})
-                  .to.have.property('message').to.match(/Type error: first argument of substringAfter function must evaluate to a string/);
+                    .to.deep.contain({position: 16, token: 'substringAfter'})
+                    .to.have.property('message').to.match(/Type error: first argument of substringAfter function must evaluate to a string/);
             });
 
             it('$substringAfter(Qualifications,"xx") - Does not expect an array', function () {
                 expect(function () {
                     jsonata('$substringAfter(Qualifications,"xx")').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 16, token: 'substringAfter'})
-                  .to.have.property('message').to.match(/Type error: first argument of substringAfter function must evaluate to a string/);
+                    .to.deep.contain({position: 16, token: 'substringAfter'})
+                    .to.have.property('message').to.match(/Type error: first argument of substringAfter function must evaluate to a string/);
             });
         });
 
@@ -5898,46 +7118,46 @@ describe('#evaluate', function () {
                 expect(function () {
                     jsonata('$substring("Coca" & "ca", 2, 4, 5)').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 11, token: 'substring'})
-                  .to.have.property('message').to.match(/The substring function expects two or three arguments/);
+                    .to.deep.contain({position: 11, token: 'substring'})
+                    .to.have.property('message').to.match(/The substring function expects two or three arguments/);
             });
 
             it('$substring() with non-numeric second argument', function () {
                 expect(function () {
                     jsonata('$substring("Coca", "Mr", 4)').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 11, token: 'substring', value: "Mr"})
-                  .to.have.property('message').to.match(/Type error: second argument of substring function must evaluate to a number/);
+                    .to.deep.contain({position: 11, token: 'substring', value: "Mr"})
+                    .to.have.property('message').to.match(/Type error: second argument of substring function must evaluate to a number/);
             });
 
             it('$substring() with non-numeric third argument', function () {
                 expect(function () {
                     jsonata('$substring("Coca", 3, "Whoops")').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 11, token: 'substring', value: "Whoops"})
-                  .to.have.property('message').to.match(/Type error: third argument of substring function must evaluate to a number/);
+                    .to.deep.contain({position: 11, token: 'substring', value: "Whoops"})
+                    .to.have.property('message').to.match(/Type error: third argument of substring function must evaluate to a number/);
             });
 
             it('$substring(Salary,2,4) - Field <NAME> is null', function () {
                 expect(function () {
                     jsonata('$substring(Salary,2,4)').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 11, token: 'substring', value: null})
-                  .to.have.property('message').to.match(/Type error: first argument of substring function must evaluate to a string/);
+                    .to.deep.contain({position: 11, token: 'substring', value: null})
+                    .to.have.property('message').to.match(/Type error: first argument of substring function must evaluate to a string/);
             });
 
             it('$substring() - last two arguments to be integers', function () {
                 expect(function () {
                     jsonata('$substring("Hello","World",5)').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 11, token: 'substring', value: "World"})
-                  .to.have.property('message').to.match(/Type error: second argument of substring function must evaluate to a number/);
+                    .to.deep.contain({position: 11, token: 'substring', value: "World"})
+                    .to.have.property('message').to.match(/Type error: second argument of substring function must evaluate to a number/);
 
                 expect(function () {
                     jsonata('$substring("Hello",5,"World")').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 11, token: 'substring', value: "World"})
-                  .to.have.property('message').to.match(/Type error: third argument of substring function must evaluate to a number/);
+                    .to.deep.contain({position: 11, token: 'substring', value: "World"})
+                    .to.have.property('message').to.match(/Type error: third argument of substring function must evaluate to a number/);
 
                 var result = jsonata('$substring("Hello World",5.5,5)').evaluate(person);
                 expect(result).to.equal(" Worl");
@@ -5947,16 +7167,16 @@ describe('#evaluate', function () {
                 expect(function () {
                     jsonata('$substring(Employment,"xx")').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 11, token: 'substring'})
-                  .to.have.property('message').to.match(/Type error: first argument of substring function must evaluate to a string/);
+                    .to.deep.contain({position: 11, token: 'substring'})
+                    .to.have.property('message').to.match(/Type error: first argument of substring function must evaluate to a string/);
             });
 
             it('$substring(Qualifications,6,5) - Does not expect an array', function () {
                 expect(function () {
                     jsonata('$substring(Qualifications,6,5)').evaluate(person);
                 }).to.throw()
-                  .to.deep.contain({position: 11, token: 'substring'})
-                  .to.have.property('message').to.match(/Type error: first argument of substring function must evaluate to a string/);
+                    .to.deep.contain({position: 11, token: 'substring'})
+                    .to.have.property('message').to.match(/Type error: first argument of substring function must evaluate to a string/);
             });
         });
     });

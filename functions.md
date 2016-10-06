@@ -83,9 +83,21 @@ Casts the `arg` parameter to a number using the following casting rules
    - All other values cause an error to be thrown.
 
 #### `$sum(array)`
-#### `$abs(number)`
+
+Returns the arithmetic sum of an array of numbers. 
+It is an error if the input array contains an item which isn't a number.
+
+#### `$abs(number)` - to be implemented
 #### `$max(array)`
+
+Returns the maximum number in an array of numbers. 
+It is an error if the input array contains an item which isn't a number.
+
 #### `$min(array)`
+
+Returns the minimum number in an array of numbers. 
+It is an error if the input array contains an item which isn't a number.
+
 #### `$round(number)` - to be implemented
 
 Rounds up to the nearest integer
@@ -95,6 +107,10 @@ Rounds up to the nearest integer
   [Round half to even](https://en.wikipedia.org/wiki/Rounding#Round_half_to_even) Commonly used in financial calculations.
 
 #### `$average(array)`
+
+Returns the mean value of an array of numbers. 
+It is an error if the input array contains an item which isn't a number.
+
 #### `$power(base, exponent)` - to be implemented
 
 ### Boolean functions
