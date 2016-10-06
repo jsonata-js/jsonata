@@ -1,6 +1,6 @@
 ## JSONata Function Library
 The following is a proposed function library for use within JSONata expressions.
-This is work in progress. Some of these functions have been implemented, but mostly not.
+This is work in progress. Some of these functions have been implemented, and those that have not are marked accordingly.
 
 
 ### String functions
@@ -125,7 +125,7 @@ Returns Boolean NOT on the argument.  `arg` is first cast to a boolean
   
 #### `$exists(arg)`
 
-Returns Boolean `true` if the arg expression evaluates to a JSON value, or 
+Returns Boolean `true` if the arg expression evaluates to a value, or 
 `false` if the expression does not match anything (e.g. a path to a non-existent 
 field reference).
 
