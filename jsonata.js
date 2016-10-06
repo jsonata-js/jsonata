@@ -179,7 +179,7 @@ var tokenizer = function (path) {
         var i = position;
         var ch;
         var name;
-        for (; ;) {
+        for (;;) {
             ch = path.charAt(i);
             if (i == length || ' \t\n\r\v'.indexOf(ch) > -1 || operators.hasOwnProperty(ch)) {
                 if (path.charAt(position) === '$') {
@@ -253,14 +253,14 @@ var parser = function (source) {
     var advance = function (id) {
         if (id && node.id !== id) {
             var msg;
-            if (node.id === '(end)') {
+            if(node.id === '(end)') {
                 // unexpected end of buffer
                 msg = "Syntax error: expected '" + id + "' before end of expression";
             } else {
                 msg = "Syntax error: expected '" + id + "', got '" + node.id + "' at column " + node.position;
             }
             throw {
-                message: msg,
+                message: msg ,
                 stack: (new Error()).stack,
                 position: node.position,
                 token: node.id,
@@ -417,7 +417,7 @@ var parser = function (source) {
         this.type = 'function';
         this.arguments = [];
         if (node.id !== ')') {
-            for (; ;) {
+            for (;;) {
                 if (node.type === 'operator' && node.id === '?') {
                     // partial function application
                     this.type = 'partial';
@@ -473,7 +473,7 @@ var parser = function (source) {
     prefix("{", function () {
         var a = [];
         if (node.id !== "}") {
-            for (; ;) {
+            for (;;) {
                 var n = expression(0);
                 advance(":");
                 var v = expression(0);
@@ -494,7 +494,7 @@ var parser = function (source) {
     prefix("[", function () {
         var a = [];
         if (node.id !== "]") {
-            for (; ;) {
+            for (;;) {
                 var item = expression(0);
                 if (node.id === "..") {
                     // range operator
@@ -552,21 +552,21 @@ var parser = function (source) {
     // if they make a tail call.  If so, it is replaced by a thunk which will
     // be invoked by the trampoline loop during function application.
     // This enables tail-recursive functions to be written without growing the stack
-    var tail_call_optimize = function (expr) {
+    var tail_call_optimize = function(expr) {
         var result;
-        if (expr.type === 'function') {
+        if(expr.type === 'function') {
             var thunk = {type: 'lambda', thunk: true, arguments: [], position: expr.position};
             thunk.body = expr;
             result = thunk;
-        } else if (expr.type === 'condition') {
+        } else if(expr.type === 'condition') {
             // analyse both branches
             expr.then = tail_call_optimize(expr.then);
             expr.else = tail_call_optimize(expr.else);
             result = expr;
-        } else if (expr.type === 'block') {
+        } else if(expr.type === 'block') {
             // only the last expression in the block
             var length = expr.expressions.length;
-            if (length > 0) {
+            if(length > 0) {
                 expr.expressions[length - 1] = tail_call_optimize(expr.expressions[length - 1]);
             }
             result = expr;
@@ -757,8 +757,8 @@ var parser = function (source) {
  */
 function isNumeric(n) {
     var num = parseFloat(n);
-    var isNum = !isNaN(num);
-    if (isNum && !isFinite(num)) {
+    var isNum =  !isNaN(num);
+    if(isNum && !isFinite(num)) {
         throw {
             message: "Number out of range",
             value: n,
@@ -1535,7 +1535,7 @@ function evaluateFunction(expr, input, environment) {
     // apply the procedure
     try {
         result = apply(proc, evaluatedArgs, environment, input);
-        while (typeof result === 'object' && result.lambda == true && result.thunk == true) {
+        while(typeof result === 'object' && result.lambda == true && result.thunk == true) {
             // trampoline loop - this gets invoked as a result of tail-call optimization
             // the function returned a tail-call thunk
             // unpack it, evaluate its arguments, and apply the tail call
@@ -1596,7 +1596,7 @@ function evaluateLambda(expr, input, environment) {
         arguments: expr.arguments,
         body: expr.body
     };
-    if (expr.thunk == true) {
+    if(expr.thunk == true) {
         procedure.thunk = true;
     }
     return procedure;
@@ -1664,7 +1664,7 @@ function applyProcedure(proc, args) {
         result = applyNativeFunction(proc.body, env);
     } else {
         var depth = proc.environment.pushStack();
-        if (depth > 100) {
+        if(depth > 100) {
             // stack size has exceeded limit - indicates runaway recursive function
             throw {
                 message: 'Stack overflow error: Check for non-terminating recursive function.  Consider rewriting as tail-recursive.',
@@ -1786,11 +1786,6 @@ function functionSum(args) {
                 };
             }
         });
-    } else {
-        throw {
-            message: "undefined value passed to function $sum()",
-            stack: (new Error()).stack
-        };
     }
     return total;
 }
@@ -1815,11 +1810,6 @@ function functionCount(args) {
             args = [args];
         }
         total = args.length;
-    } else {
-        throw {
-            message: "undefined value passed to function $count()",
-            stack: (new Error()).stack
-        };
     }
     return total;
 }
@@ -1844,11 +1834,6 @@ function functionMax(args) {
             args = [args];
         }
         max = Math.max.apply(Math, args);
-    } else {
-        throw {
-            message: "undefined value passed to function $max()",
-            stack: (new Error()).stack
-        };
     }
     return max;
 }
@@ -1873,11 +1858,6 @@ function functionMin(args) {
             args = [args];
         }
         min = Math.min.apply(Math, args);
-    } else {
-        throw {
-            message: "undefined value passed to function $min()",
-            stack: (new Error()).stack
-        };
     }
     return min;
 }
@@ -1902,15 +1882,9 @@ function functionAverage(args) {
             args = [args];
         }
         average = functionSum(args) / args.length;
-    } else {
-        throw {
-            message: "undefined value passed to function $average()",
-            stack: (new Error()).stack
-        };
     }
     return average;
 }
-
 
 /**
  * Stingify arguments
@@ -1920,7 +1894,7 @@ function functionAverage(args) {
 function functionString(arg) {
     var str;
 
-    if (arguments.length != 1) {
+    if(arguments.length != 1) {
         throw {
             message: 'The string function expects one argument',
             stack: (new Error()).stack
@@ -1930,7 +1904,7 @@ function functionString(arg) {
     if (typeof arg === 'string') {
         // already a string
         str = arg;
-    } else if (typeof arg === 'function' || (arg && arg.lambda === true && arg.environment && arg.arguments && arg.body)) {
+    } else if(typeof arg === 'function' || (arg && arg.lambda === true && arg.environment && arg.arguments && arg.body)) {
         // functions (built-in and lambda convert to empty string
         str = '';
     } else if (typeof arg === 'number' && !isFinite(arg)) {
@@ -1952,11 +1926,11 @@ function functionString(arg) {
  * Create substring based on character number and length
  * @param {String} str - String to evaluate
  * @param {Integer} start - Character number to start substring
- * @param {Integer} length - Number of characters in substring
+ * @param {Integer} [length] - Number of characters in substring
  * @returns {string|*} Substring
  */
 function functionSubstring(str, start, length) {
-    if (arguments.length != 2 && arguments.length != 3) {
+    if(arguments.length != 2 && arguments.length != 3) {
         throw {
             message: 'The substring function expects two or three arguments',
             stack: (new Error()).stack
@@ -1964,12 +1938,12 @@ function functionSubstring(str, start, length) {
     }
 
     // undefined inputs always return undefined
-    if (typeof str === 'undefined') {
+    if(typeof str === 'undefined') {
         return undefined;
     }
 
     // otherwise it must be a string
-    if (typeof str !== 'string') {
+    if(typeof str !== 'string') {
         throw {
             message: 'Type error: first argument of substring function must evaluate to a string',
             stack: (new Error()).stack,
@@ -1977,7 +1951,7 @@ function functionSubstring(str, start, length) {
         };
     }
 
-    if (typeof start !== 'number') {
+    if(typeof start !== 'number') {
         throw {
             message: 'Type error: second argument of substring function must evaluate to a number',
             stack: (new Error()).stack,
@@ -1985,7 +1959,7 @@ function functionSubstring(str, start, length) {
         };
     }
 
-    if (typeof length !== 'undefined' && typeof length !== 'number') {
+    if(typeof length !== 'undefined' && typeof length !== 'number') {
         throw {
             message: 'Type error: third argument of substring function must evaluate to a number',
             stack: (new Error()).stack,
@@ -2003,7 +1977,7 @@ function functionSubstring(str, start, length) {
  * @returns {*} Substring
  */
 function functionSubstringBefore(str, chars) {
-    if (arguments.length != 2) {
+    if(arguments.length != 2) {
         throw {
             message: 'The substringBefore function expects two arguments',
             stack: (new Error()).stack
@@ -2011,19 +1985,19 @@ function functionSubstringBefore(str, chars) {
     }
 
     // undefined inputs always return undefined
-    if (typeof str === 'undefined') {
+    if(typeof str === 'undefined') {
         return undefined;
     }
 
     // otherwise it must be a string
-    if (typeof str !== 'string') {
+    if(typeof str !== 'string') {
         throw {
             message: 'Type error: first argument of substringBefore function must evaluate to a string',
             stack: (new Error()).stack,
             value: str
         };
     }
-    if (typeof chars !== 'string') {
+    if(typeof chars !== 'string') {
         throw {
             message: 'Type error: second argument of substringBefore function must evaluate to a string',
             stack: (new Error()).stack,
@@ -2046,7 +2020,7 @@ function functionSubstringBefore(str, chars) {
  * @returns {*} Substring
  */
 function functionSubstringAfter(str, chars) {
-    if (arguments.length != 2) {
+    if(arguments.length != 2) {
         throw {
             message: 'The substringAfter function expects two arguments',
             stack: (new Error()).stack
@@ -2054,19 +2028,19 @@ function functionSubstringAfter(str, chars) {
     }
 
     // undefined inputs always return undefined
-    if (typeof str === 'undefined') {
+    if(typeof str === 'undefined') {
         return undefined;
     }
 
     // otherwise it must be a string
-    if (typeof str !== 'string') {
+    if(typeof str !== 'string') {
         throw {
             message: 'Type error: first argument of substringAfter function must evaluate to a string',
             stack: (new Error()).stack,
             value: str
         };
     }
-    if (typeof chars !== 'string') {
+    if(typeof chars !== 'string') {
         throw {
             message: 'Type error: second argument of substringAfter function must evaluate to a string',
             stack: (new Error()).stack,
@@ -2088,7 +2062,7 @@ function functionSubstringAfter(str, chars) {
  * @returns {string} Lowercase string
  */
 function functionLowercase(str) {
-    if (arguments.length != 1) {
+    if(arguments.length != 1) {
         throw {
             message: 'The lowercase function expects one argument',
             stack: (new Error()).stack
@@ -2096,12 +2070,12 @@ function functionLowercase(str) {
     }
 
     // undefined inputs always return undefined
-    if (typeof str === 'undefined') {
+    if(typeof str === 'undefined') {
         return undefined;
     }
 
     // otherwise it must be a string
-    if (typeof str !== 'string') {
+    if(typeof str !== 'string') {
         throw {
             message: 'Type error: argument of lowercase function must evaluate to a string',
             stack: (new Error()).stack,
@@ -2118,7 +2092,7 @@ function functionLowercase(str) {
  * @returns {string} Uppercase string
  */
 function functionUppercase(str) {
-    if (arguments.length != 1) {
+    if(arguments.length != 1) {
         throw {
             message: 'The uppercase function expects one argument',
             stack: (new Error()).stack
@@ -2126,12 +2100,12 @@ function functionUppercase(str) {
     }
 
     // undefined inputs always return undefined
-    if (typeof str === 'undefined') {
+    if(typeof str === 'undefined') {
         return undefined;
     }
 
     // otherwise it must be a string
-    if (typeof str !== 'string') {
+    if(typeof str !== 'string') {
         throw {
             message: 'Type error: argument of uppercase function must evaluate to a string',
             stack: (new Error()).stack,
@@ -2143,6 +2117,137 @@ function functionUppercase(str) {
 }
 
 /**
+ * length of a string
+ * @param {String} str - string
+ * @returns {Number} The number of characters in the string
+ */
+function functionLength(str) {
+    if(arguments.length != 1) {
+        throw {
+            message: 'The length function expects one argument',
+            stack: (new Error()).stack
+        };
+    }
+
+    // undefined inputs always return undefined
+    if(typeof str === 'undefined') {
+        return undefined;
+    }
+
+    // otherwise it must be a string
+    if(typeof str !== 'string') {
+        throw {
+            message: 'Type error: argument of length function must evaluate to a string',
+            stack: (new Error()).stack,
+            value: str
+        };
+    }
+
+    return str.length;
+}
+
+/**
+ * Split a string into an array of substrings
+ * @param {String} str - string
+ * @param {String} separator - the token that splits the string
+ * @param {Integer} [limit] - max number of substrings
+ * @returns {Array} The array of string
+ */
+function functionSplit(str, separator, limit) {
+    if(arguments.length != 2 && arguments.length != 3) {
+        throw {
+            message: 'The split function expects two or three arguments',
+            stack: (new Error()).stack
+        };
+    }
+
+    // undefined inputs always return undefined
+    if(typeof str === 'undefined') {
+        return undefined;
+    }
+
+    // otherwise it must be a string
+    if(typeof str !== 'string') {
+        throw {
+            message: 'Type error: first argument of split function must evaluate to a string',
+            stack: (new Error()).stack,
+            value: str
+        };
+    }
+
+    // separator must be a string
+    if(typeof separator !== 'string') {
+        throw {
+            message: 'Type error: second argument of split function must evaluate to a string',
+            stack: (new Error()).stack,
+            value: separator
+        };
+    }
+
+    // limit, if specified, must be a number
+    if(typeof limit !== 'undefined' && (typeof limit !== 'number' || limit < 0)) {
+        throw {
+            message: 'Type error: third argument of split function must evaluate to a positive number',
+            stack: (new Error()).stack,
+            value: limit
+        };
+    }
+
+    return str.split(separator, limit);
+}
+
+/**
+ * Join an array of strings
+ * @param {Array} strs - array of string
+ * @param {String} [separator] - the token that splits the string
+ * @returns {String} The concatenated string
+ */
+function functionJoin(strs, separator) {
+    if(arguments.length != 1 && arguments.length != 2) {
+        throw {
+            message: 'The join function expects one or two arguments',
+            stack: (new Error()).stack
+        };
+    }
+
+    // undefined inputs always return undefined
+    if(typeof strs === 'undefined') {
+        return undefined;
+    }
+
+    if(!Array.isArray(strs)) {
+        strs = [strs];
+    }
+
+    // it must be an array of strings
+    var nonStrings = strs.filter(function(val) {return (typeof val !== 'string');});
+    if(nonStrings.length > 0) {
+        throw {
+            message: 'Type error: first argument of join function must be an array of strings',
+            stack: (new Error()).stack,
+            value: nonStrings
+        };
+    }
+
+
+    // if separator is not specified, default to empty string
+    if(typeof separator === 'undefined') {
+        separator = "";
+    }
+
+    // separator, if specified, must be a string
+    if(typeof separator !== 'string') {
+        throw {
+            message: 'Type error: second argument of split function must evaluate to a string',
+            stack: (new Error()).stack,
+            value: separator
+        };
+    }
+
+    return strs.join(separator);
+}
+
+/**
  * Cast argument to number
  * @param {Object} arg - Argument
  * @returns {Number} numeric value of argument
@@ -2150,7 +2255,7 @@ function functionUppercase(str) {
 function functionNumber(arg) {
     var result;
 
-    if (arguments.length != 1) {
+    if(arguments.length != 1) {
         throw {
             message: 'The number function expects one argument',
             stack: (new Error()).stack
@@ -2160,7 +2265,7 @@ function functionNumber(arg) {
     if (typeof arg === 'number') {
         // already a number
         result = arg;
-    } else if (typeof arg === 'string' && /^-?(0|([1-9][0-9]*))(\.[0-9]+)?([Ee][-+]?[0-9]+)?$/.test(arg) && isNumeric(arg)) {
+    } else if(typeof arg === 'string' && /^-?(0|([1-9][0-9]*))(\.[0-9]+)?([Ee][-+]?[0-9]+)?$/.test(arg) && isNumeric(arg)) {
         result = parseFloat(arg);
     } else {
         throw {
@@ -2188,7 +2293,7 @@ function functionBoolean(arg) {
     // object: empty -> false; non-empty -> true
     // function -> false
 
-    if (arguments.length != 1) {
+    if(arguments.length != 1) {
         throw {
             message: 'The boolean function expects one argument',
             stack: (new Error()).stack
@@ -2200,9 +2305,7 @@ function functionBoolean(arg) {
         if (arg.length == 1) {
             result = functionBoolean(arg[0]);
         } else if (arg.length > 1) {
-            var trues = arg.filter(function (val) {
-                return functionBoolean(val);
-            });
+            var trues = arg.filter(function(val) {return functionBoolean(val);});
             result = trues.length > 0;
         }
     } else if (typeof arg === 'string') {
@@ -2355,6 +2458,26 @@ function functionAppend(arg1, arg2) {
 }
 
 /**
+ * Determines if the argument is undefined
+ * @param {*} arg - argument
+ * @returns {boolean} False if argument undefined, otherwise true
+ */
+function functionExists(arg){
+    if (arguments.length != 1) {
+        throw {
+            message: 'The exists function expects one argument',
+            stack: (new Error()).stack
+        };
+    }
+
+    if (typeof arg === 'undefined') {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+/**
  * Create frame
  * @param {Object} enclosingEnvironment - Enclosing environment
  * @returns {{bind: bind, lookup: lookup}} Created frame
@@ -2373,16 +2496,16 @@ function createFrame(enclosingEnvironment) {
             }
             return value;
         },
-        stackDepth: function () {
+        stackDepth: function() {
             var value = depth;
             if (typeof value === 'undefined' && enclosingEnvironment) {
                 value = enclosingEnvironment.stackDepth();
             }
             return value;
         },
-        pushStack: function () {
+        pushStack: function() {
             var value;
-            if (typeof this.stackDepth() === 'undefined') {
+            if(typeof this.stackDepth() === 'undefined') {
                 depth = 1;
                 value = depth;
             } else if (typeof depth === 'undefined') {
@@ -2395,10 +2518,10 @@ function createFrame(enclosingEnvironment) {
             }
             return value;
         },
-        popStack: function () {
+        popStack: function() {
             var value;
             /* istanbul ignore if */
-            if (typeof this.stackDepth() === 'undefined') {
+            if(typeof this.stackDepth() === 'undefined') {
                 // no op - can't get here unless engine code mis-balances the push/pop calls
             } else if (typeof depth === 'undefined') {
                 // stack depth is defined, but not in this frame
@@ -2426,6 +2549,9 @@ staticFrame.bind('substringBefore', functionSubstringBefore);
 staticFrame.bind('substringAfter', functionSubstringAfter);
 staticFrame.bind('lowercase', functionLowercase);
 staticFrame.bind('uppercase', functionUppercase);
+staticFrame.bind('length', functionLength);
+staticFrame.bind('split', functionSplit);
+staticFrame.bind('join', functionJoin);
 staticFrame.bind('number', functionNumber);
 staticFrame.bind('boolean', functionBoolean);
 staticFrame.bind('not', functionNot);
@@ -2434,6 +2560,7 @@ staticFrame.bind('reduce', functionFoldLeft);
 staticFrame.bind('keys', functionKeys);
 staticFrame.bind('lookup', functionLookup);
 staticFrame.bind('append', functionAppend);
+staticFrame.bind('exists', functionExists);
 
 /**
  * JSONata
