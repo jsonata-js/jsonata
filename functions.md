@@ -82,12 +82,24 @@ Casts the `arg` parameter to a number using the following casting rules
    - Strings that contain a sequence of characters that represent a legal JSON number are converted to that number
    - All other values cause an error to be thrown.
 
+#### `$abs(number)` - to be implemented
+#### `$round(number)` - to be implemented
+
+Rounds up to the nearest integer
+
+#### `$roundHalfToEven(number)` - to be implemented
+
+  [Round half to even](https://en.wikipedia.org/wiki/Rounding#Round_half_to_even) Commonly used in financial calculations.
+
+#### `$power(base, exponent)` - to be implemented
+
+### Numeric aggregation functions
+
 #### `$sum(array)`
 
 Returns the arithmetic sum of an array of numbers. 
 It is an error if the input array contains an item which isn't a number.
 
-#### `$abs(number)` - to be implemented
 #### `$max(array)`
 
 Returns the maximum number in an array of numbers. 
@@ -98,20 +110,10 @@ It is an error if the input array contains an item which isn't a number.
 Returns the minimum number in an array of numbers. 
 It is an error if the input array contains an item which isn't a number.
 
-#### `$round(number)` - to be implemented
-
-Rounds up to the nearest integer
-
-#### `$roundHalfToEven(number)` - to be implemented
-
-  [Round half to even](https://en.wikipedia.org/wiki/Rounding#Round_half_to_even) Commonly used in financial calculations.
-
 #### `$average(array)`
 
 Returns the mean value of an array of numbers. 
 It is an error if the input array contains an item which isn't a number.
-
-#### `$power(base, exponent)` - to be implemented
 
 ### Boolean functions
 

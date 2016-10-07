@@ -3921,6 +3921,15 @@ describe('Evaluator - functions: number', function () {
         });
     });
 
+    describe('$number(Account.blah)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$number(Account.blah)');
+            var result = expr.evaluate(testdata2);
+            var expected = undefined;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
     describe('$number(null)', function () {
         it('should throw error', function () {
             var expr = jsonata('$number(null)');
@@ -4241,7 +4250,7 @@ describe('Evaluator - functions: boolean', function () {
         it('should return result object', function () {
             var expr = jsonata('$boolean(Account.blah)');
             var result = expr.evaluate(testdata2);
-            var expected = false;
+            var expected = undefined;
             assert.equal(JSON.stringify(result), JSON.stringify(expected));
         });
     });

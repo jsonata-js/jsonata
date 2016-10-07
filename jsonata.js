@@ -1945,6 +1945,11 @@ function functionString(arg) {
         };
     }
 
+    // undefined inputs always return undefined
+    if(typeof arg === 'undefined') {
+        return undefined;
+    }
+
     if (typeof arg === 'string') {
         // already a string
         str = arg;
@@ -2306,6 +2311,11 @@ function functionNumber(arg) {
         };
     }
 
+    // undefined inputs always return undefined
+    if(typeof arg === 'undefined') {
+        return undefined;
+    }
+
     if (typeof arg === 'number') {
         // already a number
         result = arg;
@@ -2342,6 +2352,11 @@ function functionBoolean(arg) {
             message: 'The boolean function expects one argument',
             stack: (new Error()).stack
         };
+    }
+
+    // undefined inputs always return undefined
+    if(typeof arg === 'undefined') {
+        return undefined;
     }
 
     var result = false;
