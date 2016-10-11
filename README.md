@@ -15,7 +15,7 @@ and operators, and also the ability to format the output into any arbitrary JSON
 - `npm install jsonata`
 
 ##Usage
-In node.js (works in v4.4 and later):
+In node.js (works in v0.10 and later):
 ```
 var jsonata = require("jsonata");
 var data = { "example": [ {"value": 4}, {"value": 7}, {"value": 13}] };
