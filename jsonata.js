@@ -6,7 +6,7 @@
 
 'use strict';
 
-const operators = {
+var operators = {
     '.': 75,
     '[': 80,
     ']': 0,
@@ -42,7 +42,7 @@ const operators = {
     '!': 0   // not an operator, but needed as a stop character for name tokens
 };
 
-const escapes = {  // JSON string escape sequences - see json.org
+var escapes = {  // JSON string escape sequences - see json.org
     '"': '"',
     '\\': '\\',
     '/': '/',
@@ -767,6 +767,13 @@ function isNumeric(n) {
     }
     return isNum;
 }
+
+// Polyfill
+Number.isInteger = Number.isInteger || function(value) {
+    return typeof value === "number" &&
+        isFinite(value) &&
+        Math.floor(value) === value;
+};
 
 /**
  * Evaluate expression against input data
@@ -2410,19 +2417,19 @@ function functionMap(func) {
 
     // each subsequent arg must be an array - coerce if not
     var args = [];
-    for (let i = 1; i < varargs.length; i++) {
-        if (Array.isArray(varargs[i])) {
-            args.push(varargs[i]);
+    for (var ii = 1; ii < varargs.length; ii++) {
+        if (Array.isArray(varargs[ii])) {
+            args.push(varargs[ii]);
         } else {
-            args.push([varargs[i]]);
+            args.push([varargs[ii]]);
         }
 
     }
     // do the map - iterate over the arrays, and invoke func
     if (args.length > 0) {
-        for (let i = 0; i < args[0].length; i++) {
+        for (var i = 0; i < args[0].length; i++) {
             var func_args = [];
-            for (let j = 0; j < func.arguments.length; j++) {
+            for (var j = 0; j < func.arguments.length; j++) {
                 func_args.push(args[j][i]);
             }
             // invoke func
