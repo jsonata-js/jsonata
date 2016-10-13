@@ -6117,6 +6117,7 @@ describe('Evaluator - Tail recursion', function () {
     });
 
     describe('mutually recursive - odd/even, tail calls', function () {
+        this.timeout(5000);
         it('should return result object', function () {
             var expr = jsonata(
                 '        (' +
