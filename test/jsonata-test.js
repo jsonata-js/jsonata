@@ -144,9 +144,24 @@ var testdata4 = {
             "number": "077 7700 1234"
         }
     ],
+    "Email": [
+        {
+            "type": "work",
+            "address": ["fred.smith@my-work.com", "fsmith@my-work.com"]
+        },
+        {
+            "type": "home",
+            "address": ["freddy@my-social.com", "frederic.smith@very-serious.com"]
+        }
+    ],
     "Other": {
         "Over 18 ?": true,
-        "Misc": null
+        "Misc": null,
+        "Alternative.Address": {
+            "Street": "Brick Lane",
+            "City": "London",
+            "Postcode": "E1 6RF"
+        }
     }
 };
 
@@ -399,6 +414,67 @@ describe('Evaluator - simple field syntax', function () {
             var expr = jsonata('Other.Misc');
             var result = expr.evaluate(testdata4);
             var expected = null;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('edge case', function () {
+        it('should return result object', function () {
+            var expr = jsonata('bazz');
+            var result = expr.evaluate([
+                [
+                    {
+                        "baz": {
+                            "fud": "hello"
+                        }
+                    },
+                    {
+                        "baz": {
+                            "fud": "world"
+                        }
+                    },
+                    {
+                        "bazz": "gotcha"
+                    }
+                ]
+            ]);
+            var expected = "gotcha";
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('edge case', function () {
+        it('should return result object', function () {
+            var expr = jsonata('fud');
+            var result = expr.evaluate([
+                42,
+                [
+                    {
+                        "baz": {
+                            "fud": "hello"
+                        }
+                    },
+                    {
+                        "baz": {
+                            "fud": "world"
+                        }
+                    },
+                    {
+                        "bazz": "gotcha"
+                    }
+                ],
+                "here",
+                {
+                    "fud": "hello"
+                },
+                "hello",
+                {
+                    "fud": "world"
+                },
+                "world",
+                "gotcha"
+            ]);
+            var expected = ["hello", "world"];
             assert.equal(JSON.stringify(result), JSON.stringify(expected));
         });
     });
@@ -1024,6 +1100,15 @@ describe('Evaluator - predicates', function () {
         });
     });
 
+    describe('Account.Order.Product[$lowercase(Description.Colour) = "purple"][0].Price', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.Product[$lowercase(Description.Colour) = "purple"][0].Price');
+            var result = expr.evaluate(testdata2);
+            var expected = [34.45, 34.45];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
 });
 
 describe('Evaluator - wildcards', function () {
@@ -1032,7 +1117,7 @@ describe('Evaluator - wildcards', function () {
         it('should return result object', function () {
             var expr = jsonata('foo.*');
             var result = expr.evaluate(testdata1);
-            var expected = [42, [{"baz": {"fud": "hello"}}, {"baz": {"fud": "world"}}, {"bazz": "gotcha"}], "here"];
+            var expected = [42, {"baz": {"fud": "hello"}}, {"baz": {"fud": "world"}}, {"bazz": "gotcha"}, "here"];
             assert.equal(JSON.stringify(result), JSON.stringify(expected));
         });
     });
@@ -1087,6 +1172,39 @@ describe('Evaluator - wildcards', function () {
             var expr = jsonata('foo.*[0]');
             var result = expr.evaluate(testdata1);
             var expected = 42;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('*[type="home"]', function () {
+        it('should return result object', function () {
+            var expr = jsonata('*[type="home"]');
+            var result = expr.evaluate(testdata4);
+            var expected = [
+                {
+                    "type": "home",
+                    "number": "0203 544 1234"
+                },
+                {
+                    "type": "home",
+                    "address": [
+                        "freddy@my-social.com",
+                        "frederic.smith@very-serious.com"
+                    ]
+                }
+            ];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Account[$$.Account."Account Name" = "Firefly"].*[OrderID="order104"].Product.Price', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account[$$.Account."Account Name" = "Firefly"].*[OrderID="order104"].Product.Price');
+            var result = expr.evaluate(testdata2);
+            var expected = [
+                34.45,
+                107.99
+            ];
             assert.equal(JSON.stringify(result), JSON.stringify(expected));
         });
     });
@@ -5347,6 +5465,25 @@ describe('Evaluator - object constructor', function () {
         });
     });
 
+    describe('Phone.{type:number{$ & ", " & $_}, "phone":number}', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Phone.{type:number{$ & ", " & $_}, "phone":number}');
+            var result = expr.evaluate(testdata4);
+            var expected = {
+                "home": "0203 544 1234",
+                "phone": [
+                    "0203 544 1234",
+                    "01962 001234",
+                    "01962 001235",
+                    "077 7700 1234"
+                ],
+                "office": "01962 001235, 01962 001234",
+                "mobile": "077 7700 1234"
+            };
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
 });
 
 describe('Evaluator - aggregator', function () {
@@ -5980,6 +6117,7 @@ describe('Evaluator - Tail recursion', function () {
     });
 
     describe('mutually recursive - odd/even, tail calls', function () {
+        this.timeout(5000);
         it('should return result object', function () {
             var expr = jsonata(
                 '        (' +
@@ -7170,36 +7308,3 @@ describe('end to end scenarios', function () {
     });
 });
 
-
-/* TODO
-
- Account[$.Account."Account Name" = "Firefly"].*[OrderID="order104"].Product.Price
- Account.Order[OrderID="order104"][0].Product.Price
- Account."Order"[OrderID[].test[5]="order104"][0].Product.Price
-
-
- Account.Order.Product[lowercase(Description.Colour) = 'purple'][0].Price
-
-
- Group-by support
-
- Phone.{type: $sum(number), 'phone': $join(number, ', ') }
- Phone.{type:number{$ & ', ' & $_}, 'phone':number}
-
- Account.Order.Product.{$.'Product Name': $sum($.(Price*Quantity))}
-
- */
-
-
-/*
- describe('Evaluator - illegal syntax', function() {
- describe('fdf...sd', function () {
- it('should return result object', function () {
- var expr = jsonata('...sd');
- var result = expr.evaluate(testdata1);
- assert.equal(result, undefined);
- });
- });
-
- });
- */

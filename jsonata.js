@@ -1134,7 +1134,13 @@ function evaluateWildcard(expr, input) {
     var results = [];
     if (input !== null && typeof input === 'object') {
         Object.keys(input).forEach(function (key) {
-            results.push(input[key]);
+            var value = input[key];
+            if(Array.isArray(value)) {
+                value = flatten(value);
+                results = functionAppend(results, value);
+            } else {
+                results.push(value);
+            }
         });
     }
 
@@ -1144,6 +1150,26 @@ function evaluateWildcard(expr, input) {
         result = results;
     }
     return result;
+}
+
+/**
+ * Returns a flattened array
+ * @param {Array} arg - the array to be flatten
+ * @param {Array} flattened - carries the flattened array - if not defined, will initialize to []
+ * @returns {Array} - the flattened array
+ */
+function flatten(arg, flattened) {
+    if(typeof flattened === 'undefined') {
+        flattened = [];
+    }
+    if(Array.isArray(arg)) {
+        arg.forEach(function (item) {
+            flatten(item, flattened);
+        });
+    } else {
+        flattened.push(arg);
+    }
+    return flattened;
 }
 
 /**
