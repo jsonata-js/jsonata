@@ -196,6 +196,46 @@ var person = {
     "Español" : "/ˈspænɪʃ/"
 };
 
+/**
+ * Protect the process/browser from a runnaway expression
+ * i.e. Infinite loop (tail recursion), or excessive stack growth
+ *
+ * @param {Object} expr - expression to protect
+ * @param {Number} timeout - max time in ms
+ * @param {Number} maxDepth - max stack depth
+ */
+function timeboxExpression(expr, timeout, maxDepth) {
+    var depth = 0;
+    var time = Date.now();
+
+    var checkRunnaway = function() {
+        if(depth > maxDepth) {
+            // stack too deep
+            throw {
+                message: 'Stack overflow error: Check for non-terminating recursive function.  Consider rewriting as tail-recursive.',
+                stack: (new Error()).stack
+            };
+        }
+        if(Date.now() - time > timeout) {
+            // expression has run for too long
+            throw {
+                message: "Expression evaluation timeout: Check for infinite loop",
+                stack: (new Error()).stack
+            };
+        }
+
+    };
+
+    // register callbacks
+    expr.assign('__evaluate_entry', function() {
+        depth++;
+        checkRunnaway();
+    });
+    expr.assign('__evaluate_exit', function() {
+        depth--;
+        checkRunnaway();
+    });
+}
 
 
 describe('Evaluator - simple literals', function () {
@@ -6042,6 +6082,7 @@ describe('Evaluator - Tail recursion', function () {
               '  $factorial := function($n){$n = 0 ? 1 : $n * $factorial($n - 1)};' +
               '  $factorial(99)' +
               ')             ');
+            timeboxExpression(expr, 1000, 302);
             var result = expr.evaluate();
             var expected = 9.33262154439441e+155;
             assert.equal(JSON.stringify(result), JSON.stringify(expected));
@@ -6056,6 +6097,7 @@ describe('Evaluator - Tail recursion', function () {
                   '  $factorial := function($n){$n = 0 ? 1 : $n * $factorial($n - 1)};' +
                   '  $factorial(100)' +
                   ')             ');
+                timeboxExpression(expr, 1000, 302);
                 expr.evaluate();
             }).to.throw()
                 .to.deep.contain({position: 81})
@@ -6109,10 +6151,28 @@ describe('Evaluator - Tail recursion', function () {
                   '  $inf := function($n){$n+$inf($n-1)};' +
                   '  $inf(5)' +
                   ')' );
+                timeboxExpression(expr, 1000, 300);
                 expr.evaluate();
             }).to.throw()
                 .to.deep.contain({position: 46})
                 .to.have.property('message').to.match(/Stack overflow error:/);
+        });
+    });
+
+    describe('stack overflow - infinite recursive function - tail call', function () {
+        this.timeout(5000);
+        it('should throw error', function () {
+            expect(function () {
+                var expr = jsonata(
+                  '(' +
+                  '  $inf := function(){$inf()};' +
+                  '  $inf()' +
+                  ')' );
+                timeboxExpression(expr, 1000, 500);
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 37})
+              .to.have.property('message').to.match(/Expression evaluation timeout:/);
         });
     });
 
@@ -6125,6 +6185,7 @@ describe('Evaluator - Tail recursion', function () {
                 '          $odd := function($n) { $n = 0 ? false : $even($n-1) }; ' +
                 '          $odd(6555) ' +
                 '        )' );
+            timeboxExpression(expr, 4000, 500);
             var result = expr.evaluate();
             var expected = true;
             assert.equal(JSON.stringify(result), JSON.stringify(expected));
