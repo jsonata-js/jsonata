@@ -5131,6 +5131,33 @@ describe('Evaluator - array constructor', function () {
         });
     });
 
+    describe('[1, 2, 3].$', function () {
+        it('should return result object', function () {
+            var expr = jsonata('[1, 2, 3].$');
+            var result = expr.evaluate();
+            var expected = [1,2,3];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('[1, 2, 3].$', function () {
+        it('should return result object', function () {
+            var expr = jsonata('[1, 2, 3].$');
+            var result = expr.evaluate([]);
+            var expected = [1,2,3];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('[1, 2, 3].$', function () {
+        it('should return result object', function () {
+            var expr = jsonata('[1, 2, 3].$');
+            var result = expr.evaluate([4,5,6]);
+            var expected = [1,2,3];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
 });
 
 describe('Evaluator - range operator', function () {

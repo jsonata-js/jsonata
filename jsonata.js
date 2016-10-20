@@ -862,6 +862,9 @@ function evaluatePath(expr, input, environment) {
     //   then the path is absolute rather than relative
     if (expr[0].type === 'variable') {
         expr[0].absolute = true;
+    } else if(expr[0].type === 'unary' && expr[0].value === '[') {
+        // array constructor - not relative to the input
+        input = [null];// dummy singleton sequence for first step
     }
 
     // evaluate each step in turn
