@@ -36,10 +36,12 @@ var operators = {
     '!=': 40,
     '<=': 40,
     '>=': 40,
+    '~>': 40,
     'and': 30,
     'or': 25,
     '&': 50,
-    '!': 0   // not an operator, but needed as a stop character for name tokens
+    '!': 0,   // not an operator, but needed as a stop character for name tokens
+    '~': 0   // not an operator, but needed as a stop character for name tokens
 };
 
 var escapes = {  // JSON string escape sequences - see json.org
@@ -101,6 +103,11 @@ var tokenizer = function (path) {
             // **  descendant wildcard
             position += 2;
             return create('operator', '**');
+        }
+        if (currentChar === '~' && path.charAt(position + 1) === '>') {
+            // ~> function application operator
+            position += 2;
+            return create('operator', '~>');
         }
         // test for operators
         if (operators.hasOwnProperty(currentChar)) {
@@ -397,6 +404,7 @@ var parser = function (source) {
     infix("or"); // Boolean OR
     infixr(":="); // bind variable
     prefix("-"); // unary numeric negation
+    infix("~>"); // function application
 
     // field wildcard (single level)
     prefix('*', function () {
@@ -750,6 +758,10 @@ var parser = function (source) {
     return expr;
 };
 
+// Start of Evaluator code
+
+var staticFrame = createFrame(null);
+
 /**
  * Check if value is a finite number
  * @param {float} n - number to evaluate
@@ -1046,6 +1058,9 @@ function evaluateBinary(expr, input, environment) {
             break;
         case ':=':
             result = evaluateBindExpression(expr, input, environment);
+            break;
+        case '~>':
+            result = evaluateApplyExpression(expr, input, environment);
             break;
     }
     return result;
@@ -1551,20 +1566,81 @@ function evaluateVariable(expr, input, environment) {
     return result;
 }
 
+var chain = evaluate(parser('function($f, $g) { function($x){ $g($f($x)) } }'), null, staticFrame);
+var partial1 = parser('type = "partial" and $count(arguments[type="operator" and value="?"]) =  1');
+var invokePartial = parser('$[0]($[1])');
+
+
 /**
- * Evaluate function against input data
+ * Apply the function on the RHS using the sequence on the LHS as the first argument
  * @param {Object} expr - JSONata expression
  * @param {Object} input - Input data to evaluate against
  * @param {Object} environment - Environment
  * @returns {*} Evaluated input data
  */
-function evaluateFunction(expr, input, environment) {
+function evaluateApplyExpression(expr, input, environment) {
+    var result;
+
+    var arg1 = evaluate(expr.lhs, input, environment);
+
+    if(expr.rhs.type === 'function') {
+        // this is a function _invocation_; invoke it with arg1 at the start
+        result = evaluateFunction(expr.rhs, input, environment, arg1);
+    } else if(evaluate(partial1, expr.rhs, environment)) {
+        var partial = evaluatePartialApplication(expr.rhs, input, environment);
+        result = evaluate(invokePartial, [partial, arg1], environment);
+    } else {
+        var func = evaluate(expr.rhs, input, environment);
+
+        if(!isFunction(func)) {
+            throw {
+                message: 'RHS of function application operator ~> is not a function at column ' + expr.position,
+                stack: (new Error()).stack,
+                position: expr.position
+            };
+        }
+
+        if(isFunction(arg1)) {
+            // this is function chaining (func1 ~> func2)
+            // λ($f, $g) { λ($x){ $g($f($x)) } }
+            result = apply(chain, [arg1, func], environment, null);
+        } else {
+            result = apply(func, [arg1], environment, null);
+        }
+
+    }
+
+    return result;
+}
+
+/**
+ *
+ * @param {Object} expr - expression to test
+ * @returns {boolean} - true if it is a function (lambda or built-in)
+ */
+function isFunction(expr) {
+    return (typeof expr === 'function' || (expr && expr.lambda === true && expr.environment && expr.arguments && expr.body));
+}
+
+/**
+ * Evaluate function against input data
+ * @param {Object} expr - JSONata expression
+ * @param {Object} input - Input data to evaluate against
+ * @param {Object} environment - Environment
+ * @param {Object} [applyto] - LHS of ~> operator
+ * @returns {*} Evaluated input data
+ */
+function evaluateFunction(expr, input, environment, applyto) {
     var result;
     // evaluate the arguments
     var evaluatedArgs = [];
     expr.arguments.forEach(function (arg) {
         evaluatedArgs.push(evaluate(arg, input, environment));
     });
+    if(applyto) {
+        // insert the first argument from the LHS of ~>
+        evaluatedArgs.unshift(applyto);
+    }
     // lambda function on lhs
     // create the procedure
     // can't assume that expr.procedure is a lambda type directly
@@ -1993,7 +2069,7 @@ function functionString(arg) {
     if (typeof arg === 'string') {
         // already a string
         str = arg;
-    } else if(typeof arg === 'function' || (arg && arg.lambda === true && arg.environment && arg.arguments && arg.body)) {
+    } else if(isFunction(arg)) {
         // functions (built-in and lambda convert to empty string
         str = '';
     } else if (typeof arg === 'number' && !isFinite(arg)) {
@@ -2440,16 +2516,18 @@ function functionNot(arg) {
 /**
  * Create a map from an array of arguments
  * @param {Function} func - function to apply
+ * @param {Array} [arr] - array to map over
  * @returns {Array} Map array
  */
-function functionMap(func) {
+function functionMap(func, arr) {
     // this can take a variable number of arguments - each one should be mapped to the equivalent arg of func
     // assert that func is a function
     var varargs = arguments;
     var result = [];
 
     // each subsequent arg must be an array - coerce if not
-    var args = [];
+    var args = arr;
+    args = [];
     for (var ii = 1; ii < varargs.length; ii++) {
         if (Array.isArray(varargs[ii])) {
             args.push(varargs[ii]);
@@ -2462,7 +2540,8 @@ function functionMap(func) {
     if (args.length > 0) {
         for (var i = 0; i < args[0].length; i++) {
             var func_args = [];
-            for (var j = 0; j < func.arguments.length; j++) {
+            var length = typeof func === 'function' ? func.length : func.arguments.length;
+            for (var j = 0; j < length; j++) {
                 func_args.push(args[j][i]);
             }
             // invoke func
@@ -2596,8 +2675,6 @@ function createFrame(enclosingEnvironment) {
         }
     };
 }
-
-var staticFrame = createFrame(null);
 
 staticFrame.bind('sum', functionSum);
 staticFrame.bind('count', functionCount);
