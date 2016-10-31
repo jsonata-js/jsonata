@@ -756,14 +756,17 @@ var parser = function (source) {
  * @returns {boolean} True if n is a finite number
  */
 function isNumeric(n) {
-    var num = parseFloat(n);
-    var isNum =  !isNaN(num);
-    if(isNum && !isFinite(num)) {
-        throw {
-            message: "Number out of range",
-            value: n,
-            stack: (new Error()).stack
-        };
+    var isNum = false;
+    if(typeof n === 'number') {
+        var num = parseFloat(n);
+        isNum = !isNaN(num);
+        if (isNum && !isFinite(num)) {
+            throw {
+                message: "Number out of range",
+                value: n,
+                stack: (new Error()).stack
+            };
+        }
     }
     return isNum;
 }
@@ -2359,7 +2362,7 @@ function functionNumber(arg) {
     if (typeof arg === 'number') {
         // already a number
         result = arg;
-    } else if(typeof arg === 'string' && /^-?(0|([1-9][0-9]*))(\.[0-9]+)?([Ee][-+]?[0-9]+)?$/.test(arg) && isNumeric(arg)) {
+    } else if(typeof arg === 'string' && /^-?(0|([1-9][0-9]*))(\.[0-9]+)?([Ee][-+]?[0-9]+)?$/.test(arg) && !isNaN(parseFloat(arg)) && isFinite(arg)) {
         result = parseFloat(arg);
     } else {
         throw {

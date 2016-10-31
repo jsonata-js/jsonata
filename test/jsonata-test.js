@@ -978,6 +978,16 @@ describe('Evaluator - numeric operators', function () {
         });
     });
 
+    describe('"5" + "5"', function () {
+        it('should throw error', function () {
+            var expr = jsonata('"5" + "5"');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 5})
+              .to.have.property('message').to.match(/LHS of \+ operator must evaluate to a number/);
+        });
+    });
 
 });
 
@@ -4006,7 +4016,7 @@ describe('Evaluator - functions: number', function () {
                 expr.evaluate();
             }).to.throw()
                 .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/Number out of range/);
+                .to.have.property('message').to.match(/Unable to cast value to a number/);
         });
     });
 
