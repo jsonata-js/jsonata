@@ -771,6 +771,19 @@ function isNumeric(n) {
     return isNum;
 }
 
+/**
+ * Returns true if the arg is an array of numbers
+ * @param {*} arg - the item to test
+ * @returns {boolean} True if arg is an array of numbers
+ */
+function isArrayOfNumbers(arg) {
+    var result = false;
+    if(Array.isArray(arg)) {
+        result = (arg.filter(function(item){return !isNumeric(item);}).length == 0);
+    }
+    return result;
+}
+
 // Polyfill
 /* istanbul ignore next */
 Number.isInteger = Number.isInteger || function(value) {
@@ -956,17 +969,22 @@ function applyPredicates(predicates, input, environment) {
             inputSequence.forEach(function (item, index) {
                 var res = evaluate(predicate, item, environment);
                 if (isNumeric(res)) {
-                    if (!Number.isInteger(res)) {
-                        // round it down
-                        res = Math.floor(res);
-                    }
-                    if (res < 0) {
-                        // count in from end of array
-                        res = inputSequence.length + res;
-                    }
-                    if (res == index) {
-                        results.push(item);
-                    }
+                    res = [res];
+                }
+                if(isArrayOfNumbers(res)) {
+                    res.forEach(function(ires) {
+                        if (!Number.isInteger(ires)) {
+                            // round it down
+                            ires = Math.floor(ires);
+                        }
+                        if (ires < 0) {
+                            // count in from end of array
+                            ires = inputSequence.length + ires;
+                        }
+                        if (ires == index) {
+                            results.push(item);
+                        }
+                    });
                 } else if (functionBoolean(res)) { // truthy
                     results.push(item);
                 }
@@ -2515,11 +2533,29 @@ function functionFoldLeft(func, sequence, init) {
 
 /**
  * Return keys for an object
- * @param {Object} object - Object
+ * @param {Object} arg - Object
  * @returns {Array} Array of keys
  */
-function functionKeys(object) {
-    var result = Object.keys(object);
+function functionKeys(arg) {
+    var result = [];
+
+    if(Array.isArray(arg)) {
+        // spread all of the items in the array
+        var merge = {};
+        arg.forEach(function(item) {
+            var keys = functionKeys(item);
+            if(Array.isArray(keys)) {
+                keys.forEach(function(key) {
+                    merge[key] = true;
+                });
+            }
+        });
+        result = functionKeys(merge);
+    } else if(arg != null && typeof arg === 'object' && !(arg.lambda === true && arg.input && arg.environment && arg.arguments && arg.body)) {
+        result = Object.keys(arg);
+    } else {
+        result = undefined;
+    }
     return result;
 }
 
@@ -2530,7 +2566,7 @@ function functionKeys(object) {
  * @returns {*} Value of key in object
  */
 function functionLookup(object, key) {
-    var result = object[key];
+    var result = evaluateName({value: key}, object);
     return result;
 }
 
@@ -2580,6 +2616,31 @@ function functionExists(arg){
 }
 
 /**
+ * Splits an object into an array of object with one property each
+ * @param {*} arg - the object to split
+ * @returns {*} - the array
+ */
+function functionSpread(arg) {
+    var result = [];
+
+    if(Array.isArray(arg)) {
+        // spread all of the items in the array
+        arg.forEach(function(item) {
+            result = functionAppend(result, functionSpread(item));
+        });
+    } else if(arg != null && typeof arg === 'object' && !(arg.lambda === true && arg.input && arg.environment && arg.arguments && arg.body)) {
+        for(var key in arg) {
+            var obj = {};
+            obj[key] = arg[key];
+            result.push(obj);
+        }
+    } else {
+        result = arg;
+    }
+    return result;
+}
+
+/**
  * Create frame
  * @param {Object} enclosingEnvironment - Enclosing environment
  * @returns {{bind: bind, lookup: lookup}} Created frame
@@ -2625,6 +2686,7 @@ staticFrame.bind('keys', functionKeys);
 staticFrame.bind('lookup', functionLookup);
 staticFrame.bind('append', functionAppend);
 staticFrame.bind('exists', functionExists);
+staticFrame.bind('spread', functionSpread);
 
 /**
  * JSONata
