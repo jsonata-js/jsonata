@@ -800,6 +800,37 @@ describe('Evaluator - simple array selectors', function () {
 
 });
 
+describe('Evaluator - multiple array selectors', function () {
+
+    describe('[1..10][[1..3,8,-1]]', function () {
+        it('should return result object', function () {
+            var expr = jsonata('[1..10][[1..3,8,-1]]');
+            var result = expr.evaluate();
+            var expected = [2, 3, 4, 9, 10];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('[1..10][[1..3,8,5]]', function () {
+        it('should return result object', function () {
+            var expr = jsonata('[1..10][[1..3,8,5]]');
+            var result = expr.evaluate();
+            var expected = [2, 3, 4, 6, 9];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('[1..10][[1..3,8,false]]', function () {
+        it('should return result object', function () {
+            var expr = jsonata('[1..10][[1..3,8,false]]');
+            var result = expr.evaluate();
+            var expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+});
+
 describe('Evaluator - quoted object selectors', function () {
     describe('foo."blah"', function () {
         it('should return result object', function () {
@@ -2630,6 +2661,67 @@ describe('Evaluator - functions: exists', function () {
             }).to.throw()
                 .to.deep.contain({position: 8})
                 .to.have.property('message').to.match(/The exists function expects one argument/);
+        });
+    });
+
+});
+
+describe('Evaluator - functions: spread', function () {
+
+    describe('$spread("Hello World")', function () {
+        it('should return itself', function () {
+            var expr = jsonata('$spread("Hello World")');
+            var result = expr.evaluate(testdata2);
+            var expected = "Hello World";
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$spread((Account.Order.Product.Description))', function () {
+        it('should return itself', function () {
+            var expr = jsonata('$spread((Account.Order.Product.Description))');
+            var result = expr.evaluate(testdata2);
+            var expected = [
+                {"Colour": "Purple"},
+                {"Width": 300},
+                {"Height": 200},
+                {"Depth": 210},
+                {"Weight": 0.75},
+                {"Colour": "Orange"},
+                {"Width": 300},
+                {"Height": 200},
+                {"Depth": 210},
+                {"Weight": 0.6},
+                {"Colour": "Purple"},
+                {"Width": 300},
+                {"Height": 200},
+                {"Depth": 210},
+                {"Weight": 0.75},
+                {"Colour": "Black"},
+                {"Width": 30},
+                {"Height": 20},
+                {"Depth": 210},
+                {"Weight": 2}
+            ];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$spread(blah)', function () {
+        it('should return itself', function () {
+            var expr = jsonata('$spread(blah)');
+            var result = expr.evaluate(testdata2);
+            var expected = undefined;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$string($spread(function($x){$x*$x}))', function () {
+        it('should return itself', function () {
+            var expr = jsonata('$string($spread(function($x){$x*$x}))');
+            var result = expr.evaluate(testdata2);
+            var expected = '';
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
         });
     });
 
@@ -4476,6 +4568,21 @@ describe('Evaluator - functions: keys', function () {
         });
     });
 
+    describe('$keys(Account.Order.Product)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$keys(Account.Order.Product)');
+            var result = expr.evaluate(testdata2);
+            var expected = [
+                "Product Name",
+                "ProductID",
+                "SKU",
+                "Description",
+                "Price",
+                "Quantity"
+            ];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
 });
 
 describe('Evaluator - functions: lookup', function () {
@@ -4485,6 +4592,29 @@ describe('Evaluator - functions: lookup', function () {
             var expr = jsonata('$lookup(Account, "Account Name")');
             var result = expr.evaluate(testdata2);
             var expected = "Firefly";
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$lookup(Account.Order.Product, "Product Name"))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$lookup(Account.Order.Product, "Product Name")');
+            var result = expr.evaluate(testdata2);
+            var expected = [
+                "Bowler Hat",
+                "Trilby hat",
+                "Bowler Hat",
+                "Cloak"
+            ];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$lookup(Account.Order.Product.ProductID, "Product Name"))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$lookup(Account.Order.Product.ProductID, "Product Name")');
+            var result = expr.evaluate(testdata2);
+            var expected = undefined;
             assert.equal(JSON.stringify(result), JSON.stringify(expected));
         });
     });
