@@ -1819,6 +1819,25 @@ function getNativeFunctionArguments(func) {
 }
 
 /**
+ * Tests whether arg is a lambda function
+ * @param {*} arg - the value to test
+ * @returns {boolean} - true if it is a lambda function
+ */
+function isLambda(arg) {
+    var result = false;
+    if(arg && typeof arg === 'object' &&
+      arg.lambda === true &&
+      arg.hasOwnProperty('input') &&
+      arg.hasOwnProperty('arguments') &&
+      arg.hasOwnProperty('environment') &&
+      arg.hasOwnProperty('body')) {
+        result = true;
+    }
+
+    return result;
+}
+
+/**
  * Sum function
  * @param {Object} args - Arguments
  * @returns {number} Total value of arguments
@@ -2014,7 +2033,7 @@ function functionString(arg) {
     if (typeof arg === 'string') {
         // already a string
         str = arg;
-    } else if(typeof arg === 'function' || (arg && arg.lambda === true && arg.environment && arg.arguments && arg.body)) {
+    } else if(typeof arg === 'function' || isLambda(arg)) {
         // functions (built-in and lambda convert to empty string
         str = '';
     } else if (typeof arg === 'number' && !isFinite(arg)) {
@@ -2026,7 +2045,7 @@ function functionString(arg) {
     } else
         str = JSON.stringify(arg, function (key, val) {
             return (typeof val !== 'undefined' && val !== null && val.toPrecision && isNumeric(val)) ? Number(val.toPrecision(13)) :
-                (val && val.lambda === true && val.environment && val.arguments && val.body) ? '' :
+                (val && isLambda(val)) ? '' :
                     (typeof val === 'function') ? '' : val;
         });
     return str;
@@ -2439,7 +2458,7 @@ function functionBoolean(arg) {
     } else if (arg != null && typeof arg === 'object') {
         if (Object.keys(arg).length > 0) {
             // make sure it's not a lambda function
-            if (!(arg.lambda === true && arg.input && arg.environment && arg.arguments && arg.body)) {
+            if (!(isLambda(arg))) {
                 result = true;
             }
         }
@@ -2540,7 +2559,7 @@ function functionKeys(arg) {
     var result = [];
 
     if(Array.isArray(arg)) {
-        // spread all of the items in the array
+        // merge the keys of all of the items in the array
         var merge = {};
         arg.forEach(function(item) {
             var keys = functionKeys(item);
@@ -2551,8 +2570,11 @@ function functionKeys(arg) {
             }
         });
         result = functionKeys(merge);
-    } else if(arg != null && typeof arg === 'object' && !(arg.lambda === true && arg.input && arg.environment && arg.arguments && arg.body)) {
+    } else if(arg != null && typeof arg === 'object' && !(isLambda(arg))) {
         result = Object.keys(arg);
+        if(result.length == 0) {
+            result = undefined;
+        }
     } else {
         result = undefined;
     }
@@ -2628,7 +2650,7 @@ function functionSpread(arg) {
         arg.forEach(function(item) {
             result = functionAppend(result, functionSpread(item));
         });
-    } else if(arg != null && typeof arg === 'object' && !(arg.lambda === true && arg.input && arg.environment && arg.arguments && arg.body)) {
+    } else if(arg != null && typeof arg === 'object' && !isLambda(arg)) {
         for(var key in arg) {
             var obj = {};
             obj[key] = arg[key];
