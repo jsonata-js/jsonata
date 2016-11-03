@@ -4583,6 +4583,52 @@ describe('Evaluator - functions: keys', function () {
             assert.equal(JSON.stringify(result), JSON.stringify(expected));
         });
     });
+
+    describe('$keys({})', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$keys({})');
+            var result = expr.evaluate();
+            var expected = undefined;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$keys({"foo":{}})', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$keys({"foo":{}})');
+            var result = expr.evaluate();
+            var expected = ["foo"];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$keys("foo")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$keys("foo")');
+            var result = expr.evaluate();
+            var expected = undefined;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$keys(function(){1})', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$keys(function(){1})');
+            var result = expr.evaluate();
+            var expected = undefined;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$keys(["foo", "bar"])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$keys(["foo", "bar"])');
+            var result = expr.evaluate();
+            var expected = undefined;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
 });
 
 describe('Evaluator - functions: lookup', function () {
