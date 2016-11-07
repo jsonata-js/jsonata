@@ -32,12 +32,13 @@ var operators = {
     '`': 80,
     '**': 60,
     '..': 20,
-    ':=': 30,
+    ':=': 10,
     '!=': 40,
     '<=': 40,
     '>=': 40,
     'and': 30,
     'or': 25,
+    'in': 40,
     '&': 50,
     '!': 0   // not an operator, but needed as a stop character for name tokens
 };
@@ -193,6 +194,7 @@ var tokenizer = function (path) {
                     switch (name) {
                         case 'and':
                         case 'or':
+                        case 'in':
                             return create('operator', name);
                         case 'true':
                             return create('value', true);
@@ -395,6 +397,7 @@ var parser = function (source) {
     infix("&"); // string concatenation
     infix("and"); // Boolean AND
     infix("or"); // Boolean OR
+    infix("in"); // is member of array
     infixr(":="); // bind variable
     prefix("-"); // unary numeric negation
 
@@ -694,7 +697,7 @@ var parser = function (source) {
                 break;
             case 'operator':
                 // the tokens 'and' and 'or' might have been used as a name rather than an operator
-                if (expr.value === 'and' || expr.value === 'or') {
+                if (expr.value === 'and' || expr.value === 'or' || expr.value === 'in') {
                     expr.type = 'name';
                     result = post_parse(expr);
                 } else if (expr.value === '?') {
@@ -900,7 +903,9 @@ function evaluatePath(expr, input, environment) {
             step.type = 'name';
         }
         if (step.value === '{') {
-            result = evaluateGroupExpression(step, inputSequence, environment);
+            if(typeof input !== 'undefined') {
+                result = evaluateGroupExpression(step, inputSequence, environment);
+            }
         } else {
             inputSequence.forEach(function (item) {
                 var res = evaluate(step, item, environment);
@@ -1067,6 +1072,9 @@ function evaluateBinary(expr, input, environment) {
             break;
         case ':=':
             result = evaluateBindExpression(expr, input, environment);
+            break;
+        case 'in':
+            result = evaluateIncludesExpression(expr, input, environment);
             break;
     }
     return result;
@@ -1345,6 +1353,39 @@ function evaluateComparisonExpression(expr, input, environment) {
             result = lhs >= rhs;
             break;
     }
+    return result;
+}
+
+/**
+ * Inclusion operator - in
+ *
+ * @param {Object} expr - AST
+ * @param {*} input - input context
+ * @param {Object} environment - frame
+ * @returns {boolean} - true if lhs is a member of rhs
+ */
+function evaluateIncludesExpression(expr, input, environment) {
+    var result = false;
+
+    var lhs = evaluate(expr.lhs, input, environment);
+    var rhs = evaluate(expr.rhs, input, environment);
+
+    if (typeof lhs === 'undefined' || typeof rhs === 'undefined') {
+        // if either side is undefined, the result is false
+        return false;
+    }
+
+    if(!Array.isArray(rhs)) {
+        rhs = [rhs];
+    }
+
+    for(var i = 0; i < rhs.length; i++) {
+        if(rhs[i] === lhs) {
+            result = true;
+            break;
+        }
+    }
+
     return result;
 }
 
@@ -2740,5 +2781,9 @@ function jsonata(expr) {
     };
 }
 
-module.exports = jsonata;
-module.exports.parser = parser;
+// node.js only - export the jsonata and parser functions
+// istanbul ignore else
+if(typeof module !== 'undefined') {
+    module.exports = jsonata;
+    module.exports.parser = parser;
+}
