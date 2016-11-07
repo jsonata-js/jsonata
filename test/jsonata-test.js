@@ -165,6 +165,81 @@ var testdata4 = {
     }
 };
 
+var testdata5 = {
+    "library": {
+        "books": [
+            {
+                "title": "Structure and Interpretation of Computer Programs",
+                "authors": ["Abelson", "Sussman"],
+                "isbn": "9780262510875",
+                "price": 38.90,
+                "copies": 2
+            },
+            {
+                "title": "The C Programming Language",
+                "authors": ["Kernighan", "Richie"],
+                "isbn": "9780131103627",
+                "price": 33.59,
+                "copies": 3
+            },
+            {
+                "title": "The AWK Programming Language",
+                "authors": ["Aho", "Kernighan", "Weinberger"],
+                "isbn": "9780201079814",
+                "copies": 1
+            },
+            {
+                "title": "Compilers: Principles, Techniques, and Tools",
+                "authors": ["Aho", "Lam", "Sethi", "Ullman"],
+                "isbn": "9780201100884",
+                "price": 23.38,
+                "copies": 1
+            }
+        ],
+        "loans": [
+            {
+                "customer": "10001",
+                "isbn": "9780262510875",
+                "return": "2016-12-05"
+            },
+            {
+                "customer": "10003",
+                "isbn": "9780201100884",
+                "return": "2016-10-22"
+            }
+        ],
+        "customers": [
+            {
+                "id": "10001",
+                "name": "Joe Doe",
+                "address": {
+                    "street": "2 Long Road",
+                    "city": "Winchester",
+                    "postcode": "SO22 5PU"
+                }
+            },
+            {
+                "id": "10002",
+                "name": "Fred Bloggs",
+                "address": {
+                    "street": "56 Letsby Avenue",
+                    "city": "Winchester",
+                    "postcode": "SO22 4WD"
+                }
+            },
+            {
+                "id": "10003",
+                "name": "Jason Arthur",
+                "address": {
+                    "street": "1 Preddy Gate",
+                    "city": "Southampton",
+                    "postcode": "SO14 0MG"
+                }
+            }
+        ]
+    }
+};
+
 var data1 = {
     doc: 23,
     detail: {
@@ -1149,6 +1224,86 @@ describe('Evaluator - comparison operators', function () {
             assert.equal(JSON.stringify(result), JSON.stringify(expected));
         });
     });
+
+});
+
+describe('Evaluator - inclusion operator', function () {
+
+    describe('1 in [1,2]', function () {
+        it('should return result object', function () {
+            var expr = jsonata('1 in [1,2]');
+            var result = expr.evaluate();
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('3 in [1,2]', function () {
+        it('should return result object', function () {
+            var expr = jsonata('3 in [1,2]');
+            var result = expr.evaluate();
+            var expected = false;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('"hello" in [1,2]', function () {
+        it('should return result object', function () {
+            var expr = jsonata('"hello" in [1,2]');
+            var result = expr.evaluate();
+            var expected = false;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('"world" in ["hello", "world"]', function () {
+        it('should return result object', function () {
+            var expr = jsonata('"world" in ["hello", "world"]');
+            var result = expr.evaluate();
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('in in ["hello", "world"]', function () {
+        it('should return result object', function () {
+            var expr = jsonata('in in ["hello", "world"]');
+            var result = expr.evaluate();
+            var expected = false;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('"world" in in', function () {
+        it('should return result object', function () {
+            var expr = jsonata('"world" in in');
+            var result = expr.evaluate();
+            var expected = false;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('"hello" in "hello"', function () {
+        it('should return result object', function () {
+            var expr = jsonata('"hello" in "hello"');
+            var result = expr.evaluate();
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('library.books["Aho" in authors].title', function () {
+        it('should return result object', function () {
+            var expr = jsonata('library.books["Aho" in authors].title');
+            var result = expr.evaluate(testdata5);
+            var expected = [
+                "The AWK Programming Language",
+                "Compilers: Principles, Techniques, and Tools"
+            ];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
 
 });
 
@@ -5503,6 +5658,15 @@ describe('Evaluator - object constructor', function () {
             var expr = jsonata('{"one": 1, "two": [3, "four"]}');
             var result = expr.evaluate(testdata1);
             var expected = {"one": 1, "two": [3, "four"]};
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('blah.{}', function () {
+        it('should return result object', function () {
+            var expr = jsonata('blah.{}');
+            var result = expr.evaluate(testdata1);
+            var expected = undefined;
             assert.equal(JSON.stringify(result), JSON.stringify(expected));
         });
     });
