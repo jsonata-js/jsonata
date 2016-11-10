@@ -10,7 +10,7 @@
 'use strict';
 
 var jsonata = require('../jsonata');
-var glob = require('glob-fs')({ gitignore: true });
+var glob = require('glob');
 var path = require('path');
 var fs = require('fs');
 var parsejson = require('parse-json'); // Better error reporting
@@ -19,8 +19,8 @@ var expect = chai.expect;
 
 // Identify JSON test files
 // (Note, using synchronous functions is generally bad practice.  If we use a callback here, mocha
-// will end the process before the callback returns, which is not what we want.)
-var testfiles = glob.readdirSync('**/*-test.json');
+// will end testing before the callback returns, which is not what we want.)
+var testfiles = glob.sync('**/*-test.json');
 if(!testfiles.length) {
     throw new Error('Could not match any JSON test files!');
 }
