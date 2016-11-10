@@ -1,0 +1,64 @@
+[
+    {
+        "name": "string literals",
+        "group": [
+            {
+                "name": "in double quotes",
+                "expression": "\"hello\"",
+                "expected": "hello"
+            },
+            {
+                "name": "in single quotes",
+                "expression": "'hello'",
+                "expected": "hello"
+            },
+            {
+                "name": "single quote in string",
+                "expression": "\"Wayne's World\"",
+                "expected": "Wayne's World"
+            }
+        ]
+    },
+    {
+        "name": "integers",
+        "group": [
+            {
+                "expression": "42",
+                "expected": 42
+            },
+            {
+                "expression": "-42",
+                "expected": -42
+            }
+        ]
+    },
+    {
+        "name": "floating points",
+        "group": [
+            {
+                "expression": "3.14159",
+                "expected": 3.14159
+            },
+            {
+                "expression": "6.022e23",
+                "expected": 6.022e23
+            },
+            {
+                "expression": "1.602E-19",
+                "expected": 1.602E-19
+            },
+            {
+                "expression": "-42",
+                "expected": -42
+            },
+            {
+                "expression": "10e1000",
+                "error": {
+                    "token": "10e1000",
+                    "position": 0,
+                    "message": "Number out of range:"
+                }
+            }
+        ]
+    }
+]
