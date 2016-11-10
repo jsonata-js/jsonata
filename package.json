@@ -35,7 +35,8 @@
     "istanbul": "^0.4.5",
     "jsdoc": "^3.4.0",
     "mocha": "^3.0.2",
-    "mocha-lcov-reporter": "^1.2.0"
+    "mocha-lcov-reporter": "^1.2.0",
+    "parse-json": "^2.2.0"
   },
   "engines": {
     "node": ">= 0.10"

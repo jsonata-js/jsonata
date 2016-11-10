@@ -1,0 +1,56 @@
+[
+    {
+        "name": "escape sequences",
+        "group": [
+            {
+                "expression": "\"hello\\tworld\"",
+                "expected": "hello\tworld"
+            },
+            {
+                "expression": "\"hello\\nworld\"",
+                "expected": "hello\nworld"
+            },
+            {
+                "expression": "\"hello \\\"world\\\"\"",
+                "expected": "hello \"world\""
+            }
+        ]
+    },
+    {
+        "name": "unicode",
+        "group": [
+            {
+                "name": "λ-calculus rocks",
+                "expression": "\"\\u03BB-calculus rocks\"",
+                "expected": "λ-calculus rocks"
+            },
+            {
+                "name": "treble clef",
+                "expression": "\"\uD834\uDD1E\"",
+                "expected": "𝄞"
+            },
+            {
+                "expression": "\"\\y\"",
+                "error": {
+                    "message": "unsupported escape sequence:",
+                    "token": "y",
+                    "position": 2
+                }
+            },
+            {
+                "expression": "\"\\u\"",
+                    "error": {
+                    "message": "The escape sequence \\u must be followed by 4 hex digits",
+                    "position": 2
+                }
+            },
+            {
+                "expression": "\"\\u123t\"",
+                "error": {
+                    "message": "The escape sequence \\u must be followed by 4 hex digits",
+                    "position": 2
+                }
+            }
+        ]
+    }
+]

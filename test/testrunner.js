@@ -12,11 +12,13 @@
 var jsonata = require('../jsonata');
 var glob = require('glob-fs')({ gitignore: true });
 var path = require('path');
+var fs = require('fs');
+var parsejson = require('parse-json'); // Better error reporting
 var chai = require('chai');
 var expect = chai.expect;
 
 // Identify JSON test files
-// (Note, using a synchronous function is generally bad practice.  If we use a callback here, mocha
+// (Note, using synchronous functions is generally bad practice.  If we use a callback here, mocha
 // will end the process before the callback returns, which is not what we want.)
 var testfiles = glob.readdirSync('**/*-test.json');
 if(!testfiles.length) {
@@ -25,7 +27,8 @@ if(!testfiles.length) {
 
 // Iterate through each test file and run the tests
 testfiles.forEach(function(file) {
-    var tests = require(path.resolve(file)); // Load JSON as JS var
+    var contents = fs.readFileSync(path.resolve(file));
+    var tests = parsejson(contents);
     describe(file, function() {
         run(tests);
     });
@@ -62,6 +65,9 @@ function run(tests) {
                         .to.deep.contain(test.error)
                         .to.have.property('message').to.have.string(message);
                 });
+            }
+            else {
+                throw new Error('Not sure what kind of test this is: ' + JSON.stringify(test));
             }
         }
         else if(test.group) { // A group of tests
