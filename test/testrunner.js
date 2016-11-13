@@ -39,23 +39,32 @@ testfiles.forEach(function(file) {
  * Run tests specified in JSON
  * @param {Array} tests - the tests to run
  */
-function run(tests) {
+function run(tests, parentdata) {
     // Check that we are passed an array
     if(typeof tests !== 'object' || !(tests instanceof Array) ) {
         throw new Error('Test spec is not an array: ' + JSON.stringify(tests));
     }
+    
+    // If we have been passed shared data from our parent, then clone it so that we
+    // cannot pollute the parent
+    var shareddata = (typeof parentdata !== "undefined") ? clone(parentdata) : {};
 
     tests.forEach(function(test) {
         if(test.expression) { // A test
             // We always report the expression, and optionally a name
             test.name = test.name ? test.name + ': ' + test.expression : test.expression;
 
-            if(test.expected) { // Expect a result
-                it(test.name, function() {
-                    expect(jsonata(test.expression).evaluate()).to.deep.equal(test.expected);
-                });
+            // Prepare the data
+            var data; // undefined
+            if(test.data) { // data was specified
+                data = test.data;
             }
-            else if(test.error) { // Expect an error
+            else if(test.shareddata) { // use shared data
+                // clone data first so that it's impossible for one test to pollute another
+                data = clone(shareddata[test.shareddata]);
+            }
+            
+            if(test.error) { // Expect an error
                 var message = test.error.message;
                 delete test.error.message;
                 it(test.name + ' throws "' + message + '"', function() {
@@ -66,17 +75,31 @@ function run(tests) {
                         .to.have.property('message').to.have.string(message);
                 });
             }
-            else {
-                throw new Error('Not sure what kind of test this is: ' + JSON.stringify(test));
+            else { // Expect a result
+                it(test.name, function() {
+                    expect(jsonata(test.expression).evaluate(data)).to.deep.equal(test.expected);
+                });
             }
         }
         else if(test.group) { // A group of tests
             describe(test.name, function() {
-                run(test.group);
+                run(test.group, shareddata);
             });
+        }
+        else if(test.data) { // This is test data
+            shareddata[test.name] = test.data;
         }
         else {
             throw new Error('Test was not an expression test or a group of tests: ' + JSON.stringify(test));
         }
     });
+}
+
+function clone(data) {
+    if(typeof data === "undefined") {
+        return undefined;
+    }
+    else {
+        return JSON.parse(JSON.stringify(data));
+    }
 }

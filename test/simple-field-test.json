@@ -1,0 +1,143 @@
+[
+    {
+        "name": "testdata1",
+        "data": {
+            "foo": {
+                "bar": 42,
+                "blah": [
+                    {
+                        "baz": {
+                            "fud": "hello"
+                         }
+                    },
+                    {
+                         "baz": {
+                             "fud": "world"
+                         }
+                    },
+                    {
+                        "bazz": "gotcha"
+                    }
+                ],
+                "blah.baz": "here"
+            },
+            "bar": 98
+        }
+    },
+    {
+        "name": "simple field syntax",
+        "group": [
+            {
+                "expression": "foo.bar",
+                "expected": 42,
+                "shareddata": "testdata1"
+            },
+            {
+                "expression": "foo.blah",
+                "expected": [
+                    {
+                        "baz": {
+                            "fud": "hello"
+                        }
+                    },
+                    {
+                        "baz": {
+                            "fud": "world"
+                        }
+                    },
+                    {
+                        "bazz": "gotcha"
+                    }
+                ],
+                "shareddata": "testdata1"
+            },
+            {
+                "expression": "foo.blah.bazz",
+                "expected": "gotcha",
+                "shareddata": "testdata1"
+            },
+            {
+                "expression": "foo.blah.baz",
+                "expected": [
+                    {
+                        "fud": "hello"
+                    },
+                    {
+                        "fud": "world"
+                    }
+                ],
+                "shareddata": "testdata1"
+            },
+            {
+                "expression": "foo.blah.baz.fud",
+                "expected": [
+                    "hello",
+                    "world"
+                ],
+                "shareddata": "testdata1"
+            },
+            {
+                "expression": "Other.Misc",
+                "shareddata": "testdata1"
+            },
+            {
+                "name": "edge case",
+                "expression": "bazz",
+                "expected": "gotcha",
+                "data": [
+                    [
+                        {
+                            "baz": {
+                                "fud": "hello"
+                            }
+                        },
+                        {
+                            "baz": {
+                                "fud": "world"
+                            }
+                        },
+                        {
+                            "bazz": "gotcha"
+                        }
+                    ]
+                ]
+            },
+            {
+                "name": "edge case",
+                "expression": "fud",
+                "expected": [
+                    "hello",
+                    "world"
+                ],
+                "data": [
+                    42,
+                    [
+                        {
+                            "baz": {
+                                "fud": "hello"
+                            }
+                        },
+                        {
+                            "baz": {
+                                "fud": "world"
+                            }
+                        },
+                        {
+                            "bazz": "gotcha"
+                        }
+                    ],
+                    "here",
+                    {
+                        "fud": "hello"
+                    },
+                    "hello",
+                    {
+                        "fud": "world"
+                    },
+                    "world",
+                    "gotcha"
+                ]
+            }
+        ]
+    }
+]
