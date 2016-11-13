@@ -38,13 +38,14 @@ testfiles.forEach(function(file) {
 /**
  * Run tests specified in JSON
  * @param {Array} tests - the tests to run
+ * @param {Object} parentdata - shared data from the called, may be `undefined`
  */
 function run(tests, parentdata) {
     // Check that we are passed an array
     if(typeof tests !== 'object' || !(tests instanceof Array) ) {
         throw new Error('Test spec is not an array: ' + JSON.stringify(tests));
     }
-    
+
     // If we have been passed shared data from our parent, then clone it so that we
     // cannot pollute the parent
     var shareddata = (typeof parentdata !== "undefined") ? clone(parentdata) : {};
@@ -63,7 +64,7 @@ function run(tests, parentdata) {
                 // clone data first so that it's impossible for one test to pollute another
                 data = clone(shareddata[test.shareddata]);
             }
-            
+
             if(test.error) { // Expect an error
                 var message = test.error.message;
                 delete test.error.message;
@@ -95,6 +96,12 @@ function run(tests, parentdata) {
     });
 }
 
+
+/**
+ * Deep clone of a JSON object
+ * @param {Object} data - data to clone
+ * @returns {Object} exact clone of the input data
+ */
 function clone(data) {
     if(typeof data === "undefined") {
         return undefined;
