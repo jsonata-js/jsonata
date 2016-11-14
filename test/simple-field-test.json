@@ -30,7 +30,7 @@
             {
                 "expression": "foo.bar",
                 "expected": 42,
-                "shareddata": "testdata1"
+                "data": {"$ref": "testdata1"}
             },
             {
                 "expression": "foo.blah",
@@ -49,12 +49,12 @@
                         "bazz": "gotcha"
                     }
                 ],
-                "shareddata": "testdata1"
+                "data": {"$ref": "testdata1"}
             },
             {
                 "expression": "foo.blah.bazz",
                 "expected": "gotcha",
-                "shareddata": "testdata1"
+                "data": {"$ref": "testdata1"}
             },
             {
                 "expression": "foo.blah.baz",
@@ -66,7 +66,7 @@
                         "fud": "world"
                     }
                 ],
-                "shareddata": "testdata1"
+                "data": {"$ref": "testdata1"}
             },
             {
                 "expression": "foo.blah.baz.fud",
@@ -74,11 +74,11 @@
                     "hello",
                     "world"
                 ],
-                "shareddata": "testdata1"
+                "data": {"$ref": "testdata1"}
             },
             {
                 "expression": "Other.Misc",
-                "shareddata": "testdata1"
+                "data": {"$ref": "testdata1"}
             },
             {
                 "name": "edge case",

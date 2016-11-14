@@ -53,22 +53,13 @@ function run(tests, parentdata) {
     tests.forEach(function(test) {
         if(test.expression) { // A test
             // We always report the expression, and optionally a name
-            test.name = test.name ? test.name + ': ' + test.expression : test.expression;
-
-            // Prepare the data
-            var data; // undefined
-            if(test.data) { // data was specified
-                data = test.data;
-            }
-            else if(test.shareddata) { // use shared data
-                // clone data first so that it's impossible for one test to pollute another
-                data = clone(shareddata[test.shareddata]);
-            }
+            var name = test.name ? test.name + ': ' + test.expression : test.expression;
+            var data = resolve(test.data, shareddata);
 
             if(test.error) { // Expect an error
                 var message = test.error.message;
                 delete test.error.message;
-                it(test.name + ' throws "' + message + '"', function() {
+                it(name + ' throws "' + message + '"', function() {
                     expect(function () {
                         jsonata(test.expression);
                     }).to.throw()
@@ -77,8 +68,9 @@ function run(tests, parentdata) {
                 });
             }
             else { // Expect a result
-                it(test.name, function() {
-                    expect(jsonata(test.expression).evaluate(data)).to.deep.equal(test.expected);
+                it(name, function() {
+                    var expected = resolve(test.expected, shareddata);
+                    expect(jsonata(test.expression).evaluate(data)).to.deep.equal(expected);
                 });
             }
         }
@@ -103,10 +95,44 @@ function run(tests, parentdata) {
  * @returns {Object} exact clone of the input data
  */
 function clone(data) {
-    if(typeof data === "undefined") {
+    if(typeof data === 'undefined') {
         return undefined;
     }
     else {
         return JSON.parse(JSON.stringify(data));
+    }
+}
+
+
+/**
+ * Resolve shared data references if there are any
+ * References are of the form: {"$ref": "shared_data_name"}
+ * The return value may be:
+ *  - `undefined` if the `spec` was undefined
+ *  - a clone of some shared data if the `spec` was a reference
+ *  - a JSON object if the `spec` was a JSON object
+ * @param {object} spec - the specification, which could be JSON data or a reference
+ * @param {object} shareddata - the shared data store
+ * @returns {object} the result of resolving the spec
+ */
+function resolve(spec, shareddata) {
+    // No specification, so it's undefined
+    if(typeof spec === 'undefined') {
+        return undefined;
+    }
+    // Specification is a shared data reference
+    else if(typeof spec === 'object' && typeof spec.$ref === 'string') {
+        var ref = spec.$ref;
+        if(shareddata[ref]) {
+            // Clone data first so that it's impossible for one test to pollute another
+            return clone(shareddata[ref]);
+        }
+        else {
+            throw new Error('Could not resolve shared data reference: ' + ref);
+        }
+    }
+    // Specification is any other JSON object
+    else {
+        return spec;
     }
 }

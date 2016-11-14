@@ -1,0 +1,74 @@
+[
+    {
+        "name": "testdata1",
+        "data": {
+            "foo": {
+                "bar": 42,
+                "blah": [
+                    {
+                        "baz": {
+                            "fud": "hello"
+                        }
+                    },
+                    {
+                        "baz": {
+                            "fud": "world"
+                        }
+                    },
+                    {
+                        "bazz": "gotcha"
+                    }
+                ],
+                "blah.baz": "here"
+            },
+            "bar": 98
+        }
+    },
+    {
+        "name": "helloworld",
+        "data": [
+            "hello",
+            "world"
+        ]
+    },
+    {
+        "name": "parenthesis",
+        "group": [
+            {
+                "expression": "foo.(blah).baz.fud",
+                "expected": {"$ref": "helloworld"},
+                "data": {"$ref": "testdata1"}
+            },
+            {
+                "expression": "foo.(blah.baz).fud",
+                "expected": {"$ref": "helloworld"},
+                "data": {"$ref": "testdata1"}
+            },
+            {
+                "expression": "(foo.blah.baz).fud",
+                "expected": {"$ref": "helloworld"},
+                "data": {"$ref": "testdata1"}
+            },
+            {
+                "expression": "foo.blah.(baz.fud)",
+                "expected": {"$ref": "helloworld"},
+                "data": {"$ref": "testdata1"}
+            },
+            {
+                "expression": "(foo.blah.baz.fud)",
+                "expected": {"$ref": "helloworld"},
+                "data": {"$ref": "testdata1"}
+            },
+            {
+                "expression": "(foo).(blah).baz.(fud)",
+                "expected": {"$ref": "helloworld"},
+                "data": {"$ref": "testdata1"}
+            },
+            {
+                "expression": "(foo.(blah).baz.fud)",
+                "expected": {"$ref": "helloworld"},
+                "data": {"$ref": "testdata1"}
+            }
+        ]
+    }
+]

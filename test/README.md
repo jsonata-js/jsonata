@@ -17,13 +17,12 @@ This checks that the literal number `42` has value 42.
 As we have seen, tests have an `expression` property which is a JSONata expression to evaluate.  They can also have an `expected`
 property which contains the expected result as a JSON object.  The full list of properties that a test can have is:
 
-- `data` - a JSON object to evaluate the expression on.  Cannot be specified with `shareddata`.
+- `data` - a JSON object to evaluate the expression on, or a shared data reference.
 - `error` - an expected error.  Cannot be specified with `expected`.
 - `expected` - an expected JSON object.  Cannot be specified with `error`.
 - `expression` - the JSONata expression to evaluate.
 - `name` - this is a comment about the test.  The test `expression` is automatically appeneded to the test name, so you don't need
 to type that yourself.
-- `shareddata` - the name of a shared data object to use.  Cannot be specified with `data`.
 
 An example of a test would be:
 ```
@@ -77,7 +76,8 @@ and more groups.
 
 ## Shared data
 Sometimes it makes sense to share data between tests to avoid duplication.  This can be achieved with shared data.  In this
-example, the shared data object `shareddataexample` is defined, and then used in a subsequent test:
+example, the shared data object `shareddataexample` is defined, and then used in a subsequent test.  It is references using the
+special JSON object `{"$ref": "<shared_data_name>"}`:
 ```
 [
     {
@@ -89,7 +89,7 @@ example, the shared data object `shareddataexample` is defined, and then used in
     {
         "expression": "some",
         "expected": "JSON",
-        "shareddata": "shareddataexample"
+        "data": {"$ref": "shareddataexample"}
     }
 ]
 ```
