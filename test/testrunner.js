@@ -29,7 +29,7 @@ if(!testfiles.length) {
 testfiles.forEach(function(file) {
     var contents = fs.readFileSync(path.resolve(file));
     var tests = parsejson(contents);
-    describe(file, function() {
+    describe('File: ' + file, function() {
         run(tests);
     });
 });
@@ -48,7 +48,7 @@ function run(tests, parentdata) {
 
     // If we have been passed shared data from our parent, then clone it so that we
     // cannot pollute the parent
-    var shareddata = (typeof parentdata !== "undefined") ? clone(parentdata) : {};
+    var shareddata = (typeof parentdata !== 'undefined') ? clone(parentdata) : {};
 
     tests.forEach(function(test) {
         if(test.expression) { // A test
