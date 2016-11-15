@@ -5169,7 +5169,7 @@ describe('Evaluator - errors', function () {
                 expr.evaluate(testdata2);
             }).to.throw()
                 .to.deep.contain({position: 4, token: 'sum'})
-                .to.have.property('message').to.match(/Attempted to invoke a non-function .* Did you mean/);
+                .to.have.property('message').to.match(/Attempted to invoke a non-function. Did you mean/);
         });
     });
 
@@ -6748,7 +6748,7 @@ describe('Evaluator - Partial function application', function () {
                 expr.evaluate(expr);
             }).to.throw()
                 .to.deep.contain({position: 10, token: 'substring'})
-                .to.have.property('message').to.match(/Attempted to partially apply a non-function .* Did you mean/);
+                .to.have.property('message').to.match(/Attempted to partially apply a non-function. Did you mean/);
         });
     });
 

@@ -141,7 +141,7 @@ var jsonata = (function() {
                                 position += 4;
                             } else {
                                 throw {
-                                    message: "The escape sequence \\u must be followed by 4 hex digits at column " + position,
+                                    message: "The escape sequence \\u must be followed by 4 hex digits",
                                     stack: (new Error()).stack,
                                     position: position
                                 };
@@ -149,7 +149,7 @@ var jsonata = (function() {
                         } else {
                             // illegal escape sequence
                             throw {
-                                message: 'unsupported escape sequence: \\' + currentChar + ' at column ' + position,
+                                message: 'unsupported escape sequence: \\' + currentChar,
                                 stack: (new Error()).stack,
                                 position: position,
                                 token: currentChar
@@ -165,7 +165,7 @@ var jsonata = (function() {
                     position++;
                 }
                 throw {
-                    message: 'no terminating quote found in string literal at column ' + position,
+                    message: 'no terminating quote found in string literal',
                     stack: (new Error()).stack,
                     position: position
                 };
@@ -180,7 +180,7 @@ var jsonata = (function() {
                     return create('number', num);
                 } else {
                     throw {
-                        message: 'Number out of range: ' + match[0] + ' at column ' + position,
+                        message: 'Number out of range: ' + match[0],
                         stack: (new Error()).stack,
                         position: position,
                         token: match[0]
@@ -270,7 +270,7 @@ var jsonata = (function() {
                     // unexpected end of buffer
                     msg = "Syntax error: expected '" + id + "' before end of expression";
                 } else {
-                    msg = "Syntax error: expected '" + id + "', got '" + node.id + "' at column " + node.position;
+                    msg = "Syntax error: expected '" + id + "', got '" + node.id;
                 }
                 throw {
                     message: msg ,
@@ -297,7 +297,7 @@ var jsonata = (function() {
                     symbol = symbol_table[value];
                     if (!symbol) {
                         throw {
-                            message: "Unknown operator: " + value + " at column " + next_token.position,
+                            message: "Unknown operator: " + value,
                             stack: (new Error()).stack,
                             position: next_token.position,
                             token: value
@@ -313,7 +313,7 @@ var jsonata = (function() {
                 /* istanbul ignore next */
                 default:
                     throw {
-                        message: "Unexpected token:" + value + " at column " + next_token.position,
+                        message: "Unexpected token:" + value,
                         stack: (new Error()).stack,
                         position: next_token.position,
                         token: value
@@ -617,7 +617,7 @@ var jsonata = (function() {
                             result = post_parse(expr.lhs);
                             if (typeof result.aggregate !== 'undefined') {
                                 throw {
-                                    message: 'A predicate cannot follow an aggregate in a step. Error at column: ' + expr.position,
+                                    message: 'A predicate cannot follow an aggregate in a step.',
                                     stack: (new Error()).stack,
                                     position: expr.position
                                 };
@@ -634,7 +634,7 @@ var jsonata = (function() {
                             result = post_parse(expr.lhs);
                             if (typeof result.aggregate !== 'undefined') {
                                 throw {
-                                    message: 'Each step can only have one aggregator. Error at column: ' + expr.position,
+                                    message: 'Each step can only have one aggregator.',
                                     stack: (new Error()).stack,
                                     position: expr.position
                                 };
@@ -716,7 +716,7 @@ var jsonata = (function() {
                         result = expr;
                     } else {
                         throw {
-                            message: "Syntax error: " + expr.value + " at column " + expr.position,
+                            message: "Syntax error: " + expr.value,
                             stack: (new Error()).stack,
                             position: expr.position,
                             token: expr.value
@@ -724,7 +724,7 @@ var jsonata = (function() {
                     }
                     break;
                 default:
-                    var reason = "Unknown expression type: " + expr.value + " at column " + expr.position;
+                    var reason = "Unknown expression type: " + expr.value;
                     /* istanbul ignore else */
                     if (expr.id === '(end)') {
                         reason = "Syntax error: unexpected end of expression";
@@ -747,7 +747,7 @@ var jsonata = (function() {
         var expr = expression(0);
         if (node.id !== '(end)') {
             throw {
-                message: "Syntax error: " + node.value + " at column " + node.position,
+                message: "Syntax error: " + node.value,
                 stack: (new Error()).stack,
                 position: node.position,
                 token: node.value
@@ -1108,7 +1108,7 @@ var jsonata = (function() {
                     result = -result;
                 } else {
                     throw {
-                        message: "Cannot negate a non-numeric value: " + result + " at column " + expr.position,
+                        message: "Cannot negate a non-numeric value: " + result,
                         stack: (new Error()).stack,
                         position: expr.position,
                         token: expr.value,
@@ -1289,7 +1289,7 @@ var jsonata = (function() {
 
         if (!isNumeric(lhs)) {
             throw {
-                message: 'LHS of ' + expr.value + ' operator must evaluate to a number at column ' + expr.position,
+                message: 'LHS of ' + expr.value + ' operator must evaluate to a number',
                 stack: (new Error()).stack,
                 position: expr.position,
                 token: expr.value,
@@ -1298,7 +1298,7 @@ var jsonata = (function() {
         }
         if (!isNumeric(rhs)) {
             throw {
-                message: 'RHS of ' + expr.value + ' operator must evaluate to a number at column ' + expr.position,
+                message: 'RHS of ' + expr.value + ' operator must evaluate to a number',
                 stack: (new Error()).stack,
                 position: expr.position,
                 token: expr.value,
@@ -1468,7 +1468,7 @@ var jsonata = (function() {
                 // key has to be a string
                 if (typeof  key !== 'string') {
                     throw {
-                        message: 'Key in object structure must evaluate to a string. Got: ' + key + ' at column ' + expr.position,
+                        message: 'Key in object structure must evaluate to a string. Got: ' + key,
                         stack: (new Error()).stack,
                         position: expr.position,
                         value: key
@@ -1518,7 +1518,7 @@ var jsonata = (function() {
 
         if (!Number.isInteger(lhs)) {
             throw {
-                message: 'LHS of range operator (..) must evaluate to an integer at column ' + expr.position,
+                message: 'LHS of range operator (..) must evaluate to an integer',
                 stack: (new Error()).stack,
                 position: expr.position,
                 token: expr.value,
@@ -1527,7 +1527,7 @@ var jsonata = (function() {
         }
         if (!Number.isInteger(rhs)) {
             throw {
-                message: 'RHS of range operator (..) must evaluate to an integer at column ' + expr.position,
+                message: 'RHS of range operator (..) must evaluate to an integer',
                 stack: (new Error()).stack,
                 position: expr.position,
                 token: expr.value,
@@ -1555,7 +1555,7 @@ var jsonata = (function() {
         var value = evaluate(expr.rhs, input, environment);
         if (expr.lhs.type !== 'variable') {
             throw {
-                message: "Left hand side of := must be a variable name (start with $) at column " + expr.position,
+                message: "Left hand side of := must be a variable name (start with $)",
                 stack: (new Error()).stack,
                 position: expr.position,
                 token: expr.value,
@@ -1648,7 +1648,7 @@ var jsonata = (function() {
         if (typeof proc === 'undefined' && expr.procedure.type === 'name' && environment.lookup(expr.procedure.value)) {
             // help the user out here if they simply forgot the leading $
             throw {
-                message: 'Attempted to invoke a non-function at column ' + expr.position + '. Did you mean \'$' + expr.procedure.value + '\'?',
+                message: 'Attempted to invoke a non-function. Did you mean \'$' + expr.procedure.value + '\'?',
                 stack: (new Error()).stack,
                 position: expr.position,
                 token: expr.procedure.value
@@ -1748,7 +1748,7 @@ var jsonata = (function() {
         if (typeof proc === 'undefined' && expr.procedure.type === 'name' && environment.lookup(expr.procedure.value)) {
             // help the user out here if they simply forgot the leading $
             throw {
-                message: 'Attempted to partially apply a non-function at column ' + expr.position + '. Did you mean \'$' + expr.procedure.value + '\'?',
+                message: 'Attempted to partially apply a non-function. Did you mean \'$' + expr.procedure.value + '\'?',
                 stack: (new Error()).stack,
                 position: expr.position,
                 token: expr.procedure.value
@@ -1760,7 +1760,7 @@ var jsonata = (function() {
             result = partialApplyNativeFunction(proc, evaluatedArgs);
         } else {
             throw {
-                message: 'Attempted to partially apply a non-function at column ' + expr.position,
+                message: 'Attempted to partially apply a non-function',
                 stack: (new Error()).stack,
                 position: expr.position,
                 token: expr.procedure.value
