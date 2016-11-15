@@ -1,6 +1,6 @@
 # JSON-based tests
 
-JSONata tests can be written in JSON.  This is done by creating `.json` files in the test directory.  These are detected and run
+JSONata tests can be written in JSON.  This is done by creating files in the test directory with a name format matching `*-test.json`.  These are detected and run
 by `testrunner.js`.  A JSON test file must contain a JSON array at the top level.  A very simple test is:
 
 ```
@@ -19,7 +19,7 @@ property which contains the expected result as a JSON object.  The full list of 
 
 - `data` - a JSON object to evaluate the expression on, or a shared data reference.
 - `error` - an expected error.  Cannot be specified with `expected`.
-- `expected` - an expected JSON object.  Cannot be specified with `error`.
+- `expected` - an expected JSON object, or a shared data reference.  Cannot be specified with `error`.
 - `expression` - the JSONata expression to evaluate.
 - `name` - this is a comment about the test.  The test `expression` is automatically appeneded to the test name, so you don't need
 to type that yourself.
