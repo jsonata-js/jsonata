@@ -124,7 +124,7 @@ var jsonata = (function() {
                 var quoteType = currentChar;
                 // double quoted string literal - find end of string
                 position++;
-                var qstr = "";
+                var qstr = '';
                 while (position < length) {
                     currentChar = path.charAt(position);
                     if (currentChar === '\\') { // escape sequence
@@ -141,7 +141,7 @@ var jsonata = (function() {
                                 position += 4;
                             } else {
                                 throw {
-                                    message: "The escape sequence \\u must be followed by 4 hex digits",
+                                    message: 'The escape sequence \\u must be followed by 4 hex digits',
                                     stack: (new Error()).stack,
                                     position: position
                                 };
@@ -282,7 +282,7 @@ var jsonata = (function() {
             }
             var next_token = lexer();
             if (next_token === null) {
-                node = symbol_table["(end)"];
+                node = symbol_table['(end)'];
                 return node;
             }
             var value = next_token.value;
@@ -291,13 +291,13 @@ var jsonata = (function() {
             switch (type) {
                 case 'name':
                 case 'variable':
-                    symbol = symbol_table["(name)"];
+                    symbol = symbol_table['(name)'];
                     break;
                 case 'operator':
                     symbol = symbol_table[value];
                     if (!symbol) {
                         throw {
-                            message: "Unknown operator: " + value,
+                            message: 'Unknown operator: ' + value,
                             stack: (new Error()).stack,
                             position: next_token.position,
                             token: value
@@ -307,13 +307,13 @@ var jsonata = (function() {
                 case 'string':
                 case 'number':
                 case 'value':
-                    type = "literal";
-                    symbol = symbol_table["(literal)"];
+                    type = 'literal';
+                    symbol = symbol_table['(literal)'];
                     break;
                 /* istanbul ignore next */
                 default:
                     throw {
-                        message: "Unexpected token:" + value,
+                        message: 'Unexpected token:' + value,
                         stack: (new Error()).stack,
                         position: next_token.position,
                         token: value
@@ -350,7 +350,7 @@ var jsonata = (function() {
             s.led = led || function (left) {
                 this.lhs = left;
                 this.rhs = expression(bindingPower);
-                this.type = "binary";
+                this.type = 'binary';
                 return this;
             };
             return s;
@@ -365,7 +365,7 @@ var jsonata = (function() {
             s.led = led || function (left) {
                 this.lhs = left;
                 this.rhs = expression(bindingPower - 1); // subtract 1 from bindingPower for right associative operators
-                this.type = "binary";
+                this.type = 'binary';
                 return this;
             };
             return s;
@@ -377,55 +377,55 @@ var jsonata = (function() {
             var s = symbol(id);
             s.nud = nud || function () {
                 this.expression = expression(70);
-                this.type = "unary";
+                this.type = 'unary';
                 return this;
             };
             return s;
         };
 
-        symbol("(end)");
-        symbol("(name)");
-        symbol("(literal)");
-        symbol(":");
-        symbol(";");
-        symbol(",");
-        symbol(")");
-        symbol("]");
-        symbol("}");
-        symbol(".."); // range operator
-        infix("."); // field reference
-        infix("+"); // numeric addition
-        infix("-"); // numeric subtraction
-        infix("*"); // numeric multiplication
-        infix("/"); // numeric division
-        infix("%"); // numeric modulus
-        infix("="); // equality
-        infix("<"); // less than
-        infix(">"); // greater than
-        infix("!="); // not equal to
-        infix("<="); // less than or equal
-        infix(">="); // greater than or equal
-        infix("&"); // string concatenation
-        infix("and"); // Boolean AND
-        infix("or"); // Boolean OR
-        infix("in"); // is member of array
-        infixr(":="); // bind variable
-        prefix("-"); // unary numeric negation
+        symbol('(end)');
+        symbol('(name)');
+        symbol('(literal)');
+        symbol(':');
+        symbol(';');
+        symbol(',');
+        symbol(')');
+        symbol(']');
+        symbol('}');
+        symbol('..'); // range operator
+        infix('.'); // field reference
+        infix('+'); // numeric addition
+        infix('-'); // numeric subtraction
+        infix('*'); // numeric multiplication
+        infix('/'); // numeric division
+        infix('%'); // numeric modulus
+        infix('='); // equality
+        infix('<'); // less than
+        infix('>'); // greater than
+        infix('!='); // not equal to
+        infix('<='); // less than or equal
+        infix('>='); // greater than or equal
+        infix('&'); // string concatenation
+        infix('and'); // Boolean AND
+        infix('or'); // Boolean OR
+        infix('in'); // is member of array
+        infixr(':='); // bind variable
+        prefix('-'); // unary numeric negation
 
         // field wildcard (single level)
         prefix('*', function () {
-            this.type = "wildcard";
+            this.type = 'wildcard';
             return this;
         });
 
         // descendant wildcard (multi-level)
         prefix('**', function () {
-            this.type = "descendant";
+            this.type = 'descendant';
             return this;
         });
 
         // function invocation
-        infix("(", operators['('], function (left) {
+        infix('(', operators['('], function (left) {
             // left is is what we are trying to invoke
             this.procedure = left;
             this.type = 'function';
@@ -444,7 +444,7 @@ var jsonata = (function() {
                     advance(',');
                 }
             }
-            advance(")");
+            advance(')');
             // if the name of the function is 'function' or λ, then this is function definition (lambda function)
             if (left.type === 'name' && (left.value === 'function' || left.value === '\u03BB')) {
                 // all of the args must be VARIABLE tokens
@@ -468,94 +468,94 @@ var jsonata = (function() {
         });
 
         // parenthesis - block expression
-        prefix("(", function () {
+        prefix('(', function () {
             var expressions = [];
-            while (node.id !== ")") {
+            while (node.id !== ')') {
                 expressions.push(expression(0));
-                if (node.id !== ";") {
+                if (node.id !== ';') {
                     break;
                 }
-                advance(";");
+                advance(';');
             }
-            advance(")");
+            advance(')');
             this.type = 'block';
             this.expressions = expressions;
             return this;
         });
 
     // object constructor
-        prefix("{", function () {
+        prefix('{', function () {
             var a = [];
-            if (node.id !== "}") {
+            if (node.id !== '}') {
                 for (;;) {
                     var n = expression(0);
-                    advance(":");
+                    advance(':');
                     var v = expression(0);
                     a.push([n, v]); // holds an array of name/value expression pairs
-                    if (node.id !== ",") {
+                    if (node.id !== ',') {
                         break;
                     }
-                    advance(",");
+                    advance(',');
                 }
             }
-            advance("}");
+            advance('}');
             this.lhs = a;
-            this.type = "unary";
+            this.type = 'unary';
             return this;
         });
 
     // array constructor
-        prefix("[", function () {
+        prefix('[', function () {
             var a = [];
-            if (node.id !== "]") {
+            if (node.id !== ']') {
                 for (;;) {
                     var item = expression(0);
-                    if (node.id === "..") {
+                    if (node.id === '..') {
                         // range operator
-                        var range = {type: "binary", value: "..", position: node.position, lhs: item};
-                        advance("..");
+                        var range = {type: 'binary', value: '..', position: node.position, lhs: item};
+                        advance('..');
                         range.rhs = expression(0);
                         item = range;
                     }
                     a.push(item);
-                    if (node.id !== ",") {
+                    if (node.id !== ',') {
                         break;
                     }
-                    advance(",");
+                    advance(',');
                 }
             }
-            advance("]");
+            advance(']');
             this.lhs = a;
-            this.type = "unary";
+            this.type = 'unary';
             return this;
         });
 
         // filter - predicate or array index
-        infix("[", operators['['], function (left) {
+        infix('[', operators['['], function (left) {
             this.lhs = left;
             this.rhs = expression(operators[']']);
             this.type = 'binary';
-            advance("]");
+            advance(']');
             return this;
         });
 
         // aggregator
-        infix("{", operators['{'], function (left) {
+        infix('{', operators['{'], function (left) {
             this.lhs = left;
             this.rhs = expression(operators['}']);
             this.type = 'binary';
-            advance("}");
+            advance('}');
             return this;
         });
 
         // if/then/else ternary operator ?:
-        infix("?", operators['?'], function (left) {
+        infix('?', operators['?'], function (left) {
             this.type = 'condition';
             this.condition = left;
             this.then = expression(0);
             if (node.id === ':') {
                 // else condition
-                advance(":");
+                advance(':');
                 this.else = expression(0);
             }
             return this;
@@ -716,7 +716,7 @@ var jsonata = (function() {
                         result = expr;
                     } else {
                         throw {
-                            message: "Syntax error: " + expr.value,
+                            message: 'Syntax error: ' + expr.value,
                             stack: (new Error()).stack,
                             position: expr.position,
                             token: expr.value
@@ -724,10 +724,10 @@ var jsonata = (function() {
                     }
                     break;
                 default:
-                    var reason = "Unknown expression type: " + expr.value;
+                    var reason = 'Unknown expression type: ' + expr.value;
                     /* istanbul ignore else */
                     if (expr.id === '(end)') {
-                        reason = "Syntax error: unexpected end of expression";
+                        reason = 'Syntax error: unexpected end of expression';
                     }
                     throw {
                         message: reason,
@@ -747,7 +747,7 @@ var jsonata = (function() {
         var expr = expression(0);
         if (node.id !== '(end)') {
             throw {
-                message: "Syntax error: " + node.value,
+                message: 'Syntax error: ' + node.value,
                 stack: (new Error()).stack,
                 position: node.position,
                 token: node.value
@@ -776,7 +776,7 @@ var jsonata = (function() {
             isNum = !isNaN(num);
             if (isNum && !isFinite(num)) {
                 throw {
-                    message: "Number out of range",
+                    message: 'Number out of range',
                     value: n,
                     stack: (new Error()).stack
                 };
@@ -801,7 +801,7 @@ var jsonata = (function() {
     // Polyfill
     /* istanbul ignore next */
     Number.isInteger = Number.isInteger || function(value) {
-        return typeof value === "number" &&
+        return typeof value === 'number' &&
             isFinite(value) &&
             Math.floor(value) === value;
     };
@@ -1108,7 +1108,7 @@ var jsonata = (function() {
                     result = -result;
                 } else {
                     throw {
-                        message: "Cannot negate a non-numeric value: " + result,
+                        message: 'Cannot negate a non-numeric value: ' + result,
                         stack: (new Error()).stack,
                         position: expr.position,
                         token: expr.value,
@@ -1555,7 +1555,7 @@ var jsonata = (function() {
         var value = evaluate(expr.rhs, input, environment);
         if (expr.lhs.type !== 'variable') {
             throw {
-                message: "Left hand side of := must be a variable name (start with $)",
+                message: 'Left hand side of := must be a variable name (start with $)',
                 stack: (new Error()).stack,
                 position: expr.position,
                 token: expr.value,
@@ -2090,7 +2090,7 @@ var jsonata = (function() {
             str = '';
         } else if (typeof arg === 'number' && !isFinite(arg)) {
             throw {
-                message: "Attempting to invoke string function on Infinity or NaN",
+                message: 'Attempting to invoke string function on Infinity or NaN',
                 value: arg,
                 stack: (new Error()).stack
             };
@@ -2413,7 +2413,7 @@ var jsonata = (function() {
 
         // if separator is not specified, default to empty string
         if(typeof separator === 'undefined') {
-            separator = "";
+            separator = '';
         }
 
         // separator, if specified, must be a string
@@ -2455,7 +2455,7 @@ var jsonata = (function() {
             result = parseFloat(arg);
         } else {
             throw {
-                message: "Unable to cast value to a number",
+                message: 'Unable to cast value to a number',
                 value: arg,
                 stack: (new Error()).stack
             };

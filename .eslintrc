@@ -17,12 +17,15 @@
   // Additional rules
   "rules": {
     "array-bracket-spacing": ["error", "never"],
+    "brace-style": ["error", "1tbs", {"allowSingleLine": true}],
     "dot-notation": "error",
     "ideal/no-tabs-in-file": "error",
     "indent": ["error", 4, {"SwitchCase": 1}],
     "max-len": ["error", 1000, {"ignoreComments": true}],
     "new-cap": ["error", {"capIsNewExceptions": ["Router"]}],
-    "no-console": "off",
+    "no-console": "error",
+    "no-eval": "error",
+    "no-implied-eval": "error",
     "no-floating-decimal": "error",
     "no-lonely-if": "error",
     "no-spaced-func": "error",
@@ -32,6 +35,7 @@
     "no-useless-call": "error",
     "no-with": "error",
     "operator-linebreak": ["error", "after"],
+    "quotes": ["error", "single", {"avoidEscape": true}],
     "require-jsdoc": ["error", {
       "require": {
         "ClassDeclaration": true,

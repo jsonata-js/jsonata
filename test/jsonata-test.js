@@ -4,6 +4,10 @@
  *   This project is licensed under the MIT License, see LICENSE
  */
 
+ // There a mixture of double and single quotes because our JS style it to use single,
+ // yet we have lots of JSON literals in this file which require double quotes.
+ /* eslint-disable quotes */
+
 'use strict';
 
 var jsonata = require('../jsonata');
