@@ -1,0 +1,6 @@
+{
+  // Rules ammendments
+  "rules": {
+    "strict": ["error", "global"],
+  }
+}

@@ -4,7 +4,6 @@
  *   This project is licensed under the MIT License, see LICENSE
  */
 
-'use strict';
 /**
  * @module JSONata
  * @description JSON query and transformation language
@@ -17,6 +16,8 @@
  * @returns {{evaluate: evaluate, assign: assign}} Evaluated expression
  */
 var jsonata = (function() {
+    'use strict';
+
     var operators = {
         '.': 75,
         '[': 80,
@@ -483,7 +484,7 @@ var jsonata = (function() {
             return this;
         });
 
-    // object constructor
+        // object constructor
         prefix("{", function () {
             var a = [];
             if (node.id !== "}") {
@@ -504,7 +505,7 @@ var jsonata = (function() {
             return this;
         });
 
-    // array constructor
+        // array constructor
         prefix("[", function () {
             var a = [];
             if (node.id !== "]") {

@@ -40,7 +40,7 @@
       }
     }],
     "semi": ["error", "always"],
-    "strict": ["error", "global"],
+    "strict": ["error", "function"],
     "valid-jsdoc": ["error", {"requireReturn": false}]
   }
 }
