@@ -307,7 +307,6 @@ function timeboxExpression(expr, timeout, maxDepth) {
     });
 }
 
-
 describe('Evaluator - quoted object selectors', function () {
     describe('foo."blah"', function () {
         it('should return result object', function () {
@@ -349,132 +348,6 @@ describe('Evaluator - quoted object selectors', function () {
 });
 
 describe('Evaluator - numeric operators', function () {
-    describe('foo.bar + bar', function () {
-        it('should return result object', function () {
-            var expr = jsonata('foo.bar + bar');
-            var result = expr.evaluate(testdata1);
-            var expected = 140;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('bar + foo.bar', function () {
-        it('should return result object', function () {
-            var expr = jsonata('bar + foo.bar');
-            var result = expr.evaluate(testdata1);
-            var expected = 140;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('foo.bar - bar', function () {
-        it('should return result object', function () {
-            var expr = jsonata('foo.bar - bar');
-            var result = expr.evaluate(testdata1);
-            var expected = -56;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('bar - foo.bar', function () {
-        it('should return result object', function () {
-            var expr = jsonata('bar - foo.bar');
-            var result = expr.evaluate(testdata1);
-            var expected = 56;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('foo.bar * bar', function () {
-        it('should return result object', function () {
-            var expr = jsonata('foo.bar * bar');
-            var result = expr.evaluate(testdata1);
-            var expected = 4116;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('bar * foo.bar', function () {
-        it('should return result object', function () {
-            var expr = jsonata('bar * foo.bar');
-            var result = expr.evaluate(testdata1);
-            var expected = 4116;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('foo.bar / bar', function () {
-        it('should return result object', function () {
-            var expr = jsonata('foo.bar / bar');
-            var result = expr.evaluate(testdata1);
-            var expected = 0.42857142857142855;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('bar / foo.bar', function () {
-        it('should return result object', function () {
-            var expr = jsonata('bar / foo.bar');
-            var result = expr.evaluate(testdata1);
-            var expected = 2.3333333333333335;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('foo.bar % bar', function () {
-        it('should return result object', function () {
-            var expr = jsonata('foo.bar % bar');
-            var result = expr.evaluate(testdata1);
-            var expected = 42;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('bar % foo.bar', function () {
-        it('should return result object', function () {
-            var expr = jsonata('bar % foo.bar');
-            var result = expr.evaluate(testdata1);
-            var expected = 14;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('bar + foo.bar * bar', function () {
-        it('should return result object', function () {
-            var expr = jsonata('bar + foo.bar * bar');
-            var result = expr.evaluate(testdata1);
-            var expected = 4214;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('foo.bar * bar + bar', function () {
-        it('should return result object', function () {
-            var expr = jsonata('foo.bar * bar + bar');
-            var result = expr.evaluate(testdata1);
-            var expected = 4214;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('24 * notexist', function () {
-        it('should return undefined', function () {
-            var expr = jsonata('24 * notexist');
-            var result = expr.evaluate(testdata1);
-            var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('notexist + 1', function () {
-        it('should return undefined', function () {
-            var expr = jsonata('notexist + 1');
-            var result = expr.evaluate(testdata1);
-            var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
     describe('1/(10e300 * 10e100) ', function () {
         it('should throw error', function () {
             var expr = jsonata('1/(10e300 * 10e100) ');
@@ -485,148 +358,6 @@ describe('Evaluator - numeric operators', function () {
                 .to.have.property('message').to.match(/Number out of range/);
         });
     });
-
-    describe('"5" + "5"', function () {
-        it('should throw error', function () {
-            var expr = jsonata('"5" + "5"');
-            expect(function () {
-                expr.evaluate();
-            }).to.throw()
-              .to.deep.contain({position: 5})
-              .to.have.property('message').to.match(/LHS of \+ operator must evaluate to a number/);
-        });
-    });
-
-});
-
-describe('Evaluator - comparison operators', function () {
-
-    describe('foo.bar > bar', function () {
-        it('should return result object', function () {
-            var expr = jsonata('foo.bar > bar');
-            var result = expr.evaluate(testdata1);
-            var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('foo.bar >= bar', function () {
-        it('should return result object', function () {
-            var expr = jsonata('foo.bar >= bar');
-            var result = expr.evaluate(testdata1);
-            var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('foo.bar<bar', function () {
-        it('should return result object', function () {
-            var expr = jsonata('foo.bar<bar');
-            var result = expr.evaluate(testdata1);
-            var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('foo.bar<=bar', function () {
-        it('should return result object', function () {
-            var expr = jsonata('foo.bar<=bar');
-            var result = expr.evaluate(testdata1);
-            var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('bar>foo.bar', function () {
-        it('should return result object', function () {
-            var expr = jsonata('bar>foo.bar');
-            var result = expr.evaluate(testdata1);
-            var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('bar < foo.bar', function () {
-        it('should return result object', function () {
-            var expr = jsonata('bar < foo.bar');
-            var result = expr.evaluate(testdata1);
-            var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('foo.bar = bar', function () {
-        it('should return result object', function () {
-            var expr = jsonata('foo.bar = bar');
-            var result = expr.evaluate(testdata1);
-            var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('foo.bar!= bar', function () {
-        it('should return result object', function () {
-            var expr = jsonata('foo.bar!= bar');
-            var result = expr.evaluate(testdata1);
-            var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('bar = foo.bar + 56', function () {
-        it('should return result object', function () {
-            var expr = jsonata('bar = foo.bar + 56');
-            var result = expr.evaluate(testdata1);
-            var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('bar !=foo.bar+56', function () {
-        it('should return result object', function () {
-            var expr = jsonata('bar !=foo.bar + 56');
-            var result = expr.evaluate(testdata1);
-            var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('foo.blah.baz[fud = "hello"]', function () {
-        it('should return result object', function () {
-            var expr = jsonata('foo.blah.baz[fud = "hello"]');
-            var result = expr.evaluate(testdata1);
-            var expected = {fud: 'hello'};
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('foo.blah.baz[fud != "world"]', function () {
-        it('should return result object', function () {
-            var expr = jsonata('foo.blah.baz[fud != "world"]');
-            var result = expr.evaluate(testdata1);
-            var expected = {fud: 'hello'};
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('Account.Order.Product[Price > 30].Price', function () {
-        it('should return result object', function () {
-            var expr = jsonata('Account.Order.Product[Price > 30].Price');
-            var result = expr.evaluate(testdata2);
-            var expected = [34.45, 34.45, 107.99];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('Account.Order.Product.Price[$<=35]', function () {
-        it('should return result object', function () {
-            var expr = jsonata('Account.Order.Product.Price[$<=35]');
-            var result = expr.evaluate(testdata2);
-            var expected = [34.45, 21.67, 34.45];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
 });
 
 describe('Evaluator - inclusion operator', function () {
@@ -846,173 +577,6 @@ describe('Evaluator - wildcards', function () {
             assert.equal(JSON.stringify(result), JSON.stringify(expected));
         });
     });
-});
-
-describe('Evaluator - desendant operator', function () {
-
-    describe('foo.**.blah', function () {
-        it('should return result object', function () {
-            var expr = jsonata('foo.**.blah');
-            var result = expr.evaluate(testdata1);
-            var expected = [{"baz": {"fud": "hello"}}, {"baz": {"fud": "world"}}, {"bazz": "gotcha"}];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('foo.**.baz', function () {
-        it('should return result object', function () {
-            var expr = jsonata('foo.**.baz');
-            var result = expr.evaluate(testdata1);
-            var expected = [{"fud": "hello"}, {"fud": "world"}];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('foo.**.fud', function () {
-        it('should return result object', function () {
-            var expr = jsonata('foo.**.fud');
-            var result = expr.evaluate(testdata1);
-            var expected = ["hello", "world"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('"foo".**.fud', function () {
-        it('should return result object', function () {
-            var expr = jsonata('"foo".**.fud');
-            var result = expr.evaluate(testdata1);
-            var expected = ["hello", "world"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('foo.**."fud"', function () {
-        it('should return result object', function () {
-            var expr = jsonata('foo.**."fud"');
-            var result = expr.evaluate(testdata1);
-            var expected = ["hello", "world"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('"foo".**."fud"', function () {
-        it('should return result object', function () {
-            var expr = jsonata('"foo".**."fud"');
-            var result = expr.evaluate(testdata1);
-            var expected = ["hello", "world"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('foo.*.**.fud', function () {
-        it('should return result object', function () {
-            var expr = jsonata('foo.*.**.fud');
-            var result = expr.evaluate(testdata1);
-            var expected = ["hello", "world"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('foo.**.*.fud', function () {
-        it('should return result object', function () {
-            var expr = jsonata('foo.**.*.fud');
-            var result = expr.evaluate(testdata1);
-            var expected = ["hello", "world"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('Account.Order.**.Colour', function () {
-        it('should return result object', function () {
-            var expr = jsonata('Account.Order.**.Colour');
-            var result = expr.evaluate(testdata2);
-            var expected = ["Purple", "Orange", "Purple", "Black"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('foo.**.fud[0]', function () {
-        it('should return result object', function () {
-            var expr = jsonata('foo.**.fud[0]');
-            var result = expr.evaluate(testdata1);
-            var expected = ["hello", "world"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('(foo.**.fud)[0]', function () {
-        it('should return result object', function () {
-            var expr = jsonata('(foo.**.fud)[0]');
-            var result = expr.evaluate(testdata1);
-            var expected = "hello";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('(**.fud)[0]', function () {
-        it('should return result object', function () {
-            var expr = jsonata('(**.fud)[0]');
-            var result = expr.evaluate(testdata1);
-            var expected = "hello";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('**.Price', function () {
-        it('should return result object', function () {
-            var expr = jsonata('**.Price');
-            var result = expr.evaluate(testdata2);
-            var expected = [
-                34.45,
-                21.67,
-                34.45,
-                107.99
-            ];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('**.Price[0]', function () {
-        it('should return result object', function () {
-            var expr = jsonata('**.Price[0]');
-            var result = expr.evaluate(testdata2);
-            var expected = [
-                34.45,
-                21.67,
-                34.45,
-                107.99
-            ];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('(**.Price)[0]', function () {
-        it('should return result object', function () {
-            var expr = jsonata('(**.Price)[0]');
-            var result = expr.evaluate(testdata2);
-            var expected = 34.45;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('**[2]', function () {
-        it('should return result object', function () {
-            var expr = jsonata('**[2]');
-            var result = expr.evaluate(testdata2);
-            var expected = "Firefly";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('Account.Order.blah.**', function () {
-        it('should return result object', function () {
-            var expr = jsonata('Account.Order.blah.**');
-            var result = expr.evaluate(testdata2);
-            var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
 });
 
 describe('Evaluator - string concat', function () {
@@ -1382,7 +946,6 @@ describe('Evaluator - variables', function () {
     });
 
 });
-
 
 describe('Evaluator - functions: sum', function () {
 
@@ -4273,7 +3836,6 @@ describe('Evaluator - functions: append', function () {
 
 });
 
-
 describe('Evaluator - functions: exists', function () {
 
     describe('$exists("Hello World")', function () {
@@ -4724,7 +4286,6 @@ describe('Evaluator - errors', function () {
 
 
 });
-
 
 describe('Evaluator - array constructor', function () {
 

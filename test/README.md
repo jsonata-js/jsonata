@@ -19,7 +19,8 @@ property which contains the expected result as a JSON object.  The full list of 
 
 - `data` - a JSON object to evaluate the expression on, or a shared data reference.
 - `error` - an expected error.  Cannot be specified with `expected`.
-- `expected` - an expected JSON object, or a shared data reference.  Cannot be specified with `error`.
+- `expected` - an expected JSON object, or a shared data reference.  Cannot be specified with `error`.  If the expected value is `undefined`,
+then do not specify the `expected` property at all.
 - `expression` - the JSONata expression to evaluate.
 - `name` - this is a comment about the test.  The test `expression` is automatically appeneded to the test name, so you don't need
 to type that yourself.

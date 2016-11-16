@@ -61,7 +61,7 @@ function run(tests, parentdata) {
                 delete test.error.message;
                 it(name + ' throws "' + message + '"', function() {
                     expect(function () {
-                        jsonata(test.expression);
+                        jsonata(test.expression).evaluate(data);
                     }).to.throw()
                         .to.deep.contain(test.error)
                         .to.have.property('message').to.have.string(message);
@@ -121,7 +121,7 @@ function resolve(spec, shareddata) {
         return undefined;
     }
     // Specification is a shared data reference
-    else if(typeof spec === 'object' && typeof spec.$ref === 'string') {
+    else if(typeof spec === 'object' && spec !== null && typeof spec.$ref === 'string') {
         var ref = spec.$ref;
         if(shareddata[ref]) {
             // Clone data first so that it's impossible for one test to pollute another
