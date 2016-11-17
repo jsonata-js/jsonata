@@ -5257,7 +5257,7 @@ describe('Evaluator - errors', function () {
                 expr.evaluate(testdata2);
             }).to.throw()
                 .to.deep.contain({position: 4, token: 'sum'})
-                .to.have.property('message').to.match(/Attempted to invoke a non-function .* Did you mean/);
+                .to.have.property('message').to.match(/Attempted to invoke a non-function. Did you mean/);
         });
     });
 
@@ -5922,22 +5922,18 @@ describe('Evaluator - object constructor', function () {
     describe('Invoice transformation', function () {
         it('should return result object', function () {
             var expr = jsonata('{' +
-              '  "Order": Account.Order.[' +
-              '    {' +
+              '  "Order": Account.Order.{' +
               '      "ID": OrderID,' +
-              '      "Product": Product.[' +
-              '        {' +
+              '      "Product": Product.{' +
               '          "Name": $."Product Name",' +
               '          "SKU": ProductID,' +
               '          "Details": {' +
               '            "Weight": Description.Weight,' +
               '            "Dimensions": Description.(Width & " x " & Height & " x " & Depth)' +
               '          }' +
-              '        }' +
-              '      ],' +
+              '        },' +
               '      "Total Price": $sum(Product.(Price * Quantity))' +
               '    }' +
-              '  ]' +
               '}');
             var result = expr.evaluate(testdata2);
             var expected = {
@@ -6801,7 +6797,7 @@ describe('Evaluator - Partial function application', function () {
                 expr.evaluate(expr);
             }).to.throw()
                 .to.deep.contain({position: 10, token: 'substring'})
-                .to.have.property('message').to.match(/Attempted to partially apply a non-function .* Did you mean/);
+                .to.have.property('message').to.match(/Attempted to partially apply a non-function. Did you mean/);
         });
     });
 
@@ -7023,17 +7019,17 @@ describe('Transform', function () {
     describe('Invoice transformation', function () {
         it('should return result object', function () {
             var expr = jsonata("" +
-              "{'Order': Account.Order.[{" +
+              "{'Order': Account.Order.{" +
               "  'ID': OrderID," +
-              "  'Product': Product.[{" +
+              "  'Product': Product.{" +
               "    'SKU': ProductID," +
               "    'Details': {" +
               "      'Weight': Description.Weight," +
               "      'Dimensions': Description.(Width & ' x ' & Height & ' x ' & Depth)" +
               "    }" +
-              "  }]," +
+              "  }," +
               "  'Total Price': $sum(Product.(Price * Quantity))" +
-              "}]" +
+              "}" +
               "}" +
               "");
             var result = expr.evaluate(testdata2);
