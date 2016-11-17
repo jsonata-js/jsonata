@@ -1611,6 +1611,15 @@ describe('Evaluator - desendant operator', function () {
         });
     });
 
+    describe('**', function () {
+        it('should return result object', function () {
+            var expr = jsonata('**');
+            var result = expr.evaluate();
+            var expected = undefined;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
 });
 
 describe('Evaluator - string concat', function () {
@@ -1876,6 +1885,85 @@ describe('Evaluator - array flattening', function () {
             var expr = jsonata('nest0.nest1.nest2.nest3');
             var result = expr.evaluate(testdata3);
             var expected = [1, 2, 3, 4, 5, 6, 7, 8];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+});
+
+describe('Evaluator - keep singleton arrays', function () {
+
+    describe('Phone[type="mobile"].number', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Phone[type="mobile"].number');
+            var result = expr.evaluate(testdata4);
+            var expected = "077 7700 1234";
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Phone[type="mobile"][].number', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Phone[type="mobile"][].number');
+            var result = expr.evaluate(testdata4);
+            var expected = ["077 7700 1234"];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Phone[][type="mobile"].number', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Phone[][type="mobile"].number');
+            var result = expr.evaluate(testdata4);
+            var expected = ["077 7700 1234"];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Phone[type="office"][].number', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Phone[type="office"][].number');
+            var result = expr.evaluate(testdata4);
+            var expected = [
+                "01962 001234",
+                "01962 001235"
+            ];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Phone{type: number}', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Phone{type: number}');
+            var result = expr.evaluate(testdata4);
+            var expected = {
+                "home": "0203 544 1234",
+                "office": [
+                    "01962 001234",
+                    "01962 001235"
+                ],
+                "mobile": "077 7700 1234"
+            };
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Phone{type: number[]}', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Phone{type: number[]}');
+            var result = expr.evaluate(testdata4);
+            var expected = {
+                "home": [
+                    "0203 544 1234"
+                ],
+                "office": [
+                    "01962 001234",
+                    "01962 001235"
+                ],
+                "mobile": [
+                    "077 7700 1234"
+                ]
+            };
             assert.equal(JSON.stringify(result), JSON.stringify(expected));
         });
     });
@@ -5219,7 +5307,7 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('2(blah)');
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 2})
+                .to.deep.contain({position: 2, token: 2})
                 .to.have.property('message').to.match(/Attempted to invoke a non-function/);
         });
     });
@@ -5230,8 +5318,19 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('2()');
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 2})
+                .to.deep.contain({position: 2, token: 2})
                 .to.have.property('message').to.match(/Attempted to invoke a non-function/);
+        });
+    });
+
+    describe('3(?)', function () {
+        it('should throw error', function () {
+            expect(function () {
+                var expr = jsonata('3(?)');
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position:2, token: 3})
+              .to.have.property('message').to.match(/Attempted to partially apply a non-function/);
         });
     });
 
@@ -5262,6 +5361,17 @@ describe('Evaluator - errors', function () {
             }).to.throw()
                 .to.deep.contain({position: 3, token: ':=', value: 'x'})
                 .to.have.property('message').to.match(/Left hand side of := must be a variable name/);
+        });
+    });
+
+    describe('2:=1', function () {
+        it('should throw error', function () {
+            expect(function () {
+                var expr = jsonata('2:=1');
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 3, token: ':=', value: 2})
+              .to.have.property('message').to.match(/Left hand side of := must be a variable name/);
         });
     });
 
@@ -5298,25 +5408,25 @@ describe('Evaluator - errors', function () {
         });
     });
 
-    describe('[1,2,3]{$+$_}[true]', function () {
+    describe('[1,2,3]{"num": $}[true]', function () {
         it('should throw error', function () {
             expect(function () {
-                var expr = jsonata('[1,2,3]{$+$_}[true]');
+                var expr = jsonata('[1,2,3]{"num": $}[true]');
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 14})
-                .to.have.property('message').to.match(/A predicate cannot follow an aggregate in a step/);
+                .to.deep.contain({position: 18})
+                .to.have.property('message').to.match(/A predicate cannot follow a grouping expression in a step/);
         });
     });
 
-    describe('[1,2,3]{$+$_}{$+$_}', function () {
+    describe('[1,2,3]{"num": $}{"num": $}', function () {
         it('should throw error', function () {
             expect(function () {
-                var expr = jsonata('[1,2,3]{$+$_}{$+$_}');
+                var expr = jsonata('[1,2,3]{"num": $}{"num": $}');
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 14})
-                .to.have.property('message').to.match(/Each step can only have one aggregator/);
+                .to.deep.contain({position: 18})
+                .to.have.property('message').to.match(/Each step can only have one grouping expression/);
         });
     });
 
@@ -5395,7 +5505,7 @@ describe('Evaluator - array constructor', function () {
         it('should return result object', function () {
             var expr = jsonata('["foo.bar", foo.bar, ["foo.baz", foo.blah.baz]]');
             var result = expr.evaluate(testdata1);
-            var expected = ["foo.bar", 42, ["foo.baz", [{"fud": "hello"}, {"fud": "world"}]]];
+            var expected = ["foo.bar", 42, ["foo.baz", {"fud": "hello"}, {"fud": "world"}]];
             assert.equal(JSON.stringify(result), JSON.stringify(expected));
         });
     });
@@ -5431,7 +5541,7 @@ describe('Evaluator - array constructor', function () {
         it('should return result object', function () {
             var expr = jsonata('foo.blah.baz.[fud, fud]');
             var result = expr.evaluate(testdata1);
-            var expected = ["hello", "hello", "world", "world"];
+            var expected = [["hello","hello"],["world","world"]];
             assert.equal(JSON.stringify(result), JSON.stringify(expected));
         });
     });
@@ -5440,7 +5550,7 @@ describe('Evaluator - array constructor', function () {
         it('should return result object', function () {
             var expr = jsonata('foo.blah.baz.[[fud, fud]]');
             var result = expr.evaluate(testdata1);
-            var expected = [["hello", "hello"], ["world", "world"]];
+            var expected = [[["hello","hello"]],[["world","world"]]];
             assert.equal(JSON.stringify(result), JSON.stringify(expected));
         });
     });
@@ -5671,20 +5781,38 @@ describe('Evaluator - object constructor', function () {
         });
     });
 
-    describe('Account.Order.{OrderID: Product."Product Name"}', function () {
+    describe('Account.Order{OrderID: Product."Product Name"}', function () {
         it('should return result object', function () {
-            var expr = jsonata('Account.Order.{OrderID: Product."Product Name"}');
+            var expr = jsonata('Account.Order{OrderID: Product."Product Name"}');
             var result = expr.evaluate(testdata2);
             var expected = {"order103": ["Bowler Hat", "Trilby hat"], "order104": ["Bowler Hat", "Cloak"]};
             assert.equal(JSON.stringify(result), JSON.stringify(expected));
         });
     });
 
-    describe('Account.Order.[{OrderID: Product."Product Name"}]', function () {
+    describe('Account.Order.{OrderID: Product."Product Name"}', function () {
         it('should return result object', function () {
-            var expr = jsonata('Account.Order.[{OrderID: Product."Product Name"}]');
+            var expr = jsonata('Account.Order.{OrderID: Product."Product Name"}');
             var result = expr.evaluate(testdata2);
             var expected = [{"order103": ["Bowler Hat", "Trilby hat"]}, {"order104": ["Bowler Hat", "Cloak"]}];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Account.Order.Product{$string(ProductID): Price}', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.Product{$string(ProductID): Price}');
+            var result = expr.evaluate(testdata2);
+            var expected = {"345664": 107.99, "858236": 21.67, "858383": [34.45, 34.45]};
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Account.Order.Product{$string(ProductID): (Price)[0]}', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.Product{$string(ProductID): (Price)[0]}');
+            var result = expr.evaluate(testdata2);
+            var expected = {"345664": 107.99, "858236": 21.67, "858383": 34.45};
             assert.equal(JSON.stringify(result), JSON.stringify(expected));
         });
     });
@@ -5693,26 +5821,19 @@ describe('Evaluator - object constructor', function () {
         it('should return result object', function () {
             var expr = jsonata('Account.Order.Product.{$string(ProductID): Price}');
             var result = expr.evaluate(testdata2);
-            var expected = {"345664": 107.99, "858236": 21.67, "858383": [34.45, 34.45]};
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('Account.Order.Product.{$string(ProductID): Price[0]}', function () {
-        it('should return result object', function () {
-            var expr = jsonata('Account.Order.Product.{$string(ProductID): Price[0]}');
-            var result = expr.evaluate(testdata2);
-            var expected = {"345664": 107.99, "858236": 21.67, "858383": 34.45};
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('Account.Order.Product.[{$string(ProductID): Price}]', function () {
-        it('should return result object', function () {
-            var expr = jsonata('Account.Order.Product.[{$string(ProductID): Price}]');
-            var result = expr.evaluate(testdata2);
             var expected = [{"858383": 34.45}, {"858236": 21.67}, {"858383": 34.45}, {"345664": 107.99}];
             assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Account.Order.Product{ProductID: "Product Name"}', function () {
+        it('should throw error', function () {
+            var expr = jsonata('Account.Order.Product{ProductID: "Product Name"}');
+            expect(function () {
+                expr.evaluate(testdata2);
+            }).to.throw()
+                .to.deep.contain({position: 22, value: 858383})
+                .to.have.property('message').to.match(/Key in object structure must evaluate to a string/);
         });
     });
 
@@ -5727,14 +5848,12 @@ describe('Evaluator - object constructor', function () {
         });
     });
 
-    describe('Account.Order.Product.[{ProductID: "Product Name"}]', function () {
-        it('should throw error', function () {
-            var expr = jsonata('Account.Order.Product.[{ProductID: "Product Name"}]');
-            expect(function () {
-                expr.evaluate(testdata2);
-            }).to.throw()
-                .to.deep.contain({position: 24, value: 858383})
-                .to.have.property('message').to.match(/Key in object structure must evaluate to a string/);
+    describe('Account.Order{OrderID: $sum(Product.(Price*Quantity))}', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order{OrderID: $sum(Product.(Price*Quantity))}');
+            var result = expr.evaluate(testdata2);
+            var expected = {"order103": 90.57000000000001, "order104": 245.79000000000002};
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
         });
     });
 
@@ -5742,23 +5861,14 @@ describe('Evaluator - object constructor', function () {
         it('should return result object', function () {
             var expr = jsonata('Account.Order.{OrderID: $sum(Product.(Price*Quantity))}');
             var result = expr.evaluate(testdata2);
-            var expected = {"order103": 90.57000000000001, "order104": 245.79000000000002};
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('Account.Order.[{OrderID: $sum(Product.(Price*Quantity))}]', function () {
-        it('should return result object', function () {
-            var expr = jsonata('Account.Order.[{OrderID: $sum(Product.(Price*Quantity))}]');
-            var result = expr.evaluate(testdata2);
             var expected = [{"order103": 90.57000000000001}, {"order104": 245.79000000000002}];
             assert.equal(JSON.stringify(result), JSON.stringify(expected));
         });
     });
 
-    describe('Account.Order.Product.{$."Product Name": Price, $."Product Name": Price}', function () {
+    describe('Account.Order.Product{$."Product Name": Price, $."Product Name": Price}', function () {
         it('should return result object', function () {
-            var expr = jsonata('Account.Order.Product.{$."Product Name": Price, $."Product Name": Price}');
+            var expr = jsonata('Account.Order.Product{$."Product Name": Price, $."Product Name": Price}');
             var result = expr.evaluate(testdata2);
             var expected = {
                 "Bowler Hat": [
@@ -5782,7 +5892,7 @@ describe('Evaluator - object constructor', function () {
 
     describe('Object & array transform', function () {
         it('should return result object', function () {
-            var expr = jsonata('Account.Order.{' +
+            var expr = jsonata('Account.Order{' +
               '  OrderID: {' +
               '    "TotalPrice":$sum(Product.(Price * Quantity)),' +
               '    "Items": Product."Product Name"' +
@@ -5812,22 +5922,18 @@ describe('Evaluator - object constructor', function () {
     describe('Invoice transformation', function () {
         it('should return result object', function () {
             var expr = jsonata('{' +
-              '  "Order": Account.Order.[' +
-              '    {' +
+              '  "Order": Account.Order.{' +
               '      "ID": OrderID,' +
-              '      "Product": Product.[' +
-              '        {' +
+              '      "Product": Product.{' +
               '          "Name": $."Product Name",' +
               '          "SKU": ProductID,' +
               '          "Details": {' +
               '            "Weight": Description.Weight,' +
               '            "Dimensions": Description.(Width & " x " & Height & " x " & Depth)' +
               '          }' +
-              '        }' +
-              '      ],' +
+              '        },' +
               '      "Total Price": $sum(Product.(Price * Quantity))' +
               '    }' +
-              '  ]' +
               '}');
             var result = expr.evaluate(testdata2);
             var expected = {
@@ -5882,9 +5988,9 @@ describe('Evaluator - object constructor', function () {
         });
     });
 
-    describe('Phone.{type:number{$ & ", " & $_}, "phone":number}', function () {
+    describe('Phone{type: $join(number, ", "), "phone":number}', function () {
         it('should return result object', function () {
-            var expr = jsonata('Phone.{type:number{$ & ", " & $_}, "phone":number}');
+            var expr = jsonata('Phone{type: $join(number, ", "), "phone":number}');
             var result = expr.evaluate(testdata4);
             var expected = {
                 "home": "0203 544 1234",
@@ -5894,67 +6000,10 @@ describe('Evaluator - object constructor', function () {
                     "01962 001235",
                     "077 7700 1234"
                 ],
-                "office": "01962 001235, 01962 001234",
+                "office": "01962 001234, 01962 001235",
                 "mobile": "077 7700 1234"
             };
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-});
-
-describe('Evaluator - aggregator', function () {
-    describe('Account.Order.Product.Price{$+$_}', function () {
-        it('should return result object', function () {
-            var expr = jsonata('Account.Order.Product.Price{$+$_}');
-            var result = expr.evaluate(testdata2);
-            var expected = 198.56;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('(Account.Order.Product.Price){$+$_}', function () {
-        it('should return result object', function () {
-            var expr = jsonata('(Account.Order.Product.Price){$+$_}');
-            var result = expr.evaluate(testdata2);
-            var expected = 198.56;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('(Account.Order.Product.Price)[0]{$+$_} ', function () {
-        it('should return result object', function () {
-            var expr = jsonata('(Account.Order.Product.Price)[0]{$+$_} ');
-            var result = expr.evaluate(testdata2);
-            var expected = 34.45;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('Account.Order.Product.(Price*Quantity){$+$_} ', function () {
-        it('should return result object', function () {
-            var expr = jsonata('Account.Order.Product.(Price*Quantity){$+$_} ');
-            var result = expr.evaluate(testdata2);
-            var expected = 336.36;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('[1,2,3]{$+$_}', function () {
-        it('should return result object', function () {
-            var expr = jsonata('[1,2,3]{$+$_}');
-            var result = expr.evaluate(null);
-            var expected = 6;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('1{$+$_}', function () {
-        it('should return result object', function () {
-            var expr = jsonata('1{$+$_}');
-            var result = expr.evaluate(null);
-            var expected = 1;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.be.deep.equal(expected);
         });
     });
 
@@ -6673,7 +6722,7 @@ describe('Evaluator - Closures', function () {
 
                 'Account.(' +
                 '  $AccName := function() { $."Account Name" };' +
-                '  Order[OrderID = "order104"].Product.{' +
+                '  Order[OrderID = "order104"].Product{' +
                 '    "Account": $AccName(),' +
                 '    "SKU-" & $string(ProductID): $."Product Name"' +
                 '  } ' +
@@ -6970,17 +7019,17 @@ describe('Transform', function () {
     describe('Invoice transformation', function () {
         it('should return result object', function () {
             var expr = jsonata("" +
-              "{'Order': Account.Order.[{" +
+              "{'Order': Account.Order.{" +
               "  'ID': OrderID," +
-              "  'Product': Product.[{" +
+              "  'Product': Product.{" +
               "    'SKU': ProductID," +
               "    'Details': {" +
               "      'Weight': Description.Weight," +
               "      'Dimensions': Description.(Width & ' x ' & Height & ' x ' & Depth)" +
               "    }" +
-              "  }]," +
+              "  }," +
               "  'Total Price': $sum(Product.(Price * Quantity))" +
-              "}]" +
+              "}" +
               "}" +
               "");
             var result = expr.evaluate(testdata2);
@@ -7390,15 +7439,15 @@ describe('#evaluate', function () {
                     .to.have.property('message').to.match(/Attempted to invoke a non-function/);
             });
 
-            it('unsupported function, e.g. this.authentication()', function () {
-                var expr = 'this.authentication(Salutation)';
+            it('unsupported function, e.g. Employment.authentication()', function () {
+                var expr = 'Employment.authentication(Salutation)';
 
                 var evaluate = function () {
                     jsonata(expr).evaluate(person);
                 };
 
                 expect(evaluate).to.throw()
-                    .to.deep.contain({position: 20, token: 'authentication'})
+                    .to.deep.contain({position: 26, token: 'authentication'})
                     .to.have.property('message').to.match(/Attempted to invoke a non-function/);
             });
 

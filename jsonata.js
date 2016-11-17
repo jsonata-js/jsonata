@@ -311,7 +311,7 @@ var jsonata = (function() {
                     type = "literal";
                     symbol = symbol_table["(literal)"];
                     break;
-                /* istanbul ignore next */
+              /* istanbul ignore next */
                 default:
                     throw {
                         message: "Unexpected token:" + value,
@@ -484,27 +484,6 @@ var jsonata = (function() {
             return this;
         });
 
-        // object constructor
-        prefix("{", function () {
-            var a = [];
-            if (node.id !== "}") {
-                for (;;) {
-                    var n = expression(0);
-                    advance(":");
-                    var v = expression(0);
-                    a.push([n, v]); // holds an array of name/value expression pairs
-                    if (node.id !== ",") {
-                        break;
-                    }
-                    advance(",");
-                }
-            }
-            advance("}");
-            this.lhs = a;
-            this.type = "unary";
-            return this;
-        });
-
         // array constructor
         prefix("[", function () {
             var a = [];
@@ -533,21 +512,57 @@ var jsonata = (function() {
 
         // filter - predicate or array index
         infix("[", operators['['], function (left) {
-            this.lhs = left;
-            this.rhs = expression(operators[']']);
-            this.type = 'binary';
-            advance("]");
-            return this;
+            if(node.id === "]") {
+                // empty predicate means maintain singleton arrays in the output
+                var step = left;
+                while(step && step.type === 'binary' && step.value === '[') {
+                    step = step.lhs;
+                }
+                step.keepArray = true;
+                advance("]");
+                return left;
+            } else {
+                this.lhs = left;
+                this.rhs = expression(operators[']']);
+                this.type = 'binary';
+                advance("]");
+                return this;
+            }
         });
 
-        // aggregator
-        infix("{", operators['{'], function (left) {
-            this.lhs = left;
-            this.rhs = expression(operators['}']);
-            this.type = 'binary';
+        var objectParser = function (left) {
+            var a = [];
+            if (node.id !== "}") {
+                for (;;) {
+                    var n = expression(0);
+                    advance(":");
+                    var v = expression(0);
+                    a.push([n, v]); // holds an array of name/value expression pairs
+                    if (node.id !== ",") {
+                        break;
+                    }
+                    advance(",");
+                }
+            }
             advance("}");
+            if(typeof left === 'undefined') {
+                // NUD - unary prefix form
+                this.lhs = a;
+                this.type = "unary";
+            } else {
+                // LED - binary infix form
+                this.lhs = left;
+                this.rhs = a;
+                this.type = 'binary';
+            }
             return this;
-        });
+        };
+
+        // object constructor
+        prefix("{", objectParser);
+
+        // object grouping
+        infix("{", operators['{'], objectParser);
 
         // if/then/else ternary operator ?:
         infix("?", operators['?'], function (left) {
@@ -601,13 +616,16 @@ var jsonata = (function() {
                 case 'binary':
                     switch (expr.value) {
                         case '.':
-                            var step = post_parse(expr.lhs);
-                            if (Array.isArray(step)) {
-                                Array.prototype.push.apply(result, step);
+                            var lstep = post_parse(expr.lhs);
+                            if (lstep.type === 'path') {
+                                Array.prototype.push.apply(result, lstep);
                             } else {
-                                result.push(step);
+                                result.push(lstep);
                             }
-                            var rest = [post_parse(expr.rhs)];
+                            var rest = post_parse(expr.rhs);
+                            if(rest.type !== 'path') {
+                                rest = [rest];
+                            }
                             Array.prototype.push.apply(result, rest);
                             result.type = 'path';
                             break;
@@ -616,31 +634,41 @@ var jsonata = (function() {
                             // LHS is a step or a predicated step
                             // RHS is the predicate expr
                             result = post_parse(expr.lhs);
-                            if (typeof result.aggregate !== 'undefined') {
+                            var step = result;
+                            if(result.type === 'path') {
+                                step = result[result.length - 1];
+                            }
+                            if (typeof step.group !== 'undefined') {
                                 throw {
-                                    message: 'A predicate cannot follow an aggregate in a step.',
+                                    message: 'A predicate cannot follow a grouping expression in a step. Error at column: ' + expr.position,
                                     stack: (new Error()).stack,
                                     position: expr.position
                                 };
                             }
-                            if (typeof result.predicate === 'undefined') {
-                                result.predicate = [];
+                            if (typeof step.predicate === 'undefined') {
+                                step.predicate = [];
                             }
-                            result.predicate.push(post_parse(expr.rhs));
+                            step.predicate.push(post_parse(expr.rhs));
                             break;
                         case '{':
-                            // aggregate
+                            // group-by
                             // LHS is a step or a predicated step
-                            // RHS is the predicate expr
+                            // RHS is the object constructor expr
                             result = post_parse(expr.lhs);
-                            if (typeof result.aggregate !== 'undefined') {
+                            if (typeof result.group !== 'undefined') {
                                 throw {
-                                    message: 'Each step can only have one aggregator.',
+                                    message: 'Each step can only have one grouping expression. Error at column: ' + expr.position,
                                     stack: (new Error()).stack,
                                     position: expr.position
                                 };
                             }
-                            result.aggregate = post_parse(expr.rhs);
+                            // object constructor - process each pair
+                            result.group = {
+                                lhs: expr.rhs.map(function (pair) {
+                                    return [post_parse(pair[0]), post_parse(pair[1])];
+                                }),
+                                position: expr.position
+                            };
                             break;
                         default:
                             result = {type: expr.type, value: expr.value, position: expr.position};
@@ -701,6 +729,9 @@ var jsonata = (function() {
                     // if so, need to mark the block as one that needs to create a new frame
                     break;
                 case 'name':
+                    result = [expr];
+                    result.type = 'path';
+                    break;
                 case 'literal':
                 case 'wildcard':
                 case 'descendant':
@@ -755,12 +786,6 @@ var jsonata = (function() {
             };
         }
         expr = post_parse(expr);
-
-        // a single name token is a single step location path
-        if (expr.type === 'name') {
-            expr = [expr];
-            expr.type = 'path';
-        }
 
         return expr;
     };
@@ -866,8 +891,8 @@ var jsonata = (function() {
         if (expr.hasOwnProperty('predicate')) {
             result = applyPredicates(expr.predicate, result, environment);
         }
-        if (expr.hasOwnProperty('aggregate')) {
-            result = applyAggregate(expr.aggregate, result, environment);
+        if (expr.hasOwnProperty('group')) {
+            result = evaluateGroupExpression(expr.group, result, environment);
         }
 
         var exitCallback = environment.lookup('__evaluate_exit');
@@ -888,6 +913,7 @@ var jsonata = (function() {
     function evaluatePath(expr, input, environment) {
         var result;
         var inputSequence;
+        var keepSingletonArray = false;
         // expr is an array of steps
         // if the first step is a variable reference ($...), including root reference ($$),
         //   then the path is absolute rather than relative
@@ -899,7 +925,11 @@ var jsonata = (function() {
         }
 
         // evaluate each step in turn
-        expr.forEach(function (step) {
+        for(var ii = 0; ii < expr.length; ii++) {
+            var step = expr[ii];
+            if(step.keepArray === true) {
+                keepSingletonArray = true;
+            }
             var resultSequence = [];
             result = undefined;
             // if input is not an array, make it so
@@ -914,35 +944,36 @@ var jsonata = (function() {
             if (expr.length > 1 && step.type === 'literal') {
                 step.type = 'name';
             }
-            if (step.value === '{') {
-                if(typeof input !== 'undefined') {
-                    result = evaluateGroupExpression(step, inputSequence, environment);
-                }
-            } else {
-                inputSequence.forEach(function (item) {
-                    var res = evaluate(step, item, environment);
-                    if (typeof res !== 'undefined') {
-                        if (Array.isArray(res)) {
-                            // is res an array - if so, flatten it into the parent array
-                            res.forEach(function (innerRes) {
-                                if (typeof innerRes !== 'undefined') {
-                                    resultSequence.push(innerRes);
-                                }
-                            });
-                        } else {
-                            resultSequence.push(res);
-                        }
+            inputSequence.forEach(function (item) {
+                var res = evaluate(step, item, environment);
+                if (typeof res !== 'undefined') {
+                    if (Array.isArray(res) && (step.value !== '[' )) {
+                        // is res an array - if so, flatten it into the parent array
+                        res.forEach(function (innerRes) {
+                            if (typeof innerRes !== 'undefined') {
+                                resultSequence.push(innerRes);
+                            }
+                        });
+                    } else {
+                        resultSequence.push(res);
                     }
-                });
-                if (resultSequence.length == 1) {
-                    result = resultSequence[0];
-                } else if (resultSequence.length > 1) {
-                    result = resultSequence;
                 }
+            });
+            if (resultSequence.length == 1) {
+                if(keepSingletonArray) {
+                    result = resultSequence;
+                } else {
+                    result = resultSequence[0];
+                }
+            } else if (resultSequence.length > 1) {
+                result = resultSequence;
             }
 
+            if(typeof result === 'undefined') {
+                break;
+            }
             input = result;
-        });
+        }
         return result;
     }
 
@@ -1014,35 +1045,6 @@ var jsonata = (function() {
             }
             inputSequence = result;
         });
-        return result;
-    }
-
-    /**
-     * Apply aggregate to input data
-     * @param {Object} expr - JSONata expression
-     * @param {Object} input - Input data to evaluate against
-     * @param {Object} environment - Environment
-     * @returns {{}} Result after applying aggregate
-     */
-    function applyAggregate(expr, input, environment) {
-        var result = {};
-        // this is effectively a 'reduce' HOF (fold left)
-        // if the input is a singleton, then just return this as the result
-        // otherwise iterate over the input array and aggregate the result
-        if (Array.isArray(input)) {
-            // create a new frame to limit the scope
-            var aggEnv = createFrame(environment);
-            // the variable $@ will hold the aggregated value, initialize this to the first array item
-            aggEnv.bind('_', input[0]);
-            // loop over the remainder of the array
-            for (var index = 1; index < input.length; index++) {
-                var reduce = evaluate(expr, input[index], aggEnv);
-                aggEnv.bind('_', reduce);
-            }
-            result = aggEnv.lookup('_');
-        } else {
-            result = input;
-        }
         return result;
     }
 
@@ -1123,11 +1125,10 @@ var jsonata = (function() {
                 expr.lhs.forEach(function (item) {
                     var value = evaluate(item, input, environment);
                     if (typeof value !== 'undefined') {
-                        if (item.value === '..') {
-                            // array generated by the range operator - merge into results
-                            result = functionAppend(result, value);
-                        } else {
+                        if(item.value === '[') {
                             result.push(value);
+                        } else {
+                            result = functionAppend(result, value);
                         }
                     }
                 });
@@ -1414,11 +1415,11 @@ var jsonata = (function() {
         switch (expr.value) {
             case 'and':
                 result = functionBoolean(evaluate(expr.lhs, input, environment)) &&
-                    functionBoolean(evaluate(expr.rhs, input, environment));
+                  functionBoolean(evaluate(expr.rhs, input, environment));
                 break;
             case 'or':
                 result = functionBoolean(evaluate(expr.lhs, input, environment)) ||
-                    functionBoolean(evaluate(expr.rhs, input, environment));
+                  functionBoolean(evaluate(expr.rhs, input, environment));
                 break;
         }
         return result;
@@ -1560,7 +1561,7 @@ var jsonata = (function() {
                 stack: (new Error()).stack,
                 position: expr.position,
                 token: expr.value,
-                value: expr.lhs.value
+                value: expr.lhs.type === 'path' ? expr.lhs[0].value : expr.lhs.value
             };
         }
         environment.bind(expr.lhs.value, value);
@@ -1646,13 +1647,13 @@ var jsonata = (function() {
         // evaluate it generically first, then check that it is a function.  Throw error if not.
         var proc = evaluate(expr.procedure, input, environment);
 
-        if (typeof proc === 'undefined' && expr.procedure.type === 'name' && environment.lookup(expr.procedure.value)) {
+        if (typeof proc === 'undefined' && expr.procedure.type === 'path' && environment.lookup(expr.procedure[0].value)) {
             // help the user out here if they simply forgot the leading $
             throw {
-                message: 'Attempted to invoke a non-function. Did you mean \'$' + expr.procedure.value + '\'?',
+                message: 'Attempted to invoke a non-function. Did you mean \'$' + expr.procedure[0].value + '\'?',
                 stack: (new Error()).stack,
                 position: expr.position,
-                token: expr.procedure.value
+                token: expr.procedure[0].value
             };
         }
         // apply the procedure
@@ -1674,7 +1675,7 @@ var jsonata = (function() {
             // add the position field to the error
             err.position = expr.position;
             // and the function identifier
-            err.token = expr.procedure.value;
+            err.token = expr.procedure.type === 'path' ? expr.procedure[0].value : expr.procedure.value;
             throw err;
         }
         return result;
@@ -1746,13 +1747,13 @@ var jsonata = (function() {
         });
         // lookup the procedure
         var proc = evaluate(expr.procedure, input, environment);
-        if (typeof proc === 'undefined' && expr.procedure.type === 'name' && environment.lookup(expr.procedure.value)) {
+        if (typeof proc === 'undefined' && expr.procedure.type === 'path' && environment.lookup(expr.procedure[0].value)) {
             // help the user out here if they simply forgot the leading $
             throw {
-                message: 'Attempted to partially apply a non-function. Did you mean \'$' + expr.procedure.value + '\'?',
+                message: 'Attempted to partially apply a non-function. Did you mean \'$' + expr.procedure[0].value + '\'?',
                 stack: (new Error()).stack,
                 position: expr.position,
-                token: expr.procedure.value
+                token: expr.procedure[0].value
             };
         }
         if (proc && proc.lambda) {
@@ -1764,7 +1765,7 @@ var jsonata = (function() {
                 message: 'Attempted to partially apply a non-function',
                 stack: (new Error()).stack,
                 position: expr.position,
-                token: expr.procedure.value
+                token: expr.procedure.type === 'path' ? expr.procedure[0].value : expr.procedure.value
             };
         }
         return result;
@@ -2098,8 +2099,8 @@ var jsonata = (function() {
         } else
             str = JSON.stringify(arg, function (key, val) {
                 return (typeof val !== 'undefined' && val !== null && val.toPrecision && isNumeric(val)) ? Number(val.toPrecision(13)) :
-                    (val && isLambda(val)) ? '' :
-                        (typeof val === 'function') ? '' : val;
+                  (val && isLambda(val)) ? '' :
+                    (typeof val === 'function') ? '' : val;
             });
         return str;
     }
