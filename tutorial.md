@@ -185,7 +185,7 @@ is addressing a single value in the structure and it makes sense to return just 
 In the last two expressions, however, it is not immediately obvious how many values will be matched, and it is
 not helpful if the host language has to process the results in different ways depending on what gets returned.
 
-If this is a concern, then the expression can be modified to make it return an array even if obly a single value is matched.
+If this is a concern, then the expression can be modified to make it return an array even if only a single value is matched.
 This is done by adding empty square brackets `[]` to a step within the location path.  The examples above can be re-written
 to always return an array as follows:
 
