@@ -5,7 +5,7 @@
 
 JSON query and transformation language
 
-##Introduction
+## Introduction
 JSONata is a lightweight query and transformation language for JSON data.
 Inspired by the 'location path' semantics of XPath 3.1, it allows sophisticated
 queries to be expressed in a compact and intuitive notation.  A rich complement of built in
@@ -15,15 +15,15 @@ using familiar JSON object and array syntax.
 Coupled with the facility to create user defined functions, advanced expressions
 can be built to tackle any JSON query and transformation task.
 
-<p><iframe width="400" height="300" src="https://www.youtube.com/embed/ZBaK40rtIBM" frameborder="0" allowfullscreen></iframe><br />
-<br /></p>
+## Demonstration
+[![JSONata demonstration video](http://img.youtube.com/vi/ZBaK40rtIBM/0.jpg)](http://www.youtube.com/watch?v=ZBaK40rtIBM)
 
 Try it out at [http://try.jsonata.org/](http://try.jsonata.org/)
 
-##Install
+## Install
 - `npm install jsonata`
 
-##Usage
+## Usage
 In node.js:
 ```javascript
 var jsonata = require("jsonata");
@@ -56,10 +56,10 @@ In a browser:
 </html>
 ```
 
-##Tutorial
+## Tutorial
 A tutorial on the JSONata language is available [here](tutorial.md)
 
-##Developers
+## Developers
 If you want to run the latest code from git, here's how to get started:
 
 2. Clone the code:
@@ -76,7 +76,7 @@ If you want to run the latest code from git, here's how to get started:
         npm t
 
 
-##Errors
+## Errors
 
 If an expression throws an error, e.g. syntax error or a runtime error (type error), then the object thrown
 has a consistent structure containing the column number of the error, the token that caused the error,
@@ -86,7 +86,7 @@ For example:
 
 `{ "position": 16, "token": "}", "value": "]", "message": "Syntax error: expected ']' got '}'" }`
 
-##More Information
+## More Information
 Tutorial [tutorial.md](tutorial.md)
 Function library [functions.md](functions.md)
 JSONata [Tech Talk](https://developer.ibm.com/open/videos/dw-open-tech-talk-jsonata/) 
