@@ -1,0 +1,22 @@
+{
+  "name": "jsonata",
+  "description": "JSON query and transformation language",
+  "main": "jsonata.js",
+  "license": "MIT",
+  "keywords": [
+    "JSON",
+    "query",
+    "transformation",
+    "transform",
+    "mapping",
+    "path"
+  ],
+  "homepage": "https://github.com/jsonata-js/jsonata",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
