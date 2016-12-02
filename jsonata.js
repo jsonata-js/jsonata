@@ -2728,8 +2728,10 @@ var jsonata = (function() {
                 bindings[name] = value;
             },
             lookup: function (name) {
-                var value = bindings[name];
-                if (typeof value === 'undefined' && enclosingEnvironment) {
+                var value;
+                if(bindings.hasOwnProperty(name)) {
+                    value = bindings[name];
+                } else if (enclosingEnvironment) {
                     value = enclosingEnvironment.lookup(name);
                 }
                 return value;

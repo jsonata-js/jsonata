@@ -2070,6 +2070,29 @@ describe('Evaluator - variables', function () {
 });
 
 
+describe('Evaluator - variable scope', function () {
+
+    describe('( $foo := "defined"; ( $foo := nothing ); $foo )', function () {
+        it('should return result object', function () {
+            var expr = jsonata('( $foo := "defined"; ( $foo := nothing ); $foo )');
+            var result = expr.evaluate();
+            var expected = "defined";
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('( $foo := "defined"; ( $foo := nothing; $foo ) )', function () {
+        it('should return result object', function () {
+            var expr = jsonata('( $foo := "defined"; ( $foo := nothing; $foo ) )');
+            var result = expr.evaluate();
+            var expected = undefined;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+});
+
+
 describe('Evaluator - functions: sum', function () {
 
     describe('$sum(Account.Order.Product.(Price * Quantity))', function () {
