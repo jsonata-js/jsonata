@@ -7110,7 +7110,7 @@ describe('Evaluator - function application operator', function () {
         });
     });
 
-    describe('op chaining', function () {
+    describe('op chaining - reduce array of 2 functions', function () {
         it('should return result object', function () {
             var expr = jsonata('(' +
               '$square := function($x){$x*$x};' +
@@ -7125,7 +7125,7 @@ describe('Evaluator - function application operator', function () {
         });
     });
 
-    describe('op chaining', function () {
+    describe('op chaining - reduce array of 3 functions', function () {
         it('should return result object', function () {
             var expr = jsonata('(' +
               '$square := function($x){$x*$x};' +
@@ -7140,7 +7140,7 @@ describe('Evaluator - function application operator', function () {
         });
     });
 
-    describe('op chaining', function () {
+    describe('op chaining - square the sum', function () {
         it('should return result object', function () {
             var expr = jsonata('(' +
               '$square := function($x){$x*$x};' +
@@ -7153,7 +7153,7 @@ describe('Evaluator - function application operator', function () {
         });
     });
 
-    describe('op chaining', function () {
+    describe('op chaining - sum of squares', function () {
         it('should return result object', function () {
             var expr = jsonata('(' +
               '$square := function($x){$x*$x};' +
@@ -7166,7 +7166,7 @@ describe('Evaluator - function application operator', function () {
         });
     });
 
-    describe('op chaining', function () {
+    describe('op chaining - map/reduce', function () {
         it('should return result object', function () {
             var expr = jsonata('(' +
               '$product := function($x, $y){$x*$y};' +
@@ -7180,7 +7180,34 @@ describe('Evaluator - function application operator', function () {
         });
     });
 
-    describe('op chaining', function () {
+    describe('op chaining - map/reduce 2', function () {
+        it('should return result object', function () {
+            var expr = jsonata('(' +
+              '$times := λ($x, $y) { $x * $y };' +
+              '$product := $reduce($times, ?);' +
+              '$square := function($x){$x*$x};' +
+              '$product_of_squares := $map($square, ?) ~> $product;' +
+              '[1..5] ~> $product_of_squares()' +
+              ')');
+            var result = expr.evaluate();
+            var expected = 14400;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('op chaining - map/reduce 3', function () {
+        it('should return result object', function () {
+            var expr = jsonata('(' +
+              '$square := function($x){$x*$x};' +
+              '[1..5] ~> $map($square, ?) ~> $reduce(λ($x, $y) { $x * $y }, ?);' +
+              ')');
+            var result = expr.evaluate();
+            var expected = 14400;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('op chaining - 3 arg map', function () {
         it('should return result object', function () {
             var expr = jsonata('(' +
               '$prices := Account.Order.Product.Price;' +
