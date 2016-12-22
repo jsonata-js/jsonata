@@ -1,6 +1,5 @@
-/karma.conf.js
-node_modules/
 coverage/
-npm-debug.log
 doc/
-.idea
+jsonata.min.js
+node_modules/
+npm-debug.log
