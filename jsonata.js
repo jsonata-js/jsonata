@@ -76,7 +76,53 @@ var jsonata = (function() {
             return obj;
         };
 
-        var next = function () {
+        var scanRegex = function() {
+            // the prefix '/' will have been previously scanned. Find the end of the regex.
+            // search for closing '/' ignoring any that are escaped, or within brackets
+            var start = position;
+            var depth = 0;
+            var pattern;
+            var flags;
+            while(position < length) {
+                var currentChar = path.charAt(position);
+                if(currentChar === '/' && path.charAt(position - 1) !== '\\' && depth === 0) {
+                    // end of regex found
+                    pattern = path.substring(start, position);
+                    if(pattern === '') {
+                        throw {
+                            message: "Empty regular expressions are not allowed",
+                            stack: (new Error()).stack,
+                            position: position
+                        };
+                    }
+                    position++;
+                    currentChar = path.charAt(position);
+                    // flags
+                    start = position;
+                    while(currentChar === 'i' || currentChar === 'm') {
+                        position++;
+                        currentChar = path.charAt(position);
+                    }
+                    flags = path.substring(start, position) + 'g';
+                    return new RegExp(pattern, flags);
+                }
+                if((currentChar === '(' || currentChar === '[' || currentChar === '{') && path.charAt(position - 1) !== '\\' ) {
+                    depth++;
+                }
+                if((currentChar === ')' || currentChar === ']' || currentChar === '}') && path.charAt(position - 1) !== '\\' ) {
+                    depth--;
+                }
+
+                position++;
+            }
+            throw {
+                message: "No terminating / in regular expression",
+                stack: (new Error()).stack,
+                position: position
+            };
+        };
+
+        var next = function (prefix) {
             if (position >= length) return null;
             var currentChar = path.charAt(position);
             // skip whitespace
@@ -114,6 +160,10 @@ var jsonata = (function() {
                 // **  descendant wildcard
                 position += 2;
                 return create('operator', '**');
+            }
+            if (prefix !== true && currentChar === '/') {
+                position++;
+                return create('regex', scanRegex());
             }
             // test for operators
             if (operators.hasOwnProperty(currentChar)) {
@@ -264,7 +314,7 @@ var jsonata = (function() {
             return s;
         };
 
-        var advance = function (id) {
+        var advance = function (id, infix) {
             if (id && node.id !== id) {
                 var msg;
                 if(node.id === '(end)') {
@@ -281,7 +331,7 @@ var jsonata = (function() {
                     value: id
                 };
             }
-            var next_token = lexer();
+            var next_token = lexer(infix);
             if (next_token === null) {
                 node = symbol_table["(end)"];
                 return node;
@@ -311,6 +361,10 @@ var jsonata = (function() {
                     type = "literal";
                     symbol = symbol_table["(literal)"];
                     break;
+                case 'regex':
+                    type = "regex";
+                    symbol = symbol_table["(regex)"];
+                    break;
               /* istanbul ignore next */
                 default:
                     throw {
@@ -332,7 +386,7 @@ var jsonata = (function() {
         var expression = function (rbp) {
             var left;
             var t = node;
-            advance();
+            advance(null, true);
             left = t.nud();
             while (rbp < node.lbp) {
                 t = node;
@@ -387,6 +441,7 @@ var jsonata = (function() {
         symbol("(end)");
         symbol("(name)");
         symbol("(literal)");
+        symbol("(regex)");
         symbol(":");
         symbol(";");
         symbol(",");
@@ -736,6 +791,7 @@ var jsonata = (function() {
                 case 'wildcard':
                 case 'descendant':
                 case 'variable':
+                case 'regex':
                     result = expr;
                     break;
                 case 'operator':
@@ -874,6 +930,9 @@ var jsonata = (function() {
                 break;
             case 'block':
                 result = evaluateBlock(expr, input, environment);
+                break;
+            case 'regex':
+                result = evaluateRegex(expr, input, environment);
                 break;
             case 'function':
                 result = evaluateFunction(expr, input, environment);
@@ -1608,6 +1667,44 @@ var jsonata = (function() {
     }
 
     /**
+     * Prepare a regex
+     * @param {Object} expr - expression containing regex
+     * @returns {Function} Higher order function representing prepared regex
+     */
+    function evaluateRegex(expr) {
+        expr.value.lastIndex = 0;
+        var closure = function(str) {
+            var re = expr.value;
+            //var result = str.match(expr.value);
+            var result;
+            var match = re.exec(str);
+            if(match !== null) {
+                result = {
+                    match: match[0],
+                    start: match.index,
+                    end: match.index + match[0].length,
+                    groups: []
+                };
+                if(match.length > 1) {
+                    for(var i = 1; i < match.length; i++) {
+                        result.groups.push(match[i]);
+                    }
+                }
+                result.next = function() {
+                    if(re.lastIndex >= str.length) {
+                        return undefined;
+                    } else {
+                        return closure(str);
+                    }
+                };
+            }
+
+            return result;
+        };
+        return closure;
+    }
+
+    /**
      * Evaluate variable against input data
      * @param {Object} expr - JSONata expression
      * @param {Object} input - Input data to evaluate against
@@ -1659,7 +1756,7 @@ var jsonata = (function() {
         // apply the procedure
         try {
             result = apply(proc, evaluatedArgs, environment, input);
-            while(typeof result === 'object' && result.lambda == true && result.thunk == true) {
+            while(typeof result === 'object' && result !== null && result.lambda == true && result.thunk == true) {
                 // trampoline loop - this gets invoked as a result of tail-call optimization
                 // the function returned a tail-call thunk
                 // unpack it, evaluate its arguments, and apply the tail call
@@ -2330,9 +2427,263 @@ var jsonata = (function() {
     }
 
     /**
+     * Tests if the str contains the token
+     * @param {String} str - string to test
+     * @param {String} token - substring or regex to find
+     * @returns {Boolean} - true if str contains token
+     */
+    function functionContains(str, token) {
+        if(arguments.length != 2) {
+            throw {
+                message: 'The contains function expects two arguments',
+                stack: (new Error()).stack
+            };
+        }
+
+        // undefined inputs always return undefined
+        if(typeof str === 'undefined') {
+            return undefined;
+        }
+
+        // otherwise it must be a string
+        if(typeof str !== 'string') {
+            throw {
+                message: 'Type error: first argument of contains function must evaluate to a string',
+                stack: (new Error()).stack,
+                value: str
+            };
+        }
+
+        // token must be a string or regex function
+        if(typeof token !== 'string' && typeof token !== 'function') {
+            throw {
+                message: 'Type error: second argument of contains function must evaluate to a string or a regular expression',
+                stack: (new Error()).stack,
+                value: token
+            };
+        }
+
+        var result;
+
+        if(typeof token === 'string') {
+            result = (str.indexOf(token) !== -1);
+        } else {
+            var matches = token(str);
+            result = (typeof matches !== 'undefined');
+        }
+
+        return result;
+    }
+
+    /**
+     * Match a string with a regex returning an array of object containing details of each match
+     * @param {String} str - string
+     * @param {String} regex - the regex applied to the string
+     * @param {Integer} [limit] - max number of matches to return
+     * @returns {Array} The array of match objects
+     */
+    function functionMatch(str, regex, limit) {
+        if(arguments.length != 2 && arguments.length != 3) {
+            throw {
+                message: 'The match function expects two or three arguments',
+                stack: (new Error()).stack
+            };
+        }
+
+        // undefined inputs always return undefined
+        if(typeof str === 'undefined') {
+            return undefined;
+        }
+
+        // otherwise it must be a string
+        if(typeof str !== 'string') {
+            throw {
+                message: 'Type error: first argument of match function must evaluate to a string',
+                stack: (new Error()).stack,
+                value: str
+            };
+        }
+
+        // separator must be a string or regex function
+        if(typeof regex !== 'function') {
+            throw {
+                message: 'Type error: second argument of match function must evaluate to a regular expression',
+                stack: (new Error()).stack,
+                value: regex
+            };
+        }
+
+        // limit, if specified, must be a number
+        if(typeof limit !== 'undefined' && (typeof limit !== 'number' || limit < 0)) {
+            throw {
+                message: 'Type error: third argument of match function must evaluate to a positive number',
+                stack: (new Error()).stack,
+                value: limit
+            };
+        }
+
+        var result = [];
+
+        if(typeof limit === 'undefined' || limit > 0) {
+            var count = 0;
+            var matches = regex(str);
+            if (typeof matches !== 'undefined') {
+                while (typeof matches !== 'undefined' && (typeof limit === 'undefined' || count < limit)) {
+                    result.push({
+                        match: matches.match,
+                        index: matches.start,
+                        groups: matches.groups
+                    });
+                    matches = matches.next();
+                    count++;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Match a string with a regex returning an array of object containing details of each match
+     * @param {String} str - string
+     * @param {String} pattern - the substring/regex applied to the string
+     * @param {String} replacement - text to replace the matched substrings
+     * @param {Integer} [limit] - max number of matches to return
+     * @returns {Array} The array of match objects
+     */
+    function functionReplace(str, pattern, replacement, limit) {
+        if(arguments.length != 3 && arguments.length != 4) {
+            throw {
+                message: 'The replace function expects three or four arguments',
+                stack: (new Error()).stack
+            };
+        }
+
+        // undefined inputs always return undefined
+        if(typeof str === 'undefined') {
+            return undefined;
+        }
+
+        // otherwise it must be a string
+        if(typeof str !== 'string') {
+            throw {
+                message: 'Type error: first argument of replace function must evaluate to a string',
+                stack: (new Error()).stack,
+                value: str
+            };
+        }
+
+        // pattern must be a string or regex function
+        if(typeof pattern !== 'string' && typeof pattern !== 'function') {
+            throw {
+                message: 'Type error: second argument of replace function must evaluate to a string or a regular expression',
+                stack: (new Error()).stack,
+                value: pattern
+            };
+        }
+
+        // pattern cannot be an empty string
+        if(pattern === '') {
+            throw {
+                message: 'Type error: second argument of replace function cannot be an empty string',
+                stack: (new Error()).stack,
+                value: pattern
+            };
+        }
+
+        // replacement string
+        if(typeof replacement !== 'string') {
+            throw {
+                message: 'Type error: third argument of replace function must evaluate to a string',
+                stack: (new Error()).stack,
+                value: replacement
+            };
+        }
+
+        // limit, if specified, must be a number
+        if(typeof limit !== 'undefined' && (typeof limit !== 'number' || limit < 0)) {
+            throw {
+                message: 'Type error: forth argument of replace function must evaluate to a positive number',
+                stack: (new Error()).stack,
+                value: limit
+            };
+        }
+
+        var regexReplacement = function(regexMatch) {
+            var substitute = '';
+            // scan forward, copying the replacement text into the substitute string
+            // and replace any occurrence of $n with the values matched by the regex
+            var position = 0;
+            var index = replacement.indexOf('$', position);
+            while(index !== -1 && position < replacement.length) {
+                substitute += replacement.substring(position, index);
+                position = index + 1;
+                var dollarVal = replacement.charAt(position);
+                if(dollarVal === '$') {
+                    // literal $
+                    substitute += '$';
+                    position++;
+                } else if(dollarVal === '0') {
+                    substitute += regexMatch.match;
+                    position++;
+                } else {
+                    index = parseInt(replacement.substring(position), 10);
+                    if(!isNaN(index)) {
+                        substitute += regexMatch.groups[index - 1];
+                        position += index.toString().length;
+                    } else {
+                        // not a capture group, treat the $ as literal
+                        substitute += '$';
+                    }
+                }
+                index = replacement.indexOf('$', position);
+            }
+            substitute += replacement.substring(position);
+            return substitute;
+        };
+
+        var result = '';
+        var position = 0;
+
+        if(typeof limit === 'undefined' || limit > 0) {
+            var count = 0;
+            if(typeof pattern === 'string') {
+                var index = str.indexOf(pattern, position);
+                while(index !== -1 && (typeof limit === 'undefined' || count < limit)) {
+                    result += str.substring(position, index);
+                    result += replacement;
+                    position = index + pattern.length;
+                    count++;
+                    index = str.indexOf(pattern, position);
+                }
+                result += str.substring(position);
+            } else {
+                var matches = pattern(str);
+                if (typeof matches !== 'undefined') {
+                    while (typeof matches !== 'undefined' && (typeof limit === 'undefined' || count < limit)) {
+                        result += str.substring(position, matches.start);
+                        result += regexReplacement(matches);
+                        position = matches.start + matches.match.length;
+                        count++;
+                        matches = matches.next();
+                    }
+                    result += str.substring(position);
+                } else {
+                    result = str;
+                }
+            }
+        } else {
+            result = str;
+        }
+
+        return result;
+    }
+
+
+    /**
      * Split a string into an array of substrings
      * @param {String} str - string
-     * @param {String} separator - the token that splits the string
+     * @param {String} separator - the token or regex that splits the string
      * @param {Integer} [limit] - max number of substrings
      * @returns {Array} The array of string
      */
@@ -2358,10 +2709,10 @@ var jsonata = (function() {
             };
         }
 
-        // separator must be a string
-        if(typeof separator !== 'string') {
+        // separator must be a string or regex function
+        if(typeof separator !== 'string' && typeof separator !== 'function') {
             throw {
-                message: 'Type error: second argument of split function must evaluate to a string',
+                message: 'Type error: second argument of split function must evaluate to a string or regular expression',
                 stack: (new Error()).stack,
                 value: separator
             };
@@ -2376,7 +2727,32 @@ var jsonata = (function() {
             };
         }
 
-        return str.split(separator, limit);
+        var result = [];
+
+        if(typeof limit === 'undefined' || limit > 0) {
+            if (typeof separator === 'string') {
+                result = str.split(separator, limit);
+            } else {
+                var count = 0;
+                var matches = separator(str);
+                if (typeof matches !== 'undefined') {
+                    var start = 0;
+                    while (typeof matches !== 'undefined' && (typeof limit === 'undefined' || count < limit)) {
+                        result.push(str.substring(start, matches.start));
+                        start = matches.end;
+                        matches = matches.next();
+                        count++;
+                    }
+                    if(typeof limit === 'undefined' || count < limit) {
+                        result.push(str.substring(start));
+                    }
+                } else {
+                    result = [str];
+                }
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -2753,6 +3129,9 @@ var jsonata = (function() {
     staticFrame.bind('lowercase', functionLowercase);
     staticFrame.bind('uppercase', functionUppercase);
     staticFrame.bind('length', functionLength);
+    staticFrame.bind('match', functionMatch);
+    staticFrame.bind('contains', functionContains);
+    staticFrame.bind('replace', functionReplace);
     staticFrame.bind('split', functionSplit);
     staticFrame.bind('join', functionJoin);
     staticFrame.bind('number', functionNumber);

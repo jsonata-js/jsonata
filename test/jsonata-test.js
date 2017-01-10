@@ -3562,6 +3562,203 @@ describe('Evaluator - functions: length', function () {
 
 });
 
+describe('Evaluator - functions: contains', function () {
+
+    describe('$contains("Hello World", "lo")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$contains("Hello World", "lo")');
+            var result = expr.evaluate();
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$contains("Hello World", "World")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$contains("Hello World", "World")');
+            var result = expr.evaluate();
+            var expected = true;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$contains("Hello World", "world")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$contains("Hello World", "world")');
+            var result = expr.evaluate();
+            var expected = false;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$contains("Hello World", "Word")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$contains("Hello World", "Word")');
+            var result = expr.evaluate();
+            var expected = false;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$contains(nothing, "World")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$contains(nothing, "World")');
+            var result = expr.evaluate();
+            var expected = undefined;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$contains("Hello World")', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$contains("Hello World")');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 10})
+              .to.have.property('message').to.match(/The contains function expects two arguments/);
+        });
+    });
+
+    describe('$contains(23, 3)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$contains(23, 3)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 10})
+              .to.have.property('message').to.match(/Type error: first argument of contains function must evaluate to a string/);
+        });
+    });
+
+    describe('$contains("23", 3)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$contains("23", 3)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 10})
+              .to.have.property('message').to.match(/Type error: second argument of contains function must evaluate to a string or a regular expression/);
+        });
+    });
+
+});
+
+describe('Evaluator - functions: replace', function () {
+
+    describe('$replace("Hello World", "World", "Everyone")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$replace("Hello World", "World", "Everyone")');
+            var result = expr.evaluate();
+            var expected = "Hello Everyone";
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$replace("the cat sat on the mat", "at", "it")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$replace("the cat sat on the mat", "at", "it")');
+            var result = expr.evaluate();
+            var expected = "the cit sit on the mit";
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$replace("the cat sat on the mat", "at", "it", 0)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$replace("the cat sat on the mat", "at", "it", 0)');
+            var result = expr.evaluate();
+            var expected = "the cat sat on the mat";
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$replace("the cat sat on the mat", "at", "it", 2)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$replace("the cat sat on the mat", "at", "it", 2)');
+            var result = expr.evaluate();
+            var expected = "the cit sit on the mat";
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$replace(nothing, "at", "it", 2)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$replace(nothing, "at", "it", 2)');
+            var result = expr.evaluate();
+            var expected = undefined;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('$replace("hello")', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$replace("hello")');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 9})
+              .to.have.property('message').to.match(/The replace function expects three or four arguments/);
+        });
+    });
+
+    describe('$replace("hello", "l", "1", null)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$replace("hello", "l", "1", null)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 9, token: 'replace', value: null})
+              .to.have.property('message').to.match(/Type error: forth argument of replace function must evaluate to a positive number/);
+        });
+    });
+
+    describe('$replace("hello", "l", 1)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$replace("hello", "l", 1)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 9, token: 'replace', value: 1})
+              .to.have.property('message').to.match(/Type error: third argument of replace function must evaluate to a string/);
+        });
+    });
+
+    describe('$replace("hello", "", 1)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$replace("hello", "", 1)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 9, token: 'replace', value: ""})
+              .to.have.property('message').to.match(/Type error: second argument of replace function cannot be an empty string/);
+        });
+    });
+
+    describe('$replace("hello", 2, 1)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$replace("hello", 2, 1)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 9, token: 'replace', value: 2})
+              .to.have.property('message').to.match(/Type error: second argument of replace function must evaluate to a string or a regular expression/);
+        });
+    });
+
+    describe('$replace(123, 2, 1)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$replace(123, 2, 1)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 9, token: 'replace', value: 123})
+              .to.have.property('message').to.match(/Type error: first argument of replace function must evaluate to a string/);
+        });
+    });
+
+});
+
 describe('Evaluator - functions: split', function () {
 
     describe('$split("Hello World", " ")', function () {
@@ -3847,447 +4044,6 @@ describe('Evaluator - functions: join', function () {
             }).to.throw()
                 .to.deep.contain({position: 6})
                 .to.have.property('message').to.match(/The join function expects one or two arguments/);
-        });
-    });
-
-});
-
-describe('Evaluator - functions: length', function () {
-
-    describe('$length("")', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$length("")');
-            var result = expr.evaluate();
-            var expected = 0;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$length("hello")', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$length("hello")');
-            var result = expr.evaluate();
-            var expected = 5;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$length(missing)', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$length(missing)');
-            var result = expr.evaluate();
-            var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$length("\\u03BB-calculus")', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$length("\\u03BB-calculus")');
-            var result = expr.evaluate();
-            var expected = 10;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$length("\\uD834\\uDD1E")', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$length("\\uD834\\uDD1E")');
-            var result = expr.evaluate();
-            var expected = 2;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$length("𝄞")', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$length("𝄞")');
-            var result = expr.evaluate();
-            var expected = 2;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$length("超明體繁")', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$length("超明體繁")');
-            var result = expr.evaluate();
-            var expected = 4;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$length("\\t")', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$length("\\t")');
-            var result = expr.evaluate();
-            var expected = 1;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$length("\\n")', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$length("\\n")');
-            var result = expr.evaluate();
-            var expected = 1;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$length(1234)', function () {
-        it('should throw error', function () {
-            var expr = jsonata('$length(1234)');
-            expect(function () {
-                expr.evaluate();
-            }).to.throw()
-              .to.deep.contain({position: 8, value: 1234})
-              .to.have.property('message').to.match(/Type error: argument of length function must evaluate to a string/);
-        });
-    });
-
-    describe('$length(null)', function () {
-        it('should throw error', function () {
-            var expr = jsonata('$length(null)');
-            expect(function () {
-                expr.evaluate();
-            }).to.throw()
-              .to.deep.contain({position: 8, value: null})
-              .to.have.property('message').to.match(/Type error: argument of length function must evaluate to a string/);
-        });
-    });
-
-    describe('$length(true)', function () {
-        it('should throw error', function () {
-            var expr = jsonata('$length(true)');
-            expect(function () {
-                expr.evaluate();
-            }).to.throw()
-              .to.deep.contain({position: 8, value: true})
-              .to.have.property('message').to.match(/Type error: argument of length function must evaluate to a string/);
-        });
-    });
-
-    describe('$length(["str"])', function () {
-        it('should throw error', function () {
-            var expr = jsonata('$length(["str"])');
-            expect(function () {
-                expr.evaluate();
-            }).to.throw()
-              .to.deep.contain({position: 8})
-              .to.have.property('message').to.match(/Type error: argument of length function must evaluate to a string/);
-        });
-    });
-
-    describe('$length()', function () {
-        it('should throw error', function () {
-            var expr = jsonata('$length()');
-            expect(function () {
-                expr.evaluate();
-            }).to.throw()
-              .to.deep.contain({position: 8})
-              .to.have.property('message').to.match(/The length function expects one argument/);
-        });
-    });
-
-    describe('$length("Hello", "World")', function () {
-        it('should throw error', function () {
-            var expr = jsonata('$length()');
-            expect(function () {
-                expr.evaluate();
-            }).to.throw()
-              .to.deep.contain({position: 8})
-              .to.have.property('message').to.match(/The length function expects one argument/);
-        });
-    });
-
-});
-
-describe('Evaluator - functions: split', function () {
-
-    describe('$split("Hello World", " ")', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$split("Hello World", " ")');
-            var result = expr.evaluate();
-            var expected = ["Hello", "World"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$split("Hello", " ")', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$split("Hello", " ")');
-            var result = expr.evaluate();
-            var expected = ["Hello"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$split("Hello  World", " ")', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$split("Hello  World", " ")');
-            var result = expr.evaluate();
-            var expected = ["Hello", "", "World"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$split("Hello", "")', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$split("Hello", "")');
-            var result = expr.evaluate();
-            var expected = ["H", "e", "l", "l", "o"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$sum($split("12345", "").$number($))', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$sum($split("12345", "").$number($))');
-            var result = expr.evaluate();
-            var expected = 15;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$split("a, b, c, d", ", ")', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$split("a, b, c, d", ", ")');
-            var result = expr.evaluate();
-            var expected = ["a", "b", "c", "d"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$split("a, b, c, d", ", ", 2)', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$split("a, b, c, d", ", ", 2)');
-            var result = expr.evaluate();
-            var expected = ["a", "b"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$split("a, b, c, d", ", ", 2.5)', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$split("a, b, c, d", ", ", 2.5)');
-            var result = expr.evaluate();
-            var expected = ["a", "b"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$split("a, b, c, d", ", ", 10)', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$split("a, b, c, d", ", ", 10)');
-            var result = expr.evaluate();
-            var expected = ["a", "b", "c", "d"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$split("a, b, c, d", ", ", 0)', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$split("a, b, c, d", ", ", 0)');
-            var result = expr.evaluate();
-            var expected = [];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$split(nothing, " ")', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$split(nothing, " ")');
-            var result = expr.evaluate();
-            var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$split("a, b, c, d", ", ", -3)', function () {
-        it('should throw error', function () {
-            var expr = jsonata('$split("a, b, c, d", ", ", -3)');
-            expect(function () {
-                expr.evaluate();
-            }).to.throw()
-              .to.deep.contain({position: 7, value: -3})
-              .to.have.property('message').to.match(/Type error: third argument of split function must evaluate to a positive number/);
-        });
-    });
-
-    describe('$split("a, b, c, d", ", ", null)', function () {
-        it('should throw error', function () {
-            var expr = jsonata('$split("a, b, c, d", ", ", null)');
-            expect(function () {
-                expr.evaluate();
-            }).to.throw()
-              .to.deep.contain({position: 7, value: null})
-              .to.have.property('message').to.match(/Type error: third argument of split function must evaluate to a positive number/);
-        });
-    });
-
-    describe('$split("a, b, c, d", ", ", "2")', function () {
-        it('should throw error', function () {
-            var expr = jsonata('$split("a, b, c, d", ", ", "2")');
-            expect(function () {
-                expr.evaluate();
-            }).to.throw()
-              .to.deep.contain({position: 7, value: "2"})
-              .to.have.property('message').to.match(/Type error: third argument of split function must evaluate to a positive number/);
-        });
-    });
-
-    describe('$split("a, b, c, d", true)', function () {
-        it('should throw error', function () {
-            var expr = jsonata('$split("a, b, c, d", true)');
-            expect(function () {
-                expr.evaluate();
-            }).to.throw()
-              .to.deep.contain({position: 7, value: true})
-              .to.have.property('message').to.match(/Type error: second argument of split function must evaluate to a string/);
-        });
-    });
-
-    describe('$split(12345, 3)', function () {
-        it('should throw error', function () {
-            var expr = jsonata('$split(12345, 3)');
-            expect(function () {
-                expr.evaluate();
-            }).to.throw()
-              .to.deep.contain({position: 7, value: 12345})
-              .to.have.property('message').to.match(/Type error: first argument of split function must evaluate to a string/);
-        });
-    });
-
-    describe('$split(12345)', function () {
-        it('should throw error', function () {
-            var expr = jsonata('$split(12345)');
-            expect(function () {
-                expr.evaluate();
-            }).to.throw()
-              .to.deep.contain({position: 7})
-              .to.have.property('message').to.match(/The split function expects two or three arguments/);
-        });
-    });
-
-
-});
-
-describe('Evaluator - functions: join', function () {
-
-    describe('$join("hello")', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$join("hello")');
-            var result = expr.evaluate();
-            var expected = "hello";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$join(["hello"])', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$join(["hello"])');
-            var result = expr.evaluate();
-            var expected = "hello";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$join(["hello", "world"])', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$join(["hello", "world"])');
-            var result = expr.evaluate();
-            var expected = "helloworld";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$join(["hello", "world"], ", ")', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$join(["hello", "world"], ", ")');
-            var result = expr.evaluate();
-            var expected = "hello, world";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$join([], ", ")', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$join([], ", ")');
-            var result = expr.evaluate();
-            var expected = "";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$join(Account.Order.Product.Description.Colour, ", ")', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$join(Account.Order.Product.Description.Colour, ", ")');
-            var result = expr.evaluate(testdata2);
-            var expected = "Purple, Orange, Purple, Black";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$join(Account.Order.Product.Description.Colour, no.sep)', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$join(Account.Order.Product.Description.Colour, no.sep)');
-            var result = expr.evaluate(testdata2);
-            var expected = "PurpleOrangePurpleBlack";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$join(Account.blah.Product.Description.Colour, ", ")', function () {
-        it('should return result object', function () {
-            var expr = jsonata('$join(Account.blah.Product.Description.Colour, ", ")');
-            var result = expr.evaluate(testdata2);
-            var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$join(true, ", ")', function () {
-        it('should throw error', function () {
-            var expr = jsonata('$join(true, ", ")');
-            expect(function () {
-                expr.evaluate();
-            }).to.throw()
-              .to.deep.contain({position: 6})
-              .to.have.property('message').to.match(/Type error: first argument of join function must be an array of strings/);
-        });
-    });
-
-    describe('$join([1,2,3], ", ")', function () {
-        it('should throw error', function () {
-            var expr = jsonata('$join([1,2,3], ", ")');
-            expect(function () {
-                expr.evaluate();
-            }).to.throw()
-              .to.deep.contain({position: 6})
-              .to.have.property('message').to.match(/Type error: first argument of join function must be an array of strings/);
-        });
-    });
-
-    describe('$join(["hello"], 3)', function () {
-        it('should throw error', function () {
-            var expr = jsonata('$join(["hello"], 3)');
-            expect(function () {
-                expr.evaluate();
-            }).to.throw()
-              .to.deep.contain({position: 6})
-              .to.have.property('message').to.match(/Type error: second argument of split function must evaluate to a string/);
-        });
-    });
-
-    describe('$join()', function () {
-        it('should throw error', function () {
-            var expr = jsonata('$join()');
-            expect(function () {
-                expr.evaluate();
-            }).to.throw()
-              .to.deep.contain({position: 6})
-              .to.have.property('message').to.match(/The join function expects one or two arguments/);
         });
     });
 
@@ -7037,6 +6793,397 @@ describe('HOF - reduce', function () {
 
 });
 
+describe('Regex', function () {
+    describe('Construction', function () {
+        describe('/ab/ ("ab")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('/ab/ ("ab")');
+                var result = expr.evaluate();
+                var expected = {"match": "ab", "start": 0, "end": 2, "groups": []};
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('/ab/ ()', function () {
+            it('should return result object', function () {
+                var expr = jsonata('/ab/ ()');
+                var result = expr.evaluate();
+                var expected = undefined;
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('/ab+/ ("ababbabbcc")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('/ab+/ ("ababbabbcc")');
+                var result = expr.evaluate();
+                var expected = {"match": "ab", "start": 0, "end": 2, "groups": []};
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('/a(b+)/ ("ababbabbcc")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('/a(b+)/ ("ababbabbcc")');
+                var result = expr.evaluate();
+                var expected = {"match": "ab", "start": 0, "end": 2, "groups": ["b"]};
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('/a(b+)/ ("ababbabbcc").next()', function () {
+            it('should return result object', function () {
+                var expr = jsonata('/a(b+)/ ("ababbabbcc").next()');
+                var result = expr.evaluate();
+                var expected = {"match": "abb", "start": 2, "end": 5, "groups": ["bb"]};
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('/a(b+)/ ("ababbabbcc").next().next()', function () {
+            it('should return result object', function () {
+                var expr = jsonata('/a(b+)/ ("ababbabbcc").next().next()');
+                var result = expr.evaluate();
+                var expected = {"match": "abb", "start": 5, "end": 8, "groups": ["bb"]};
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('/a(b+)/ ("ababbabbcc").next().next().next()', function () {
+            it('should return result object', function () {
+                var expr = jsonata('/a(b+)/ ("ababbabbcc").next().next().next()');
+                var result = expr.evaluate();
+                var expected = undefined;
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('/a(b+)/i ("Ababbabbcc")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('/a(b+)/i ("Ababbabbcc")');
+                var result = expr.evaluate();
+                var expected = {"match": "Ab", "start": 0, "end": 2, "groups": ["b"]};
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('empty regex', function () {
+            it('should throw error', function () {
+                expect(function () {
+                    var expr = jsonata('//');
+                    expr.evaluate();
+                }).to.throw()
+                  .to.deep.contain({position: 1})
+                  .to.have.property('message').to.match(/Empty regular expressions are not allowed/);
+            });
+        });
+
+        describe('empty regex', function () {
+            it('should throw error', function () {
+                expect(function () {
+                    var expr = jsonata('/');
+                    expr.evaluate();
+                }).to.throw()
+                  .to.deep.contain({position: 1})
+                  .to.have.property('message').to.match(/No terminating \/ in regular expression/);
+            });
+        });
+
+    });
+
+    describe('Functions - $match', function () {
+        describe('$match("ababbabbcc",/ab/)', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$match("ababbabbcc",/ab/)');
+                var result = expr.evaluate();
+                var expected = [{"match": "ab", "index": 0, "groups": []}, {
+                    "match": "ab",
+                    "index": 2,
+                    "groups": []
+                }, {"match": "ab", "index": 5, "groups": []}];
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$match("ababbabbcc",/a(b+)/)', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$match("ababbabbcc",/a(b+)/)');
+                var result = expr.evaluate();
+                var expected = [{"match": "ab", "index": 0, "groups": ["b"]}, {
+                    "match": "abb",
+                    "index": 2,
+                    "groups": ["bb"]
+                }, {"match": "abb", "index": 5, "groups": ["bb"]}];
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$match("ababbabbcc",/a(b+)/, 1)', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$match("ababbabbcc",/a(b+)/, 1)');
+                var result = expr.evaluate();
+                var expected = [{"match": "ab", "index": 0, "groups": ["b"]}];
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$match("ababbabbcc",/a(b+)/, 0)', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$match("ababbabbcc",/a(b+)/, 0)');
+                var result = expr.evaluate();
+                var expected = [];
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$match(nothing,/a(xb+)/)', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$match(nothing,/a(xb+)/)');
+                var result = expr.evaluate();
+                var expected = undefined;
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$match("ababbabbcc",/a(xb+)/)', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$match("ababbabbcc",/a(xb+)/)');
+                var result = expr.evaluate();
+                var expected = [];
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$match("a, b, c, d", /ab/, -3)', function () {
+            it('should throw error', function () {
+                var expr = jsonata('$match("a, b, c, d", /ab/, -3)');
+                expect(function () {
+                    expr.evaluate();
+                }).to.throw()
+                  .to.deep.contain({position: 7, value: -3})
+                  .to.have.property('message').to.match(/Type error: third argument of match function must evaluate to a positive number/);
+            });
+        });
+
+        describe('$match("a, b, c, d", /ab/, null)', function () {
+            it('should throw error', function () {
+                var expr = jsonata('$match("a, b, c, d", /ab/, null)');
+                expect(function () {
+                    expr.evaluate();
+                }).to.throw()
+                  .to.deep.contain({position: 7, value: null})
+                  .to.have.property('message').to.match(/Type error: third argument of match function must evaluate to a positive number/);
+            });
+        });
+
+        describe('$match("a, b, c, d", /ab/, "2")', function () {
+            it('should throw error', function () {
+                var expr = jsonata('$match("a, b, c, d", /ab/, "2")');
+                expect(function () {
+                    expr.evaluate();
+                }).to.throw()
+                  .to.deep.contain({position: 7, value: "2"})
+                  .to.have.property('message').to.match(/Type error: third argument of match function must evaluate to a positive number/);
+            });
+        });
+
+        describe('$match("a, b, c, d", "ab")', function () {
+            it('should throw error', function () {
+                var expr = jsonata('$match("a, b, c, d", "ab")');
+                expect(function () {
+                    expr.evaluate();
+                }).to.throw()
+                  .to.deep.contain({position: 7, value: "ab"})
+                  .to.have.property('message').to.match(/Type error: second argument of match function must evaluate to a regular expression/);
+            });
+        });
+
+        describe('$match("a, b, c, d", true)', function () {
+            it('should throw error', function () {
+                var expr = jsonata('$match("a, b, c, d", true)');
+                expect(function () {
+                    expr.evaluate();
+                }).to.throw()
+                  .to.deep.contain({position: 7, value: true})
+                  .to.have.property('message').to.match(/Type error: second argument of match function must evaluate to a regular expression/);
+            });
+        });
+
+        describe('$match(12345, 3)', function () {
+            it('should throw error', function () {
+                var expr = jsonata('$match(12345, 3)');
+                expect(function () {
+                    expr.evaluate();
+                }).to.throw()
+                  .to.deep.contain({position: 7, value: 12345})
+                  .to.have.property('message').to.match(/Type error: first argument of match function must evaluate to a string/);
+            });
+        });
+
+        describe('$match(12345)', function () {
+            it('should throw error', function () {
+                var expr = jsonata('$match(12345)');
+                expect(function () {
+                    expr.evaluate();
+                }).to.throw()
+                  .to.deep.contain({position: 7})
+                  .to.have.property('message').to.match(/The match function expects two or three arguments/);
+            });
+        });
+    });
+
+    describe('Functions - $split', function () {
+        describe('$split("ababbxabbcc",/b+/)', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$split("ababbxabbcc",/b+/)');
+                var result = expr.evaluate();
+                var expected = ["a", "a", "xa", "cc"];
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$split("ababbxabbcc",/b+/, 2)', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$split("ababbxabbcc",/b+/, 2)');
+                var result = expr.evaluate();
+                var expected = ["a", "a"];
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$split("ababbxabbcc",/d+/)', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$split("ababbxabbcc",/d+/)');
+                var result = expr.evaluate();
+                var expected = ["ababbxabbcc"];
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+    });
+
+    describe('Functions - $contains', function () {
+        describe('$contains("ababbxabbcc",/ab+/)', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$contains("ababbxabbcc",/ab+/)');
+                var result = expr.evaluate();
+                var expected = true;
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$contains("ababbxabbcc",/ax+/)', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$contains("ababbxabbcc",/ax+/)');
+                var result = expr.evaluate();
+                var expected = false;
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('Account.Order.Product[$contains($."Product Name", /hat/)].ProductID', function () {
+            it('should return result object', function () {
+                var expr = jsonata('Account.Order.Product[$contains($."Product Name", /hat/)].ProductID');
+                var result = expr.evaluate(testdata2);
+                var expected = 858236;
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('Account.Order.Product[$contains($."Product Name", /hat/i)].ProductID', function () {
+            it('should return result object', function () {
+                var expr = jsonata('Account.Order.Product[$contains($."Product Name", /hat/i)].ProductID');
+                var result = expr.evaluate(testdata2);
+                var expected = [858383, 858236, 858383];
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+    });
+    describe('Functions - $replace', function () {
+        describe('$replace("ababbxabbcc",/b+/, "yy")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("ababbxabbcc",/b+/, "yy")');
+                var result = expr.evaluate();
+                var expected = "ayyayyxayycc";
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$replace("ababbxabbcc",/b+/, "yy", 2)', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("ababbxabbcc",/b+/, "yy", 2)');
+                var result = expr.evaluate();
+                var expected = "ayyayyxabbcc";
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$replace("ababbxabbcc",/b+/, "yy", 0)', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("ababbxabbcc",/b+/, "yy", 0)');
+                var result = expr.evaluate();
+                var expected = "ababbxabbcc";
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$replace("ababbxabbcc",/d+/, "yy")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("ababbxabbcc",/d+/, "yy")');
+                var result = expr.evaluate();
+                var expected = "ababbxabbcc";
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$replace("John Smith", /(\\w+)\\s(\\w+)/, "$2, $1")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("John Smith", /(\\w+)\\s(\\w+)/, "$2, $1")');
+                var result = expr.evaluate();
+                var expected = "Smith, John";
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$replace("265USD", /([0-9]+)USD/, "$$$1")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("265USD", /([0-9]+)USD/, "$$$1")');
+                var result = expr.evaluate();
+                var expected = "$265";
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$replace("265USD", /([0-9]+)USD/, "$w")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("265USD", /([0-9]+)USD/, "$w")');
+                var result = expr.evaluate();
+                var expected = "$w";
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$replace("265USD", /([0-9]+)USD/, "$0 -> $$$1")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("265USD", /([0-9]+)USD/, "$0 -> $$$1")');
+                var result = expr.evaluate();
+                var expected = "265USD -> $265";
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$replace("265USD", /([0-9]+)USD/, "$0$1$2")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("265USD", /([0-9]+)USD/, "$0 -> $$$1")');
+                var result = expr.evaluate();
+                var expected = "265USD -> $265";
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+    });
+});
 
 describe('Transform', function () {
     describe('Invoice transformation', function () {
