@@ -7100,6 +7100,7 @@ describe('Regex', function () {
         });
 
     });
+
     describe('Functions - $replace', function () {
         describe('$replace("ababbxabbcc",/b+/, "yy")', function () {
             it('should return result object', function () {
@@ -7175,10 +7176,205 @@ describe('Regex', function () {
 
         describe('$replace("265USD", /([0-9]+)USD/, "$0$1$2")', function () {
             it('should return result object', function () {
-                var expr = jsonata('$replace("265USD", /([0-9]+)USD/, "$0 -> $$$1")');
+                var expr = jsonata('$replace("265USD", /([0-9]+)USD/, "$0$1$2")');
                 var result = expr.evaluate();
-                var expected = "265USD -> $265";
+                var expected = "265USD265";
                 assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$replace("abcd", /(ab)|(a)/, "[1=$1][2=$2]")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("abcd", /(ab)|(a)/, "[1=$1][2=$2]")');
+                var result = expr.evaluate();
+                var expected = "[1=ab][2=]cd";
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$replace("abracadabra", /bra/, "*")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("abracadabra", /bra/, "*")');
+                var result = expr.evaluate();
+                var expected = "a*cada*";
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$replace("abracadabra", /a.*a/, "*")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("abracadabra", /a.*a/, "*")');
+                var result = expr.evaluate();
+                var expected = "*";
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$replace("abracadabra", /a.*?a/, "*")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("abracadabra", /a.*?a/, "*")');
+                var result = expr.evaluate();
+                var expected = "*c*bra";
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$replace("abracadabra", /a/, "")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("abracadabra", /a/, "")');
+                var result = expr.evaluate();
+                var expected = "brcdbr";
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$replace("abracadabra", /a(.)/, "a$1$1")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("abracadabra", /a(.)/, "a$1$1")');
+                var result = expr.evaluate();
+                var expected = "abbraccaddabbra";
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$replace("abracadabra", /.*?/, "$1")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("abracadabra", /.*?/, "$1")');
+                expect(function () {
+                    expr.evaluate();
+                }).to.throw()
+                  .to.deep.contain({position: 9, token: "replace", value: ".*?"})
+                  .to.have.property('message').to.match(/Regular expression matches zero length string/);
+            });
+        });
+
+        describe('$replace("AAAA", /A+/, "b")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("AAAA", /A+/, "b")');
+                var result = expr.evaluate();
+                var expected = "b";
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$replace("AAAA", /A+?/, "b")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("AAAA", /A+?/, "b")');
+                var result = expr.evaluate();
+                var expected = "bbbb";
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$replace("darted", /^(.*?)d(.*)$/, "$1c$2")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("darted", /^(.*?)d(.*)$/, "$1c$2")');
+                var result = expr.evaluate();
+                var expected = "carted";
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$replace("abcdefghijklmno", /(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)(l)(m)/, "$8$5$12$12$18$123")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("abcdefghijklmno", /(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)(l)(m)/, "$8$5$12$12$18$123")');
+                var result = expr.evaluate();
+                var expected = "hella8l3no";
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$replace("abcdefghijklmno", /xyz/, "$8$5$12$12$18$123")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("abcdefghijklmno", /xyz/, "$8$5$12$12$18$123")');
+                var result = expr.evaluate();
+                var expected = "abcdefghijklmno";
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$replace("abcdefghijklmno", /ijk/, "$8$5$12$12$18$123")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("abcdefghijklmno", /ijk/, "$8$5$12$12$18$123")');
+                var result = expr.evaluate();
+                var expected = "abcdefgh22823lmno";
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$replace("abcdefghijklmno", /(ijk)/, "$8$5$12$12$18$123")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("abcdefghijklmno", /(ijk)/, "$8$5$12$12$18$123")');
+                var result = expr.evaluate();
+                var expected = "abcdefghijk2ijk2ijk8ijk23lmno";
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$replace("abcdefghijklmno", /ijk/, "$x")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("abcdefghijklmno", /ijk/, "$x")');
+                var result = expr.evaluate();
+                var expected = "abcdefgh$xlmno";
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$replace("abcdefghijklmno", /(ijk)/, "$x$")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("abcdefghijklmno", /(ijk)/, "$x$")');
+                var result = expr.evaluate();
+                var expected = "abcdefgh$x$lmno";
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('Account.Order.Product.$replace($."Product Name", /hat/i, function($match) { "foo" })', function () {
+            it('should return result object', function () {
+                var expr = jsonata('Account.Order.Product.$replace($."Product Name", /hat/i, function($match) { "foo" })');
+                var result = expr.evaluate(testdata2);
+                var expected = ["Bowler foo","Trilby foo","Bowler foo","Cloak"];
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('Account.Order.Product.$replace($."Product Name", /(h)(at)/i, function($match) { $uppercase($match.match) })', function () {
+            it('should return result object', function () {
+                var expr = jsonata('Account.Order.Product.$replace($."Product Name", /(h)(at)/i, function($match) { $uppercase($match.match) })');
+                var result = expr.evaluate(testdata2);
+                var expected = ["Bowler HAT","Trilby HAT","Bowler HAT","Cloak"];
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('$replace("temperature = 68F today", /(-?\\d+(?:\\.\\d*)?)F\\b/, function($m) { ($number($m.groups[0]) - 32) * 5/9 & "C" })', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$replace("temperature = 68F today", /(-?\\d+(?:\\.\\d*)?)F\\b/, function($m) { ($number($m.groups[0]) - 32) * 5/9 & "C" })');
+                var result = expr.evaluate();
+                var expected = "temperature = 20C today";
+                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            });
+        });
+
+        describe('Account.Order.Product.$replace($."Product Name", /hat/i, function($match) { true })', function () {
+            it('should return result object', function () {
+                var expr = jsonata('Account.Order.Product.$replace($."Product Name", /hat/i, function($match) { true })');
+                expect(function () {
+                    expr.evaluate(testdata2);
+                }).to.throw()
+                  .to.deep.contain({position: 31, token: "replace", value: true})
+                  .to.have.property('message').to.match(/Attempted to replace a matched string with a non-string value/);
+            });
+        });
+
+        describe('Account.Order.Product.$replace($."Product Name", /hat/i, function($match) { 42 })', function () {
+            it('should return result object', function () {
+                var expr = jsonata('Account.Order.Product.$replace($."Product Name", /hat/i, function($match) { 42 })');
+                expect(function () {
+                    expr.evaluate(testdata2);
+                }).to.throw()
+                  .to.deep.contain({position: 31, token: "replace", value: 42})
+                  .to.have.property('message').to.match(/Attempted to replace a matched string with a non-string value/);
             });
         });
 

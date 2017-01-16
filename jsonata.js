@@ -1694,7 +1694,17 @@ var jsonata = (function() {
                     if(re.lastIndex >= str.length) {
                         return undefined;
                     } else {
-                        return closure(str);
+                        var next = closure(str);
+                        if(next && next.match === '' && re.lastIndex === expr.value.lastIndex) {
+                            // matches zero length string; this will never progress
+                            throw {
+                                message: "Regular expression matches zero length string",
+                                stack: (new Error()).stack,
+                                position: expr.position,
+                                value: expr.value.source
+                            };
+                        }
+                        return next;
                     }
                 };
             }
@@ -1755,19 +1765,7 @@ var jsonata = (function() {
         }
         // apply the procedure
         try {
-            result = apply(proc, evaluatedArgs, environment, input);
-            while(typeof result === 'object' && result !== null && result.lambda == true && result.thunk == true) {
-                // trampoline loop - this gets invoked as a result of tail-call optimization
-                // the function returned a tail-call thunk
-                // unpack it, evaluate its arguments, and apply the tail call
-                var next = evaluate(result.body.procedure, result.input, result.environment);
-                evaluatedArgs = [];
-                result.body.arguments.forEach(function (arg) {
-                    evaluatedArgs.push(evaluate(arg, result.input, result.environment));
-                });
-
-                result = apply(next, evaluatedArgs);
-            }
+            result = apply(proc, evaluatedArgs, input);
         } catch (err) {
             // add the position field to the error
             err.position = expr.position;
@@ -1782,11 +1780,35 @@ var jsonata = (function() {
      * Apply procedure or function
      * @param {Object} proc - Procedure
      * @param {Array} args - Arguments
-     * @param {Object} environment - Environment
      * @param {Object} self - Self
      * @returns {*} Result of procedure
      */
-    function apply(proc, args, environment, self) {
+    function apply(proc, args, self) {
+        var result;
+        result = applyInner(proc, args, self);
+        while(typeof result === 'object' && result !== null && result.lambda == true && result.thunk == true) {
+            // trampoline loop - this gets invoked as a result of tail-call optimization
+            // the function returned a tail-call thunk
+            // unpack it, evaluate its arguments, and apply the tail call
+            var next = evaluate(result.body.procedure, result.input, result.environment);
+            var evaluatedArgs = [];
+            result.body.arguments.forEach(function (arg) {
+                evaluatedArgs.push(evaluate(arg, result.input, result.environment));
+            });
+
+            result = applyInner(next, evaluatedArgs, self);
+        }
+        return result;
+    }
+
+    /**
+     * Apply procedure or function
+     * @param {Object} proc - Procedure
+     * @param {Array} args - Arguments
+     * @param {Object} self - Self
+     * @returns {*} Result of procedure
+     */
+    function applyInner(proc, args, self) {
         var result;
         if (proc && proc.lambda) {
             result = applyProcedure(proc, args);
@@ -2591,10 +2613,10 @@ var jsonata = (function() {
             };
         }
 
-        // replacement string
-        if(typeof replacement !== 'string') {
+        // replacement string or function
+        if(typeof replacement !== 'string' && typeof replacement !== 'function' && !isLambda(replacement)) {
             throw {
-                message: 'Type error: third argument of replace function must evaluate to a string',
+                message: 'Type error: third argument of replace function must evaluate to a string or replacement function',
                 stack: (new Error()).stack,
                 value: replacement
             };
@@ -2609,38 +2631,59 @@ var jsonata = (function() {
             };
         }
 
-        var regexReplacement = function(regexMatch) {
-            var substitute = '';
-            // scan forward, copying the replacement text into the substitute string
-            // and replace any occurrence of $n with the values matched by the regex
-            var position = 0;
-            var index = replacement.indexOf('$', position);
-            while(index !== -1 && position < replacement.length) {
-                substitute += replacement.substring(position, index);
-                position = index + 1;
-                var dollarVal = replacement.charAt(position);
-                if(dollarVal === '$') {
-                    // literal $
-                    substitute += '$';
-                    position++;
-                } else if(dollarVal === '0') {
-                    substitute += regexMatch.match;
-                    position++;
-                } else {
-                    index = parseInt(replacement.substring(position), 10);
-                    if(!isNaN(index)) {
-                        substitute += regexMatch.groups[index - 1];
-                        position += index.toString().length;
-                    } else {
-                        // not a capture group, treat the $ as literal
+        var replacer;
+        if(typeof replacement === 'string') {
+            replacer = function (regexMatch) {
+                var substitute = '';
+                // scan forward, copying the replacement text into the substitute string
+                // and replace any occurrence of $n with the values matched by the regex
+                var position = 0;
+                var index = replacement.indexOf('$', position);
+                while (index !== -1 && position < replacement.length) {
+                    substitute += replacement.substring(position, index);
+                    position = index + 1;
+                    var dollarVal = replacement.charAt(position);
+                    if (dollarVal === '$') {
+                        // literal $
                         substitute += '$';
+                        position++;
+                    } else if (dollarVal === '0') {
+                        substitute += regexMatch.match;
+                        position++;
+                    } else {
+                        var maxDigits;
+                        if(regexMatch.groups.length === 0) {
+                            // no sub-matches; any $ followed by a digit will be replaced by an empty string
+                            maxDigits = 1;
+                        } else {
+                            // max number of digits to parse following the $
+                            maxDigits = Math.floor(Math.log(regexMatch.groups.length) * Math.LOG10E) + 1;
+                        }
+                        index = parseInt(replacement.substring(position, position + maxDigits), 10);
+                        if(maxDigits > 1 && index > regexMatch.groups.length) {
+                            index = parseInt(replacement.substring(position, position + maxDigits - 1), 10);
+                        }
+                        if (!isNaN(index)) {
+                            if(regexMatch.groups.length > 0 ) {
+                                var submatch = regexMatch.groups[index - 1];
+                                if (typeof submatch !== 'undefined') {
+                                    substitute += submatch;
+                                }
+                            }
+                            position += index.toString().length;
+                        } else {
+                            // not a capture group, treat the $ as literal
+                            substitute += '$';
+                        }
                     }
+                    index = replacement.indexOf('$', position);
                 }
-                index = replacement.indexOf('$', position);
-            }
-            substitute += replacement.substring(position);
-            return substitute;
-        };
+                substitute += replacement.substring(position);
+                return substitute;
+            };
+        } else {
+            replacer = replacement;
+        }
 
         var result = '';
         var position = 0;
@@ -2662,7 +2705,18 @@ var jsonata = (function() {
                 if (typeof matches !== 'undefined') {
                     while (typeof matches !== 'undefined' && (typeof limit === 'undefined' || count < limit)) {
                         result += str.substring(position, matches.start);
-                        result += regexReplacement(matches);
+                        var replacedWith = apply(replacer, [matches], null);
+                        // check replacedWith is a string
+                        if(typeof replacedWith === 'string') {
+                            result += replacedWith;
+                        } else {
+                            // not a string - throw error
+                            throw {
+                                message: 'Attempted to replace a matched string with a non-string value',
+                                stack: (new Error()).stack,
+                                value: replacedWith
+                            };
+                        }
                         position = matches.start + matches.match.length;
                         count++;
                         matches = matches.next();
