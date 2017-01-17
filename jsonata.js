@@ -48,11 +48,13 @@ var jsonata = (function() {
         '!=': 40,
         '<=': 40,
         '>=': 40,
+        '~>': 40,
         'and': 30,
         'or': 25,
         'in': 40,
         '&': 50,
-        '!': 0   // not an operator, but needed as a stop character for name tokens
+        '!': 0,   // not an operator, but needed as a stop character for name tokens
+        '~': 0   // not an operator, but needed as a stop character for name tokens
     };
 
     var escapes = {  // JSON string escape sequences - see json.org
@@ -164,6 +166,11 @@ var jsonata = (function() {
             if (prefix !== true && currentChar === '/') {
                 position++;
                 return create('regex', scanRegex());
+            }
+            if (currentChar === '~' && path.charAt(position + 1) === '>') {
+                // ~> function application operator
+                position += 2;
+                return create('operator', '~>');
             }
             // test for operators
             if (operators.hasOwnProperty(currentChar)) {
@@ -467,6 +474,7 @@ var jsonata = (function() {
         infix("in"); // is member of array
         infixr(":="); // bind variable
         prefix("-"); // unary numeric negation
+        infix("~>"); // function application
 
         // field wildcard (single level)
         prefix('*', function () {
@@ -846,6 +854,10 @@ var jsonata = (function() {
         return expr;
     };
 
+// Start of Evaluator code
+
+    var staticFrame = createFrame(null);
+
     /**
      * Check if value is a finite number
      * @param {float} n - number to evaluate
@@ -884,8 +896,8 @@ var jsonata = (function() {
     /* istanbul ignore next */
     Number.isInteger = Number.isInteger || function(value) {
         return typeof value === "number" &&
-            isFinite(value) &&
-            Math.floor(value) === value;
+          isFinite(value) &&
+          Math.floor(value) === value;
     };
 
     /**
@@ -1148,6 +1160,9 @@ var jsonata = (function() {
                 break;
             case 'in':
                 result = evaluateIncludesExpression(expr, input, environment);
+                break;
+            case '~>':
+                result = evaluateApplyExpression(expr, input, environment);
                 break;
         }
         return result;
@@ -1733,20 +1748,101 @@ var jsonata = (function() {
         return result;
     }
 
+    var chain = evaluate(parser('function($f, $g) { function($x){ $g($f($x)) } }'), null, staticFrame);
+    var partial1 = parser('type = "partial" and $count(arguments[type="operator" and value="?"]) =  1');
+    var invokePartial = parser('$[0]($[1])');
+
+
     /**
-     * Evaluate function against input data
+     * Apply the function on the RHS using the sequence on the LHS as the first argument
      * @param {Object} expr - JSONata expression
      * @param {Object} input - Input data to evaluate against
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function evaluateFunction(expr, input, environment) {
+    function evaluateApplyExpression(expr, input, environment) {
+        var result;
+
+        var arg1 = evaluate(expr.lhs, input, environment);
+
+        if(expr.rhs.type === 'function') {
+            // this is a function _invocation_; invoke it with arg1 at the start
+            result = evaluateFunction(expr.rhs, input, environment, arg1);
+        } else if(evaluate(partial1, expr.rhs, environment)) {
+            var partial = evaluatePartialApplication(expr.rhs, input, environment);
+            result = evaluate(invokePartial, [partial, arg1], environment);
+        } else {
+            var func = evaluate(expr.rhs, input, environment);
+
+            if(!isFunction(func)) {
+                throw {
+                    message: 'RHS of function application operator ~> is not a function',
+                    stack: (new Error()).stack,
+                    position: expr.position,
+                    value: func
+                };
+            }
+
+            if(isFunction(arg1)) {
+                // this is function chaining (func1 ~> func2)
+                // λ($f, $g) { λ($x){ $g($f($x)) } }
+                result = apply(chain, [arg1, func], environment, null);
+            } else {
+                result = apply(func, [arg1], environment, null);
+            }
+
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param {Object} arg - expression to test
+     * @returns {boolean} - true if it is a function (lambda or built-in)
+     */
+    function isFunction(arg) {
+        return (typeof arg === 'function' || isLambda(arg));
+    }
+
+    /**
+     * Tests whether arg is a lambda function
+     * @param {*} arg - the value to test
+     * @returns {boolean} - true if it is a lambda function
+     */
+    function isLambda(arg) {
+        var result = false;
+        if(arg && typeof arg === 'object' &&
+          arg.lambda === true &&
+          arg.hasOwnProperty('input') &&
+          arg.hasOwnProperty('arguments') &&
+          arg.hasOwnProperty('environment') &&
+          arg.hasOwnProperty('body')) {
+            result = true;
+        }
+
+        return result;
+    }
+
+    /**
+     * Evaluate function against input data
+     * @param {Object} expr - JSONata expression
+     * @param {Object} input - Input data to evaluate against
+     * @param {Object} environment - Environment
+     * @param {Object} [applyto] - LHS of ~> operator
+     * @returns {*} Evaluated input data
+     */
+    function evaluateFunction(expr, input, environment, applyto) {
         var result;
         // evaluate the arguments
         var evaluatedArgs = [];
         expr.arguments.forEach(function (arg) {
             evaluatedArgs.push(evaluate(arg, input, environment));
         });
+        if(applyto) {
+            // insert the first argument from the LHS of ~>
+            evaluatedArgs.unshift(applyto);
+        }
         // lambda function on lhs
         // create the procedure
         // can't assume that expr.procedure is a lambda type directly
@@ -1992,25 +2088,6 @@ var jsonata = (function() {
     }
 
     /**
-     * Tests whether arg is a lambda function
-     * @param {*} arg - the value to test
-     * @returns {boolean} - true if it is a lambda function
-     */
-    function isLambda(arg) {
-        var result = false;
-        if(arg && typeof arg === 'object' &&
-          arg.lambda === true &&
-          arg.hasOwnProperty('input') &&
-          arg.hasOwnProperty('arguments') &&
-          arg.hasOwnProperty('environment') &&
-          arg.hasOwnProperty('body')) {
-            result = true;
-        }
-
-        return result;
-    }
-
-    /**
      * Sum function
      * @param {Object} args - Arguments
      * @returns {number} Total value of arguments
@@ -2206,7 +2283,7 @@ var jsonata = (function() {
         if (typeof arg === 'string') {
             // already a string
             str = arg;
-        } else if(typeof arg === 'function' || isLambda(arg)) {
+        } else if(isFunction(arg)) {
             // functions (built-in and lambda convert to empty string
             str = '';
         } else if (typeof arg === 'number' && !isFinite(arg)) {
@@ -2887,7 +2964,7 @@ var jsonata = (function() {
             result = parseFloat(arg);
         } else {
             throw {
-                message: "Unable to cast value to a number",
+                message: "Unable to cast value to a number: " + arg,
                 value: arg,
                 stack: (new Error()).stack
             };
@@ -2964,16 +3041,18 @@ var jsonata = (function() {
     /**
      * Create a map from an array of arguments
      * @param {Function} func - function to apply
+     * @param {Array} [arr] - array to map over
      * @returns {Array} Map array
      */
-    function functionMap(func) {
+    function functionMap(func, arr) {
         // this can take a variable number of arguments - each one should be mapped to the equivalent arg of func
         // assert that func is a function
         var varargs = arguments;
         var result = [];
 
         // each subsequent arg must be an array - coerce if not
-        var args = [];
+        var args = arr;
+        args = [];
         for (var ii = 1; ii < varargs.length; ii++) {
             if (Array.isArray(varargs[ii])) {
                 args.push(varargs[ii]);
@@ -2986,11 +3065,12 @@ var jsonata = (function() {
         if (args.length > 0) {
             for (var i = 0; i < args[0].length; i++) {
                 var func_args = [];
-                for (var j = 0; j < func.arguments.length; j++) {
+                var length = typeof func === 'function' ? func.length : func.arguments.length;
+                for (var j = 0; j < length; j++) {
                     func_args.push(args[j][i]);
                 }
                 // invoke func
-                result.push(apply(func, func_args, null, null));
+                result.push(apply(func, func_args, null));
             }
         }
         return result;
@@ -3027,7 +3107,7 @@ var jsonata = (function() {
         }
 
         while (index < sequence.length) {
-            result = apply(func, [result, sequence[index]], null, null);
+            result = apply(func, [result, sequence[index]], null);
             index++;
         }
 
@@ -3168,8 +3248,6 @@ var jsonata = (function() {
             }
         };
     }
-
-    var staticFrame = createFrame(null);
 
     staticFrame.bind('sum', functionSum);
     staticFrame.bind('count', functionCount);

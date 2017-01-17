@@ -6697,6 +6697,15 @@ describe('HOF - map', function () {
         });
     });
 
+    describe('map string function', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$map($string, [1,2,3])');
+            var result = expr.evaluate(null);
+            var expected = ['1','2','3'];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
 });
 
 describe('HOF - reduce', function () {
@@ -7333,7 +7342,7 @@ describe('Regex', function () {
             it('should return result object', function () {
                 var expr = jsonata('Account.Order.Product.$replace($."Product Name", /hat/i, function($match) { "foo" })');
                 var result = expr.evaluate(testdata2);
-                var expected = ["Bowler foo","Trilby foo","Bowler foo","Cloak"];
+                var expected = ["Bowler foo", "Trilby foo", "Bowler foo", "Cloak"];
                 assert.equal(JSON.stringify(result), JSON.stringify(expected));
             });
         });
@@ -7342,7 +7351,7 @@ describe('Regex', function () {
             it('should return result object', function () {
                 var expr = jsonata('Account.Order.Product.$replace($."Product Name", /(h)(at)/i, function($match) { $uppercase($match.match) })');
                 var result = expr.evaluate(testdata2);
-                var expected = ["Bowler HAT","Trilby HAT","Bowler HAT","Cloak"];
+                var expected = ["Bowler HAT", "Trilby HAT", "Bowler HAT", "Cloak"];
                 assert.equal(JSON.stringify(result), JSON.stringify(expected));
             });
         });
@@ -7379,6 +7388,191 @@ describe('Regex', function () {
         });
 
     });
+});
+
+describe('Evaluator - function application operator', function () {
+    describe('Account.Order[0].OrderID ~> $uppercase()', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order[0].OrderID ~> $uppercase()');
+            var result = expr.evaluate(testdata2);
+            var expected = "ORDER103";
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Account.Order[0].OrderID ~> $uppercase() ~> $lowercase()', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order[0].OrderID ~> $uppercase() ~> $lowercase()');
+            var result = expr.evaluate(testdata2);
+            var expected = "order103";
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Account.Order.OrderID ~> $join()', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.OrderID ~> $join()');
+            var result = expr.evaluate(testdata2);
+            var expected = "order103order104";
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Account.Order.OrderID ~> $join(", ")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.OrderID ~> $join(", ")');
+            var result = expr.evaluate(testdata2);
+            var expected = "order103, order104";
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('Account.Order.Product.(Price * Quantity) ~> $sum()', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.Product.(Price * Quantity) ~> $sum()');
+            var result = expr.evaluate(testdata2);
+            var expected = 336.36;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('( $square := function($x){$x*$x}; [1..5] ~> $map($square, ?) ) ', function () {
+        it('should return result object', function () {
+            var expr = jsonata('( $square := function($x){$x*$x}; [1..5] ~> $map($square, ?) ) ');
+            var result = expr.evaluate();
+            var expected = [1, 4, 9, 16, 25];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('( $square := function($x){$x*$x}; [1..5] ~> $map($square, ?) ~> $sum() ) ', function () {
+        it('should return result object', function () {
+            var expr = jsonata('( $square := function($x){$x*$x}; [1..5] ~> $map($square, ?) ~> $sum() ) ');
+            var result = expr.evaluate();
+            var expected = 55;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('op chaining - reduce array of 2 functions', function () {
+        it('should return result object', function () {
+            var expr = jsonata('(' +
+              '$square := function($x){$x*$x};' +
+              '$chain := λ($f, $g){λ($x){$g($f($x))}};' +
+              '$instructions := [$sum, $square];' +
+              '$sumsq := $instructions ~> $reduce($chain, ?);' +
+              '[1..5] ~> $sumsq()' +
+              ') ');
+            var result = expr.evaluate();
+            var expected = 225;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('op chaining - reduce array of 3 functions', function () {
+        it('should return result object', function () {
+            var expr = jsonata('(' +
+              '$square := function($x){$x*$x};' +
+              '$chain := λ($f, $g){λ($x){ $x ~> $f ~> $g }};' +
+              '$instructions := [$sum, $square, $string];' +
+              '$sumsq := $instructions ~> $reduce($chain, ?);' +
+              '[1..5] ~> $sumsq()' +
+              ') ');
+            var result = expr.evaluate();
+            var expected = "225";
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('op chaining - square the sum', function () {
+        it('should return result object', function () {
+            var expr = jsonata('(' +
+              '$square := function($x){$x*$x};' +
+              '$instructions := $sum ~> $square;' +
+              '[1..5] ~> $instructions()' +
+              ')  ');
+            var result = expr.evaluate();
+            var expected = 225;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('op chaining - sum of squares', function () {
+        it('should return result object', function () {
+            var expr = jsonata('(' +
+              '$square := function($x){$x*$x};' +
+              '$sum_of_squares := $map($square, ?) ~> $sum;' +
+              '[1..5] ~> $sum_of_squares()' +
+              ')  ');
+            var result = expr.evaluate();
+            var expected = 55;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('op chaining - map/reduce 2', function () {
+        it('should return result object', function () {
+            var expr = jsonata('(' +
+              '$times := λ($x, $y) { $x * $y };' +
+              '$product := $reduce($times, ?);' +
+              '$square := function($x){$x*$x};' +
+              '$product_of_squares := $map($square, ?) ~> $product;' +
+              '[1..5] ~> $product_of_squares()' +
+              ')');
+            var result = expr.evaluate();
+            var expected = 14400;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('op chaining - map/reduce 3', function () {
+        it('should return result object', function () {
+            var expr = jsonata('(' +
+              '$square := function($x){$x*$x};' +
+              '[1..5] ~> $map($square, ?) ~> $reduce(λ($x, $y) { $x * $y }, ?);' +
+              ')');
+            var result = expr.evaluate();
+            var expected = 14400;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('op chaining - 3 arg map', function () {
+        it('should return result object', function () {
+            var expr = jsonata('(' +
+              '$prices := Account.Order.Product.Price;' +
+              '$quantities := Account.Order.Product.Quantity;' +
+              '$product := λ($x, $y) { $x * $y };' +
+              '$map($product, $prices, $quantities) ~> $sum()' +
+              ')');
+            var result = expr.evaluate(testdata2);
+            var expected = 336.36;
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
+    describe('42 ~> "hello"', function () {
+        it('should return result object', function () {
+            var expr = jsonata('42 ~> "hello"');
+            expect(function () {
+                expr.evaluate(testdata2);
+            }).to.throw()
+              .to.deep.contain({position: 5, value: "hello"})
+              .to.have.property('message').to.match(/RHS of function application operator ~> is not a function/);
+        });
+    });
+});
+
+describe('~> /regex/', function () {
+    describe('Account.Order.Product[$."Product Name" ~> /hat/i].ProductID', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.Product[$."Product Name" ~> /hat/i].ProductID');
+            var result = expr.evaluate(testdata2);
+            var expected = [858383,858236,858383];
+            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+        });
+    });
+
 });
 
 describe('Transform', function () {
