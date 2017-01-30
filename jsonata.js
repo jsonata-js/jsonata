@@ -84,38 +84,13 @@ var jsonata = (function() {
                 position++;
                 currentChar = path.charAt(position);
             }
-            // handle double-char operators
-            if (currentChar === '.' && path.charAt(position + 1) === '.') {
-                // double-dot .. range operator
+            // test for double-char operators
+            var doublechar = currentChar + path.charAt(position + 1);
+            if(doublechar.length === 2 && operators.hasOwnProperty(doublechar) ) {
                 position += 2;
-                return create('operator', '..');
+                return create('operator', doublechar);
             }
-            if (currentChar === ':' && path.charAt(position + 1) === '=') {
-                // := assignment
-                position += 2;
-                return create('operator', ':=');
-            }
-            if (currentChar === '!' && path.charAt(position + 1) === '=') {
-                // !=
-                position += 2;
-                return create('operator', '!=');
-            }
-            if (currentChar === '>' && path.charAt(position + 1) === '=') {
-                // >=
-                position += 2;
-                return create('operator', '>=');
-            }
-            if (currentChar === '<' && path.charAt(position + 1) === '=') {
-                // <=
-                position += 2;
-                return create('operator', '<=');
-            }
-            if (currentChar === '*' && path.charAt(position + 1) === '*') {
-                // **  descendant wildcard
-                position += 2;
-                return create('operator', '**');
-            }
-            // test for operators
+            // test for single char operators
             if (operators.hasOwnProperty(currentChar)) {
                 position++;
                 return create('operator', currentChar);
@@ -205,8 +180,6 @@ var jsonata = (function() {
                         position = i;
                         switch (name) {
                             case 'and':
-                            case 'or':
-                            case 'in':
                                 return create('operator', name);
                             case 'true':
                                 return create('value', true);
