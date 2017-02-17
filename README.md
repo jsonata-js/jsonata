@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/jsonata-js/jsonata.svg)](https://travis-ci.org/jsonata-js/jsonata)
 [![Coverage Status](https://coveralls.io/repos/github/jsonata-js/jsonata/badge.svg?branch=master)](https://coveralls.io/github/jsonata-js/jsonata?branch=master)
 
-JSON query and transformation language
+JSON query and transformation language - [http://jsonata.org/](http://jsonata.org/)
 
 ## Introduction
 JSONata is a lightweight query and transformation language for JSON data.
@@ -87,9 +87,8 @@ For example:
 `{ "position": 16, "token": "}", "value": "]", "message": "Syntax error: expected ']' got '}'" }`
 
 ## More Information
-Tutorial [tutorial.md](tutorial.md)
-Function library [functions.md](functions.md)
-JSONata [Tech Talk](https://developer.ibm.com/open/videos/dw-open-tech-talk-jsonata/) 
+- JSONata [Documentation](http://docs.jsonata.org/)
+- JSONata [Tech Talk](https://developer.ibm.com/open/videos/dw-open-tech-talk-jsonata/) 
 
 ## Contributing
 See the [CONTRIBUTING.md](CONTRIBUTING.md) for details of how to contribute to this repo.
