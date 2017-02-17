@@ -288,14 +288,16 @@ function timeboxExpression(expr, timeout, maxDepth) {
             // stack too deep
             throw {
                 message: 'Stack overflow error: Check for non-terminating recursive function.  Consider rewriting as tail-recursive.',
-                stack: (new Error()).stack
+                stack: (new Error()).stack,
+                code: 'U1001'
             };
         }
         if(Date.now() - time > timeout) {
             // expression has run for too long
             throw {
                 message: "Expression evaluation timeout: Check for infinite loop",
-                stack: (new Error()).stack
+                stack: (new Error()).stack,
+                code: 'U1001'
             };
         }
 
@@ -319,7 +321,7 @@ describe('Evaluator - simple literals', function () {
             var expr = jsonata('"hello"');
             var result = expr.evaluate(testdata1);
             var expected = 'hello';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -328,7 +330,7 @@ describe('Evaluator - simple literals', function () {
             var expr = jsonata("'hello'");
             var result = expr.evaluate(testdata1);
             var expected = 'hello';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -337,7 +339,7 @@ describe('Evaluator - simple literals', function () {
             var expr = jsonata('"Wayne\'s World"');
             var result = expr.evaluate(testdata1);
             var expected = "Wayne's World";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -346,7 +348,7 @@ describe('Evaluator - simple literals', function () {
             var expr = jsonata('42');
             var result = expr.evaluate(testdata1);
             var expected = 42;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -355,7 +357,7 @@ describe('Evaluator - simple literals', function () {
             var expr = jsonata('-42');
             var result = expr.evaluate(testdata1);
             var expected = -42;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -364,7 +366,7 @@ describe('Evaluator - simple literals', function () {
             var expr = jsonata('3.14159');
             var result = expr.evaluate(testdata1);
             var expected = 3.14159;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -373,7 +375,7 @@ describe('Evaluator - simple literals', function () {
             var expr = jsonata('6.022e23');
             var result = expr.evaluate(testdata1);
             var expected = 6.022e23;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -382,7 +384,7 @@ describe('Evaluator - simple literals', function () {
             var expr = jsonata('1.602E-19');
             var result = expr.evaluate(testdata1);
             var expected = 1.602E-19;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -391,8 +393,7 @@ describe('Evaluator - simple literals', function () {
             expect(function () {
                 jsonata('10e1000');
             }).to.throw()
-                .to.deep.contain({position: 0, token: '10e1000'})
-                .to.have.property('message').to.match(/Number out of range:/);
+                .to.deep.contain({position: 0, code: 'S0102', token: '10e1000'});
         });
     });
 
@@ -404,7 +405,7 @@ describe('Evaluator - string literals, escape sequences', function () {
             var expr = jsonata('"hello\\tworld"');
             var result = expr.evaluate(testdata1);
             var expected = 'hello\tworld';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -413,7 +414,7 @@ describe('Evaluator - string literals, escape sequences', function () {
             var expr = jsonata('"hello\\nworld"');
             var result = expr.evaluate(testdata1);
             var expected = 'hello\nworld';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -422,7 +423,7 @@ describe('Evaluator - string literals, escape sequences', function () {
             var expr = jsonata('"hello \\"world\\""');
             var result = expr.evaluate(testdata1);
             var expected = 'hello "world"';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -431,7 +432,7 @@ describe('Evaluator - string literals, escape sequences', function () {
             var expr = jsonata('"\\u03BB-calculus rocks"');
             var result = expr.evaluate(testdata1);
             var expected = 'λ-calculus rocks';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -440,7 +441,7 @@ describe('Evaluator - string literals, escape sequences', function () {
             var expr = jsonata('"\uD834\uDD1E"');
             var result = expr.evaluate(testdata1);
             var expected = '𝄞';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -449,8 +450,7 @@ describe('Evaluator - string literals, escape sequences', function () {
             expect(function () {
                 jsonata('"\\y"');
             }).to.throw()
-                .to.deep.contain({position: 2, token: 'y'})
-                .to.have.property('message').to.match(/unsupported escape sequence:/);
+                .to.deep.contain({position: 2, code: 'S0103', token: 'y'});
         });
     });
 
@@ -459,8 +459,7 @@ describe('Evaluator - string literals, escape sequences', function () {
             expect(function () {
                 jsonata('"\\u"');
             }).to.throw()
-                .to.deep.contain({position: 2})
-                .to.have.property('message').to.match(/The escape sequence \\u must be followed by 4 hex digits/);
+                .to.deep.contain({position: 2, code: 'S0104'});
         });
     });
 
@@ -469,8 +468,7 @@ describe('Evaluator - string literals, escape sequences', function () {
             expect(function () {
                 jsonata('"\\u123t"');
             }).to.throw()
-                .to.deep.contain({position: 2})
-                .to.have.property('message').to.match(/The escape sequence \\u must be followed by 4 hex digits/);
+                .to.deep.contain({position: 2, code: 'S0104'});
         });
     });
 
@@ -482,7 +480,7 @@ describe('Evaluator - simple field syntax', function () {
             var expr = jsonata('foo.bar');
             var result = expr.evaluate(testdata1);
             var expected = 42;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -493,7 +491,7 @@ describe('Evaluator - simple field syntax', function () {
             var expected = [{baz: {fud: 'hello'}},
                 {baz: {fud: 'world'}},
                 {bazz: 'gotcha'}];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -502,7 +500,7 @@ describe('Evaluator - simple field syntax', function () {
             var expr = jsonata('foo.blah.bazz');
             var result = expr.evaluate(testdata1);
             var expected = "gotcha";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -511,7 +509,7 @@ describe('Evaluator - simple field syntax', function () {
             var expr = jsonata('foo.blah.baz');
             var result = expr.evaluate(testdata1);
             var expected = [{fud: 'hello'}, {fud: 'world'}];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -520,7 +518,7 @@ describe('Evaluator - simple field syntax', function () {
             var expr = jsonata('foo.blah.baz.fud');
             var result = expr.evaluate(testdata1);
             var expected = ['hello', 'world'];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -529,7 +527,7 @@ describe('Evaluator - simple field syntax', function () {
             var expr = jsonata('Other.Misc');
             var result = expr.evaluate(testdata4);
             var expected = null;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -554,7 +552,7 @@ describe('Evaluator - simple field syntax', function () {
                 ]
             ]);
             var expected = "gotcha";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -590,7 +588,7 @@ describe('Evaluator - simple field syntax', function () {
                 "gotcha"
             ]);
             var expected = ["hello", "world"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -604,7 +602,7 @@ describe('Evaluator - parenthesis', function () {
             var expr = jsonata('foo.(blah).baz.fud');
             var result = expr.evaluate(testdata1);
             var expected = ['hello', 'world'];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -613,7 +611,7 @@ describe('Evaluator - parenthesis', function () {
             var expr = jsonata('foo.(blah.baz).fud');
             var result = expr.evaluate(testdata1);
             var expected = ['hello', 'world'];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -622,7 +620,7 @@ describe('Evaluator - parenthesis', function () {
             var expr = jsonata('(foo.blah.baz).fud');
             var result = expr.evaluate(testdata1);
             var expected = ['hello', 'world'];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -631,7 +629,7 @@ describe('Evaluator - parenthesis', function () {
             var expr = jsonata('foo.blah.(baz.fud)');
             var result = expr.evaluate(testdata1);
             var expected = ['hello', 'world'];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -640,7 +638,7 @@ describe('Evaluator - parenthesis', function () {
             var expr = jsonata('(foo.blah.baz.fud)');
             var result = expr.evaluate(testdata1);
             var expected = ['hello', 'world'];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -649,7 +647,7 @@ describe('Evaluator - parenthesis', function () {
             var expr = jsonata('(foo).(blah).baz.(fud)');
             var result = expr.evaluate(testdata1);
             var expected = ['hello', 'world'];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -658,7 +656,7 @@ describe('Evaluator - parenthesis', function () {
             var expr = jsonata('(foo.(blah).baz.fud)');
             var result = expr.evaluate(testdata1);
             var expected = ['hello', 'world'];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -671,7 +669,7 @@ describe('Evaluator - simple array selectors', function () {
             var expr = jsonata('nest0.nest1[0]');
             var result = expr.evaluate(testdata3b);
             var expected = [1, 3, 5, 6];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -680,7 +678,7 @@ describe('Evaluator - simple array selectors', function () {
             var expr = jsonata('foo.blah[0].baz.fud');
             var result = expr.evaluate(testdata1);
             var expected = 'hello';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -689,7 +687,7 @@ describe('Evaluator - simple array selectors', function () {
             var expr = jsonata('foo.blah[1].baz.fud');
             var result = expr.evaluate(testdata1);
             var expected = 'world';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -698,7 +696,7 @@ describe('Evaluator - simple array selectors', function () {
             var expr = jsonata('foo.blah[-1].bazz');
             var result = expr.evaluate(testdata1);
             var expected = 'gotcha';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -707,7 +705,7 @@ describe('Evaluator - simple array selectors', function () {
             var expr = jsonata('(foo.blah)[1].baz.fud');
             var result = expr.evaluate(testdata1);
             var expected = 'world';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -716,7 +714,7 @@ describe('Evaluator - simple array selectors', function () {
             var expr = jsonata('foo.blah.baz.fud[0]');
             var result = expr.evaluate(testdata1);
             var expected = ['hello', 'world'];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -725,7 +723,7 @@ describe('Evaluator - simple array selectors', function () {
             var expr = jsonata('foo.blah.baz.fud[-1]');
             var result = expr.evaluate(testdata1);
             var expected = ['hello', 'world'];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -734,7 +732,7 @@ describe('Evaluator - simple array selectors', function () {
             var expr = jsonata('(foo.blah.baz.fud)[0]');
             var result = expr.evaluate(testdata1);
             var expected = 'hello';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -743,7 +741,7 @@ describe('Evaluator - simple array selectors', function () {
             var expr = jsonata('(foo.blah.baz.fud)[1]');
             var result = expr.evaluate(testdata1);
             var expected = 'world';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -752,7 +750,7 @@ describe('Evaluator - simple array selectors', function () {
             var expr = jsonata('(foo.blah.baz.fud)[5 * 0.2]');
             var result = expr.evaluate(testdata1);
             var expected = 'world';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -761,7 +759,7 @@ describe('Evaluator - simple array selectors', function () {
             var expr = jsonata('(foo.blah.baz.fud)[-1]');
             var result = expr.evaluate(testdata1);
             var expected = 'world';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -770,7 +768,7 @@ describe('Evaluator - simple array selectors', function () {
             var expr = jsonata('(foo.blah.baz.fud)[-2]');
             var result = expr.evaluate(testdata1);
             var expected = 'hello';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -779,7 +777,7 @@ describe('Evaluator - simple array selectors', function () {
             var expr = jsonata('(foo.blah.baz.fud)[2-4]');
             var result = expr.evaluate(testdata1);
             var expected = 'hello';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -788,7 +786,7 @@ describe('Evaluator - simple array selectors', function () {
             var expr = jsonata('(foo.blah.baz.fud)[-(4-2)]');
             var result = expr.evaluate(testdata1);
             var expected = 'hello';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -797,7 +795,7 @@ describe('Evaluator - simple array selectors', function () {
             var expr = jsonata('(foo.blah.baz.fud)[$$.foo.bar / 30]');
             var result = expr.evaluate(testdata1);
             var expected = 'world';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -806,7 +804,7 @@ describe('Evaluator - simple array selectors', function () {
             var expr = jsonata('foo.blah[0].baz');
             var result = expr.evaluate(testdata1);
             var expected = {fud: 'hello'};
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -815,7 +813,7 @@ describe('Evaluator - simple array selectors', function () {
             var expr = jsonata('foo.blah.baz[0]');
             var result = expr.evaluate(testdata1);
             var expected = [{fud: 'hello'}, {fud: 'world'}];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -824,7 +822,7 @@ describe('Evaluator - simple array selectors', function () {
             var expr = jsonata('(foo.blah.baz)[0]');
             var result = expr.evaluate(testdata1);
             var expected = {fud: 'hello'};
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -833,7 +831,7 @@ describe('Evaluator - simple array selectors', function () {
             var expr = jsonata('$[0]');
             var result = expr.evaluate([[1, 2], [3, 4]]);
             var expected = [1, 2];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -842,7 +840,7 @@ describe('Evaluator - simple array selectors', function () {
             var expr = jsonata('$[1]');
             var result = expr.evaluate([[1, 2], [3, 4]]);
             var expected = [3, 4];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -851,7 +849,7 @@ describe('Evaluator - simple array selectors', function () {
             var expr = jsonata('$[-1]');
             var result = expr.evaluate([[1, 2], [3, 4]]);
             var expected = [3, 4];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -860,7 +858,7 @@ describe('Evaluator - simple array selectors', function () {
             var expr = jsonata('$[1][0]');
             var result = expr.evaluate([[1, 2], [3, 4]]);
             var expected = 3;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -869,7 +867,7 @@ describe('Evaluator - simple array selectors', function () {
             var expr = jsonata('$[1.1][0.9]');
             var result = expr.evaluate([[1, 2], [3, 4]]);
             var expected = 3;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -882,7 +880,7 @@ describe('Evaluator - multiple array selectors', function () {
             var expr = jsonata('[1..10][[1..3,8,-1]]');
             var result = expr.evaluate();
             var expected = [2, 3, 4, 9, 10];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -891,7 +889,7 @@ describe('Evaluator - multiple array selectors', function () {
             var expr = jsonata('[1..10][[1..3,8,5]]');
             var result = expr.evaluate();
             var expected = [2, 3, 4, 6, 9];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -900,7 +898,7 @@ describe('Evaluator - multiple array selectors', function () {
             var expr = jsonata('[1..10][[1..3,8,false]]');
             var result = expr.evaluate();
             var expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -914,7 +912,7 @@ describe('Evaluator - quoted object selectors', function () {
             var expected = [{baz: {fud: 'hello'}},
                 {baz: {fud: 'world'}},
                 {bazz: 'gotcha'}];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -923,7 +921,7 @@ describe('Evaluator - quoted object selectors', function () {
             var expr = jsonata('foo."blah".baz.\'fud\'');
             var result = expr.evaluate(testdata1);
             var expected = ['hello', 'world'];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -932,7 +930,7 @@ describe('Evaluator - quoted object selectors', function () {
             var expr = jsonata('"foo"."blah"."baz"."fud"');
             var result = expr.evaluate(testdata1);
             var expected = ['hello', 'world'];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -941,7 +939,7 @@ describe('Evaluator - quoted object selectors', function () {
             var expr = jsonata('foo."blah.baz"');
             var result = expr.evaluate(testdata1);
             var expected = 'here';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 });
@@ -952,7 +950,7 @@ describe('Evaluator - numeric operators', function () {
             var expr = jsonata('foo.bar + bar');
             var result = expr.evaluate(testdata1);
             var expected = 140;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -961,7 +959,7 @@ describe('Evaluator - numeric operators', function () {
             var expr = jsonata('bar + foo.bar');
             var result = expr.evaluate(testdata1);
             var expected = 140;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -970,7 +968,7 @@ describe('Evaluator - numeric operators', function () {
             var expr = jsonata('foo.bar - bar');
             var result = expr.evaluate(testdata1);
             var expected = -56;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -979,7 +977,7 @@ describe('Evaluator - numeric operators', function () {
             var expr = jsonata('bar - foo.bar');
             var result = expr.evaluate(testdata1);
             var expected = 56;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -988,7 +986,7 @@ describe('Evaluator - numeric operators', function () {
             var expr = jsonata('foo.bar * bar');
             var result = expr.evaluate(testdata1);
             var expected = 4116;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -997,7 +995,7 @@ describe('Evaluator - numeric operators', function () {
             var expr = jsonata('bar * foo.bar');
             var result = expr.evaluate(testdata1);
             var expected = 4116;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1006,7 +1004,7 @@ describe('Evaluator - numeric operators', function () {
             var expr = jsonata('foo.bar / bar');
             var result = expr.evaluate(testdata1);
             var expected = 0.42857142857142855;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1015,7 +1013,7 @@ describe('Evaluator - numeric operators', function () {
             var expr = jsonata('bar / foo.bar');
             var result = expr.evaluate(testdata1);
             var expected = 2.3333333333333335;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1024,7 +1022,7 @@ describe('Evaluator - numeric operators', function () {
             var expr = jsonata('foo.bar % bar');
             var result = expr.evaluate(testdata1);
             var expected = 42;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1033,7 +1031,7 @@ describe('Evaluator - numeric operators', function () {
             var expr = jsonata('bar % foo.bar');
             var result = expr.evaluate(testdata1);
             var expected = 14;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1042,7 +1040,7 @@ describe('Evaluator - numeric operators', function () {
             var expr = jsonata('bar + foo.bar * bar');
             var result = expr.evaluate(testdata1);
             var expected = 4214;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1051,7 +1049,7 @@ describe('Evaluator - numeric operators', function () {
             var expr = jsonata('foo.bar * bar + bar');
             var result = expr.evaluate(testdata1);
             var expected = 4214;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1060,7 +1058,7 @@ describe('Evaluator - numeric operators', function () {
             var expr = jsonata('24 * notexist');
             var result = expr.evaluate(testdata1);
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1069,7 +1067,7 @@ describe('Evaluator - numeric operators', function () {
             var expr = jsonata('notexist + 1');
             var result = expr.evaluate(testdata1);
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1079,8 +1077,7 @@ describe('Evaluator - numeric operators', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({value: Infinity})
-                .to.have.property('message').to.match(/Number out of range/);
+                .to.deep.contain({/*position: 0, */value: Infinity, code: 'D1001'});
         });
     });
 
@@ -1090,8 +1087,7 @@ describe('Evaluator - numeric operators', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 5})
-              .to.have.property('message').to.match(/LHS of \+ operator must evaluate to a number/);
+              .to.deep.contain({position: 5, code: 'T2001'});
         });
     });
 
@@ -1104,7 +1100,7 @@ describe('Evaluator - comparison operators', function () {
             var expr = jsonata('foo.bar > bar');
             var result = expr.evaluate(testdata1);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1113,7 +1109,7 @@ describe('Evaluator - comparison operators', function () {
             var expr = jsonata('foo.bar >= bar');
             var result = expr.evaluate(testdata1);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1122,7 +1118,7 @@ describe('Evaluator - comparison operators', function () {
             var expr = jsonata('foo.bar<bar');
             var result = expr.evaluate(testdata1);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1131,7 +1127,7 @@ describe('Evaluator - comparison operators', function () {
             var expr = jsonata('foo.bar<=bar');
             var result = expr.evaluate(testdata1);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1140,7 +1136,7 @@ describe('Evaluator - comparison operators', function () {
             var expr = jsonata('bar>foo.bar');
             var result = expr.evaluate(testdata1);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1149,7 +1145,7 @@ describe('Evaluator - comparison operators', function () {
             var expr = jsonata('bar < foo.bar');
             var result = expr.evaluate(testdata1);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1158,7 +1154,7 @@ describe('Evaluator - comparison operators', function () {
             var expr = jsonata('foo.bar = bar');
             var result = expr.evaluate(testdata1);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1167,7 +1163,7 @@ describe('Evaluator - comparison operators', function () {
             var expr = jsonata('foo.bar!= bar');
             var result = expr.evaluate(testdata1);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1176,7 +1172,7 @@ describe('Evaluator - comparison operators', function () {
             var expr = jsonata('bar = foo.bar + 56');
             var result = expr.evaluate(testdata1);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1185,7 +1181,7 @@ describe('Evaluator - comparison operators', function () {
             var expr = jsonata('bar !=foo.bar + 56');
             var result = expr.evaluate(testdata1);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1194,7 +1190,7 @@ describe('Evaluator - comparison operators', function () {
             var expr = jsonata('foo.blah.baz[fud = "hello"]');
             var result = expr.evaluate(testdata1);
             var expected = {fud: 'hello'};
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1203,7 +1199,7 @@ describe('Evaluator - comparison operators', function () {
             var expr = jsonata('foo.blah.baz[fud != "world"]');
             var result = expr.evaluate(testdata1);
             var expected = {fud: 'hello'};
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1212,7 +1208,7 @@ describe('Evaluator - comparison operators', function () {
             var expr = jsonata('Account.Order.Product[Price > 30].Price');
             var result = expr.evaluate(testdata2);
             var expected = [34.45, 34.45, 107.99];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1221,7 +1217,7 @@ describe('Evaluator - comparison operators', function () {
             var expr = jsonata('Account.Order.Product.Price[$<=35]');
             var result = expr.evaluate(testdata2);
             var expected = [34.45, 21.67, 34.45];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1234,7 +1230,7 @@ describe('Evaluator - inclusion operator', function () {
             var expr = jsonata('1 in [1,2]');
             var result = expr.evaluate();
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1243,7 +1239,7 @@ describe('Evaluator - inclusion operator', function () {
             var expr = jsonata('3 in [1,2]');
             var result = expr.evaluate();
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1252,7 +1248,7 @@ describe('Evaluator - inclusion operator', function () {
             var expr = jsonata('"hello" in [1,2]');
             var result = expr.evaluate();
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1261,7 +1257,7 @@ describe('Evaluator - inclusion operator', function () {
             var expr = jsonata('"world" in ["hello", "world"]');
             var result = expr.evaluate();
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1270,7 +1266,7 @@ describe('Evaluator - inclusion operator', function () {
             var expr = jsonata('in in ["hello", "world"]');
             var result = expr.evaluate();
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1279,7 +1275,7 @@ describe('Evaluator - inclusion operator', function () {
             var expr = jsonata('"world" in in');
             var result = expr.evaluate();
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1288,7 +1284,7 @@ describe('Evaluator - inclusion operator', function () {
             var expr = jsonata('"hello" in "hello"');
             var result = expr.evaluate();
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1300,7 +1296,7 @@ describe('Evaluator - inclusion operator', function () {
                 "The AWK Programming Language",
                 "Compilers: Principles, Techniques, and Tools"
             ];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1314,7 +1310,7 @@ describe('Evaluator - predicates', function () {
             var expr = jsonata('nothing[x=6][y=3].number');
             var result = expr.evaluate();
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1323,7 +1319,7 @@ describe('Evaluator - predicates', function () {
             var expr = jsonata('clues[x=6][y=3].number');
             var result = expr.evaluate({clues: [{x: 6, y: 3, number: 7}]});
             var expected = 7;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1332,7 +1328,7 @@ describe('Evaluator - predicates', function () {
             var expr = jsonata('$[x=6][y=3].number');
             var result = expr.evaluate([{x: 6, y: 2, number: 7}]);
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1341,7 +1337,7 @@ describe('Evaluator - predicates', function () {
             var expr = jsonata('Account.Order.Product[$lowercase(Description.Colour) = "purple"][0].Price');
             var result = expr.evaluate(testdata2);
             var expected = [34.45, 34.45];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1354,7 +1350,7 @@ describe('Evaluator - wildcards', function () {
             var expr = jsonata('foo.*');
             var result = expr.evaluate(testdata1);
             var expected = [42, {"baz": {"fud": "hello"}}, {"baz": {"fud": "world"}}, {"bazz": "gotcha"}, "here"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1363,7 +1359,7 @@ describe('Evaluator - wildcards', function () {
             var expr = jsonata('foo.*.baz');
             var result = expr.evaluate(testdata1);
             var expected = [{fud: 'hello'}, {fud: 'world'}];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1372,7 +1368,7 @@ describe('Evaluator - wildcards', function () {
             var expr = jsonata('foo.*.bazz');
             var result = expr.evaluate(testdata1);
             var expected = 'gotcha';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1381,7 +1377,7 @@ describe('Evaluator - wildcards', function () {
             var expr = jsonata('foo.*.baz.*');
             var result = expr.evaluate(testdata1);
             var expected = ['hello', 'world'];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1390,7 +1386,7 @@ describe('Evaluator - wildcards', function () {
             var expr = jsonata('foo.*.baz.*');
             var result = expr.evaluate(testdata1);
             var expected = ['hello', 'world'];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1399,7 +1395,7 @@ describe('Evaluator - wildcards', function () {
             var expr = jsonata('foo.*.baz.*');
             var result = expr.evaluate(testdata1);
             var expected = ['hello', 'world'];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1408,7 +1404,7 @@ describe('Evaluator - wildcards', function () {
             var expr = jsonata('foo.*[0]');
             var result = expr.evaluate(testdata1);
             var expected = 42;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1429,7 +1425,7 @@ describe('Evaluator - wildcards', function () {
                     ]
                 }
             ];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1441,7 +1437,7 @@ describe('Evaluator - wildcards', function () {
                 34.45,
                 107.99
             ];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 });
@@ -1453,7 +1449,7 @@ describe('Evaluator - desendant operator', function () {
             var expr = jsonata('foo.**.blah');
             var result = expr.evaluate(testdata1);
             var expected = [{"baz": {"fud": "hello"}}, {"baz": {"fud": "world"}}, {"bazz": "gotcha"}];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1462,7 +1458,7 @@ describe('Evaluator - desendant operator', function () {
             var expr = jsonata('foo.**.baz');
             var result = expr.evaluate(testdata1);
             var expected = [{"fud": "hello"}, {"fud": "world"}];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1471,7 +1467,7 @@ describe('Evaluator - desendant operator', function () {
             var expr = jsonata('foo.**.fud');
             var result = expr.evaluate(testdata1);
             var expected = ["hello", "world"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1480,7 +1476,7 @@ describe('Evaluator - desendant operator', function () {
             var expr = jsonata('"foo".**.fud');
             var result = expr.evaluate(testdata1);
             var expected = ["hello", "world"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1489,7 +1485,7 @@ describe('Evaluator - desendant operator', function () {
             var expr = jsonata('foo.**."fud"');
             var result = expr.evaluate(testdata1);
             var expected = ["hello", "world"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1498,7 +1494,7 @@ describe('Evaluator - desendant operator', function () {
             var expr = jsonata('"foo".**."fud"');
             var result = expr.evaluate(testdata1);
             var expected = ["hello", "world"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1507,7 +1503,7 @@ describe('Evaluator - desendant operator', function () {
             var expr = jsonata('foo.*.**.fud');
             var result = expr.evaluate(testdata1);
             var expected = ["hello", "world"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1516,7 +1512,7 @@ describe('Evaluator - desendant operator', function () {
             var expr = jsonata('foo.**.*.fud');
             var result = expr.evaluate(testdata1);
             var expected = ["hello", "world"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1525,7 +1521,7 @@ describe('Evaluator - desendant operator', function () {
             var expr = jsonata('Account.Order.**.Colour');
             var result = expr.evaluate(testdata2);
             var expected = ["Purple", "Orange", "Purple", "Black"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1534,7 +1530,7 @@ describe('Evaluator - desendant operator', function () {
             var expr = jsonata('foo.**.fud[0]');
             var result = expr.evaluate(testdata1);
             var expected = ["hello", "world"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1543,7 +1539,7 @@ describe('Evaluator - desendant operator', function () {
             var expr = jsonata('(foo.**.fud)[0]');
             var result = expr.evaluate(testdata1);
             var expected = "hello";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1552,7 +1548,7 @@ describe('Evaluator - desendant operator', function () {
             var expr = jsonata('(**.fud)[0]');
             var result = expr.evaluate(testdata1);
             var expected = "hello";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1566,7 +1562,7 @@ describe('Evaluator - desendant operator', function () {
                 34.45,
                 107.99
             ];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1580,7 +1576,7 @@ describe('Evaluator - desendant operator', function () {
                 34.45,
                 107.99
             ];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1589,7 +1585,7 @@ describe('Evaluator - desendant operator', function () {
             var expr = jsonata('(**.Price)[0]');
             var result = expr.evaluate(testdata2);
             var expected = 34.45;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1598,7 +1594,7 @@ describe('Evaluator - desendant operator', function () {
             var expr = jsonata('**[2]');
             var result = expr.evaluate(testdata2);
             var expected = "Firefly";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1607,7 +1603,7 @@ describe('Evaluator - desendant operator', function () {
             var expr = jsonata('Account.Order.blah.**');
             var result = expr.evaluate(testdata2);
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1616,7 +1612,7 @@ describe('Evaluator - desendant operator', function () {
             var expr = jsonata('**');
             var result = expr.evaluate();
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1629,7 +1625,7 @@ describe('Evaluator - string concat', function () {
             var expr = jsonata('"foo" & "bar"');
             var result = expr.evaluate(testdata1);
             var expected = 'foobar';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1638,7 +1634,7 @@ describe('Evaluator - string concat', function () {
             var expr = jsonata('"foo"&"bar"');
             var result = expr.evaluate(testdata1);
             var expected = 'foobar';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1647,7 +1643,7 @@ describe('Evaluator - string concat', function () {
             var expr = jsonata('foo.blah[0].baz.fud &foo.blah[1].baz.fud');
             var result = expr.evaluate(testdata1);
             var expected = 'helloworld';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1656,7 +1652,7 @@ describe('Evaluator - string concat', function () {
             var expr = jsonata('foo.(blah[0].baz.fud & blah[1].baz.fud)');
             var result = expr.evaluate(testdata1);
             var expected = 'helloworld';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1665,7 +1661,7 @@ describe('Evaluator - string concat', function () {
             var expr = jsonata('foo.(blah[0].baz.fud & none)');
             var result = expr.evaluate(testdata1);
             var expected = 'hello';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1674,7 +1670,7 @@ describe('Evaluator - string concat', function () {
             var expr = jsonata('foo.(none.here & blah[1].baz.fud)');
             var result = expr.evaluate(testdata1);
             var expected = 'world';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1683,7 +1679,7 @@ describe('Evaluator - string concat', function () {
             var expr = jsonata('[1,2]&[3,4]');
             var result = expr.evaluate(testdata1);
             var expected = '[1,2][3,4]';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1692,7 +1688,7 @@ describe('Evaluator - string concat', function () {
             var expr = jsonata('[1,2]&3');
             var result = expr.evaluate(testdata1);
             var expected = '[1,2]3';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1701,7 +1697,7 @@ describe('Evaluator - string concat', function () {
             var expr = jsonata('1&2');
             var result = expr.evaluate(testdata1);
             var expected = '12';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1710,7 +1706,7 @@ describe('Evaluator - string concat', function () {
             var expr = jsonata('1&[2]');
             var result = expr.evaluate(testdata1);
             var expected = '1[2]';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1719,7 +1715,7 @@ describe('Evaluator - string concat', function () {
             var expr = jsonata('"hello"&5');
             var result = expr.evaluate(testdata1);
             var expected = 'hello5';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1728,7 +1724,7 @@ describe('Evaluator - string concat', function () {
             var expr = jsonata('"Prices: " & Account.Order.Product.Price');
             var result = expr.evaluate(testdata2);
             var expected = "Prices: [34.45,21.67,34.45,107.99]";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1741,7 +1737,7 @@ describe('Evaluator - array flattening', function () {
             var expr = jsonata('Account.Order.[Product.Price]'); // Account.Order.[Product.Price]
             var result = expr.evaluate(testdata2);
             var expected = [[34.45, 21.67], [34.45, 107.99]];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1750,7 +1746,7 @@ describe('Evaluator - array flattening', function () {
             var expr = jsonata('$.nest0');
             var result = expr.evaluate(testdata3a);
             var expected = [1, 2, 3, 4];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1759,7 +1755,7 @@ describe('Evaluator - array flattening', function () {
             var expr = jsonata('nest0');
             var result = expr.evaluate(testdata3a);
             var expected = [1, 2, 3, 4];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1768,7 +1764,7 @@ describe('Evaluator - array flattening', function () {
             var expr = jsonata('$[0]');
             var result = expr.evaluate(testdata3a);
             var expected = {"nest0": [1, 2]};
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1777,7 +1773,7 @@ describe('Evaluator - array flattening', function () {
             var expr = jsonata('$[1]');
             var result = expr.evaluate(testdata3a);
             var expected = {"nest0": [3, 4]};
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1786,7 +1782,7 @@ describe('Evaluator - array flattening', function () {
             var expr = jsonata('$[-1]');
             var result = expr.evaluate(testdata3a);
             var expected = {"nest0": [3, 4]};
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1795,7 +1791,7 @@ describe('Evaluator - array flattening', function () {
             var expr = jsonata('$[0].nest0');
             var result = expr.evaluate(testdata3a);
             var expected = [1, 2];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1804,7 +1800,7 @@ describe('Evaluator - array flattening', function () {
             var expr = jsonata('$[1].nest0');
             var result = expr.evaluate(testdata3a);
             var expected = [3, 4];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1813,7 +1809,7 @@ describe('Evaluator - array flattening', function () {
             var expr = jsonata('$[0].nest0[0]');
             var result = expr.evaluate(testdata3a);
             var expected = 1;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1822,7 +1818,7 @@ describe('Evaluator - array flattening', function () {
             var expr = jsonata('nest0.[nest1.[nest2.[nest3]]]'); // nest0.[nest1.[nest2.[nest3]]]
             var result = expr.evaluate(testdata3);
             var expected = [[[[1], [2]], [[3], [4]]], [[[5], [6]], [[7], [8]]]];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1831,7 +1827,7 @@ describe('Evaluator - array flattening', function () {
             var expr = jsonata('nest0.nest1.[nest2.[nest3]]'); // nest0.nest1.[nest2.[nest3]]
             var result = expr.evaluate(testdata3);
             var expected = [[[1], [2]], [[3], [4]], [[5], [6]], [[7], [8]]];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1840,7 +1836,7 @@ describe('Evaluator - array flattening', function () {
             var expr = jsonata('nest0.[nest1.nest2.[nest3]]'); // nest0.[nest1.nest2.[nest3]]
             var result = expr.evaluate(testdata3);
             var expected = [[[1], [2], [3], [4]], [[5], [6], [7], [8]]];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1849,7 +1845,7 @@ describe('Evaluator - array flattening', function () {
             var expr = jsonata('nest0.[nest1.[nest2.nest3]]'); // nest0.[nest1.[nest2.nest3]]
             var result = expr.evaluate(testdata3);
             var expected = [[[1, 2], [3, 4]], [[5, 6], [7, 8]]];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1858,7 +1854,7 @@ describe('Evaluator - array flattening', function () {
             var expr = jsonata('nest0.[nest1.nest2.nest3]'); // nest0.[nest1.nest2.nest3]
             var result = expr.evaluate(testdata3);
             var expected = [[1, 2, 3, 4], [5, 6, 7, 8]];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1867,7 +1863,7 @@ describe('Evaluator - array flattening', function () {
             var expr = jsonata('nest0.nest1.[nest2.nest3]'); // nest0.nest1.[nest2.nest3]
             var result = expr.evaluate(testdata3);
             var expected = [[1, 2], [3, 4], [5, 6], [7, 8]];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1876,7 +1872,7 @@ describe('Evaluator - array flattening', function () {
             var expr = jsonata('nest0.nest1.nest2.[nest3]'); // nest0.nest1.nest2.[nest3]
             var result = expr.evaluate(testdata3);
             var expected = [[1], [2], [3], [4], [5], [6], [7], [8]];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1885,7 +1881,7 @@ describe('Evaluator - array flattening', function () {
             var expr = jsonata('nest0.nest1.nest2.nest3');
             var result = expr.evaluate(testdata3);
             var expected = [1, 2, 3, 4, 5, 6, 7, 8];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1898,7 +1894,7 @@ describe('Evaluator - keep singleton arrays', function () {
             var expr = jsonata('Phone[type="mobile"].number');
             var result = expr.evaluate(testdata4);
             var expected = "077 7700 1234";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1907,7 +1903,7 @@ describe('Evaluator - keep singleton arrays', function () {
             var expr = jsonata('Phone[type="mobile"][].number');
             var result = expr.evaluate(testdata4);
             var expected = ["077 7700 1234"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1916,7 +1912,7 @@ describe('Evaluator - keep singleton arrays', function () {
             var expr = jsonata('Phone[][type="mobile"].number');
             var result = expr.evaluate(testdata4);
             var expected = ["077 7700 1234"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1928,7 +1924,7 @@ describe('Evaluator - keep singleton arrays', function () {
                 "01962 001234",
                 "01962 001235"
             ];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1944,7 +1940,7 @@ describe('Evaluator - keep singleton arrays', function () {
                 ],
                 "mobile": "077 7700 1234"
             };
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1964,7 +1960,7 @@ describe('Evaluator - keep singleton arrays', function () {
                     "077 7700 1234"
                 ]
             };
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1978,7 +1974,7 @@ describe('Evaluator - variables', function () {
             expr.assign('price', {foo: {bar: 45}});
             var result = expr.evaluate(testdata2);
             var expected = 45;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1988,7 +1984,7 @@ describe('Evaluator - variables', function () {
             var context = {'price': {foo: {bar: 45}}};
             var result = expr.evaluate(testdata2, context);
             var expected = 45;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -1998,7 +1994,7 @@ describe('Evaluator - variables', function () {
             expr.assign('var', [1, 2, 3]);
             var result = expr.evaluate(testdata2);
             var expected = 2;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2008,7 +2004,7 @@ describe('Evaluator - variables', function () {
             expr.assign('price', {foo: {bar: 45}});
             var result = expr.evaluate(testdata1);
             var expected = 42;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2017,7 +2013,7 @@ describe('Evaluator - variables', function () {
             var expr = jsonata('$a := 5');
             var result = expr.evaluate();
             var expected = 5;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2026,7 +2022,7 @@ describe('Evaluator - variables', function () {
             var expr = jsonata('$a := $b := 5');
             var result = expr.evaluate();
             var expected = 5;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2035,7 +2031,7 @@ describe('Evaluator - variables', function () {
             var expr = jsonata('($a := $b := 5; $a)');
             var result = expr.evaluate();
             var expected = 5;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2044,7 +2040,7 @@ describe('Evaluator - variables', function () {
             var expr = jsonata('($a := $b := 5; $b)');
             var result = expr.evaluate();
             var expected = 5;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2053,7 +2049,7 @@ describe('Evaluator - variables', function () {
             var expr = jsonata('( $a := 5; $a := $a + 2; $a )');
             var result = expr.evaluate();
             var expected = 7;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2063,7 +2059,7 @@ describe('Evaluator - variables', function () {
             expr.assign('v', [undefined]);
             var result = expr.evaluate();
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2077,7 +2073,7 @@ describe('Evaluator - variable scope', function () {
             var expr = jsonata('( $foo := "defined"; ( $foo := nothing ); $foo )');
             var result = expr.evaluate();
             var expected = "defined";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2086,7 +2082,7 @@ describe('Evaluator - variable scope', function () {
             var expr = jsonata('( $foo := "defined"; ( $foo := nothing; $foo ) )');
             var result = expr.evaluate();
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2100,7 +2096,7 @@ describe('Evaluator - functions: sum', function () {
             var expr = jsonata('$sum(Account.Order.Product.(Price * Quantity))');
             var result = expr.evaluate(testdata2);
             var expected = 336.36;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2109,7 +2105,7 @@ describe('Evaluator - functions: sum', function () {
             var expr = jsonata('Account.Order.$sum(Product.(Price * Quantity))');
             var result = expr.evaluate(testdata2);
             var expected = [90.57000000000001, 245.79000000000002];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2118,7 +2114,7 @@ describe('Evaluator - functions: sum', function () {
             var expr = jsonata('Account.Order.(OrderID & ": " & $sum(Product.(Price*Quantity)))');
             var result = expr.evaluate(testdata2);
             var expected = ["order103: 90.57", "order104: 245.79"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2128,8 +2124,7 @@ describe('Evaluator - functions: sum', function () {
             expect(function () {
                 expr.evaluate(testdata2);
             }).to.throw()
-                .to.deep.contain({position: 5})
-                .to.have.property('message').to.match(/The sum function expects one argument/);
+                .to.deep.contain({position: 5, code: 'T0410', token: 'sum', index: 1});
         });
     });
 
@@ -2138,7 +2133,7 @@ describe('Evaluator - functions: sum', function () {
             var expr = jsonata('$sum(1)');
             var result = expr.evaluate();
             var expected = 1;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2148,8 +2143,7 @@ describe('Evaluator - functions: sum', function () {
             expect(function () {
                 expr.evaluate(testdata2);
             }).to.throw()
-                .to.deep.contain({position: 5})
-                .to.have.property('message').to.match(/Type error: argument of sum function must be an array of numbers/);
+                .to.deep.contain({position: 5, code: 'T0412', token: 'sum', index: 1, type: 'n'});
         });
     });
 
@@ -2158,7 +2152,7 @@ describe('Evaluator - functions: sum', function () {
             var expr = jsonata('$sum(undefined)');
             var result = expr.evaluate();
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 });
@@ -2170,7 +2164,7 @@ describe('Evaluator - functions: count', function () {
             var expr = jsonata('$count(Account.Order.Product.(Price * Quantity))');
             var result = expr.evaluate(testdata2);
             var expected = 4;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2179,7 +2173,7 @@ describe('Evaluator - functions: count', function () {
             var expr = jsonata('Account.Order.$count(Product.(Price * Quantity))');
             var result = expr.evaluate(testdata2);
             var expected = [2, 2];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2188,7 +2182,7 @@ describe('Evaluator - functions: count', function () {
             var expr = jsonata('Account.Order.(OrderID & ": " & $count(Product.(Price*Quantity)))');
             var result = expr.evaluate(testdata2);
             var expected = ["order103: 2","order104: 2"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2197,7 +2191,7 @@ describe('Evaluator - functions: count', function () {
             var expr = jsonata('$count([])');
             var result = expr.evaluate();
             var expected = 0;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2206,7 +2200,7 @@ describe('Evaluator - functions: count', function () {
             var expr = jsonata('$count([1,2,3])');
             var result = expr.evaluate();
             var expected = 3;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2215,7 +2209,7 @@ describe('Evaluator - functions: count', function () {
             var expr = jsonata('$count(["1","2","3"])');
             var result = expr.evaluate();
             var expected = 3;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2224,7 +2218,7 @@ describe('Evaluator - functions: count', function () {
             var expr = jsonata('$count(["1","2",3])');
             var result = expr.evaluate();
             var expected = 3;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2233,7 +2227,7 @@ describe('Evaluator - functions: count', function () {
             var expr = jsonata('$count(1)');
             var result = expr.evaluate();
             var expected = 1;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2243,8 +2237,7 @@ describe('Evaluator - functions: count', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 7})
-                .to.have.property('message').to.match(/The count function expects one argument/);
+                .to.deep.contain({position: 7, code: 'T0410', token: 'count', index: 2});
         });
     });
 
@@ -2254,8 +2247,7 @@ describe('Evaluator - functions: count', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 7})
-                .to.have.property('message').to.match(/The count function expects one argument/);
+                .to.deep.contain({position: 7, code: 'T0410', token: 'count', index: 2});
         });
     });
 
@@ -2265,8 +2257,7 @@ describe('Evaluator - functions: count', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 7})
-                .to.have.property('message').to.match(/The count function expects one argument/);
+                .to.deep.contain({position: 7, code: 'T0410', token: 'count', index: 2});
         });
     });
 
@@ -2276,8 +2267,7 @@ describe('Evaluator - functions: count', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 7})
-                .to.have.property('message').to.match(/The count function expects one argument/);
+                .to.deep.contain({position: 7, code: 'T0410', token: 'count', index: 2});
         });
     });
 
@@ -2286,7 +2276,7 @@ describe('Evaluator - functions: count', function () {
             var expr = jsonata('$count(undefined)');
             var result = expr.evaluate();
             var expected = 0;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 });
@@ -2298,7 +2288,7 @@ describe('Evaluator - functions: max', function () {
             var expr = jsonata('$max(Account.Order.Product.(Price * Quantity))');
             var result = expr.evaluate(testdata2);
             var expected = 137.8;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2307,7 +2297,7 @@ describe('Evaluator - functions: max', function () {
             var expr = jsonata('Account.Order.$max(Product.(Price * Quantity))');
             var result = expr.evaluate(testdata2);
             var expected = [68.9,137.8];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2316,7 +2306,7 @@ describe('Evaluator - functions: max', function () {
             var expr = jsonata('Account.Order.(OrderID & ": " & $count(Product.(Price*Quantity)))');
             var result = expr.evaluate(testdata2);
             var expected = ["order103: 2","order104: 2"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2324,8 +2314,8 @@ describe('Evaluator - functions: max', function () {
         it('should return result object', function () {
             var expr = jsonata('$max([])');
             var result = expr.evaluate();
-            var expected = null;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            var expected = undefined;
+            expect(result).to.equal(expected);
         });
     });
 
@@ -2334,7 +2324,7 @@ describe('Evaluator - functions: max', function () {
             var expr = jsonata('$max([1,2,3])');
             var result = expr.evaluate();
             var expected = 3;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2345,8 +2335,7 @@ describe('Evaluator - functions: max', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 5})
-                .to.have.property('message').to.match(/Type error: argument of max function must be an array of numbers/);
+                .to.deep.contain({position: 5, code: 'T0412', token: 'max', index: 1, type: 'n'});
         });
     });
 
@@ -2356,8 +2345,7 @@ describe('Evaluator - functions: max', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 5})
-                .to.have.property('message').to.match(/Type error: argument of max function must be an array of numbers/);
+                .to.deep.contain({position: 5, code: 'T0412', token: 'max', index: 1, type: 'n'});
         });
     });
 
@@ -2366,7 +2354,7 @@ describe('Evaluator - functions: max', function () {
             var expr = jsonata('$max(1)');
             var result = expr.evaluate();
             var expected = 1;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2375,7 +2363,7 @@ describe('Evaluator - functions: max', function () {
             var expr = jsonata('$max([-1,-5])');
             var result = expr.evaluate();
             var expected = -1;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2385,8 +2373,7 @@ describe('Evaluator - functions: max', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 5})
-                .to.have.property('message').to.match(/The max function expects one argument/);
+                .to.deep.contain({position: 5, code: 'T0410', token: 'max', index: 2});
         });
     });
 
@@ -2396,8 +2383,7 @@ describe('Evaluator - functions: max', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 5})
-                .to.have.property('message').to.match(/The max function expects one argument/);
+                .to.deep.contain({position: 5, code: 'T0410', token: 'max', index: 2});
         });
     });
 
@@ -2407,8 +2393,7 @@ describe('Evaluator - functions: max', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 5})
-                .to.have.property('message').to.match(/The max function expects one argument/);
+                .to.deep.contain({position: 5, code: 'T0410', token: 'max', index: 2});
         });
     });
 
@@ -2418,8 +2403,7 @@ describe('Evaluator - functions: max', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 5})
-                .to.have.property('message').to.match(/The max function expects one argument/);
+                .to.deep.contain({position: 5, code: 'T0410', token: 'max', index: 2});
         });
     });
 
@@ -2428,7 +2412,7 @@ describe('Evaluator - functions: max', function () {
             var expr = jsonata('$max(undefined)');
             var result = expr.evaluate();
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 });
@@ -2440,7 +2424,7 @@ describe('Evaluator - functions: min', function () {
             var expr = jsonata('$min(Account.Order.Product.(Price * Quantity))');
             var result = expr.evaluate(testdata2);
             var expected = 21.67;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2449,7 +2433,7 @@ describe('Evaluator - functions: min', function () {
             var expr = jsonata('Account.Order.$min(Product.(Price * Quantity))');
             var result = expr.evaluate(testdata2);
             var expected = [21.67,107.99];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2458,7 +2442,7 @@ describe('Evaluator - functions: min', function () {
             var expr = jsonata('Account.Order.(OrderID & ": " & $min(Product.(Price*Quantity)))');
             var result = expr.evaluate(testdata2);
             var expected = ["order103: 21.67","order104: 107.99"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2466,8 +2450,8 @@ describe('Evaluator - functions: min', function () {
         it('should return result object', function () {
             var expr = jsonata('$min([])');
             var result = expr.evaluate();
-            var expected = null;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            var expected = undefined;
+            expect(result).to.equal(expected);
         });
     });
 
@@ -2476,7 +2460,7 @@ describe('Evaluator - functions: min', function () {
             var expr = jsonata('$min([1,2,3])');
             var result = expr.evaluate();
             var expected = 1;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2487,8 +2471,7 @@ describe('Evaluator - functions: min', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 5})
-                .to.have.property('message').to.match(/Type error: argument of min function must be an array of numbers/);
+                .to.deep.contain({position: 5, code: 'T0412', token: 'min', index: 1, type: 'n'});
         });
     });
 
@@ -2498,8 +2481,7 @@ describe('Evaluator - functions: min', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 5})
-                .to.have.property('message').to.match(/Type error: argument of min function must be an array of numbers/);
+                .to.deep.contain({position: 5, code: 'T0412', token: 'min', index: 1, type: 'n'});
         });
     });
 
@@ -2508,7 +2490,7 @@ describe('Evaluator - functions: min', function () {
             var expr = jsonata('$min(1)');
             var result = expr.evaluate();
             var expected = 1;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2518,8 +2500,7 @@ describe('Evaluator - functions: min', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 5})
-                .to.have.property('message').to.match(/The min function expects one argument/);
+                .to.deep.contain({position: 5, code: 'T0410', token: 'min', index: 2});
         });
     });
 
@@ -2529,8 +2510,7 @@ describe('Evaluator - functions: min', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 5})
-                .to.have.property('message').to.match(/The min function expects one argument/);
+                .to.deep.contain({position: 5, code: 'T0410', token: 'min', index: 2});
         });
     });
 
@@ -2540,8 +2520,7 @@ describe('Evaluator - functions: min', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 5})
-                .to.have.property('message').to.match(/The min function expects one argument/);
+                .to.deep.contain({position: 5, code: 'T0410', token: 'min', index: 2});
         });
     });
 
@@ -2551,8 +2530,7 @@ describe('Evaluator - functions: min', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 5})
-                .to.have.property('message').to.match(/The min function expects one argument/);
+                .to.deep.contain({position: 5, code: 'T0410', token: 'min', index: 2});
         });
     });
 
@@ -2561,7 +2539,7 @@ describe('Evaluator - functions: min', function () {
             var expr = jsonata('$min(undefined)');
             var result = expr.evaluate();
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 });
@@ -2573,7 +2551,7 @@ describe('Evaluator - functions: average', function () {
             var expr = jsonata('$average(Account.Order.Product.(Price * Quantity))');
             var result = expr.evaluate(testdata2);
             var expected = 84.09;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2582,7 +2560,7 @@ describe('Evaluator - functions: average', function () {
             var expr = jsonata('Account.Order.$average(Product.(Price * Quantity))');
             var result = expr.evaluate(testdata2);
             var expected = [45.285000000000004,122.89500000000001];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2591,7 +2569,7 @@ describe('Evaluator - functions: average', function () {
             var expr = jsonata('Account.Order.(OrderID & ": " & $average(Product.(Price*Quantity)))');
             var result = expr.evaluate(testdata2);
             var expected = ["order103: 45.285","order104: 122.895"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2599,8 +2577,8 @@ describe('Evaluator - functions: average', function () {
         it('should return result object', function () {
             var expr = jsonata('$average([])');
             var result = expr.evaluate();
-            var expected = null;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2609,7 +2587,7 @@ describe('Evaluator - functions: average', function () {
             var expr = jsonata('$average([1,2,3])');
             var result = expr.evaluate();
             var expected = 2;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2620,8 +2598,7 @@ describe('Evaluator - functions: average', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 9})
-                .to.have.property('message').to.match(/Type error: argument of average function must be an array of numbers/);
+                .to.deep.contain({position: 9, code: 'T0412', token: 'average', index: 1, type: 'n'});
         });
     });
 
@@ -2631,8 +2608,7 @@ describe('Evaluator - functions: average', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 9})
-                .to.have.property('message').to.match(/Type error: argument of average function must be an array of numbers/);
+                .to.deep.contain({position: 9, code: 'T0412', token: 'average', index: 1, type: 'n'});
         });
     });
 
@@ -2641,7 +2617,7 @@ describe('Evaluator - functions: average', function () {
             var expr = jsonata('$average(1)');
             var result = expr.evaluate();
             var expected = 1;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2651,8 +2627,7 @@ describe('Evaluator - functions: average', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 9})
-                .to.have.property('message').to.match(/The average function expects one argument/);
+                .to.deep.contain({position: 9, code: 'T0410', token: 'average', index: 2});
         });
     });
 
@@ -2662,8 +2637,7 @@ describe('Evaluator - functions: average', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 9})
-                .to.have.property('message').to.match(/The average function expects one argument/);
+                .to.deep.contain({position: 9, code: 'T0410', token: 'average', index: 2});
         });
     });
 
@@ -2673,8 +2647,7 @@ describe('Evaluator - functions: average', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 9})
-                .to.have.property('message').to.match(/The average function expects one argument/);
+                .to.deep.contain({position: 9, code: 'T0410', token: 'average', index: 2});
         });
     });
 
@@ -2684,8 +2657,7 @@ describe('Evaluator - functions: average', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 9})
-                .to.have.property('message').to.match(/The average function expects one argument/);
+                .to.deep.contain({position: 9, code: 'T0410', token: 'average', index: 2});
         });
     });
 
@@ -2694,7 +2666,7 @@ describe('Evaluator - functions: average', function () {
             var expr = jsonata('$average(undefined)');
             var result = expr.evaluate();
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 });
@@ -2706,7 +2678,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists("Hello World")');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2715,7 +2687,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists("")');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2724,7 +2696,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists(true)');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2733,7 +2705,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists(false)');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2742,7 +2714,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists(0)');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2751,7 +2723,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists(-0.5)');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2760,7 +2732,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists(null)');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2769,7 +2741,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists([])');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2778,7 +2750,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists([0])');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2787,7 +2759,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists([1,2,3])');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2796,7 +2768,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists([[]])');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2805,7 +2777,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists([[null]])');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2814,7 +2786,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists([[[true]]])');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2823,7 +2795,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists({})');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2832,7 +2804,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists({"hello":"world"})');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2841,7 +2813,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists(Account)');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2850,7 +2822,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists(Account.Order.Product.Price)');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2859,7 +2831,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists($exists)');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2868,7 +2840,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists(function(){true})');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2877,7 +2849,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists(blah)');
             var result = expr.evaluate(testdata2);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2886,7 +2858,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists(Account.blah)');
             var result = expr.evaluate(testdata2);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2895,7 +2867,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists(Account.Order[2])');
             var result = expr.evaluate(testdata2);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2904,7 +2876,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists(Account.Order[0].blah)');
             var result = expr.evaluate(testdata2);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2914,8 +2886,7 @@ describe('Evaluator - functions: exists', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/The exists function expects one argument/);
+                .to.deep.contain({position: 8, code: 'T0410', token: 'exists', index: 2});
         });
     });
 
@@ -2925,8 +2896,7 @@ describe('Evaluator - functions: exists', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/The exists function expects one argument/);
+                .to.deep.contain({position: 8, code: 'T0410', token: 'exists', index: 1});
         });
     });
 
@@ -2939,7 +2909,7 @@ describe('Evaluator - functions: spread', function () {
             var expr = jsonata('$spread("Hello World")');
             var result = expr.evaluate(testdata2);
             var expected = "Hello World";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2969,7 +2939,7 @@ describe('Evaluator - functions: spread', function () {
                 {"Depth": 210},
                 {"Weight": 2}
             ];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2978,7 +2948,7 @@ describe('Evaluator - functions: spread', function () {
             var expr = jsonata('$spread(blah)');
             var result = expr.evaluate(testdata2);
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -2987,7 +2957,7 @@ describe('Evaluator - functions: spread', function () {
             var expr = jsonata('$string($spread(function($x){$x*$x}))');
             var result = expr.evaluate(testdata2);
             var expected = '';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3000,7 +2970,7 @@ describe('Evaluator - functions: string', function () {
             var expr = jsonata('$string(5)');
             var result = expr.evaluate(testdata2);
             var expected = '5';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3009,7 +2979,7 @@ describe('Evaluator - functions: string', function () {
             var expr = jsonata('$string(22/7)');
             var result = expr.evaluate(testdata2);
             var expected = '3.142857142857';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3018,7 +2988,7 @@ describe('Evaluator - functions: string', function () {
             var expr = jsonata('$string(1e100)');
             var result = expr.evaluate(testdata2);
             var expected = '1e+100';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3027,7 +2997,7 @@ describe('Evaluator - functions: string', function () {
             var expr = jsonata('$string(1e-100)');
             var result = expr.evaluate();
             var expected = '1e-100';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3036,7 +3006,7 @@ describe('Evaluator - functions: string', function () {
             var expr = jsonata('$string(1e-6)');
             var result = expr.evaluate();
             var expected = '0.000001';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3045,7 +3015,7 @@ describe('Evaluator - functions: string', function () {
             var expr = jsonata('$string(1e-7)');
             var result = expr.evaluate();
             var expected = '1e-7';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3054,7 +3024,7 @@ describe('Evaluator - functions: string', function () {
             var expr = jsonata('$string(1e20)');
             var result = expr.evaluate();
             var expected = '100000000000000000000';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3063,7 +3033,7 @@ describe('Evaluator - functions: string', function () {
             var expr = jsonata('$string(1e21)');
             var result = expr.evaluate();
             var expected = '1e+21';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3075,7 +3045,7 @@ describe('Evaluator - functions: string', function () {
                 "90.57",
                 "245.79"
             ];
-            //assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            //expect(result).to.deep.equal(expected);
             expect(result).to.deep.equal(expected);
         });
     });
@@ -3085,7 +3055,7 @@ describe('Evaluator - functions: string', function () {
             var expr = jsonata('$string(true)');
             var result = expr.evaluate(testdata2);
             var expected = 'true';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3094,7 +3064,7 @@ describe('Evaluator - functions: string', function () {
             var expr = jsonata('$string(false)');
             var result = expr.evaluate(testdata2);
             var expected = 'false';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3103,7 +3073,7 @@ describe('Evaluator - functions: string', function () {
             var expr = jsonata('$string(null)');
             var result = expr.evaluate(testdata2);
             var expected = 'null';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3112,7 +3082,7 @@ describe('Evaluator - functions: string', function () {
             var expr = jsonata('$string(blah)');
             var result = expr.evaluate(testdata2);
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3121,7 +3091,7 @@ describe('Evaluator - functions: string', function () {
             var expr = jsonata('$string($string)');
             var result = expr.evaluate(testdata2);
             var expected = '';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3130,7 +3100,7 @@ describe('Evaluator - functions: string', function () {
             var expr = jsonata('$string(function(){true})');
             var result = expr.evaluate(testdata2);
             var expected = '';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3139,7 +3109,7 @@ describe('Evaluator - functions: string', function () {
             var expr = jsonata('$string(function(){1})');
             var result = expr.evaluate(testdata2);
             var expected = '';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3148,7 +3118,7 @@ describe('Evaluator - functions: string', function () {
             var expr = jsonata('$string({"string": "hello"})');
             var result = expr.evaluate();
             var expected = '{"string":"hello"}';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3157,7 +3127,7 @@ describe('Evaluator - functions: string', function () {
             var expr = jsonata('$string(["string", 5])');
             var result = expr.evaluate();
             var expected = '["string",5]';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3178,7 +3148,7 @@ describe('Evaluator - functions: string', function () {
               '})');
             var result = expr.evaluate();
             var expected = '{"string":"hello","number":39.4,"null":null,"boolean":false,"function":"","lambda":"","object":{"str":"another","lambda2":""},"array":[]}';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3188,8 +3158,7 @@ describe('Evaluator - functions: string', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8, value: Infinity})
-                .to.have.property('message').to.match(/Attempting to invoke string function on Infinity or NaN/);
+                .to.deep.contain({position: 8, code: 'D3001', value: Infinity});
         });
     });
 
@@ -3199,8 +3168,7 @@ describe('Evaluator - functions: string', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8, value: Infinity})
-                .to.have.property('message').to.match(/Number out of range/);
+                .to.deep.contain({position: 8, code: 'D1001', value: Infinity});
         });
     });
 
@@ -3210,19 +3178,16 @@ describe('Evaluator - functions: string', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/The string function expects one argument/);
+                .to.deep.contain({position: 8, code: 'T0410', token: 'string', index: 2});
         });
     });
 
     describe('$string()', function () {
         it('should throw error', function () {
             var expr = jsonata('$string()');
-            expect(function () {
-                expr.evaluate();
-            }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/The string function expects one argument/);
+            var result = expr.evaluate();
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3236,7 +3201,7 @@ describe('Evaluator - functions: substring', function () {
             var expr = jsonata('$substring("hello world", 0, 5)');
             var result = expr.evaluate(testdata2);
             var expected = 'hello';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3245,7 +3210,7 @@ describe('Evaluator - functions: substring', function () {
             var expr = jsonata('$substring("hello world", -5, 5)');
             var result = expr.evaluate(testdata2);
             var expected = 'world';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3254,7 +3219,7 @@ describe('Evaluator - functions: substring', function () {
             var expr = jsonata('$substring("hello world", 6)');
             var result = expr.evaluate(testdata2);
             var expected = 'world';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3263,7 +3228,7 @@ describe('Evaluator - functions: substring', function () {
             var expr = jsonata('$substring(blah, 6)');
             var result = expr.evaluate(testdata2);
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3276,7 +3241,7 @@ describe('Evaluator - functions: substringBefore', function () {
             var expr = jsonata('$substringBefore("Hello World", " ")');
             var result = expr.evaluate(testdata2);
             var expected = 'Hello';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3285,7 +3250,7 @@ describe('Evaluator - functions: substringBefore', function () {
             var expr = jsonata('$substringBefore("Hello World", "l")');
             var result = expr.evaluate(testdata2);
             var expected = 'He';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3294,7 +3259,7 @@ describe('Evaluator - functions: substringBefore', function () {
             var expr = jsonata('$substringBefore("Hello World", "f")');
             var result = expr.evaluate(testdata2);
             var expected = 'Hello World';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3303,7 +3268,7 @@ describe('Evaluator - functions: substringBefore', function () {
             var expr = jsonata('$substringBefore("Hello World", "He")');
             var result = expr.evaluate(testdata2);
             var expected = '';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3312,7 +3277,7 @@ describe('Evaluator - functions: substringBefore', function () {
             var expr = jsonata('$substringBefore(blah, "He")');
             var result = expr.evaluate(testdata2);
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3325,7 +3290,7 @@ describe('Evaluator - functions: substringAfter', function () {
             var expr = jsonata('$substringAfter("Hello World", " ")');
             var result = expr.evaluate(testdata2);
             var expected = 'World';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3334,7 +3299,7 @@ describe('Evaluator - functions: substringAfter', function () {
             var expr = jsonata('$substringAfter("Hello World", "l")');
             var result = expr.evaluate(testdata2);
             var expected = 'lo World';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3343,7 +3308,7 @@ describe('Evaluator - functions: substringAfter', function () {
             var expr = jsonata('$substringAfter("Hello World", "f")');
             var result = expr.evaluate(testdata2);
             var expected = 'Hello World';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3352,7 +3317,7 @@ describe('Evaluator - functions: substringAfter', function () {
             var expr = jsonata('$substringAfter("Hello World", "ld")');
             var result = expr.evaluate(testdata2);
             var expected = '';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3361,7 +3326,7 @@ describe('Evaluator - functions: substringAfter', function () {
             var expr = jsonata('$substringAfter(blah, "ld")');
             var result = expr.evaluate(testdata2);
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3374,7 +3339,7 @@ describe('Evaluator - functions: lowercase', function () {
             var expr = jsonata('$lowercase("Hello World")');
             var result = expr.evaluate(testdata2);
             var expected = 'hello world';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3383,7 +3348,7 @@ describe('Evaluator - functions: lowercase', function () {
             var expr = jsonata('$lowercase(blah)');
             var result = expr.evaluate(testdata2);
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3396,7 +3361,7 @@ describe('Evaluator - functions: uppercase', function () {
             var expr = jsonata('$uppercase("Hello World")');
             var result = expr.evaluate(testdata2);
             var expected = 'HELLO WORLD';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3405,7 +3370,7 @@ describe('Evaluator - functions: uppercase', function () {
             var expr = jsonata('$uppercase(blah)');
             var result = expr.evaluate(testdata2);
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3418,7 +3383,7 @@ describe('Evaluator - functions: length', function () {
             var expr = jsonata('$length("")');
             var result = expr.evaluate();
             var expected = 0;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3427,7 +3392,7 @@ describe('Evaluator - functions: length', function () {
             var expr = jsonata('$length("hello")');
             var result = expr.evaluate();
             var expected = 5;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3436,7 +3401,7 @@ describe('Evaluator - functions: length', function () {
             var expr = jsonata('$length(missing)');
             var result = expr.evaluate();
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3445,7 +3410,7 @@ describe('Evaluator - functions: length', function () {
             var expr = jsonata('$length("\\u03BB-calculus")');
             var result = expr.evaluate();
             var expected = 10;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3454,7 +3419,7 @@ describe('Evaluator - functions: length', function () {
             var expr = jsonata('$length("\\uD834\\uDD1E")');
             var result = expr.evaluate();
             var expected = 2;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3463,7 +3428,7 @@ describe('Evaluator - functions: length', function () {
             var expr = jsonata('$length("𝄞")');
             var result = expr.evaluate();
             var expected = 2;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3472,7 +3437,7 @@ describe('Evaluator - functions: length', function () {
             var expr = jsonata('$length("超明體繁")');
             var result = expr.evaluate();
             var expected = 4;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3481,7 +3446,7 @@ describe('Evaluator - functions: length', function () {
             var expr = jsonata('$length("\\t")');
             var result = expr.evaluate();
             var expected = 1;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3490,18 +3455,17 @@ describe('Evaluator - functions: length', function () {
             var expr = jsonata('$length("\\n")');
             var result = expr.evaluate();
             var expected = 1;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
     describe('$length(1234)', function () {
         it('should throw error', function () {
-            var expr = jsonata('$length(1234)');
             expect(function () {
+                var expr = jsonata('$length(1234)');
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8, value: 1234})
-                .to.have.property('message').to.match(/Type error: argument of length function must evaluate to a string/);
+                .to.deep.contain({position: 8, code: 'T0410', index: 1, value: 1234, token: 'length'});
         });
     });
 
@@ -3511,8 +3475,7 @@ describe('Evaluator - functions: length', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8, value: null})
-                .to.have.property('message').to.match(/Type error: argument of length function must evaluate to a string/);
+                .to.deep.contain({position: 8, code: 'T0410', index: 1, value: null, token: 'length'});
         });
     });
 
@@ -3522,8 +3485,7 @@ describe('Evaluator - functions: length', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8, value: true})
-                .to.have.property('message').to.match(/Type error: argument of length function must evaluate to a string/);
+                .to.deep.contain({position: 8, code: 'T0410', index: 1, value: true, token: 'length'});
         });
     });
 
@@ -3533,30 +3495,37 @@ describe('Evaluator - functions: length', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/Type error: argument of length function must evaluate to a string/);
+                .to.deep.contain({position: 8, code: 'T0410', index: 1, token: 'length'});
         });
     });
 
     describe('$length()', function () {
         it('should throw error', function () {
-            var expr = jsonata('$length()');
             expect(function () {
-                expr.evaluate();
+                var expr = jsonata('$length()');
+                expr.evaluate(23);
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/The length function expects one argument/);
+                .to.deep.contain({position: 8, code: 'T0411', index: 1, token: 'length', value: 23});
+        });
+    });
+
+    describe('$length()', function () {
+        it('should throw error', function () {
+            expect(function () {
+                var expr = jsonata('$length()');
+                expr.evaluate(testdata2);
+            }).to.throw()
+              .to.deep.contain({position: 8, code: 'T0411', index: 1, token: 'length'});
         });
     });
 
     describe('$length("Hello", "World")', function () {
         it('should throw error', function () {
-            var expr = jsonata('$length()');
             expect(function () {
+                var expr = jsonata('$length("Hello", "World")');
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/The length function expects one argument/);
+                .to.deep.contain({position: 8, code: 'T0410', index: 2, token: 'length'});
         });
     });
 
@@ -3569,7 +3538,7 @@ describe('Evaluator - functions: contains', function () {
             var expr = jsonata('$contains("Hello World", "lo")');
             var result = expr.evaluate();
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3578,7 +3547,7 @@ describe('Evaluator - functions: contains', function () {
             var expr = jsonata('$contains("Hello World", "World")');
             var result = expr.evaluate();
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3587,7 +3556,7 @@ describe('Evaluator - functions: contains', function () {
             var expr = jsonata('$contains("Hello World", "world")');
             var result = expr.evaluate();
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3596,7 +3565,7 @@ describe('Evaluator - functions: contains', function () {
             var expr = jsonata('$contains("Hello World", "Word")');
             var result = expr.evaluate();
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3605,18 +3574,7 @@ describe('Evaluator - functions: contains', function () {
             var expr = jsonata('$contains(nothing, "World")');
             var result = expr.evaluate();
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
-        });
-    });
-
-    describe('$contains("Hello World")', function () {
-        it('should throw error', function () {
-            var expr = jsonata('$contains("Hello World")');
-            expect(function () {
-                expr.evaluate();
-            }).to.throw()
-              .to.deep.contain({position: 10})
-              .to.have.property('message').to.match(/The contains function expects two arguments/);
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3626,8 +3584,7 @@ describe('Evaluator - functions: contains', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 10})
-              .to.have.property('message').to.match(/Type error: first argument of contains function must evaluate to a string/);
+              .to.deep.contain({position: 10, code: 'T0410', token: 'contains', index: 1});
         });
     });
 
@@ -3637,8 +3594,7 @@ describe('Evaluator - functions: contains', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 10})
-              .to.have.property('message').to.match(/Type error: second argument of contains function must evaluate to a string or a regular expression/);
+              .to.deep.contain({position: 10, code: 'T0410', token: 'contains', index: 2});
         });
     });
 
@@ -3651,7 +3607,7 @@ describe('Evaluator - functions: replace', function () {
             var expr = jsonata('$replace("Hello World", "World", "Everyone")');
             var result = expr.evaluate();
             var expected = "Hello Everyone";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3660,7 +3616,7 @@ describe('Evaluator - functions: replace', function () {
             var expr = jsonata('$replace("the cat sat on the mat", "at", "it")');
             var result = expr.evaluate();
             var expected = "the cit sit on the mit";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3669,7 +3625,7 @@ describe('Evaluator - functions: replace', function () {
             var expr = jsonata('$replace("the cat sat on the mat", "at", "it", 0)');
             var result = expr.evaluate();
             var expected = "the cat sat on the mat";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3678,7 +3634,7 @@ describe('Evaluator - functions: replace', function () {
             var expr = jsonata('$replace("the cat sat on the mat", "at", "it", 2)');
             var result = expr.evaluate();
             var expected = "the cit sit on the mat";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3687,7 +3643,7 @@ describe('Evaluator - functions: replace', function () {
             var expr = jsonata('$replace(nothing, "at", "it", 2)');
             var result = expr.evaluate();
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3697,8 +3653,7 @@ describe('Evaluator - functions: replace', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 9})
-              .to.have.property('message').to.match(/The replace function expects three or four arguments/);
+              .to.deep.contain({position: 9, code: 'T0410', token: 'replace', index: 2});
         });
     });
 
@@ -3708,30 +3663,37 @@ describe('Evaluator - functions: replace', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 9, token: 'replace', value: null})
-              .to.have.property('message').to.match(/Type error: forth argument of replace function must evaluate to a positive number/);
+              .to.deep.contain({position: 9, code: 'T0410', token: 'replace', index: 4, value: null});
         });
     });
 
-    describe('$replace("hello", "l", 1)', function () {
+    describe('$replace("hello", "l", "1", -2)', function () {
         it('should throw error', function () {
-            var expr = jsonata('$replace("hello", "l", 1)');
+            var expr = jsonata('$replace("hello", "l", "1", -2)');
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 9, token: 'replace', value: 1})
-              .to.have.property('message').to.match(/Type error: third argument of replace function must evaluate to a string/);
+              .to.deep.contain({position: 9, code: 'D3011', token: 'replace', index: 4, value: -2});
         });
     });
 
-    describe('$replace("hello", "", 1)', function () {
+    describe('$replace("hello", l)', function () {
         it('should throw error', function () {
-            var expr = jsonata('$replace("hello", "", 1)');
+            var expr = jsonata('$replace("hello", 1)');
+            expect(function () {
+                expr.evaluate('hello');
+            }).to.throw()
+              .to.deep.contain({position: 9, code: 'T0410', token: 'replace', index: 2, value: 1});
+        });
+    });
+
+    describe('$replace("hello", "", "bye")', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$replace("hello", "", "bye")');
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 9, token: 'replace', value: ""})
-              .to.have.property('message').to.match(/Type error: second argument of replace function cannot be an empty string/);
+              .to.deep.contain({position: 9, code: 'D3010', index: 2, token: 'replace', value: ""});
         });
     });
 
@@ -3741,8 +3703,7 @@ describe('Evaluator - functions: replace', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 9, token: 'replace', value: 2})
-              .to.have.property('message').to.match(/Type error: second argument of replace function must evaluate to a string or a regular expression/);
+              .to.deep.contain({position: 9, code: 'T0410', token: 'replace', index: 2, value: 2});
         });
     });
 
@@ -3752,8 +3713,7 @@ describe('Evaluator - functions: replace', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 9, token: 'replace', value: 123})
-              .to.have.property('message').to.match(/Type error: first argument of replace function must evaluate to a string/);
+              .to.deep.contain({position: 9,  code: 'T0410', token: 'replace', index: 1, value: 123});
         });
     });
 
@@ -3766,7 +3726,7 @@ describe('Evaluator - functions: split', function () {
             var expr = jsonata('$split("Hello World", " ")');
             var result = expr.evaluate();
             var expected = ["Hello", "World"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3775,7 +3735,7 @@ describe('Evaluator - functions: split', function () {
             var expr = jsonata('$split("Hello", " ")');
             var result = expr.evaluate();
             var expected = ["Hello"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3784,7 +3744,7 @@ describe('Evaluator - functions: split', function () {
             var expr = jsonata('$split("Hello  World", " ")');
             var result = expr.evaluate();
             var expected = ["Hello", "", "World"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3793,7 +3753,7 @@ describe('Evaluator - functions: split', function () {
             var expr = jsonata('$split("Hello", "")');
             var result = expr.evaluate();
             var expected = ["H", "e", "l", "l", "o"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3802,7 +3762,7 @@ describe('Evaluator - functions: split', function () {
             var expr = jsonata('$sum($split("12345", "").$number($))');
             var result = expr.evaluate();
             var expected = 15;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3811,7 +3771,7 @@ describe('Evaluator - functions: split', function () {
             var expr = jsonata('$split("a, b, c, d", ", ")');
             var result = expr.evaluate();
             var expected = ["a", "b", "c", "d"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3820,7 +3780,7 @@ describe('Evaluator - functions: split', function () {
             var expr = jsonata('$split("a, b, c, d", ", ", 2)');
             var result = expr.evaluate();
             var expected = ["a", "b"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3829,7 +3789,7 @@ describe('Evaluator - functions: split', function () {
             var expr = jsonata('$split("a, b, c, d", ", ", 2.5)');
             var result = expr.evaluate();
             var expected = ["a", "b"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3838,7 +3798,7 @@ describe('Evaluator - functions: split', function () {
             var expr = jsonata('$split("a, b, c, d", ", ", 10)');
             var result = expr.evaluate();
             var expected = ["a", "b", "c", "d"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3847,7 +3807,7 @@ describe('Evaluator - functions: split', function () {
             var expr = jsonata('$split("a, b, c, d", ", ", 0)');
             var result = expr.evaluate();
             var expected = [];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3856,7 +3816,7 @@ describe('Evaluator - functions: split', function () {
             var expr = jsonata('$split(nothing, " ")');
             var result = expr.evaluate();
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3866,8 +3826,7 @@ describe('Evaluator - functions: split', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 7, value: -3})
-                .to.have.property('message').to.match(/Type error: third argument of split function must evaluate to a positive number/);
+                .to.deep.contain({position: 7, code: 'D3020', index: 3, value: -3});
         });
     });
 
@@ -3877,8 +3836,17 @@ describe('Evaluator - functions: split', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 7, value: null})
-                .to.have.property('message').to.match(/Type error: third argument of split function must evaluate to a positive number/);
+                .to.deep.contain({position: 7,  code: 'T0410', token: 'split', index: 3, value: null});
+        });
+    });
+
+    describe('$split("a, b, c, d", ", ", -5)', function () {
+        it('should throw error', function () {
+            var expr = jsonata('$split("a, b, c, d", ", ", -5)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 7, code: 'D3020', token: 'split', index: 3, value: -5});
         });
     });
 
@@ -3888,8 +3856,7 @@ describe('Evaluator - functions: split', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 7, value: "2"})
-                .to.have.property('message').to.match(/Type error: third argument of split function must evaluate to a positive number/);
+                .to.deep.contain({position: 7, code: 'T0410', token: 'split', index: 3, value: "2"});
         });
     });
 
@@ -3899,8 +3866,7 @@ describe('Evaluator - functions: split', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 7, value: true})
-                .to.have.property('message').to.match(/Type error: second argument of split function must evaluate to a string/);
+                .to.deep.contain({position: 7, code: 'T0410', token: 'split', index: 2, value: true});
         });
     });
 
@@ -3910,8 +3876,7 @@ describe('Evaluator - functions: split', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 7, value: 12345})
-                .to.have.property('message').to.match(/Type error: first argument of split function must evaluate to a string/);
+                .to.deep.contain({position: 7, code: 'T0410', token: 'split', index: 1, value: 12345});
         });
     });
 
@@ -3921,8 +3886,7 @@ describe('Evaluator - functions: split', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 7})
-                .to.have.property('message').to.match(/The split function expects two or three arguments/);
+                .to.deep.contain({position: 7, code: 'T0410', token: 'split', index: 1 });
         });
     });
 
@@ -3936,7 +3900,7 @@ describe('Evaluator - functions: join', function () {
             var expr = jsonata('$join("hello")');
             var result = expr.evaluate();
             var expected = "hello";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3945,7 +3909,7 @@ describe('Evaluator - functions: join', function () {
             var expr = jsonata('$join(["hello"])');
             var result = expr.evaluate();
             var expected = "hello";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3954,7 +3918,7 @@ describe('Evaluator - functions: join', function () {
             var expr = jsonata('$join(["hello", "world"])');
             var result = expr.evaluate();
             var expected = "helloworld";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3963,7 +3927,7 @@ describe('Evaluator - functions: join', function () {
             var expr = jsonata('$join(["hello", "world"], ", ")');
             var result = expr.evaluate();
             var expected = "hello, world";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3972,7 +3936,7 @@ describe('Evaluator - functions: join', function () {
             var expr = jsonata('$join([], ", ")');
             var result = expr.evaluate();
             var expected = "";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3981,7 +3945,7 @@ describe('Evaluator - functions: join', function () {
             var expr = jsonata('$join(Account.Order.Product.Description.Colour, ", ")');
             var result = expr.evaluate(testdata2);
             var expected = "Purple, Orange, Purple, Black";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3990,7 +3954,7 @@ describe('Evaluator - functions: join', function () {
             var expr = jsonata('$join(Account.Order.Product.Description.Colour, no.sep)');
             var result = expr.evaluate(testdata2);
             var expected = "PurpleOrangePurpleBlack";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -3999,7 +3963,7 @@ describe('Evaluator - functions: join', function () {
             var expr = jsonata('$join(Account.blah.Product.Description.Colour, ", ")');
             var result = expr.evaluate(testdata2);
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4009,8 +3973,7 @@ describe('Evaluator - functions: join', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 6})
-                .to.have.property('message').to.match(/Type error: first argument of join function must be an array of strings/);
+                .to.deep.contain({position: 6, code: 'T0412', token: 'join', index: 1, value: true});
         });
     });
 
@@ -4020,8 +3983,7 @@ describe('Evaluator - functions: join', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 6})
-                .to.have.property('message').to.match(/Type error: first argument of join function must be an array of strings/);
+                .to.deep.contain({position: 6, code: 'T0412', token: 'join', index: 1});
         });
     });
 
@@ -4031,8 +3993,7 @@ describe('Evaluator - functions: join', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 6})
-                .to.have.property('message').to.match(/Type error: second argument of split function must evaluate to a string/);
+                .to.deep.contain({position: 6, code: 'T0410', token: 'join', index: 2, value: 3});
         });
     });
 
@@ -4042,8 +4003,7 @@ describe('Evaluator - functions: join', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 6})
-                .to.have.property('message').to.match(/The join function expects one or two arguments/);
+                .to.deep.contain({position: 6, code: 'T0410', token: 'join', index: 1});
         });
     });
 
@@ -4056,7 +4016,7 @@ describe('Evaluator - functions: number', function () {
             var expr = jsonata('$number(0)');
             var result = expr.evaluate();
             var expected = 0;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4065,7 +4025,7 @@ describe('Evaluator - functions: number', function () {
             var expr = jsonata('$number(10)');
             var result = expr.evaluate();
             var expected = 10;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4074,7 +4034,7 @@ describe('Evaluator - functions: number', function () {
             var expr = jsonata('$number(-0.05)');
             var result = expr.evaluate();
             var expected = -0.05;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4083,7 +4043,7 @@ describe('Evaluator - functions: number', function () {
             var expr = jsonata('$number("0")');
             var result = expr.evaluate();
             var expected = 0;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4092,7 +4052,7 @@ describe('Evaluator - functions: number', function () {
             var expr = jsonata('$number("-0.05")');
             var result = expr.evaluate();
             var expected = -0.05;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4101,7 +4061,7 @@ describe('Evaluator - functions: number', function () {
             var expr = jsonata('$number("1e2")');
             var result = expr.evaluate();
             var expected = 100;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4110,7 +4070,7 @@ describe('Evaluator - functions: number', function () {
             var expr = jsonata('$number("1.0e-2")');
             var result = expr.evaluate();
             var expected = 0.01;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4119,7 +4079,7 @@ describe('Evaluator - functions: number', function () {
             var expr = jsonata('$number("1e0")');
             var result = expr.evaluate();
             var expected = 1;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4129,8 +4089,7 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8, code: 'D3030', token: 'number', index: 1, value: "10e500"});
         });
     });
 
@@ -4140,8 +4099,7 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8, code: 'D3030', token: 'number', index: 1, value: "Hello world"});
         });
     });
 
@@ -4151,8 +4109,7 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8, code: 'D3030', token: 'number', index: 1, value: "1/2"});
         });
     });
 
@@ -4162,8 +4119,7 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8, code: 'D3030', token: 'number', index: 1, value: "1234 hello"});
         });
     });
 
@@ -4173,8 +4129,7 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8, code: 'D3030', token: 'number', index: 1, value: ""});
         });
     });
 
@@ -4184,8 +4139,7 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8, code: 'T0410', token: 'number', index: 1, value: true});
         });
     });
 
@@ -4195,8 +4149,7 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8, code: 'T0410', token: 'number', index: 1, value: false});
         });
     });
 
@@ -4205,7 +4158,7 @@ describe('Evaluator - functions: number', function () {
             var expr = jsonata('$number(Account.blah)');
             var result = expr.evaluate(testdata2);
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4215,8 +4168,7 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8, code: 'T0410', token: 'number', index: 1, value: null});
         });
     });
 
@@ -4226,8 +4178,7 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8, code: 'T0410', token: 'number', index: 1});
         });
     });
 
@@ -4237,8 +4188,7 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8, code: 'D3030', token: 'number', index: 1});
         });
     });
 
@@ -4248,8 +4198,7 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8, code: 'T0410', token: 'number', index: 1});
         });
     });
 
@@ -4259,8 +4208,7 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8, code: 'T0410', token: 'number', index: 1});
         });
     });
 
@@ -4270,8 +4218,7 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8, code: 'T0410', token: 'number', index: 1});
         });
     });
 
@@ -4281,8 +4228,7 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8, code: 'T0410', token: 'number', index: 1});
         });
     });
 
@@ -4292,8 +4238,7 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8, code: 'T0410', token: 'number', index: 1});
         });
     });
 
@@ -4303,8 +4248,7 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/Unable to cast value to a number/);
+                .to.deep.contain({position: 8, code: 'T0410', token: 'number', index: 1});
         });
     });
 
@@ -4314,19 +4258,7 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/Unable to cast value to a number/);
-        });
-    });
-
-    describe('$number()', function () {
-        it('should throw error', function () {
-            var expr = jsonata('$number()');
-            expect(function () {
-                expr.evaluate();
-            }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/The number function expects one argument/);
+                .to.deep.contain({position: 8, code: 'T0410', token: 'number', index: 1});
         });
     });
 
@@ -4336,8 +4268,7 @@ describe('Evaluator - functions: number', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/The number function expects one argument/);
+                .to.deep.contain({position: 8, code: 'T0410', token: 'number', index: 2, value: 2});
         });
     });
 
@@ -4350,7 +4281,7 @@ describe('Evaluator - functions: boolean', function () {
             var expr = jsonata('$boolean("Hello World")');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4359,7 +4290,7 @@ describe('Evaluator - functions: boolean', function () {
             var expr = jsonata('$boolean("")');
             var result = expr.evaluate(testdata2);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4368,7 +4299,7 @@ describe('Evaluator - functions: boolean', function () {
             var expr = jsonata('$boolean(true)');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4377,7 +4308,7 @@ describe('Evaluator - functions: boolean', function () {
             var expr = jsonata('$boolean(false)');
             var result = expr.evaluate(testdata2);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4386,7 +4317,7 @@ describe('Evaluator - functions: boolean', function () {
             var expr = jsonata('$boolean(0)');
             var result = expr.evaluate(testdata2);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4395,7 +4326,7 @@ describe('Evaluator - functions: boolean', function () {
             var expr = jsonata('$boolean(10)');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4404,7 +4335,7 @@ describe('Evaluator - functions: boolean', function () {
             var expr = jsonata('$boolean(-0.5)');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4413,7 +4344,7 @@ describe('Evaluator - functions: boolean', function () {
             var expr = jsonata('$boolean(null)');
             var result = expr.evaluate(testdata2);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4422,7 +4353,7 @@ describe('Evaluator - functions: boolean', function () {
             var expr = jsonata('$boolean([])');
             var result = expr.evaluate(testdata2);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4431,7 +4362,7 @@ describe('Evaluator - functions: boolean', function () {
             var expr = jsonata('$boolean([0])');
             var result = expr.evaluate(testdata2);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4440,7 +4371,7 @@ describe('Evaluator - functions: boolean', function () {
             var expr = jsonata('$boolean([1])');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4449,7 +4380,7 @@ describe('Evaluator - functions: boolean', function () {
             var expr = jsonata('$boolean([1,2,3])');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4458,7 +4389,7 @@ describe('Evaluator - functions: boolean', function () {
             var expr = jsonata('$boolean([0,0])');
             var result = expr.evaluate(testdata2);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4467,7 +4398,7 @@ describe('Evaluator - functions: boolean', function () {
             var expr = jsonata('$boolean([[]])');
             var result = expr.evaluate(testdata2);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4476,7 +4407,7 @@ describe('Evaluator - functions: boolean', function () {
             var expr = jsonata('$boolean([[null]])');
             var result = expr.evaluate(testdata2);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4485,7 +4416,7 @@ describe('Evaluator - functions: boolean', function () {
             var expr = jsonata('$boolean([[[true]]])');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4494,7 +4425,7 @@ describe('Evaluator - functions: boolean', function () {
             var expr = jsonata('$boolean({})');
             var result = expr.evaluate(testdata2);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4503,7 +4434,7 @@ describe('Evaluator - functions: boolean', function () {
             var expr = jsonata('$boolean({"hello":"world"})');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4512,7 +4443,7 @@ describe('Evaluator - functions: boolean', function () {
             var expr = jsonata('$boolean(Account)');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4521,7 +4452,7 @@ describe('Evaluator - functions: boolean', function () {
             var expr = jsonata('$boolean(Account.Order.Product.Price)');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4530,7 +4461,7 @@ describe('Evaluator - functions: boolean', function () {
             var expr = jsonata('$boolean(Account.blah)');
             var result = expr.evaluate(testdata2);
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4539,7 +4470,7 @@ describe('Evaluator - functions: boolean', function () {
             var expr = jsonata('$boolean($boolean)');
             var result = expr.evaluate(testdata2);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4548,7 +4479,7 @@ describe('Evaluator - functions: boolean', function () {
             var expr = jsonata('$boolean(function(){true})');
             var result = expr.evaluate(testdata2);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4558,19 +4489,7 @@ describe('Evaluator - functions: boolean', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 9})
-                .to.have.property('message').to.match(/The boolean function expects one argument/);
-        });
-    });
-
-    describe('$boolean()', function () {
-        it('should throw error', function () {
-            var expr = jsonata('$boolean()');
-            expect(function () {
-                expr.evaluate();
-            }).to.throw()
-                .to.deep.contain({position: 9})
-                .to.have.property('message').to.match(/The boolean function expects one argument/);
+                .to.deep.contain({position: 9, code: 'T0410', token: 'boolean', index: 2, value: 3});
         });
     });
 
@@ -4586,7 +4505,7 @@ describe('Evaluator - functions: keys', function () {
                 "Account Name",
                 "Order"
             ];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4602,7 +4521,7 @@ describe('Evaluator - functions: keys', function () {
                 "Price",
                 "Quantity"
             ];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4611,7 +4530,7 @@ describe('Evaluator - functions: keys', function () {
             var expr = jsonata('$keys({})');
             var result = expr.evaluate();
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4620,7 +4539,7 @@ describe('Evaluator - functions: keys', function () {
             var expr = jsonata('$keys({"foo":{}})');
             var result = expr.evaluate();
             var expected = ["foo"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4629,7 +4548,7 @@ describe('Evaluator - functions: keys', function () {
             var expr = jsonata('$keys("foo")');
             var result = expr.evaluate();
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4638,7 +4557,7 @@ describe('Evaluator - functions: keys', function () {
             var expr = jsonata('$keys(function(){1})');
             var result = expr.evaluate();
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4647,7 +4566,7 @@ describe('Evaluator - functions: keys', function () {
             var expr = jsonata('$keys(["foo", "bar"])');
             var result = expr.evaluate();
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4660,7 +4579,7 @@ describe('Evaluator - functions: lookup', function () {
             var expr = jsonata('$lookup(Account, "Account Name")');
             var result = expr.evaluate(testdata2);
             var expected = "Firefly";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4674,7 +4593,7 @@ describe('Evaluator - functions: lookup', function () {
                 "Bowler Hat",
                 "Cloak"
             ];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4683,7 +4602,7 @@ describe('Evaluator - functions: lookup', function () {
             var expr = jsonata('$lookup(Account.Order.Product.ProductID, "Product Name")');
             var result = expr.evaluate(testdata2);
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4696,7 +4615,7 @@ describe('Evaluator - functions: append', function () {
             var expr = jsonata('$append([1,2], [3,4])');
             var result = expr.evaluate(testdata2);
             var expected = [1, 2, 3, 4];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4705,7 +4624,7 @@ describe('Evaluator - functions: append', function () {
             var expr = jsonata('$append(1, [3,4])');
             var result = expr.evaluate(testdata2);
             var expected = [1, 3, 4];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4714,7 +4633,7 @@ describe('Evaluator - functions: append', function () {
             var expr = jsonata('$append(1,2)');
             var result = expr.evaluate(testdata2);
             var expected = [1, 2];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4723,7 +4642,7 @@ describe('Evaluator - functions: append', function () {
             var expr = jsonata('$append(1,notexist)');
             var result = expr.evaluate(testdata2);
             var expected = 1;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4732,7 +4651,7 @@ describe('Evaluator - functions: append', function () {
             var expr = jsonata('$append(notexist, [2,3,4])');
             var result = expr.evaluate(testdata2);
             var expected = [2, 3, 4];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4746,7 +4665,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists("Hello World")');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4755,7 +4674,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists("")');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4764,7 +4683,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists(true)');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4773,7 +4692,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists(false)');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4782,7 +4701,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists(0)');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4791,7 +4710,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists(-0.5)');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4800,7 +4719,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists(null)');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4809,7 +4728,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists([])');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4818,7 +4737,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists([0])');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4827,7 +4746,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists([1,2,3])');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4836,7 +4755,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists([[]])');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4845,7 +4764,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists([[null]])');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4854,7 +4773,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists([[[true]]])');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4863,7 +4782,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists({})');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4872,7 +4791,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists({"hello":"world"})');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4881,7 +4800,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists(Account)');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4890,7 +4809,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists(Account.Order.Product.Price)');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4899,7 +4818,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists($exists)');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4908,7 +4827,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists(function(){true})');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4917,7 +4836,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists(blah)');
             var result = expr.evaluate(testdata2);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4926,7 +4845,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists(Account.blah)');
             var result = expr.evaluate(testdata2);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4935,7 +4854,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists(Account.Order[2])');
             var result = expr.evaluate(testdata2);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4944,7 +4863,7 @@ describe('Evaluator - functions: exists', function () {
             var expr = jsonata('$exists(Account.Order[0].blah)');
             var result = expr.evaluate(testdata2);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -4954,8 +4873,7 @@ describe('Evaluator - functions: exists', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/The exists function expects one argument/);
+                .to.deep.contain({position: 8, code: 'T0410', token: 'exists', index: 2, value: 3});
         });
     });
 
@@ -4965,8 +4883,7 @@ describe('Evaluator - functions: exists', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/The exists function expects one argument/);
+                .to.deep.contain({position: 8, code: 'T0410', token: 'exists', index: 1});
         });
     });
 
@@ -4980,8 +4897,7 @@ describe('Evaluator - errors', function () {
             expect(function () {
                 expr.evaluate(testdata2);
             }).to.throw()
-                .to.deep.contain({position: 5, token: '-', value: 's'})
-                .to.have.property('message').to.match(/LHS of - operator/);
+                .to.deep.contain({position: 5, code: 'T2001', token: '-', value: 's'});
         });
     });
 
@@ -4991,8 +4907,8 @@ describe('Evaluator - errors', function () {
             expect(function () {
                 expr.evaluate(testdata2);
             }).to.throw()
-                .to.deep.contain({position: 3, token: '+', value: null})
-                .to.have.property('message').to.match(/RHS of \+ operator/);
+                .to.deep.contain({position: 3, code: 'T2002', token: '+', value: null});
+
         });
     });
 
@@ -5002,8 +4918,7 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('"no closing quote');
                 expr.evaluate(testdata2);
             }).to.throw()
-                .to.deep.contain({position: 17})
-                .to.have.property('message').to.match(/no terminating quote/);
+                .to.deep.contain({position: 17, code: 'S0101'});
         });
     });
 
@@ -5013,8 +4928,7 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('- "s"');
                 expr.evaluate(testdata2);
             }).to.throw()
-                .to.deep.contain({position: 1, token: '-', value: 's'})
-                .to.have.property('message').to.match(/Cannot negate a non-numeric value/);
+                .to.deep.contain({position: 1, code: 'D1002', token: '-', value: 's'});
         });
     });
 
@@ -5024,8 +4938,7 @@ describe('Evaluator - errors', function () {
             expect(function () {
                 expr.evaluate(testdata2);
             }).to.throw()
-                .to.deep.contain({position: 8})
-                .to.have.property('message').to.match(/Attempted to invoke a non-function/);
+                .to.deep.contain({position: 8, code: 'T1006'});
         });
     });
 
@@ -5035,8 +4948,7 @@ describe('Evaluator - errors', function () {
             expect(function () {
                 expr.evaluate(testdata2);
             }).to.throw()
-                .to.deep.contain({position: 4, token: 'sum'})
-                .to.have.property('message').to.match(/Attempted to invoke a non-function. Did you mean/);
+                .to.deep.contain({position: 4, code: 'T1005', token: 'sum'});
         });
     });
 
@@ -5045,8 +4957,7 @@ describe('Evaluator - errors', function () {
             expect(function () {
                 jsonata('[1,2)');
             }).to.throw()
-                .to.deep.contain({position: 5, token: ')', value: ']'})
-                .to.have.property('message').to.match(/Syntax error: expected .* got/);
+                .to.deep.contain({position: 5, code: 'S0202', token: ')', value: ']'});
         });
     });
 
@@ -5055,8 +4966,7 @@ describe('Evaluator - errors', function () {
             expect(function () {
                 jsonata('[1:2]');
             }).to.throw()
-                .to.deep.contain({position: 3, token: ':', value: ']'})
-                .to.have.property('message').to.match(/Syntax error: expected .* got/);
+                .to.deep.contain({position: 3, code: 'S0202', token: ':', value: ']'});
         });
     });
 
@@ -5065,8 +4975,7 @@ describe('Evaluator - errors', function () {
             expect(function () {
                 jsonata('[1!2]');
             }).to.throw()
-                .to.deep.contain({position: 3, token: '!'})
-                .to.have.property('message').to.match(/Unknown operator/);
+                .to.deep.contain({position: 3, code: 'S0204', token: '!'});
         });
     });
 
@@ -5075,8 +4984,7 @@ describe('Evaluator - errors', function () {
             expect(function () {
                 jsonata('@ bar');
             }).to.throw()
-                .to.deep.contain({position: 1, token: '@'})
-                .to.have.property('message').to.match(/Unknown operator/);
+                .to.deep.contain({position: 1, code: 'S0204', token: '@'});
         });
     });
 
@@ -5086,8 +4994,7 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('2(blah)');
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 2, token: 2})
-                .to.have.property('message').to.match(/Attempted to invoke a non-function/);
+                .to.deep.contain({position: 2, code: 'T1006', token: 2});
         });
     });
 
@@ -5097,8 +5004,7 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('2()');
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 2, token: 2})
-                .to.have.property('message').to.match(/Attempted to invoke a non-function/);
+                .to.deep.contain({position: 2, code: 'T1006', token: 2});
         });
     });
 
@@ -5108,8 +5014,7 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('3(?)');
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position:2, token: 3})
-              .to.have.property('message').to.match(/Attempted to partially apply a non-function/);
+              .to.deep.contain({position:2, code: 'T1008', token: 3});
         });
     });
 
@@ -5118,7 +5023,7 @@ describe('Evaluator - errors', function () {
             expect(function () {
                 jsonata('1=');
             }).to.throw()
-                .to.have.property('message').to.match(/Syntax error: unexpected end of expression/);
+              .to.deep.contain({position: 2, code: 'S0207'});
         });
     });
 
@@ -5127,8 +5032,7 @@ describe('Evaluator - errors', function () {
             expect(function () {
                 jsonata('function(x){$x}(3)');
             }).to.throw()
-                .to.deep.contain({position: 10, token: 'x'})
-                .to.have.property('message').to.match(/of function definition must be a variable name/);
+                .to.deep.contain({position: 10, code: 'S0208', token: 'x'});
         });
     });
 
@@ -5138,8 +5042,7 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('x:=1');
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 3, token: ':=', value: 'x'})
-                .to.have.property('message').to.match(/Left hand side of := must be a variable name/);
+                .to.deep.contain({position: 3, code: 'D2005', token: ':=', value: 'x'});
         });
     });
 
@@ -5149,8 +5052,7 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('2:=1');
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 3, token: ':=', value: 2})
-              .to.have.property('message').to.match(/Left hand side of := must be a variable name/);
+              .to.deep.contain({position: 3, code: 'D2005', token: ':=', value: 2});
         });
     });
 
@@ -5160,8 +5062,7 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('$foo()');
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 5})
-                .to.have.property('message').to.match(/Attempted to invoke a non-function/);
+                .to.deep.contain({position: 5, code: 'T1006'});
         });
     });
 
@@ -5171,8 +5072,7 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('55=>5');
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 5, token: 5})
-                .to.have.property('message').to.match(/Syntax error:/);
+                .to.deep.contain({position: 5, code: 'S0201', token: 5});
         });
     });
 
@@ -5182,8 +5082,7 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('Ssum(:)');
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 6, token: ':'})
-                .to.have.property('message').to.match(/Syntax error:/);
+                .to.deep.contain({position: 6, code: 'S0201', token: ':'});
         });
     });
 
@@ -5193,8 +5092,7 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('[1,2,3]{"num": $}[true]');
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 18})
-                .to.have.property('message').to.match(/A predicate cannot follow a grouping expression in a step/);
+                .to.deep.contain({position: 18, code: 'S0209'});
         });
     });
 
@@ -5204,8 +5102,7 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('[1,2,3]{"num": $}{"num": $}');
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 18})
-                .to.have.property('message').to.match(/Each step can only have one grouping expression/);
+                .to.deep.contain({position: 18, code: 'S0210'});
         });
     });
 
@@ -5220,7 +5117,7 @@ describe('Evaluator - array constructor', function () {
             var expr = jsonata('[]');
             var result = expr.evaluate(testdata2);
             var expected = [];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5229,7 +5126,7 @@ describe('Evaluator - array constructor', function () {
             var expr = jsonata('[1]');
             var result = expr.evaluate(testdata2);
             var expected = [1];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5238,7 +5135,7 @@ describe('Evaluator - array constructor', function () {
             var expr = jsonata('[1, 2]');
             var result = expr.evaluate(testdata2);
             var expected = [1, 2];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5247,7 +5144,7 @@ describe('Evaluator - array constructor', function () {
             var expr = jsonata('[1, 2,3]');
             var result = expr.evaluate(testdata2);
             var expected = [1, 2, 3];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5256,7 +5153,7 @@ describe('Evaluator - array constructor', function () {
             var expr = jsonata('[1, 2, [3, 4]]');
             var result = expr.evaluate(testdata2);
             var expected = [1, 2, [3, 4]];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5265,7 +5162,7 @@ describe('Evaluator - array constructor', function () {
             var expr = jsonata('[1, "two", ["three", 4]]');
             var result = expr.evaluate(testdata2);
             var expected = [1, "two", ["three", 4]];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5276,7 +5173,7 @@ describe('Evaluator - array constructor', function () {
             expr.assign('four', "four");
             var result = expr.evaluate(testdata2);
             var expected = [1, 2, ["three", "four"]];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5285,7 +5182,7 @@ describe('Evaluator - array constructor', function () {
             var expr = jsonata('["foo.bar", foo.bar, ["foo.baz", foo.blah.baz]]');
             var result = expr.evaluate(testdata1);
             var expected = ["foo.bar", 42, ["foo.baz", {"fud": "hello"}, {"fud": "world"}]];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5294,7 +5191,7 @@ describe('Evaluator - array constructor', function () {
             var expr = jsonata('[1, 2, 3][0]');
             var result = expr.evaluate(testdata2);
             var expected = 1;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5303,7 +5200,7 @@ describe('Evaluator - array constructor', function () {
             var expr = jsonata('[1, 2, [3, 4]][-1]');
             var result = expr.evaluate(testdata2);
             var expected = [3, 4];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5312,7 +5209,7 @@ describe('Evaluator - array constructor', function () {
             var expr = jsonata('[1, 2, [3, 4]][-1][-1]');
             var result = expr.evaluate(testdata2);
             var expected = 4;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5321,7 +5218,7 @@ describe('Evaluator - array constructor', function () {
             var expr = jsonata('foo.blah.baz.[fud, fud]');
             var result = expr.evaluate(testdata1);
             var expected = [["hello","hello"],["world","world"]];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5330,7 +5227,7 @@ describe('Evaluator - array constructor', function () {
             var expr = jsonata('foo.blah.baz.[[fud, fud]]');
             var result = expr.evaluate(testdata1);
             var expected = [[["hello","hello"]],[["world","world"]]];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5339,7 +5236,7 @@ describe('Evaluator - array constructor', function () {
             var expr = jsonata('foo.blah.[baz].fud');
             var result = expr.evaluate(testdata1a);
             var expected = "hello";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5348,7 +5245,7 @@ describe('Evaluator - array constructor', function () {
             var expr = jsonata('foo.blah.[baz, buz].fud');
             var result = expr.evaluate(testdata1a);
             var expected = ["hello", "world"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5357,7 +5254,7 @@ describe('Evaluator - array constructor', function () {
             var expr = jsonata('[0,1,2,3,4,5,6,7,8,9][$ % 2 = 0]');
             var result = expr.evaluate(null);
             var expected = [0, 2, 4, 6, 8];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5366,7 +5263,7 @@ describe('Evaluator - array constructor', function () {
             var expr = jsonata('[1, 2, 3].$');
             var result = expr.evaluate();
             var expected = [1,2,3];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5375,7 +5272,7 @@ describe('Evaluator - array constructor', function () {
             var expr = jsonata('[1, 2, 3].$');
             var result = expr.evaluate([]);
             var expected = [1,2,3];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5384,7 +5281,7 @@ describe('Evaluator - array constructor', function () {
             var expr = jsonata('[1, 2, 3].$');
             var result = expr.evaluate([4,5,6]);
             var expected = [1,2,3];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5396,7 +5293,7 @@ describe('Evaluator - range operator', function () {
             var expr = jsonata('[0..9]');
             var result = expr.evaluate(testdata1);
             var expected = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5405,7 +5302,7 @@ describe('Evaluator - range operator', function () {
             var expr = jsonata('[0..9][$ % 2 = 0]');
             var result = expr.evaluate(testdata1);
             var expected = [0, 2, 4, 6, 8];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5414,7 +5311,7 @@ describe('Evaluator - range operator', function () {
             var expr = jsonata('[0, 4..9, 20, 22]');
             var result = expr.evaluate(testdata1);
             var expected = [0, 4, 5, 6, 7, 8, 9, 20, 22];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5423,7 +5320,7 @@ describe('Evaluator - range operator', function () {
             var expr = jsonata('[5..2]');
             var result = expr.evaluate(testdata1);
             var expected = [];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5432,7 +5329,7 @@ describe('Evaluator - range operator', function () {
             var expr = jsonata('[5..2, 2..5]');
             var result = expr.evaluate(testdata1);
             var expected = [2, 3, 4, 5];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5441,7 +5338,7 @@ describe('Evaluator - range operator', function () {
             var expr = jsonata('[-2..2]');
             var result = expr.evaluate(testdata1);
             var expected = [-2, -1, 0, 1, 2];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5450,7 +5347,7 @@ describe('Evaluator - range operator', function () {
             var expr = jsonata('[-2..2].($*$)');
             var result = expr.evaluate(testdata1);
             var expected = [4, 1, 0, 1, 4];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5459,7 +5356,7 @@ describe('Evaluator - range operator', function () {
             var expr = jsonata('[-2..blah]');
             var result = expr.evaluate();
             var expected = [];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5468,7 +5365,7 @@ describe('Evaluator - range operator', function () {
             var expr = jsonata('[blah..5, 3, -2..blah]');
             var result = expr.evaluate();
             var expected = [3];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5478,8 +5375,7 @@ describe('Evaluator - range operator', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 7, token: '..', value: 1.1})
-                .to.have.property('message').to.match(/LHS of range operator \(\.\.\) must evaluate to an integer/);
+                .to.deep.contain({position: 7, code: 'T2003', token: '..', value: 1.1});
         });
     });
 
@@ -5489,8 +5385,7 @@ describe('Evaluator - range operator', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 5, token: '..', value: 5.5})
-                .to.have.property('message').to.match(/RHS of range operator \(\.\.\) must evaluate to an integer/);
+                .to.deep.contain({position: 5, code: 'T2004', token: '..', value: 5.5});
         });
     });
 
@@ -5502,7 +5397,7 @@ describe('Evaluator - object constructor', function () {
             var expr = jsonata('{}');
             var result = expr.evaluate(testdata1);
             var expected = {};
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5511,7 +5406,7 @@ describe('Evaluator - object constructor', function () {
             var expr = jsonata('{"key": "value"}');
             var result = expr.evaluate(testdata1);
             var expected = {"key": "value"};
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5520,7 +5415,7 @@ describe('Evaluator - object constructor', function () {
             var expr = jsonata('{"one": 1, "two": 2}');
             var result = expr.evaluate(testdata1);
             var expected = {"one": 1, "two": 2};
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5529,7 +5424,7 @@ describe('Evaluator - object constructor', function () {
             var expr = jsonata('{"one": 1, "two": 2}.two');
             var result = expr.evaluate(testdata1);
             var expected = 2;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5538,7 +5433,7 @@ describe('Evaluator - object constructor', function () {
             var expr = jsonata('{"one": 1, "two": {"three": 3, "four": "4"}}');
             var result = expr.evaluate(testdata1);
             var expected = {"one": 1, "two": {"three": 3, "four": "4"}};
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5547,7 +5442,7 @@ describe('Evaluator - object constructor', function () {
             var expr = jsonata('{"one": 1, "two": [3, "four"]}');
             var result = expr.evaluate(testdata1);
             var expected = {"one": 1, "two": [3, "four"]};
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5556,7 +5451,7 @@ describe('Evaluator - object constructor', function () {
             var expr = jsonata('blah.{}');
             var result = expr.evaluate(testdata1);
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5565,7 +5460,7 @@ describe('Evaluator - object constructor', function () {
             var expr = jsonata('Account.Order{OrderID: Product."Product Name"}');
             var result = expr.evaluate(testdata2);
             var expected = {"order103": ["Bowler Hat", "Trilby hat"], "order104": ["Bowler Hat", "Cloak"]};
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5574,7 +5469,7 @@ describe('Evaluator - object constructor', function () {
             var expr = jsonata('Account.Order.{OrderID: Product."Product Name"}');
             var result = expr.evaluate(testdata2);
             var expected = [{"order103": ["Bowler Hat", "Trilby hat"]}, {"order104": ["Bowler Hat", "Cloak"]}];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5583,7 +5478,7 @@ describe('Evaluator - object constructor', function () {
             var expr = jsonata('Account.Order.Product{$string(ProductID): Price}');
             var result = expr.evaluate(testdata2);
             var expected = {"345664": 107.99, "858236": 21.67, "858383": [34.45, 34.45]};
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5592,7 +5487,7 @@ describe('Evaluator - object constructor', function () {
             var expr = jsonata('Account.Order.Product{$string(ProductID): (Price)[0]}');
             var result = expr.evaluate(testdata2);
             var expected = {"345664": 107.99, "858236": 21.67, "858383": 34.45};
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5601,7 +5496,7 @@ describe('Evaluator - object constructor', function () {
             var expr = jsonata('Account.Order.Product.{$string(ProductID): Price}');
             var result = expr.evaluate(testdata2);
             var expected = [{"858383": 34.45}, {"858236": 21.67}, {"858383": 34.45}, {"345664": 107.99}];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5611,8 +5506,7 @@ describe('Evaluator - object constructor', function () {
             expect(function () {
                 expr.evaluate(testdata2);
             }).to.throw()
-                .to.deep.contain({position: 22, value: 858383})
-                .to.have.property('message').to.match(/Key in object structure must evaluate to a string/);
+                .to.deep.contain({position: 22, code: 'T1003', value: 858383});
         });
     });
 
@@ -5622,8 +5516,7 @@ describe('Evaluator - object constructor', function () {
             expect(function () {
                 expr.evaluate(testdata2);
             }).to.throw()
-                .to.deep.contain({position: 23, value: 858383})
-                .to.have.property('message').to.match(/Key in object structure must evaluate to a string/);
+                .to.deep.contain({position: 23, code: 'T1003', value: 858383});
         });
     });
 
@@ -5632,7 +5525,7 @@ describe('Evaluator - object constructor', function () {
             var expr = jsonata('Account.Order{OrderID: $sum(Product.(Price*Quantity))}');
             var result = expr.evaluate(testdata2);
             var expected = {"order103": 90.57000000000001, "order104": 245.79000000000002};
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5641,7 +5534,7 @@ describe('Evaluator - object constructor', function () {
             var expr = jsonata('Account.Order.{OrderID: $sum(Product.(Price*Quantity))}');
             var result = expr.evaluate(testdata2);
             var expected = [{"order103": 90.57000000000001}, {"order104": 245.79000000000002}];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5665,7 +5558,7 @@ describe('Evaluator - object constructor', function () {
                     107.99
                 ]
             };
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5694,7 +5587,7 @@ describe('Evaluator - object constructor', function () {
                     ]
                 }
             };
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5763,7 +5656,7 @@ describe('Evaluator - object constructor', function () {
                     }
                 ]
             };
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5845,7 +5738,7 @@ describe('Evaluator - Boolean expressions', function () {
             var expr = jsonata('true');
             var result = expr.evaluate(testdata1);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5854,7 +5747,7 @@ describe('Evaluator - Boolean expressions', function () {
             var expr = jsonata('false');
             var result = expr.evaluate(testdata1);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5863,7 +5756,7 @@ describe('Evaluator - Boolean expressions', function () {
             var expr = jsonata('false or false');
             var result = expr.evaluate(testdata1);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5872,7 +5765,7 @@ describe('Evaluator - Boolean expressions', function () {
             var expr = jsonata('false or true');
             var result = expr.evaluate(testdata1);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5881,7 +5774,7 @@ describe('Evaluator - Boolean expressions', function () {
             var expr = jsonata('true or false');
             var result = expr.evaluate(testdata1);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5890,7 +5783,7 @@ describe('Evaluator - Boolean expressions', function () {
             var expr = jsonata('true or true');
             var result = expr.evaluate(testdata1);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5899,7 +5792,7 @@ describe('Evaluator - Boolean expressions', function () {
             var expr = jsonata('false and false');
             var result = expr.evaluate(testdata1);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5908,7 +5801,7 @@ describe('Evaluator - Boolean expressions', function () {
             var expr = jsonata('false and true');
             var result = expr.evaluate(testdata1);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5917,7 +5810,7 @@ describe('Evaluator - Boolean expressions', function () {
             var expr = jsonata('true and false');
             var result = expr.evaluate(testdata1);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5926,7 +5819,7 @@ describe('Evaluator - Boolean expressions', function () {
             var expr = jsonata('true and true');
             var result = expr.evaluate(testdata1);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5935,7 +5828,7 @@ describe('Evaluator - Boolean expressions', function () {
             var expr = jsonata('$not(false)');
             var result = expr.evaluate(testdata1);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5944,7 +5837,7 @@ describe('Evaluator - Boolean expressions', function () {
             var expr = jsonata('$not(true)');
             var result = expr.evaluate(testdata1);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5953,7 +5846,7 @@ describe('Evaluator - Boolean expressions', function () {
             var expr = jsonata('and=1 and or=2');
             var result = expr.evaluate({"and": 1, "or": 2});
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5962,7 +5855,7 @@ describe('Evaluator - Boolean expressions', function () {
             var expr = jsonata('and>1 or or<=2');
             var result = expr.evaluate({"and": 1, "or": 2});
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5971,7 +5864,7 @@ describe('Evaluator - Boolean expressions', function () {
             var expr = jsonata('and>1 or or!=2');
             var result = expr.evaluate({"and": 1, "or": 2});
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -5980,7 +5873,7 @@ describe('Evaluator - Boolean expressions', function () {
             var expr = jsonata('and and and');
             var result = expr.evaluate({"and": 1, "or": 2});
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 });
@@ -5991,7 +5884,7 @@ describe('Evaluator - null', function () {
             var expr = jsonata('null');
             var result = expr.evaluate(testdata1);
             var expected = null;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6000,7 +5893,7 @@ describe('Evaluator - null', function () {
             var expr = jsonata('[null]');
             var result = expr.evaluate(testdata1);
             var expected = [null];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6009,7 +5902,7 @@ describe('Evaluator - null', function () {
             var expr = jsonata('[null, null]');
             var result = expr.evaluate(testdata1);
             var expected = [null, null];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6018,7 +5911,7 @@ describe('Evaluator - null', function () {
             var expr = jsonata('$not(null)');
             var result = expr.evaluate(testdata1);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6027,7 +5920,7 @@ describe('Evaluator - null', function () {
             var expr = jsonata('null = null');
             var result = expr.evaluate(testdata1);
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6036,7 +5929,7 @@ describe('Evaluator - null', function () {
             var expr = jsonata('null != null');
             var result = expr.evaluate(testdata1);
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6045,7 +5938,7 @@ describe('Evaluator - null', function () {
             var expr = jsonata('{"true": true, "false":false, "null": null}');
             var result = expr.evaluate(testdata1);
             var expected = {"true": true, "false": false, "null": null};
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6059,7 +5952,7 @@ describe('Evaluator - Conditional expressions', function () {
             var expr = jsonata('["Red"[$$="Bus"], "White"[$$="Police Car"]][0]');
             var result = expr.evaluate("Bus");
             var expected = "Red";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6068,7 +5961,7 @@ describe('Evaluator - Conditional expressions', function () {
             var expr = jsonata('["Red"[$$="Bus"], "White"[$$="Police Car"]][0]');
             var result = expr.evaluate("Police Car");
             var expected = "White";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6077,7 +5970,7 @@ describe('Evaluator - Conditional expressions', function () {
             var expr = jsonata('["Red"[$$="Bus"], "White"[$$="Police Car"]][0]');
             var result = expr.evaluate("Tuk tuk");
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6086,7 +5979,7 @@ describe('Evaluator - Conditional expressions', function () {
             var expr = jsonata('$lookup({"Bus": "Red", "Police Car": "White"}, $$)');
             var result = expr.evaluate("Bus");
             var expected = "Red";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6095,7 +5988,7 @@ describe('Evaluator - Conditional expressions', function () {
             var expr = jsonata('$lookup({"Bus": "Red", "Police Car": "White"}, $$)');
             var result = expr.evaluate("Police Car");
             var expected = "White";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6104,7 +5997,7 @@ describe('Evaluator - Conditional expressions', function () {
             var expr = jsonata('$lookup({"Bus": "Red", "Police Car": "White"}, $$)');
             var result = expr.evaluate("Tuk tuk");
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6113,7 +6006,7 @@ describe('Evaluator - Conditional expressions', function () {
             var expr = jsonata('Account.Order.Product.(Price < 30 ? "Cheap")');
             var result = expr.evaluate(testdata2);
             var expected = "Cheap";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6122,7 +6015,7 @@ describe('Evaluator - Conditional expressions', function () {
             var expr = jsonata('Account.Order.Product.(Price < 30 ? "Cheap" : "Expensive")');
             var result = expr.evaluate(testdata2);
             var expected = ["Expensive", "Cheap", "Expensive", "Expensive"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6131,7 +6024,7 @@ describe('Evaluator - Conditional expressions', function () {
             var expr = jsonata('Account.Order.Product.(Price < 30 ? "Cheap" : Price < 100 ? "Expensive" : "Rip off")');
             var result = expr.evaluate(testdata2);
             var expected = ["Expensive", "Cheap", "Expensive", "Rip off"];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6143,7 +6036,7 @@ describe('Evaluator - Lambda functions', function () {
             var expr = jsonata('function($x){$x*$x}(5)');
             var result = expr.evaluate(null);
             var expected = 25;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6152,7 +6045,7 @@ describe('Evaluator - Lambda functions', function () {
             var expr = jsonata('($factorial:= function($x){$x <= 1 ? 1 : $x * $factorial($x-1)}; $factorial(4))');
             var result = expr.evaluate(null);
             var expected = 24;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6161,7 +6054,7 @@ describe('Evaluator - Lambda functions', function () {
             var expr = jsonata('($fibonacci := function($x){$x <= 1 ? $x : $fibonacci($x-1) + $fibonacci($x-2)}; [1,2,3,4,5,6,7,8,9].$fibonacci($))');
             var result = expr.evaluate(null);
             var expected = [1, 1, 2, 3, 5, 8, 13, 21, 34];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6170,7 +6063,7 @@ describe('Evaluator - Lambda functions', function () {
             var expr = jsonata('($nth_price := function($n) { (Account.Order.Product.Price)[$n] }; $nth_price(1) )');
             var result = expr.evaluate(testdata2);
             var expected = 21.67;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6184,7 +6077,7 @@ describe('Evaluator - Lambda functions', function () {
               '            )');
             var result = expr.evaluate();
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6197,7 +6090,7 @@ describe('Evaluator - Lambda functions', function () {
               '              $even(65) )');
             var result = expr.evaluate();
             var expected = false;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6211,7 +6104,7 @@ describe('Evaluator - Lambda functions', function () {
                 '        )' );
             var result = expr.evaluate();
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6224,7 +6117,7 @@ describe('Evaluator - Lambda functions', function () {
               ')' );
             var result = expr.evaluate();
             var expected = [4,3];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6242,7 +6135,7 @@ describe('Evaluator - Lambda functions', function () {
             );
             var result = expr.evaluate();
             var expected = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6260,7 +6153,7 @@ describe('Evaluator - Lambda functions', function () {
             );
             var result = expr.evaluate();
             var expected = [0, 2, 4, 6, 8, 10, 12, 14];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6276,7 +6169,7 @@ describe('Evaluator - Tail recursion', function () {
               '            ) ' );
             var result = expr.evaluate();
             var expected = undefined;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6290,7 +6183,7 @@ describe('Evaluator - Tail recursion', function () {
             timeboxExpression(expr, 1000, 302);
             var result = expr.evaluate();
             var expected = 9.33262154439441e+155;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6305,8 +6198,7 @@ describe('Evaluator - Tail recursion', function () {
                 timeboxExpression(expr, 1000, 302);
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 81})
-                .to.have.property('message').to.match(/Stack overflow error:/);
+                .to.deep.contain({position: 81, code: 'U1001'});
         });
     });
 
@@ -6325,7 +6217,7 @@ describe('Evaluator - Tail recursion', function () {
               '');
             var result = expr.evaluate();
             var expected = 120;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6344,7 +6236,7 @@ describe('Evaluator - Tail recursion', function () {
               '');
             var result = expr.evaluate();
             var expected = 5.7133839564458575e+262;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6359,8 +6251,7 @@ describe('Evaluator - Tail recursion', function () {
                 timeboxExpression(expr, 1000, 300);
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 46})
-                .to.have.property('message').to.match(/Stack overflow error:/);
+                .to.deep.contain({position: 46, code: 'U1001'});
         });
     });
 
@@ -6376,8 +6267,7 @@ describe('Evaluator - Tail recursion', function () {
                 timeboxExpression(expr, 1000, 500);
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 37})
-              .to.have.property('message').to.match(/Expression evaluation timeout:/);
+              .to.deep.contain({position: 37, code: 'U1001'});
         });
     });
 
@@ -6393,7 +6283,7 @@ describe('Evaluator - Tail recursion', function () {
             timeboxExpression(expr, 4000, 500);
             var result = expr.evaluate();
             var expected = true;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6405,7 +6295,7 @@ describe('Evaluator - Higher order functions', function () {
             var expr = jsonata('($twice:=function($f){function($x){$f($f($x))}}; $add3:=function($y){$y+3}; $add6:=$twice($add3); $add6(7))');
             var result = expr.evaluate(null);
             var expected = 13;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6414,7 +6304,7 @@ describe('Evaluator - Higher order functions', function () {
             var expr = jsonata('λ($f) { λ($x) { $x($x) }( λ($g) { $f( (λ($a) {$g($g)($a)}))})}(λ($f) { λ($n) { $n < 2 ? 1 : $n * $f($n - 1) } })(6)');
             var result = expr.evaluate(null);
             var expected = 720;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6423,7 +6313,7 @@ describe('Evaluator - Higher order functions', function () {
             var expr = jsonata('λ($f) { λ($x) { $x($x) }( λ($g) { $f( (λ($a) {$g($g)($a)}))})}(λ($f) { λ($n) { $n <= 1 ? $n : $f($n-1) + $f($n-2) } })(6) ');
             var result = expr.evaluate(null);
             var expected = 8;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6435,7 +6325,7 @@ describe('Evaluator - Block expressions', function () {
             var expr = jsonata('(1; 2; 3)');
             var result = expr.evaluate(null);
             var expected = 3;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6444,7 +6334,7 @@ describe('Evaluator - Block expressions', function () {
             var expr = jsonata('(1; 2; 3;)');
             var result = expr.evaluate(null);
             var expected = 3;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6453,7 +6343,7 @@ describe('Evaluator - Block expressions', function () {
             var expr = jsonata('($a:=1; $b:=2; $c:=($a:=4; $a+$b); $a+$c)');
             var result = expr.evaluate(null);
             var expected = 7;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6462,7 +6352,7 @@ describe('Evaluator - Block expressions', function () {
             var expr = jsonata('Account.Order.Product.($var1 := Price ; $var2:=Quantity; $var1 * $var2)');
             var result = expr.evaluate(testdata2);
             var expected = [68.9, 21.67, 137.8, 107.99];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6475,7 +6365,7 @@ describe('Evaluator - Block expressions', function () {
               ')');
             var result = expr.evaluate(testdata2);
             var expected = 'order103';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6488,7 +6378,7 @@ describe('Evaluator - Block expressions', function () {
               ')' );
             var result = expr.evaluate(testdata2);
             var expected = 'order103';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6514,7 +6404,7 @@ describe('Evaluator - Closures', function () {
                 "SKU-858383": "Bowler Hat",
                 "SKU-345664": "Cloak"
             };
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6533,7 +6423,7 @@ describe('Evaluator - Partial function application', function () {
             );
             var result = expr.evaluate(testdata2);
             var expected = 5;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6549,7 +6439,7 @@ describe('Evaluator - Partial function application', function () {
             );
             var result = expr.evaluate(testdata2);
             var expected = 6;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6560,12 +6450,11 @@ describe('Evaluator - Partial function application', function () {
                 '  $firstn := $substring(?, 0, ?);' +
                 '  $first5 := $firstn(?, 5);' +
                 '  $first5("Hello World")' +
-                ')' +
-                ''
+                ')'
             );
             var result = expr.evaluate(testdata2);
             var expected = 'Hello';
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6575,8 +6464,7 @@ describe('Evaluator - Partial function application', function () {
             expect(function () {
                 expr.evaluate(expr);
             }).to.throw()
-                .to.deep.contain({position: 10, token: 'substring'})
-                .to.have.property('message').to.match(/Attempted to partially apply a non-function. Did you mean/);
+                .to.deep.contain({position: 10, code: 'T1007', token: 'substring'});
         });
     });
 
@@ -6586,11 +6474,27 @@ describe('Evaluator - Partial function application', function () {
             expect(function () {
                 expr.evaluate(expr);
             }).to.throw()
-                .to.deep.contain({position: 8, token: 'unknown'})
-                .to.have.property('message').to.match(/Attempted to partially apply a non-function/);
+                .to.deep.contain({position: 8, code: 'T1008', token: 'unknown'});
         });
     });
 
+    describe('Partially apply user-defined Javascript function', function () {
+        it('should return result object', function () {
+            var expr = jsonata(
+              '(' +
+              '  $firstn := $substr(?, 0, ?);' +
+              '  $first5 := $firstn(?, 5);' +
+              '  $first5("Hello World")' +
+              ')'
+            );
+            expr.assign('substr', function(str, start, len) {
+                return str.substr(start, len);
+            });
+            var result = expr.evaluate(testdata2);
+            var expected = 'Hello';
+            expect(result).to.deep.equal(expected);
+        });
+    });
 });
 
 
@@ -6608,7 +6512,7 @@ describe('HOF - map', function () {
               ')  ');
             var result = expr.evaluate(null);
             var expected = [1, 4, 9, 16, 25];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6625,7 +6529,7 @@ describe('HOF - map', function () {
               ') ');
             var result = expr.evaluate(null);
             var expected = [6, 6, 6, 6, 6];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6642,7 +6546,7 @@ describe('HOF - map', function () {
               ') ');
             var result = expr.evaluate(null);
             var expected = [6, 6, 6, 6, 6];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6659,7 +6563,7 @@ describe('HOF - map', function () {
               ') ');
             var result = expr.evaluate(null);
             var expected = 6;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6676,7 +6580,7 @@ describe('HOF - map', function () {
               ') ');
             var result = expr.evaluate(null);
             var expected = 6;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6691,9 +6595,10 @@ describe('HOF - map', function () {
               '  $add := function($x){$x*$x};' +
               '  $map($add) ' +
               ')  ');
-            var result = expr.evaluate(null);
-            var expected = [];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 99, code: 'T0410', token: 'map', index: 2});
         });
     });
 
@@ -6702,10 +6607,44 @@ describe('HOF - map', function () {
             var expr = jsonata('$map($string, [1,2,3])');
             var result = expr.evaluate(null);
             var expected = ['1','2','3'];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
+    describe('map a user-defined Javascript function', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$map($sqrt, [1,4,9,16])');
+            expr.assign('sqrt', function(num) {
+                return Math.sqrt(num);
+            });
+            var result = expr.evaluate(testdata2);
+            var expected = [1,2,3,4];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('map a user-defined Javascript function with signature', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$map($sqrt, [1,4,9,16])');
+            expr.registerFunction('sqrt', function(num) {
+                return Math.sqrt(num);
+            }, '<n:n>');
+            var result = expr.evaluate(testdata2);
+            var expected = [1,2,3,4];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+    describe('map a user-defined Javascript function with undefined signature', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$map($sqrt, [1,4,9,16])');
+            expr.registerFunction('sqrt', function(num) {
+                return Math.sqrt(num);
+            });
+            var result = expr.evaluate(testdata2);
+            var expected = [1,2,3,4];
+            expect(result).to.deep.equal(expected);
+        });
+    });
 });
 
 describe('HOF - reduce', function () {
@@ -6718,7 +6657,7 @@ describe('HOF - reduce', function () {
               ') ');
             var result = expr.evaluate(null);
             var expected = 15;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6733,7 +6672,7 @@ describe('HOF - reduce', function () {
               "      ");
             var result = expr.evaluate(null);
             var expected = "1 ... 2 ... 3 ... 4 ... 5";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6746,7 +6685,7 @@ describe('HOF - reduce', function () {
               ')' );
             var result = expr.evaluate(null);
             var expected = 17;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6759,7 +6698,7 @@ describe('HOF - reduce', function () {
               ')' );
             var result = expr.evaluate(null);
             var expected = 1;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6772,7 +6711,7 @@ describe('HOF - reduce', function () {
               ')' );
             var result = expr.evaluate(null);
             var expected = 1;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6781,7 +6720,7 @@ describe('HOF - reduce', function () {
             var expr = jsonata('$reduce($append, Account.Order.Product.Quantity)');
             var result = expr.evaluate(testdata2);
             var expected = [2, 1, 4, 1];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6795,8 +6734,7 @@ describe('HOF - reduce', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 23})
-                .to.have.property('message').to.match(/The first argument of the reduce function must be a function of arity 2/);
+                .to.deep.contain({position: 23, code: 'D3050', index: 1});
         });
     });
 
@@ -6809,7 +6747,7 @@ describe('Regex', function () {
                 var expr = jsonata('/ab/ ("ab")');
                 var result = expr.evaluate();
                 var expected = {"match": "ab", "start": 0, "end": 2, "groups": []};
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(JSON.stringify(result)).to.equal(JSON.stringify(expected));
             });
         });
 
@@ -6818,7 +6756,7 @@ describe('Regex', function () {
                 var expr = jsonata('/ab/ ()');
                 var result = expr.evaluate();
                 var expected = undefined;
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(JSON.stringify(result)).to.equal(JSON.stringify(expected));
             });
         });
 
@@ -6827,7 +6765,7 @@ describe('Regex', function () {
                 var expr = jsonata('/ab+/ ("ababbabbcc")');
                 var result = expr.evaluate();
                 var expected = {"match": "ab", "start": 0, "end": 2, "groups": []};
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(JSON.stringify(result)).to.equal(JSON.stringify(expected));
             });
         });
 
@@ -6836,7 +6774,7 @@ describe('Regex', function () {
                 var expr = jsonata('/a(b+)/ ("ababbabbcc")');
                 var result = expr.evaluate();
                 var expected = {"match": "ab", "start": 0, "end": 2, "groups": ["b"]};
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(JSON.stringify(result)).to.equal(JSON.stringify(expected));
             });
         });
 
@@ -6845,7 +6783,7 @@ describe('Regex', function () {
                 var expr = jsonata('/a(b+)/ ("ababbabbcc").next()');
                 var result = expr.evaluate();
                 var expected = {"match": "abb", "start": 2, "end": 5, "groups": ["bb"]};
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(JSON.stringify(result)).to.equal(JSON.stringify(expected));
             });
         });
 
@@ -6854,7 +6792,7 @@ describe('Regex', function () {
                 var expr = jsonata('/a(b+)/ ("ababbabbcc").next().next()');
                 var result = expr.evaluate();
                 var expected = {"match": "abb", "start": 5, "end": 8, "groups": ["bb"]};
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(JSON.stringify(result)).to.equal(JSON.stringify(expected));
             });
         });
 
@@ -6863,7 +6801,7 @@ describe('Regex', function () {
                 var expr = jsonata('/a(b+)/ ("ababbabbcc").next().next().next()');
                 var result = expr.evaluate();
                 var expected = undefined;
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(JSON.stringify(result)).to.equal(JSON.stringify(expected));
             });
         });
 
@@ -6872,7 +6810,7 @@ describe('Regex', function () {
                 var expr = jsonata('/a(b+)/i ("Ababbabbcc")');
                 var result = expr.evaluate();
                 var expected = {"match": "Ab", "start": 0, "end": 2, "groups": ["b"]};
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(JSON.stringify(result)).to.equal(JSON.stringify(expected));
             });
         });
 
@@ -6882,8 +6820,7 @@ describe('Regex', function () {
                     var expr = jsonata('//');
                     expr.evaluate();
                 }).to.throw()
-                  .to.deep.contain({position: 1})
-                  .to.have.property('message').to.match(/Empty regular expressions are not allowed/);
+                  .to.deep.contain({position: 1, code: 'S0301'});
             });
         });
 
@@ -6893,8 +6830,7 @@ describe('Regex', function () {
                     var expr = jsonata('/');
                     expr.evaluate();
                 }).to.throw()
-                  .to.deep.contain({position: 1})
-                  .to.have.property('message').to.match(/No terminating \/ in regular expression/);
+                  .to.deep.contain({position: 1, code: 'S0302'});
             });
         });
 
@@ -6910,7 +6846,7 @@ describe('Regex', function () {
                     "index": 2,
                     "groups": []
                 }, {"match": "ab", "index": 5, "groups": []}];
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -6923,7 +6859,7 @@ describe('Regex', function () {
                     "index": 2,
                     "groups": ["bb"]
                 }, {"match": "abb", "index": 5, "groups": ["bb"]}];
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -6932,7 +6868,7 @@ describe('Regex', function () {
                 var expr = jsonata('$match("ababbabbcc",/a(b+)/, 1)');
                 var result = expr.evaluate();
                 var expected = [{"match": "ab", "index": 0, "groups": ["b"]}];
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -6941,7 +6877,7 @@ describe('Regex', function () {
                 var expr = jsonata('$match("ababbabbcc",/a(b+)/, 0)');
                 var result = expr.evaluate();
                 var expected = [];
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -6950,7 +6886,7 @@ describe('Regex', function () {
                 var expr = jsonata('$match(nothing,/a(xb+)/)');
                 var result = expr.evaluate();
                 var expected = undefined;
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -6959,7 +6895,7 @@ describe('Regex', function () {
                 var expr = jsonata('$match("ababbabbcc",/a(xb+)/)');
                 var result = expr.evaluate();
                 var expected = [];
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -6969,8 +6905,7 @@ describe('Regex', function () {
                 expect(function () {
                     expr.evaluate();
                 }).to.throw()
-                  .to.deep.contain({position: 7, value: -3})
-                  .to.have.property('message').to.match(/Type error: third argument of match function must evaluate to a positive number/);
+                  .to.deep.contain({position: 7, code: 'D3040', token: 'match', index: 3, value: -3});
             });
         });
 
@@ -6980,8 +6915,7 @@ describe('Regex', function () {
                 expect(function () {
                     expr.evaluate();
                 }).to.throw()
-                  .to.deep.contain({position: 7, value: null})
-                  .to.have.property('message').to.match(/Type error: third argument of match function must evaluate to a positive number/);
+                  .to.deep.contain({position: 7, code: 'T0410', token: 'match', index: 3, value: null});
             });
         });
 
@@ -6991,8 +6925,7 @@ describe('Regex', function () {
                 expect(function () {
                     expr.evaluate();
                 }).to.throw()
-                  .to.deep.contain({position: 7, value: "2"})
-                  .to.have.property('message').to.match(/Type error: third argument of match function must evaluate to a positive number/);
+                  .to.deep.contain({position: 7, code: 'T0410', token: 'match', index: 3, value: "2"});
             });
         });
 
@@ -7002,8 +6935,7 @@ describe('Regex', function () {
                 expect(function () {
                     expr.evaluate();
                 }).to.throw()
-                  .to.deep.contain({position: 7, value: "ab"})
-                  .to.have.property('message').to.match(/Type error: second argument of match function must evaluate to a regular expression/);
+                  .to.deep.contain({position: 7, code: 'T0410', token: 'match', index: 2, value: "ab"});
             });
         });
 
@@ -7013,8 +6945,7 @@ describe('Regex', function () {
                 expect(function () {
                     expr.evaluate();
                 }).to.throw()
-                  .to.deep.contain({position: 7, value: true})
-                  .to.have.property('message').to.match(/Type error: second argument of match function must evaluate to a regular expression/);
+                  .to.deep.contain({position: 7, code: 'T0410', token: 'match', index: 2, value: true});
             });
         });
 
@@ -7024,8 +6955,7 @@ describe('Regex', function () {
                 expect(function () {
                     expr.evaluate();
                 }).to.throw()
-                  .to.deep.contain({position: 7, value: 12345})
-                  .to.have.property('message').to.match(/Type error: first argument of match function must evaluate to a string/);
+                  .to.deep.contain({position: 7, code: 'T0410', token: 'match', index: 1, value: 12345});
             });
         });
 
@@ -7035,8 +6965,7 @@ describe('Regex', function () {
                 expect(function () {
                     expr.evaluate();
                 }).to.throw()
-                  .to.deep.contain({position: 7})
-                  .to.have.property('message').to.match(/The match function expects two or three arguments/);
+                  .to.deep.contain({position: 7, code: 'T0410', token: 'match', index: 1 });
             });
         });
     });
@@ -7047,7 +6976,7 @@ describe('Regex', function () {
                 var expr = jsonata('$split("ababbxabbcc",/b+/)');
                 var result = expr.evaluate();
                 var expected = ["a", "a", "xa", "cc"];
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7056,7 +6985,7 @@ describe('Regex', function () {
                 var expr = jsonata('$split("ababbxabbcc",/b+/, 2)');
                 var result = expr.evaluate();
                 var expected = ["a", "a"];
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7065,7 +6994,7 @@ describe('Regex', function () {
                 var expr = jsonata('$split("ababbxabbcc",/d+/)');
                 var result = expr.evaluate();
                 var expected = ["ababbxabbcc"];
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7077,7 +7006,7 @@ describe('Regex', function () {
                 var expr = jsonata('$contains("ababbxabbcc",/ab+/)');
                 var result = expr.evaluate();
                 var expected = true;
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7086,7 +7015,7 @@ describe('Regex', function () {
                 var expr = jsonata('$contains("ababbxabbcc",/ax+/)');
                 var result = expr.evaluate();
                 var expected = false;
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7095,7 +7024,7 @@ describe('Regex', function () {
                 var expr = jsonata('Account.Order.Product[$contains($."Product Name", /hat/)].ProductID');
                 var result = expr.evaluate(testdata2);
                 var expected = 858236;
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7104,7 +7033,7 @@ describe('Regex', function () {
                 var expr = jsonata('Account.Order.Product[$contains($."Product Name", /hat/i)].ProductID');
                 var result = expr.evaluate(testdata2);
                 var expected = [858383, 858236, 858383];
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7116,7 +7045,7 @@ describe('Regex', function () {
                 var expr = jsonata('$replace("ababbxabbcc",/b+/, "yy")');
                 var result = expr.evaluate();
                 var expected = "ayyayyxayycc";
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7125,7 +7054,7 @@ describe('Regex', function () {
                 var expr = jsonata('$replace("ababbxabbcc",/b+/, "yy", 2)');
                 var result = expr.evaluate();
                 var expected = "ayyayyxabbcc";
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7134,7 +7063,7 @@ describe('Regex', function () {
                 var expr = jsonata('$replace("ababbxabbcc",/b+/, "yy", 0)');
                 var result = expr.evaluate();
                 var expected = "ababbxabbcc";
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7143,7 +7072,7 @@ describe('Regex', function () {
                 var expr = jsonata('$replace("ababbxabbcc",/d+/, "yy")');
                 var result = expr.evaluate();
                 var expected = "ababbxabbcc";
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7152,7 +7081,7 @@ describe('Regex', function () {
                 var expr = jsonata('$replace("John Smith", /(\\w+)\\s(\\w+)/, "$2, $1")');
                 var result = expr.evaluate();
                 var expected = "Smith, John";
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7161,7 +7090,7 @@ describe('Regex', function () {
                 var expr = jsonata('$replace("265USD", /([0-9]+)USD/, "$$$1")');
                 var result = expr.evaluate();
                 var expected = "$265";
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7170,7 +7099,7 @@ describe('Regex', function () {
                 var expr = jsonata('$replace("265USD", /([0-9]+)USD/, "$w")');
                 var result = expr.evaluate();
                 var expected = "$w";
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7179,7 +7108,7 @@ describe('Regex', function () {
                 var expr = jsonata('$replace("265USD", /([0-9]+)USD/, "$0 -> $$$1")');
                 var result = expr.evaluate();
                 var expected = "265USD -> $265";
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7188,7 +7117,7 @@ describe('Regex', function () {
                 var expr = jsonata('$replace("265USD", /([0-9]+)USD/, "$0$1$2")');
                 var result = expr.evaluate();
                 var expected = "265USD265";
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7197,7 +7126,7 @@ describe('Regex', function () {
                 var expr = jsonata('$replace("abcd", /(ab)|(a)/, "[1=$1][2=$2]")');
                 var result = expr.evaluate();
                 var expected = "[1=ab][2=]cd";
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7206,7 +7135,7 @@ describe('Regex', function () {
                 var expr = jsonata('$replace("abracadabra", /bra/, "*")');
                 var result = expr.evaluate();
                 var expected = "a*cada*";
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7215,7 +7144,7 @@ describe('Regex', function () {
                 var expr = jsonata('$replace("abracadabra", /a.*a/, "*")');
                 var result = expr.evaluate();
                 var expected = "*";
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7224,7 +7153,7 @@ describe('Regex', function () {
                 var expr = jsonata('$replace("abracadabra", /a.*?a/, "*")');
                 var result = expr.evaluate();
                 var expected = "*c*bra";
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7233,7 +7162,7 @@ describe('Regex', function () {
                 var expr = jsonata('$replace("abracadabra", /a/, "")');
                 var result = expr.evaluate();
                 var expected = "brcdbr";
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7242,7 +7171,7 @@ describe('Regex', function () {
                 var expr = jsonata('$replace("abracadabra", /a(.)/, "a$1$1")');
                 var result = expr.evaluate();
                 var expected = "abbraccaddabbra";
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7252,8 +7181,7 @@ describe('Regex', function () {
                 expect(function () {
                     expr.evaluate();
                 }).to.throw()
-                  .to.deep.contain({position: 9, token: "replace", value: ".*?"})
-                  .to.have.property('message').to.match(/Regular expression matches zero length string/);
+                  .to.deep.contain({position: 9, code: 'D1004', token: "replace", value: ".*?"});
             });
         });
 
@@ -7262,7 +7190,7 @@ describe('Regex', function () {
                 var expr = jsonata('$replace("AAAA", /A+/, "b")');
                 var result = expr.evaluate();
                 var expected = "b";
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7271,7 +7199,7 @@ describe('Regex', function () {
                 var expr = jsonata('$replace("AAAA", /A+?/, "b")');
                 var result = expr.evaluate();
                 var expected = "bbbb";
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7280,7 +7208,7 @@ describe('Regex', function () {
                 var expr = jsonata('$replace("darted", /^(.*?)d(.*)$/, "$1c$2")');
                 var result = expr.evaluate();
                 var expected = "carted";
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7289,7 +7217,7 @@ describe('Regex', function () {
                 var expr = jsonata('$replace("abcdefghijklmno", /(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)(l)(m)/, "$8$5$12$12$18$123")');
                 var result = expr.evaluate();
                 var expected = "hella8l3no";
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7298,7 +7226,7 @@ describe('Regex', function () {
                 var expr = jsonata('$replace("abcdefghijklmno", /xyz/, "$8$5$12$12$18$123")');
                 var result = expr.evaluate();
                 var expected = "abcdefghijklmno";
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7307,7 +7235,7 @@ describe('Regex', function () {
                 var expr = jsonata('$replace("abcdefghijklmno", /ijk/, "$8$5$12$12$18$123")');
                 var result = expr.evaluate();
                 var expected = "abcdefgh22823lmno";
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7316,7 +7244,7 @@ describe('Regex', function () {
                 var expr = jsonata('$replace("abcdefghijklmno", /(ijk)/, "$8$5$12$12$18$123")');
                 var result = expr.evaluate();
                 var expected = "abcdefghijk2ijk2ijk8ijk23lmno";
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7325,7 +7253,7 @@ describe('Regex', function () {
                 var expr = jsonata('$replace("abcdefghijklmno", /ijk/, "$x")');
                 var result = expr.evaluate();
                 var expected = "abcdefgh$xlmno";
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7334,7 +7262,7 @@ describe('Regex', function () {
                 var expr = jsonata('$replace("abcdefghijklmno", /(ijk)/, "$x$")');
                 var result = expr.evaluate();
                 var expected = "abcdefgh$x$lmno";
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7343,7 +7271,7 @@ describe('Regex', function () {
                 var expr = jsonata('Account.Order.Product.$replace($."Product Name", /hat/i, function($match) { "foo" })');
                 var result = expr.evaluate(testdata2);
                 var expected = ["Bowler foo", "Trilby foo", "Bowler foo", "Cloak"];
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7352,7 +7280,7 @@ describe('Regex', function () {
                 var expr = jsonata('Account.Order.Product.$replace($."Product Name", /(h)(at)/i, function($match) { $uppercase($match.match) })');
                 var result = expr.evaluate(testdata2);
                 var expected = ["Bowler HAT", "Trilby HAT", "Bowler HAT", "Cloak"];
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7361,7 +7289,7 @@ describe('Regex', function () {
                 var expr = jsonata('$replace("temperature = 68F today", /(-?\\d+(?:\\.\\d*)?)F\\b/, function($m) { ($number($m.groups[0]) - 32) * 5/9 & "C" })');
                 var result = expr.evaluate();
                 var expected = "temperature = 20C today";
-                assert.equal(JSON.stringify(result), JSON.stringify(expected));
+                expect(result).to.deep.equal(expected);
             });
         });
 
@@ -7371,8 +7299,7 @@ describe('Regex', function () {
                 expect(function () {
                     expr.evaluate(testdata2);
                 }).to.throw()
-                  .to.deep.contain({position: 31, token: "replace", value: true})
-                  .to.have.property('message').to.match(/Attempted to replace a matched string with a non-string value/);
+                  .to.deep.contain({position: 31, code: 'D3012', token: "replace", value: true});
             });
         });
 
@@ -7382,8 +7309,7 @@ describe('Regex', function () {
                 expect(function () {
                     expr.evaluate(testdata2);
                 }).to.throw()
-                  .to.deep.contain({position: 31, token: "replace", value: 42})
-                  .to.have.property('message').to.match(/Attempted to replace a matched string with a non-string value/);
+                  .to.deep.contain({position: 31, code: 'D3012', token: "replace", value: 42});
             });
         });
 
@@ -7396,7 +7322,7 @@ describe('Evaluator - function application operator', function () {
             var expr = jsonata('Account.Order[0].OrderID ~> $uppercase()');
             var result = expr.evaluate(testdata2);
             var expected = "ORDER103";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -7405,7 +7331,7 @@ describe('Evaluator - function application operator', function () {
             var expr = jsonata('Account.Order[0].OrderID ~> $uppercase() ~> $lowercase()');
             var result = expr.evaluate(testdata2);
             var expected = "order103";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -7414,7 +7340,7 @@ describe('Evaluator - function application operator', function () {
             var expr = jsonata('Account.Order.OrderID ~> $join()');
             var result = expr.evaluate(testdata2);
             var expected = "order103order104";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -7423,7 +7349,7 @@ describe('Evaluator - function application operator', function () {
             var expr = jsonata('Account.Order.OrderID ~> $join(", ")');
             var result = expr.evaluate(testdata2);
             var expected = "order103, order104";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -7432,7 +7358,7 @@ describe('Evaluator - function application operator', function () {
             var expr = jsonata('Account.Order.Product.(Price * Quantity) ~> $sum()');
             var result = expr.evaluate(testdata2);
             var expected = 336.36;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -7441,7 +7367,7 @@ describe('Evaluator - function application operator', function () {
             var expr = jsonata('( $square := function($x){$x*$x}; [1..5] ~> $map($square, ?) ) ');
             var result = expr.evaluate();
             var expected = [1, 4, 9, 16, 25];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -7450,7 +7376,19 @@ describe('Evaluator - function application operator', function () {
             var expr = jsonata('( $square := function($x){$x*$x}; [1..5] ~> $map($square, ?) ~> $sum() ) ');
             var result = expr.evaluate();
             var expected = 55;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('Chaining 2 partially applied functions', function () {
+        it('should return result object', function () {
+            var expr = jsonata('(' +
+              '$betweenBackets := $substringAfter(?, "(") ~> $substringBefore(?, ")");' +
+              '$betweenBackets("test(foo)bar")' +
+              ') ');
+            var result = expr.evaluate();
+            var expected = 'foo';
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -7465,7 +7403,7 @@ describe('Evaluator - function application operator', function () {
               ') ');
             var result = expr.evaluate();
             var expected = 225;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -7480,7 +7418,7 @@ describe('Evaluator - function application operator', function () {
               ') ');
             var result = expr.evaluate();
             var expected = "225";
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -7493,7 +7431,7 @@ describe('Evaluator - function application operator', function () {
               ')  ');
             var result = expr.evaluate();
             var expected = 225;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -7506,7 +7444,7 @@ describe('Evaluator - function application operator', function () {
               ')  ');
             var result = expr.evaluate();
             var expected = 55;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -7521,7 +7459,7 @@ describe('Evaluator - function application operator', function () {
               ')');
             var result = expr.evaluate();
             var expected = 14400;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -7533,7 +7471,7 @@ describe('Evaluator - function application operator', function () {
               ')');
             var result = expr.evaluate();
             var expected = 14400;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -7547,7 +7485,7 @@ describe('Evaluator - function application operator', function () {
               ')');
             var result = expr.evaluate(testdata2);
             var expected = 336.36;
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -7557,8 +7495,7 @@ describe('Evaluator - function application operator', function () {
             expect(function () {
                 expr.evaluate(testdata2);
             }).to.throw()
-              .to.deep.contain({position: 5, value: "hello"})
-              .to.have.property('message').to.match(/RHS of function application operator ~> is not a function/);
+              .to.deep.contain({position: 5, code: 'T2006', value: "hello"});
         });
     });
 });
@@ -7569,10 +7506,390 @@ describe('~> /regex/', function () {
             var expr = jsonata('Account.Order.Product[$."Product Name" ~> /hat/i].ProductID');
             var result = expr.evaluate(testdata2);
             var expected = [858383,858236,858383];
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
+});
+
+describe('Function signatures', function () {
+    describe('λ($arg)<b:b>{$not($arg)}(true)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('λ($arg)<b:b>{$not($arg)}(true)');
+            var result = expr.evaluate();
+            var expected = false;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('λ($arg)<b:b>{$not($arg)}(foo)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('λ($arg)<b:b>{$not($arg)}(foo)');
+            var result = expr.evaluate();
+            var expected = true;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('λ($arg)<x:b>{$not($arg)}(null)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('λ($arg)<x:b>{$not($arg)}(null)');
+            var result = expr.evaluate();
+            var expected = true;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('function($x,$y)<n-n:n>{$x+$y}(2, 6)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('function($x,$y)<n-n:n>{$x+$y}(2, 6)');
+            var result = expr.evaluate();
+            var expected = 8;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('[1..5].function($x,$y)<n-n:n>{$x+$y}(6)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('[1..5].function($x,$y)<n-n:n>{$x+$y}(6)');
+            var result = expr.evaluate();
+            var expected = [7,8,9,10,11];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('[1..5].function($x,$y)<n-n:n>{$x+$y}(2, 6)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('[1..5].function($x,$y)<n-n:n>{$x+$y}(2, 6)');
+            var result = expr.evaluate();
+            var expected = [8,8,8,8,8];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('Age.function($x,$y)<n-n:n>{$x+$y}(6)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Age.function($x,$y)<n-n:n>{$x+$y}(6)');
+            var result = expr.evaluate(testdata4);
+            var expected = 34;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('λ($str)<s->{$uppercase($str)}("hello")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('λ($str)<s->{$uppercase($str)}("hello")');
+            var result = expr.evaluate();
+            var expected = "HELLO";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('Account.Order.Product.Description.Colour.λ($str)<s->{$uppercase($str)}()', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.Product.Description.Colour.λ($str)<s->{$uppercase($str)}()');
+            var result = expr.evaluate(testdata2);
+            var expected = ["PURPLE", "ORANGE", "PURPLE", "BLACK"];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('λ($str, $prefix)<s-s>{$prefix & $str}("World", "Hello ")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('λ($str, $prefix)<s-s>{$prefix & $str}("World", "Hello ")');
+            var result = expr.evaluate();
+            var expected = "Hello World";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('FirstName.λ($str, $prefix)<s-s>{$prefix & $str}("Hello ")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('FirstName.λ($str, $prefix)<s-s>{$prefix & $str}("Hello ")');
+            var result = expr.evaluate(testdata4);
+            var expected = "Hello Fred";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('λ($arr, $sep)<a<s>s?:s>{$join($arr, $sep)}("a")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('λ($arr, $sep)<a<s>s?:s>{$join($arr, $sep)}("a")');
+            var result = expr.evaluate();
+            var expected = "a";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('λ($arr, $sep)<a<s>s?:s>{$join($arr, $sep)}(["a"])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('λ($arr, $sep)<a<s>s?:s>{$join($arr, $sep)}(["a"])');
+            var result = expr.evaluate(testdata4);
+            var expected = "a";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('λ($arr, $sep)<a<s>s?:s>{$join($arr, $sep)}("a", "-")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('λ($arr, $sep)<a<s>s?:s>{$join($arr, $sep)}("a", "-")');
+            var result = expr.evaluate();
+            var expected = "a";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('λ($arr, $sep)<a<s>s?:s>{$join($arr, $sep)}(["a"], "-")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('λ($arr, $sep)<a<s>s?:s>{$join($arr, $sep)}(["a"], "-")');
+            var result = expr.evaluate();
+            var expected = "a";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('λ($arr, $sep)<a<s>s?:s>{$join($arr, $sep)}(["a", "b"], "-")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('λ($arr, $sep)<a<s>s?:s>{$join($arr, $sep)}(["a", "b"], "-")');
+            var result = expr.evaluate();
+            var expected = "a-b";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('λ($arr, $sep)<as?:s>{$join($arr, $sep)}(["a", "b"], "-")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('λ($arr, $sep)<as?:s>{$join($arr, $sep)}(["a", "b"], "-")');
+            var result = expr.evaluate();
+            var expected = "a-b";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('λ($arr, $sep)<a<s>s?:s>{$join($arr, $sep)}([], "-")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('λ($arr, $sep)<a<s>s?:s>{$join($arr, $sep)}([], "-")');
+            var result = expr.evaluate();
+            var expected = "";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('λ($arr, $sep)<a<s>s?:s>{$join($arr, $sep)}(foo, "-")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('λ($arr, $sep)<a<s>s?:s>{$join($arr, $sep)}(foo, "-")');
+            var result = expr.evaluate();
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('λ($obj)<o>{$obj}({"hello": "world"})', function () {
+        it('should return result object', function () {
+            var expr = jsonata('λ($obj)<o>{$obj}({"hello": "world"})');
+            var result = expr.evaluate();
+            var expected = {"hello": "world"};
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('λ($arr)<a<a<n>>>{$arr}([[1]])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('λ($arr)<a<a<n>>>{$arr}([[1]])');
+            var result = expr.evaluate();
+            var expected = [[1]];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('λ($num)<(ns)-:n>{$number($num)}(5)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('λ($num)<(ns)-:n>{$number($num)}(5)');
+            var result = expr.evaluate();
+            var expected = 5;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('λ($num)<(ns)-:n>{$number($num)}("5")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('λ($num)<(ns)-:n>{$number($num)}("5")');
+            var result = expr.evaluate();
+            var expected = 5;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('[1..5].λ($num)<(ns)-:n>{$number($num)}()', function () {
+        it('should return result object', function () {
+            var expr = jsonata('[1..5].λ($num)<(ns)-:n>{$number($num)}()');
+            var result = expr.evaluate();
+            var expected = [1,2,3,4,5];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('Higher order function signature', function () {
+        it('should return result object', function () {
+            var expr = jsonata('(' +
+              '$twice := function($f)<f:f>{function($x)<n:n>{$f($f($x))}};' +
+              '$add2 := function($x)<n:n>{$x+2};' +
+              '$add4 := $twice($add2);' +
+              '$add4(5)' +
+              ')');
+            var result = expr.evaluate();
+            var expected = 9;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('Higher order function signature with param', function () {
+        it('should return result object', function () {
+            var expr = jsonata('(' +
+              '$twice := function($f)<f<n:n>:f<n:n>>{function($x)<n:n>{$f($f($x))}};' +
+              '$add2 := function($x)<n:n>{$x+2};' +
+              '$add4 := $twice($add2);' +
+              '$add4(5)' +
+              ')');
+            var result = expr.evaluate();
+            var expected = 9;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('λ($arg)<n<n>>{$arg}(5)', function () {
+        it('should throw meaningful type error', function () {
+            expect(function () {
+                var expr = jsonata('λ($arg)<n<n>>{$arg}(5)');
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 10, code: 'S0401', value: "n"});
+        });
+    });
+
+});
+
+describe('Function signature violations', function () {
+    describe('λ($arg1, $arg2)<nn:a>{[$arg1, $arg2]}(1,"2")', function () {
+        it('should throw meaningful type error', function () {
+            var expr = jsonata('λ($arg1, $arg2)<nn:a>{[$arg1, $arg2]}(1,"2")');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 38, code: 'T0410', index: 2, value: "2"});
+        });
+    });
+
+    describe('λ($arg1, $arg2)<nn:a>{[$arg1, $arg2]}(1,3,"2")', function () {
+        it('should throw meaningful type error', function () {
+            var expr = jsonata('λ($arg1, $arg2)<nn:a>{[$arg1, $arg2]}(1,3,"2")');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 38, code: 'T0410', index: 3, value: "2"});
+        });
+    });
+
+    describe('λ($arg1, $arg2)<nn+:a>{[$arg1, $arg2]}(1,3, 2,"g")', function () {
+        it('should throw meaningful type error', function () {
+            var expr = jsonata('λ($arg1, $arg2)<nn+:a>{[$arg1, $arg2]}(1,3, 2,"g")');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 39, code: 'T0410', index: 4, value: "g"});
+        });
+    });
+
+    describe('λ($arr)<a<n>>{$arr}(["3"]) ', function () {
+        it('should throw meaningful type error', function () {
+            var expr = jsonata('λ($arr)<a<n>>{$arr}(["3"]) ');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 20, code: 'T0412', index: 1, type: 'n'});
+        });
+    });
+
+    describe('λ($arr)<a<n>>{$arr}([1, 2, "3"]) ', function () {
+        it('should throw meaningful type error', function () {
+            var expr = jsonata('λ($arr)<a<n>>{$arr}([1, 2, "3"]) ');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 20, code: 'T0412', index: 1, type: 'n'});
+        });
+    });
+
+    describe('λ($arr)<a<n>>{$arr}("f")', function () {
+        it('should throw meaningful type error', function () {
+            var expr = jsonata('λ($arr)<a<n>>{$arr}("f")');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 20, code: 'T0412', index: 1, type: 'n', value: "f"});
+        });
+    });
+
+    describe('Error with function name', function () {
+        it('should throw meaningful type error', function () {
+            var expr = jsonata('(' +
+              '$fun := λ($arr)<a<n>>{$arr};' +
+              '$fun("f")' +
+              ')');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 34, code: 'T0412', index: 1, type: 'n', value: "f", token: "fun"});
+        });
+    });
+
+    describe('λ($arr)<(sa<n>)>>{$arr}([[1]])', function () {
+        it('should throw meaningful type error', function () {
+            expect(function () {
+                var expr = jsonata('λ($arr)<(sa<n>)>>{$arr}([[1]])');
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 9, code: 'S0402'});
+        });
+    });
+});
+
+describe('Default context arguments', function () {
+    describe('$number()', function () {
+        it('cast context to number', function () {
+            var expr = jsonata('$number()');
+            var context = "5";
+            var result = expr.evaluate(context);
+            expect(result).to.equal(5);
+        });
+    });
+
+    describe('[1..5].$string()', function () {
+        it('cast context to string', function () {
+            var expr = jsonata('[1..5].$string()');
+            var result = expr.evaluate();
+            var expected = ['1', '2', '3', '4', '5'];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('[1..5].("Item " & $string())', function () {
+        it('cast context to string', function () {
+            var expr = jsonata('[1..5].("Item " & $string())');
+            var result = expr.evaluate();
+            var expected = ["Item 1","Item 2","Item 3","Item 4","Item 5"];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('Account.Order.Product."Product Name".$uppercase().$substringBefore(" ")', function () {
+        it('chain functions', function () {
+            var expr = jsonata('Account.Order.Product."Product Name".$uppercase().$substringBefore(" ")');
+            var result = expr.evaluate(testdata2);
+            var expected = ["BOWLER", "TRILBY", "BOWLER", "CLOAK"];
+            expect(result).to.deep.equal(expected);
+        });
+    });
 });
 
 describe('Transform', function () {
@@ -7637,7 +7954,7 @@ describe('Transform', function () {
                     }
                 ]
             };
-            assert.equal(JSON.stringify(result), JSON.stringify(expected));
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -7968,8 +8285,7 @@ describe('#evaluate', function () {
                 expect(function () {
                     jsonata('$lowercase("Missing close brackets"').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({token: '(end)', value: ')'})
-                    .to.have.property('message').to.match(/Syntax error: expected \'\)\' before end of expression/);
+                    .to.deep.contain({position: 35, code: 'S0203', token: '(end)', value: ')'});
             });
 
             it('unsupported function, e.g. $unknown()', function () {
@@ -7980,8 +8296,7 @@ describe('#evaluate', function () {
                 };
 
                 expect(evaluate).to.throw()
-                    .to.deep.contain({position: 9, token: 'unknown'})
-                    .to.have.property('message').to.match(/Attempted to invoke a non-function/);
+                    .to.deep.contain({position: 9, code: 'T1006', token: 'unknown'});
             });
 
             it('unsupported function, e.g. $decrypt()', function () {
@@ -7995,8 +8310,7 @@ describe('#evaluate', function () {
                 };
 
                 expect(evaluate).to.throw()
-                    .to.deep.contain({position: 9, token: 'decrypt'})
-                    .to.have.property('message').to.match(/Attempted to invoke a non-function/);
+                    .to.deep.contain({position: 9, code: 'T1006', token: 'decrypt'});
             });
 
             it('unsupported function, e.g. Employment.authentication()', function () {
@@ -8007,8 +8321,7 @@ describe('#evaluate', function () {
                 };
 
                 expect(evaluate).to.throw()
-                    .to.deep.contain({position: 26, token: 'authentication'})
-                    .to.have.property('message').to.match(/Attempted to invoke a non-function/);
+                    .to.deep.contain({position: 26, code: 'T1006', token: 'authentication'});
             });
 
             it('field in function does not exist', function () {
@@ -8037,32 +8350,28 @@ describe('#evaluate', function () {
                 expect(function () {
                     jsonata('$lowercase("Coca", "Cola")').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 11, token: 'lowercase'})
-                    .to.have.property('message').to.match(/The lowercase function expects one argument/);
+                    .to.deep.contain({position: 11, code: 'T0410', index: 2, token: 'lowercase'});
             });
 
             it('$lowercase(Salary) - Field <NAME> is null', function () {
                 expect(function () {
                     jsonata('$lowercase(Salary)').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 11, token: 'lowercase', value: null})
-                    .to.have.property('message').to.match(/Type error: argument of lowercase function must evaluate to a string/);
+                    .to.deep.contain({position: 11, code: 'T0410', index: 1, token: 'lowercase', value: null});
             });
 
             it('$lowercase(20) - Function lowercase expects a string argument', function () {
                 expect(function () {
                     jsonata('$lowercase(20)').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 11, token: 'lowercase', value: 20})
-                    .to.have.property('message').to.match(/Type error: argument of lowercase function must evaluate to a string/);
+                    .to.deep.contain({position: 11, code: 'T0410', index: 1, token: 'lowercase', value: 20});
             });
 
             it('$lowercase(20.55) - Function lowercase expects a string argument', function () {
                 expect(function () {
                     jsonata('$lowercase(20.55)').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 11, token: 'lowercase', value: 20.55})
-                    .to.have.property('message').to.match(/Type error: argument of lowercase function must evaluate to a string/);
+                    .to.deep.contain({position: 11, code: 'T0410', index: 1, token: 'lowercase', value: 20.55});
             });
 
 
@@ -8070,16 +8379,14 @@ describe('#evaluate', function () {
                 expect(function () {
                     jsonata('$lowercase(Employment)').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 11, token: 'lowercase'})
-                    .to.have.property('message').to.match(/Type error: argument of lowercase function must evaluate to a string/);
+                    .to.deep.contain({position: 11, code: 'T0410', index: 1, token: 'lowercase'});
             });
 
             it('$lowercase(Qualifications) - Does not expect an array', function () {
                 expect(function () {
                     jsonata('$lowercase(Qualifications)').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 11, token: 'lowercase'})
-                    .to.have.property('message').to.match(/Type error: argument of lowercase function must evaluate to a string/);
+                    .to.deep.contain({position: 11, code: 'T0410', index: 1, token: 'lowercase'});
             });
         });
 
@@ -8088,56 +8395,49 @@ describe('#evaluate', function () {
                 expect(function () {
                     jsonata('$uppercase("Coca", "Cola")').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 11, token: 'uppercase'})
-                    .to.have.property('message').to.match(/The uppercase function expects one argument/);
+                    .to.deep.contain({position: 11, code: 'T0410', index: 2, token: 'uppercase'});
             });
 
             it('$uppercase(Salary) - Field <NAME> is null', function () {
                 expect(function () {
                     jsonata('$uppercase(Salary)').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 11, token: 'uppercase', value: null})
-                    .to.have.property('message').to.match(/Type error: argument of uppercase function must evaluate to a string/);
+                    .to.deep.contain({position: 11, code: 'T0410', index: 1, token: 'uppercase', value: null});
             });
 
             it('$uppercase(20) - Function uppercase expects a string argument', function () {
                 expect(function () {
                     jsonata('$uppercase(28)').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 11, token: 'uppercase', value: 28})
-                    .to.have.property('message').to.match(/Type error: argument of uppercase function must evaluate to a string/);
+                    .to.deep.contain({position: 11, code: 'T0410', index: 1, token: 'uppercase', value: 28});
             });
 
             it('$uppercase(20.55) - Function uppercase expects a string argument', function () {
                 expect(function () {
                     jsonata('$uppercase(20.55)').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 11, token: 'uppercase', value: 20.55})
-                    .to.have.property('message').to.match(/Type error: argument of uppercase function must evaluate to a string/);
+                    .to.deep.contain({position: 11, code: 'T0410', index: 1, token: 'uppercase', value: 20.55});
             });
 
             it('$uppercase(Cars) - Function uppercase expects a string argument', function () {
                 expect(function () {
                     jsonata('$uppercase(Cars)').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 11, token: 'uppercase', value: 3})
-                    .to.have.property('message').to.match(/Type error: argument of uppercase function must evaluate to a string/);
+                    .to.deep.contain({position: 11, code: 'T0410', index: 1, token: 'uppercase', value: 3});
             });
 
             it('$uppercase(Employment) - Does not expect an object', function () {
                 expect(function () {
                     jsonata('$uppercase(Employment)').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 11, token: 'uppercase'})
-                    .to.have.property('message').to.match(/Type error: argument of uppercase function must evaluate to a string/);
+                    .to.deep.contain({position: 11, code: 'T0410', index: 1, token: 'uppercase'});
             });
 
             it('$uppercase(Qualifications) - Does not expect an array', function () {
                 expect(function () {
                     jsonata('$uppercase(Qualifications)').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 11, token: 'uppercase'})
-                    .to.have.property('message').to.match(/Type error: argument of uppercase function must evaluate to a string/);
+                    .to.deep.contain({position: 11, code: 'T0410', index: 1, token: 'uppercase'});
             });
         });
 
@@ -8146,64 +8446,56 @@ describe('#evaluate', function () {
                 expect(function () {
                     jsonata('$substringBefore("Coca" & "ca")').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 17, token: 'substringBefore'})
-                    .to.have.property('message').to.match(/The substringBefore function expects two arguments/);
+                    .to.deep.contain({position: 17, code: 'T0411', index: 1, token: 'substringBefore'});
             });
 
             it('$substringBefore(Salary,"xx") - Field <NAME> is null', function () {
                 expect(function () {
                     jsonata('$substringBefore(Salary,"xx")').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 17, token: 'substringBefore', value: null})
-                    .to.have.property('message').to.match(/Type error: first argument of substringBefore function must evaluate to a string/);
+                    .to.deep.contain({position: 17, code: 'T0410', index: 1, token: 'substringBefore', value: null});
             });
 
             it('$substringBefore(22,"xx") - Function substringBefore expects 2 string arguments', function () {
                 expect(function () {
                     jsonata('$substringBefore(22,"xx")').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 17, token: 'substringBefore', value: 22})
-                    .to.have.property('message').to.match(/Type error: first argument of substringBefore function must evaluate to a string/);
+                    .to.deep.contain({position: 17, code: 'T0410', index: 1, token: 'substringBefore', value: 22});
             });
 
             it('$substringBefore(22.55,"xx") - Function substringBefore expects 2 string arguments', function () {
                 expect(function () {
                     jsonata('$substringBefore(22.55,"xx")').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 17, token: 'substringBefore', value: 22.55})
-                    .to.have.property('message').to.match(/Type error: first argument of substringBefore function must evaluate to a string/);
+                    .to.deep.contain({position: 17, code: 'T0410', index: 1, token: 'substringBefore', value: 22.55});
             });
 
             it('$substringBefore("22",0) - Function substringBefore expects 2 string arguments', function () {
                 expect(function () {
                     jsonata('$substringBefore("22",2)').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 17, token: 'substringBefore', value: 2})
-                    .to.have.property('message').to.match(/Type error: second argument of substringBefore function must evaluate to a string/);
+                    .to.deep.contain({position: 17, code: 'T0410', index: 2, token: 'substringBefore', value: 2});
             });
 
             it('$substringBefore("22.55",5) - Function substringBefore expects 2 string arguments', function () {
                 expect(function () {
                     jsonata('$substringBefore("22.55",5)').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 17, token: 'substringBefore', value: 5})
-                    .to.have.property('message').to.match(/Type error: second argument of substringBefore function must evaluate to a string/);
+                    .to.deep.contain({position: 17, code: 'T0410', index: 2, token: 'substringBefore', value: 5});
             });
 
             it('$substringBefore(Employment,"xx") - Does not expect an object', function () {
                 expect(function () {
                     jsonata('$substringBefore(Employment,"xx")').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 17, token: 'substringBefore'})
-                    .to.have.property('message').to.match(/Type error: first argument of substringBefore function must evaluate to a string/);
+                    .to.deep.contain({position: 17, code: 'T0410', index: 1, token: 'substringBefore'});
             });
 
             it('$substringBefore(Qualifications,"xx") - Does not expect an array', function () {
                 expect(function () {
                     jsonata('$substringBefore(Qualifications,"xx")').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 17, token: 'substringBefore'})
-                    .to.have.property('message').to.match(/Type error: first argument of substringBefore function must evaluate to a string/);
+                    .to.deep.contain({position: 17, code: 'T0410', index: 1, token: 'substringBefore'});
             });
         });
 
@@ -8212,64 +8504,56 @@ describe('#evaluate', function () {
                 expect(function () {
                     jsonata('$substringAfter("Coca" & "ca")').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 16, token: 'substringAfter'})
-                    .to.have.property('message').to.match(/The substringAfter function expects two arguments/);
+                    .to.deep.contain({position: 16, code: 'T0411', index: 1, token: 'substringAfter'});
             });
 
             it('$substringAfter(Salary,"xx") - Field <NAME> is null', function () {
                 expect(function () {
                     jsonata('$substringAfter(Salary,"xx")').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 16, token: 'substringAfter', value: null})
-                    .to.have.property('message').to.match(/Type error: first argument of substringAfter function must evaluate to a string/);
+                    .to.deep.contain({position: 16, code: 'T0410', index: 1, token: 'substringAfter', value: null});
             });
 
             it('$substringAfter(22,"xx") - Function substringAfter expects 2 string arguments', function () {
                 expect(function () {
                     jsonata('$substringAfter(22,"xx")').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 16, token: 'substringAfter', value: 22})
-                    .to.have.property('message').to.match(/Type error: first argument of substringAfter function must evaluate to a string/);
+                    .to.deep.contain({position: 16, code: 'T0410', index: 1, token: 'substringAfter', value: 22});
             });
 
             it('$substringAfter(22.55,"xx") - Function substringAfter expects 2 string arguments', function () {
                 expect(function () {
                     jsonata('$substringAfter(22.55,"xx")').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 16, token: 'substringAfter', value: 22.55})
-                    .to.have.property('message').to.match(/Type error: first argument of substringAfter function must evaluate to a string/);
+                    .to.deep.contain({position: 16, code: 'T0410', index: 1, token: 'substringAfter', value: 22.55});
             });
 
             it('$substringAfter("22",0) - Function substringAfter expects 2 string arguments', function () {
                 expect(function () {
                     jsonata('$substringAfter("22",2)').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 16, token: 'substringAfter', value: 2})
-                    .to.have.property('message').to.match(/Type error: second argument of substringAfter function must evaluate to a string/);
+                    .to.deep.contain({position: 16, code: 'T0410', index: 2, token: 'substringAfter', value: 2});
             });
 
             it('$substringAfter("22.55",5) - Function substringAfter expects 2 string arguments', function () {
                 expect(function () {
                     jsonata('$substringAfter("22.55",5)').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 16, token: 'substringAfter', value: 5})
-                    .to.have.property('message').to.match(/Type error: second argument of substringAfter function must evaluate to a string/);
+                    .to.deep.contain({position: 16, code: 'T0410', index: 2, token: 'substringAfter', value: 5});
             });
 
             it('$substringAfter(Employment,"xx") - Does not expect an object', function () {
                 expect(function () {
                     jsonata('$substringAfter(Employment,"xx")').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 16, token: 'substringAfter'})
-                    .to.have.property('message').to.match(/Type error: first argument of substringAfter function must evaluate to a string/);
+                    .to.deep.contain({position: 16, code: 'T0410', index: 1, token: 'substringAfter'});
             });
 
             it('$substringAfter(Qualifications,"xx") - Does not expect an array', function () {
                 expect(function () {
                     jsonata('$substringAfter(Qualifications,"xx")').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 16, token: 'substringAfter'})
-                    .to.have.property('message').to.match(/Type error: first argument of substringAfter function must evaluate to a string/);
+                    .to.deep.contain({position: 16, code: 'T0410', index: 1, token: 'substringAfter'});
             });
         });
 
@@ -8278,46 +8562,40 @@ describe('#evaluate', function () {
                 expect(function () {
                     jsonata('$substring("Coca" & "ca", 2, 4, 5)').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 11, token: 'substring'})
-                    .to.have.property('message').to.match(/The substring function expects two or three arguments/);
+                    .to.deep.contain({position: 11, code: 'T0410', index: 4, token: 'substring'});
             });
 
             it('$substring() with non-numeric second argument', function () {
                 expect(function () {
                     jsonata('$substring("Coca", "Mr", 4)').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 11, token: 'substring', value: "Mr"})
-                    .to.have.property('message').to.match(/Type error: second argument of substring function must evaluate to a number/);
+                    .to.deep.contain({position: 11, code: 'T0410', index: 2, token: 'substring', value: "Mr"});
             });
 
             it('$substring() with non-numeric third argument', function () {
                 expect(function () {
                     jsonata('$substring("Coca", 3, "Whoops")').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 11, token: 'substring', value: "Whoops"})
-                    .to.have.property('message').to.match(/Type error: third argument of substring function must evaluate to a number/);
+                    .to.deep.contain({position: 11, code: 'T0410', index: 3, token: 'substring', value: "Whoops"});
             });
 
             it('$substring(Salary,2,4) - Field <NAME> is null', function () {
                 expect(function () {
                     jsonata('$substring(Salary,2,4)').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 11, token: 'substring', value: null})
-                    .to.have.property('message').to.match(/Type error: first argument of substring function must evaluate to a string/);
+                    .to.deep.contain({position: 11, code: 'T0410', index: 1, token: 'substring', value: null});
             });
 
             it('$substring() - last two arguments to be integers', function () {
                 expect(function () {
                     jsonata('$substring("Hello","World",5)').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 11, token: 'substring', value: "World"})
-                    .to.have.property('message').to.match(/Type error: second argument of substring function must evaluate to a number/);
+                    .to.deep.contain({position: 11, code: 'T0410', index: 2, token: 'substring', value: "World"});
 
                 expect(function () {
                     jsonata('$substring("Hello",5,"World")').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 11, token: 'substring', value: "World"})
-                    .to.have.property('message').to.match(/Type error: third argument of substring function must evaluate to a number/);
+                    .to.deep.contain({position: 11, code: 'T0410', index: 3, token: 'substring', value: "World"});
 
                 var result = jsonata('$substring("Hello World",5.5,5)').evaluate(person);
                 expect(result).to.equal(" Worl");
@@ -8327,16 +8605,14 @@ describe('#evaluate', function () {
                 expect(function () {
                     jsonata('$substring(Employment,"xx")').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 11, token: 'substring'})
-                    .to.have.property('message').to.match(/Type error: first argument of substring function must evaluate to a string/);
+                    .to.deep.contain({position: 11, code: 'T0410', index: 1, token: 'substring'});
             });
 
             it('$substring(Qualifications,6,5) - Does not expect an array', function () {
                 expect(function () {
                     jsonata('$substring(Qualifications,6,5)').evaluate(person);
                 }).to.throw()
-                    .to.deep.contain({position: 11, token: 'substring'})
-                    .to.have.property('message').to.match(/Type error: first argument of substring function must evaluate to a string/);
+                    .to.deep.contain({position: 11, code: 'T0410', index: 1, token: 'substring'});
             });
         });
     });
