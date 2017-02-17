@@ -2614,6 +2614,30 @@ var jsonata = (function() {
     }
 
     /**
+     * Normalize and trim whitespace within a string
+     * @param {string} str - string to be trimmed
+     * @returns {string} - trimmed string
+     */
+    function functionTrim(str) {
+        // undefined inputs always return undefined
+        if(typeof str === 'undefined') {
+            return undefined;
+        }
+
+        // normalize whitespace
+        var result = str.replace(/[ \t\n\r]+/gm, ' ');
+        if(result.charAt(0) === ' ') {
+            // strip leading space
+            result = result.substring(1);
+        }
+        if(result.charAt(result.length - 1) === ' ') {
+            // strip trailing space
+            result = result.substring(0, result.length - 1);
+        }
+        return result;
+    }
+
+    /**
      * Tests if the str contains the token
      * @param {String} str - string to test
      * @param {String} token - substring or regex to find
@@ -3186,6 +3210,7 @@ var jsonata = (function() {
     staticFrame.bind('lowercase', defineFunction(functionLowercase, '<s-:s>'));
     staticFrame.bind('uppercase', defineFunction(functionUppercase, '<s-:s>'));
     staticFrame.bind('length', defineFunction(functionLength, '<s-:n>'));
+    staticFrame.bind('trim', defineFunction(functionTrim, '<s-:s>'));
     staticFrame.bind('match', defineFunction(functionMatch, '<s-f<s:o>n?:a<o>>'));
     staticFrame.bind('contains', defineFunction(functionContains, '<s-(sf):b>')); // TODO <s-(sf<s:o>):b>
     staticFrame.bind('replace', defineFunction(functionReplace, '<s-(sf)(sf)n?:s>')); // TODO <s-(sf<s:o>)(sf<o:s>)n?:s>

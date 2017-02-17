@@ -3531,6 +3531,36 @@ describe('Evaluator - functions: length', function () {
 
 });
 
+describe('Evaluator - functions: trim', function () {
+
+    describe('$trim("Hello World")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$trim("Hello World")');
+            var result = expr.evaluate();
+            var expected = "Hello World";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$trim("   Hello  \n  \t World  \t ")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$trim("   Hello  \n  \t World  \t ")');
+            var result = expr.evaluate();
+            var expected = "Hello World";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$trim()', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$trim()');
+            var result = expr.evaluate();
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+});
+
 describe('Evaluator - functions: contains', function () {
 
     describe('$contains("Hello World", "lo")', function () {
