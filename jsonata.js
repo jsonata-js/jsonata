@@ -1,5 +1,5 @@
 /**
- * © Copyright IBM Corp. 2016 All Rights Reserved
+ * © Copyright IBM Corp. 2016, 2017 All Rights Reserved
  *   Project name: JSONata
  *   This project is licensed under the MIT License, see LICENSE
  */
@@ -48,11 +48,13 @@ var jsonata = (function() {
         '!=': 40,
         '<=': 40,
         '>=': 40,
+        '~>': 40,
         'and': 30,
         'or': 25,
         'in': 40,
         '&': 50,
-        '!': 0   // not an operator, but needed as a stop character for name tokens
+        '!': 0,   // not an operator, but needed as a stop character for name tokens
+        '~': 0   // not an operator, but needed as a stop character for name tokens
     };
 
     var escapes = {  // JSON string escape sequences - see json.org
@@ -76,13 +78,64 @@ var jsonata = (function() {
             return obj;
         };
 
-        var next = function () {
+        var scanRegex = function() {
+            // the prefix '/' will have been previously scanned. Find the end of the regex.
+            // search for closing '/' ignoring any that are escaped, or within brackets
+            var start = position;
+            var depth = 0;
+            var pattern;
+            var flags;
+            while(position < length) {
+                var currentChar = path.charAt(position);
+                if(currentChar === '/' && path.charAt(position - 1) !== '\\' && depth === 0) {
+                    // end of regex found
+                    pattern = path.substring(start, position);
+                    if(pattern === '') {
+                        throw {
+                            code: "S0301",
+                            stack: (new Error()).stack,
+                            position: position
+                        };
+                    }
+                    position++;
+                    currentChar = path.charAt(position);
+                    // flags
+                    start = position;
+                    while(currentChar === 'i' || currentChar === 'm') {
+                        position++;
+                        currentChar = path.charAt(position);
+                    }
+                    flags = path.substring(start, position) + 'g';
+                    return new RegExp(pattern, flags);
+                }
+                if((currentChar === '(' || currentChar === '[' || currentChar === '{') && path.charAt(position - 1) !== '\\' ) {
+                    depth++;
+                }
+                if((currentChar === ')' || currentChar === ']' || currentChar === '}') && path.charAt(position - 1) !== '\\' ) {
+                    depth--;
+                }
+
+                position++;
+            }
+            throw {
+                code: "S0302",
+                stack: (new Error()).stack,
+                position: position
+            };
+        };
+
+        var next = function (prefix) {
             if (position >= length) return null;
             var currentChar = path.charAt(position);
             // skip whitespace
             while (position < length && ' \t\n\r\v'.indexOf(currentChar) > -1) {
                 position++;
                 currentChar = path.charAt(position);
+            }
+            // test for regex
+            if (prefix !== true && currentChar === '/') {
+                position++;
+                return create('regex', scanRegex());
             }
             // test for double-char operators
             var doublechar = currentChar + path.charAt(position + 1);
@@ -117,7 +170,7 @@ var jsonata = (function() {
                                 position += 4;
                             } else {
                                 throw {
-                                    message: "The escape sequence \\u must be followed by 4 hex digits",
+                                    code: "S0104",
                                     stack: (new Error()).stack,
                                     position: position
                                 };
@@ -125,7 +178,7 @@ var jsonata = (function() {
                         } else {
                             // illegal escape sequence
                             throw {
-                                message: 'unsupported escape sequence: \\' + currentChar,
+                                code: "S0103",
                                 stack: (new Error()).stack,
                                 position: position,
                                 token: currentChar
@@ -141,7 +194,7 @@ var jsonata = (function() {
                     position++;
                 }
                 throw {
-                    message: 'no terminating quote found in string literal',
+                    code: "S0101",
                     stack: (new Error()).stack,
                     position: position
                 };
@@ -156,7 +209,7 @@ var jsonata = (function() {
                     return create('number', num);
                 } else {
                     throw {
-                        message: 'Number out of range: ' + match[0],
+                        code: "S0102",
                         stack: (new Error()).stack,
                         position: position,
                         token: match[0]
@@ -204,6 +257,296 @@ var jsonata = (function() {
         return next;
     };
 
+    /**
+     * Parses a function signature definition and returns a validation function
+     * @param {string} signature - the signature between the <angle brackets>
+     * @returns {Function} validation function
+     */
+    function parseSignature(signature) {
+        // create a Regex that represents this signature and return a function that when invoked,
+        // returns the validated (possibly fixed-up) arguments, or throws a validation error
+        // step through the signature, one symbol at a time
+        var position = 1;
+        var params = [];
+        var param = {};
+        var prevParam = param;
+        while (position < signature.length) {
+            var symbol = signature.charAt(position);
+            if(symbol === ':') {
+                // TODO figure out what to do with the return type
+                // ignore it for now
+                break;
+            }
+
+            var next = function() {
+                params.push(param);
+                prevParam = param;
+                param = {};
+            };
+
+            var findClosingBracket = function(str, start, openSymbol, closeSymbol) {
+                // returns the position of the closing symbol (e.g. bracket) in a string
+                // that balances the opening symbol at position start
+                var depth = 1;
+                var position = start;
+                while(position < str.length) {
+                    position++;
+                    symbol = str.charAt(position);
+                    if(symbol === closeSymbol) {
+                        depth--;
+                        if(depth === 0) {
+                            // we're done
+                            break; // out of while loop
+                        }
+                    } else if(symbol === openSymbol) {
+                        depth++;
+                    }
+                }
+                return position;
+            };
+
+            switch (symbol) {
+                case 's': // string
+                case 'n': // number
+                case 'b': // boolean
+                case 'l': // not so sure about expecting null?
+                case 'o': // object
+                    param.regex = '[' + symbol + 'm]';
+                    param.type = symbol;
+                    next();
+                    break;
+                case 'a': // array
+                    //  normally treat any value as singleton array
+                    param.regex = '[asnblfom]';
+                    param.type = symbol;
+                    param.array = true;
+                    next();
+                    break;
+                case 'f': // function
+                    param.regex = 'f';
+                    param.type = symbol;
+                    next();
+                    break;
+                case 'j': // any JSON type
+                    param.regex = '[asnblom]';
+                    param.type = symbol;
+                    next();
+                    break;
+                case 'x': // any type
+                    param.regex = '[asnblfom]';
+                    param.type = symbol;
+                    next();
+                    break;
+                case '-': // use context if param not supplied
+                    prevParam.context = true;
+                    prevParam.contextRegex = new RegExp(prevParam.regex); // pre-compiled to test the context type at runtime
+                    prevParam.regex += '?';
+                    break;
+                case '?': // optional param
+                case '+': // one or more
+                    prevParam.regex += symbol;
+                    break;
+                case '(': // choice of types
+                    // search forward for matching ')'
+                    var endParen = findClosingBracket(signature, position, '(', ')');
+                    var choice = signature.substring(position + 1, endParen);
+                    if(choice.indexOf('<') === -1) {
+                        // no parameterized types, simple regex
+                        param.regex = '[' + choice + 'm]';
+                    } else {
+                        // TODO harder
+                        throw {
+                            code: "S0402",
+                            stack: (new Error()).stack,
+                            value: choice,
+                            offset: position
+                        };
+                    }
+                    param.type = '(' + choice + ')';
+                    position = endParen;
+                    next();
+                    break;
+                case '<': // type parameter - can only be applied to 'a' and 'f'
+                    if(prevParam.type === 'a' || prevParam.type === 'f') {
+                        // search forward for matching '>'
+                        var endPos = findClosingBracket(signature, position, '<', '>');
+                        prevParam.subtype = signature.substring(position + 1, endPos);
+                        position = endPos;
+                    } else {
+                        throw {
+                            code: "S0401",
+                            stack: (new Error()).stack,
+                            value: prevParam.type,
+                            offset: position
+                        };
+                    }
+                    break;
+            }
+            position++;
+        }
+        var regexStr = '^' +
+          params.map(function(param) {
+              return '(' + param.regex + ')';
+          }).join('') +
+          '$';
+        var regex = new RegExp(regexStr);
+        var getSymbol = function(value) {
+            var symbol;
+            if(isFunction(value)) {
+                symbol = 'f';
+            } else {
+                var type = typeof value;
+                switch (type) {
+                    case 'string':
+                        symbol = 's';
+                        break;
+                    case 'number':
+                        symbol = 'n';
+                        break;
+                    case 'boolean':
+                        symbol = 'b';
+                        break;
+                    case 'object':
+                        if (value === null) {
+                            symbol = 'l';
+                        } else if (Array.isArray(value)) {
+                            symbol = 'a';
+                        } else {
+                            symbol = 'o';
+                        }
+                        break;
+                    case 'undefined':
+                        // any value can be undefined, but should be allowed to match
+                        symbol = 'm'; // m for missing
+                }
+            }
+            return symbol;
+        };
+
+        var throwValidationError = function(badArgs, badSig) {
+            // to figure out where this went wrong we need apply each component of the
+            // regex to each argument until we get to the one that fails to match
+            var partialPattern = '^';
+            var goodTo = 0;
+            for(var index = 0; index < params.length; index++) {
+                partialPattern += params[index].regex;
+                var match = badSig.match(partialPattern);
+                if(match === null) {
+                    // failed here
+                    throw {
+                        code: "T0410",
+                        stack: (new Error()).stack,
+                        value: badArgs[goodTo],
+                        index: goodTo + 1
+                    };
+                }
+                goodTo = match[0].length;
+            }
+            // if it got this far, it's probably because of extraneous arguments (we
+            // haven't added the trailing '$' in the regex yet.
+            throw {
+                code: "T0410",
+                stack: (new Error()).stack,
+                value: badArgs[goodTo],
+                index: goodTo + 1
+            };
+        };
+
+        return {
+            definition: signature,
+            validate: function(args, context) {
+                var suppliedSig = '';
+                args.forEach(function(arg) {
+                    suppliedSig += getSymbol(arg);
+                });
+                var isValid = regex.exec(suppliedSig);
+//            console.log(isValid, params);
+                if(isValid) {
+                    var validatedArgs = [];
+                    var argIndex = 0;
+                    params.forEach(function(param, index) {
+                        var arg = args[argIndex];
+                        var match = isValid[index + 1];
+                        if(match === '') {
+                            if (param.context) {
+                                // substitute context value for missing arg
+                                // first check that the context value is the right type
+                                var contextType = getSymbol(context);
+                                // test contextType against the regex for this arg (without the trailing ?)
+                                if(param.contextRegex.test(contextType)) {
+                                    validatedArgs.push(context);
+                                } else {
+                                    // context value not compatible with this argument
+                                    throw {
+                                        code: "T0411",
+                                        stack: (new Error()).stack,
+                                        value: context,
+                                        index: argIndex + 1
+                                    };
+                                }
+                            } else {
+                                validatedArgs.push(arg);
+                                argIndex++;
+                            }
+                        } else {
+                            // may have matched multiple args (if the regex ends with a '+'
+                            // split into single tokens
+                            match.split('').forEach(function(single) {
+                                if (param.type === 'a') {
+                                    if (single === 'm') {
+                                        // missing (undefined)
+                                        arg = undefined;
+                                    } else {
+                                        arg = args[argIndex];
+                                        var arrayOK = true;
+                                        // is there type information on the contents of the array?
+                                        if (typeof param.subtype !== 'undefined') {
+                                            if (single !== 'a' && match !== param.subtype) {
+                                                arrayOK = false;
+                                            } else if (single === 'a') {
+                                                if (arg.length > 0) {
+                                                    var itemType = getSymbol(arg[0]);
+                                                    if (itemType !== param.subtype.charAt(0)) { // TODO recurse further
+                                                        arrayOK = false;
+                                                    } else {
+                                                        // make sure every item in the array is this type
+                                                        var differentItems = arg.filter(function (val) {
+                                                            return (getSymbol(val) !== itemType);
+                                                        });
+                                                        arrayOK = (differentItems.length === 0);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        if (!arrayOK) {
+                                            throw {
+                                                code: "T0412",
+                                                stack: (new Error()).stack,
+                                                value: arg,
+                                                index: argIndex + 1,
+                                                type: param.subtype // TODO translate symbol to type name
+                                            };
+                                        }
+                                        // the function expects an array. If it's not one, make it so
+                                        if (single !== 'a') {
+                                            arg = [arg];
+                                        }
+                                    }
+                                    validatedArgs.push(arg);
+                                    argIndex++;
+                                } else {
+                                    validatedArgs.push(arg);
+                                    argIndex++;
+                                }
+                            });
+                        }
+                    });
+                    return validatedArgs;
+                }
+                throwValidationError(args, suppliedSig);
+            }
+        };
+    }
 
     // This parser implements the 'Top down operator precedence' algorithm developed by Vaughan R Pratt; http://dl.acm.org/citation.cfm?id=512931.
     // and builds on the Javascript framework described by Douglas Crockford at http://javascript.crockford.com/tdop/tdop.html
@@ -237,26 +580,27 @@ var jsonata = (function() {
             return s;
         };
 
-        var advance = function (id) {
+        var advance = function (id, infix) {
             if (id && node.id !== id) {
-                var msg;
+                var code;
                 if(node.id === '(end)') {
                     // unexpected end of buffer
-                    msg = "Syntax error: expected '" + id + "' before end of expression";
+                    code = "S0203";
                 } else {
-                    msg = "Syntax error: expected '" + id + "', got '" + node.id;
+                    code = "S0202";
                 }
                 throw {
-                    message: msg ,
+                    code: code,
                     stack: (new Error()).stack,
                     position: node.position,
                     token: node.id,
                     value: id
                 };
             }
-            var next_token = lexer();
+            var next_token = lexer(infix);
             if (next_token === null) {
                 node = symbol_table["(end)"];
+                node.position = source.length;
                 return node;
             }
             var value = next_token.value;
@@ -271,7 +615,7 @@ var jsonata = (function() {
                     symbol = symbol_table[value];
                     if (!symbol) {
                         throw {
-                            message: "Unknown operator: " + value,
+                            code: "S0204",
                             stack: (new Error()).stack,
                             position: next_token.position,
                             token: value
@@ -284,10 +628,14 @@ var jsonata = (function() {
                     type = "literal";
                     symbol = symbol_table["(literal)"];
                     break;
+                case 'regex':
+                    type = "regex";
+                    symbol = symbol_table["(regex)"];
+                    break;
               /* istanbul ignore next */
                 default:
                     throw {
-                        message: "Unexpected token:" + value,
+                        code: "S0205",
                         stack: (new Error()).stack,
                         position: next_token.position,
                         token: value
@@ -305,7 +653,7 @@ var jsonata = (function() {
         var expression = function (rbp) {
             var left;
             var t = node;
-            advance();
+            advance(null, true);
             left = t.nud();
             while (rbp < node.lbp) {
                 t = node;
@@ -360,6 +708,7 @@ var jsonata = (function() {
         symbol("(end)");
         symbol("(name)");
         symbol("(literal)");
+        symbol("(regex)");
         symbol(":");
         symbol(";");
         symbol(",");
@@ -385,6 +734,7 @@ var jsonata = (function() {
         infix("in"); // is member of array
         infixr(":="); // bind variable
         prefix("-"); // unary numeric negation
+        infix("~>"); // function application
 
         // field wildcard (single level)
         prefix('*', function () {
@@ -425,14 +775,38 @@ var jsonata = (function() {
                 this.arguments.forEach(function (arg, index) {
                     if (arg.type !== 'variable') {
                         throw {
-                            message: 'Parameter ' + (index + 1) + ' of function definition must be a variable name (start with $)',
+                            code: "S0208",
                             stack: (new Error()).stack,
                             position: arg.position,
-                            token: arg.value
+                            token: arg.value,
+                            value: index + 1
                         };
                     }
                 });
                 this.type = 'lambda';
+                // is the next token a '<' - if so, parse the function signature
+                if(node.id === '<') {
+                    var sigPos = node.position;
+                    var depth = 1;
+                    var sig = '<';
+                    while(depth > 0 && node.id !== '{' && node.id !== '(end)') {
+                        var tok = advance();
+                        if(tok.id === '>') {
+                            depth--;
+                        } else if(tok.id === '<') {
+                            depth++;
+                        }
+                        sig += tok.value;
+                    }
+                    advance('>');
+                    try {
+                        this.signature = parseSignature(sig);
+                    } catch(err) {
+                        // insert the position into this error
+                        err.position = sigPos + err.offset;
+                        throw err;
+                    }
+                }
                 // parse the function body
                 advance('{');
                 this.body = expression(0);
@@ -613,7 +987,7 @@ var jsonata = (function() {
                             }
                             if (typeof step.group !== 'undefined') {
                                 throw {
-                                    message: 'A predicate cannot follow a grouping expression in a step. Error at column: ' + expr.position,
+                                    code: "S0209",
                                     stack: (new Error()).stack,
                                     position: expr.position
                                 };
@@ -630,7 +1004,7 @@ var jsonata = (function() {
                             result = post_parse(expr.lhs);
                             if (typeof result.group !== 'undefined') {
                                 throw {
-                                    message: 'Each step can only have one grouping expression. Error at column: ' + expr.position,
+                                    code: "S0210",
                                     stack: (new Error()).stack,
                                     position: expr.position
                                 };
@@ -680,7 +1054,7 @@ var jsonata = (function() {
                     result.procedure = post_parse(expr.procedure);
                     break;
                 case 'lambda':
-                    result = {type: expr.type, arguments: expr.arguments, position: expr.position};
+                    result = {type: expr.type, arguments: expr.arguments, signature: expr.signature, position: expr.position};
                     var body = post_parse(expr.body);
                     result.body = tail_call_optimize(body);
                     break;
@@ -709,6 +1083,7 @@ var jsonata = (function() {
                 case 'wildcard':
                 case 'descendant':
                 case 'variable':
+                case 'regex':
                     result = expr;
                     break;
                 case 'operator':
@@ -721,7 +1096,7 @@ var jsonata = (function() {
                         result = expr;
                     } else {
                         throw {
-                            message: "Syntax error: " + expr.value,
+                            code: "S0201",
                             stack: (new Error()).stack,
                             position: expr.position,
                             token: expr.value
@@ -729,13 +1104,13 @@ var jsonata = (function() {
                     }
                     break;
                 default:
-                    var reason = "Unknown expression type: " + expr.value;
+                    var code = "S0206";
                     /* istanbul ignore else */
                     if (expr.id === '(end)') {
-                        reason = "Syntax error: unexpected end of expression";
+                        code = "S0207";
                     }
                     throw {
-                        message: reason,
+                        code: code,
                         stack: (new Error()).stack,
                         position: expr.position,
                         token: expr.value
@@ -752,7 +1127,7 @@ var jsonata = (function() {
         var expr = expression(0);
         if (node.id !== '(end)') {
             throw {
-                message: "Syntax error: " + node.value,
+                code: "S0201",
                 stack: (new Error()).stack,
                 position: node.position,
                 token: node.value
@@ -762,6 +1137,10 @@ var jsonata = (function() {
 
         return expr;
     };
+
+// Start of Evaluator code
+
+    var staticFrame = createFrame(null);
 
     /**
      * Check if value is a finite number
@@ -775,7 +1154,7 @@ var jsonata = (function() {
             isNum = !isNaN(num);
             if (isNum && !isFinite(num)) {
                 throw {
-                    message: "Number out of range",
+                    code: "D1001",
                     value: n,
                     stack: (new Error()).stack
                 };
@@ -801,8 +1180,8 @@ var jsonata = (function() {
     /* istanbul ignore next */
     Number.isInteger = Number.isInteger || function(value) {
         return typeof value === "number" &&
-            isFinite(value) &&
-            Math.floor(value) === value;
+          isFinite(value) &&
+          Math.floor(value) === value;
     };
 
     /**
@@ -847,6 +1226,9 @@ var jsonata = (function() {
                 break;
             case 'block':
                 result = evaluateBlock(expr, input, environment);
+                break;
+            case 'regex':
+                result = evaluateRegex(expr, input, environment);
                 break;
             case 'function':
                 result = evaluateFunction(expr, input, environment);
@@ -1063,6 +1445,9 @@ var jsonata = (function() {
             case 'in':
                 result = evaluateIncludesExpression(expr, input, environment);
                 break;
+            case '~>':
+                result = evaluateApplyExpression(expr, input, environment);
+                break;
         }
         return result;
     }
@@ -1084,7 +1469,7 @@ var jsonata = (function() {
                     result = -result;
                 } else {
                     throw {
-                        message: "Cannot negate a non-numeric value: " + result,
+                        code: "D1002",
                         stack: (new Error()).stack,
                         position: expr.position,
                         token: expr.value,
@@ -1264,7 +1649,7 @@ var jsonata = (function() {
 
         if (!isNumeric(lhs)) {
             throw {
-                message: 'LHS of ' + expr.value + ' operator must evaluate to a number',
+                code: "T2001",
                 stack: (new Error()).stack,
                 position: expr.position,
                 token: expr.value,
@@ -1273,7 +1658,7 @@ var jsonata = (function() {
         }
         if (!isNumeric(rhs)) {
             throw {
-                message: 'RHS of ' + expr.value + ' operator must evaluate to a number',
+                code: "T2002",
                 stack: (new Error()).stack,
                 position: expr.position,
                 token: expr.value,
@@ -1443,7 +1828,7 @@ var jsonata = (function() {
                 // key has to be a string
                 if (typeof  key !== 'string') {
                     throw {
-                        message: 'Key in object structure must evaluate to a string. Got: ' + key,
+                        code: "T1003",
                         stack: (new Error()).stack,
                         position: expr.position,
                         value: key
@@ -1493,7 +1878,7 @@ var jsonata = (function() {
 
         if (!Number.isInteger(lhs)) {
             throw {
-                message: 'LHS of range operator (..) must evaluate to an integer',
+                code: "T2003",
                 stack: (new Error()).stack,
                 position: expr.position,
                 token: expr.value,
@@ -1502,7 +1887,7 @@ var jsonata = (function() {
         }
         if (!Number.isInteger(rhs)) {
             throw {
-                message: 'RHS of range operator (..) must evaluate to an integer',
+                code: "T2004",
                 stack: (new Error()).stack,
                 position: expr.position,
                 token: expr.value,
@@ -1530,7 +1915,7 @@ var jsonata = (function() {
         var value = evaluate(expr.rhs, input, environment);
         if (expr.lhs.type !== 'variable') {
             throw {
-                message: "Left hand side of := must be a variable name (start with $)",
+                code: "D2005",
                 stack: (new Error()).stack,
                 position: expr.position,
                 token: expr.value,
@@ -1581,6 +1966,54 @@ var jsonata = (function() {
     }
 
     /**
+     * Prepare a regex
+     * @param {Object} expr - expression containing regex
+     * @returns {Function} Higher order function representing prepared regex
+     */
+    function evaluateRegex(expr) {
+        expr.value.lastIndex = 0;
+        var closure = function(str) {
+            var re = expr.value;
+            //var result = str.match(expr.value);
+            var result;
+            var match = re.exec(str);
+            if(match !== null) {
+                result = {
+                    match: match[0],
+                    start: match.index,
+                    end: match.index + match[0].length,
+                    groups: []
+                };
+                if(match.length > 1) {
+                    for(var i = 1; i < match.length; i++) {
+                        result.groups.push(match[i]);
+                    }
+                }
+                result.next = function() {
+                    if(re.lastIndex >= str.length) {
+                        return undefined;
+                    } else {
+                        var next = closure(str);
+                        if(next && next.match === '' && re.lastIndex === expr.value.lastIndex) {
+                            // matches zero length string; this will never progress
+                            throw {
+                                code: "D1004",
+                                stack: (new Error()).stack,
+                                position: expr.position,
+                                value: expr.value.source
+                            };
+                        }
+                        return next;
+                    }
+                };
+            }
+
+            return result;
+        };
+        return closure;
+    }
+
+    /**
      * Evaluate variable against input data
      * @param {Object} expr - JSONata expression
      * @param {Object} input - Input data to evaluate against
@@ -1599,20 +2032,85 @@ var jsonata = (function() {
         return result;
     }
 
+    var chain = evaluate(parser('function($f, $g) { function($x){ $g($f($x)) } }'), null, staticFrame);
+
     /**
-     * Evaluate function against input data
+     * Apply the function on the RHS using the sequence on the LHS as the first argument
      * @param {Object} expr - JSONata expression
      * @param {Object} input - Input data to evaluate against
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function evaluateFunction(expr, input, environment) {
+    function evaluateApplyExpression(expr, input, environment) {
+        var result;
+
+        var arg1 = evaluate(expr.lhs, input, environment);
+
+        if(expr.rhs.type === 'function') {
+            // this is a function _invocation_; invoke it with arg1 at the start
+            result = evaluateFunction(expr.rhs, input, environment, arg1);
+        } else {
+            var func = evaluate(expr.rhs, input, environment);
+
+            if(!isFunction(func)) {
+                throw {
+                    code: "T2006",
+                    stack: (new Error()).stack,
+                    position: expr.position,
+                    value: func
+                };
+            }
+
+            if(isFunction(arg1)) {
+                // this is function chaining (func1 ~> func2)
+                // λ($f, $g) { λ($x){ $g($f($x)) } }
+                result = apply(chain, [arg1, func], environment, null);
+            } else {
+                result = apply(func, [arg1], environment, null);
+            }
+
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param {Object} arg - expression to test
+     * @returns {boolean} - true if it is a function (lambda or built-in)
+     */
+    function isFunction(arg) {
+        return ((arg && (arg._jsonata_function === true || arg._jsonata_lambda === true)) || typeof arg === 'function');
+    }
+
+    /**
+     * Tests whether arg is a lambda function
+     * @param {*} arg - the value to test
+     * @returns {boolean} - true if it is a lambda function
+     */
+    function isLambda(arg) {
+        return arg && arg._jsonata_lambda === true;
+    }
+
+    /**
+     * Evaluate function against input data
+     * @param {Object} expr - JSONata expression
+     * @param {Object} input - Input data to evaluate against
+     * @param {Object} environment - Environment
+     * @param {Object} [applyto] - LHS of ~> operator
+     * @returns {*} Evaluated input data
+     */
+    function evaluateFunction(expr, input, environment, applyto) {
         var result;
         // evaluate the arguments
         var evaluatedArgs = [];
         expr.arguments.forEach(function (arg) {
             evaluatedArgs.push(evaluate(arg, input, environment));
         });
+        if(applyto) {
+            // insert the first argument from the LHS of ~>
+            evaluatedArgs.unshift(applyto);
+        }
         // lambda function on lhs
         // create the procedure
         // can't assume that expr.procedure is a lambda type directly
@@ -1623,7 +2121,7 @@ var jsonata = (function() {
         if (typeof proc === 'undefined' && expr.procedure.type === 'path' && environment.lookup(expr.procedure[0].value)) {
             // help the user out here if they simply forgot the leading $
             throw {
-                message: 'Attempted to invoke a non-function. Did you mean \'$' + expr.procedure[0].value + '\'?',
+                code: "T1005",
                 stack: (new Error()).stack,
                 position: expr.position,
                 token: expr.procedure[0].value
@@ -1631,19 +2129,11 @@ var jsonata = (function() {
         }
         // apply the procedure
         try {
-            result = apply(proc, evaluatedArgs, environment, input);
-            while(typeof result === 'object' && result.lambda == true && result.thunk == true) {
-                // trampoline loop - this gets invoked as a result of tail-call optimization
-                // the function returned a tail-call thunk
-                // unpack it, evaluate its arguments, and apply the tail call
-                var next = evaluate(result.body.procedure, result.input, result.environment);
-                evaluatedArgs = [];
-                result.body.arguments.forEach(function (arg) {
-                    evaluatedArgs.push(evaluate(arg, result.input, result.environment));
-                });
-
-                result = apply(next, evaluatedArgs);
+            var validatedArgs = evaluatedArgs;
+            if(proc) {
+                validatedArgs = validateArguments(proc.signature, evaluatedArgs, input);
             }
+            result = apply(proc, validatedArgs, input);
         } catch (err) {
             // add the position field to the error
             err.position = expr.position;
@@ -1658,19 +2148,45 @@ var jsonata = (function() {
      * Apply procedure or function
      * @param {Object} proc - Procedure
      * @param {Array} args - Arguments
-     * @param {Object} environment - Environment
      * @param {Object} self - Self
      * @returns {*} Result of procedure
      */
-    function apply(proc, args, environment, self) {
+    function apply(proc, args, self) {
         var result;
-        if (proc && proc.lambda) {
+        result = applyInner(proc, args, self);
+        while(isLambda(result) && result.thunk === true) {
+            // trampoline loop - this gets invoked as a result of tail-call optimization
+            // the function returned a tail-call thunk
+            // unpack it, evaluate its arguments, and apply the tail call
+            var next = evaluate(result.body.procedure, result.input, result.environment);
+            var evaluatedArgs = [];
+            result.body.arguments.forEach(function (arg) {
+                evaluatedArgs.push(evaluate(arg, result.input, result.environment));
+            });
+
+            result = applyInner(next, evaluatedArgs, self);
+        }
+        return result;
+    }
+
+    /**
+     * Apply procedure or function
+     * @param {Object} proc - Procedure
+     * @param {Array} args - Arguments
+     * @param {Object} self - Self
+     * @returns {*} Result of procedure
+     */
+    function applyInner(proc, args, self) {
+        var result;
+        if (isLambda(proc)) {
             result = applyProcedure(proc, args);
+        } else if (proc && proc._jsonata_function === true) {
+            result = proc.implementation.apply(self, args);
         } else if (typeof proc === 'function') {
             result = proc.apply(self, args);
         } else {
             throw {
-                message: 'Attempted to invoke a non-function',
+                code: "T1006",
                 stack: (new Error()).stack
             };
         }
@@ -1687,10 +2203,11 @@ var jsonata = (function() {
     function evaluateLambda(expr, input, environment) {
         // make a function (closure)
         var procedure = {
-            lambda: true,
+            _jsonata_lambda: true,
             input: input,
             environment: environment,
             arguments: expr.arguments,
+            signature: expr.signature,
             body: expr.body
         };
         if(expr.thunk == true) {
@@ -1723,25 +2240,44 @@ var jsonata = (function() {
         if (typeof proc === 'undefined' && expr.procedure.type === 'path' && environment.lookup(expr.procedure[0].value)) {
             // help the user out here if they simply forgot the leading $
             throw {
-                message: 'Attempted to partially apply a non-function. Did you mean \'$' + expr.procedure[0].value + '\'?',
+                code: "T1007",
                 stack: (new Error()).stack,
                 position: expr.position,
                 token: expr.procedure[0].value
             };
         }
-        if (proc && proc.lambda) {
+        if (isLambda(proc)) {
             result = partialApplyProcedure(proc, evaluatedArgs);
+        } else if (proc && proc._jsonata_function === true) {
+            result = partialApplyNativeFunction(proc.implementation, evaluatedArgs);
         } else if (typeof proc === 'function') {
             result = partialApplyNativeFunction(proc, evaluatedArgs);
         } else {
             throw {
-                message: 'Attempted to partially apply a non-function',
+                code: "T1008",
                 stack: (new Error()).stack,
                 position: expr.position,
                 token: expr.procedure.type === 'path' ? expr.procedure[0].value : expr.procedure.value
             };
         }
         return result;
+    }
+
+    /**
+     * Validate the arguments against the signature validator (if it exists)
+     * @param {Function} signature - validator function
+     * @param {Array} args - function arguments
+     * @param {*} context - context value
+     * @returns {Array} - validated arguments
+     */
+    function validateArguments(signature, args, context) {
+        if(typeof signature === 'undefined') {
+            // nothing to validate
+            return args;
+        }
+        var validatedArgs = signature.validate(args, context);
+//        console.log(args, validatedArgs);
+        return validatedArgs;
     }
 
     /**
@@ -1784,7 +2320,7 @@ var jsonata = (function() {
             }
         });
         var procedure = {
-            lambda: true,
+            _jsonata_lambda: true,
             input: proc.input,
             environment: env,
             arguments: unboundArgs,
@@ -1846,22 +2382,20 @@ var jsonata = (function() {
     }
 
     /**
-     * Tests whether arg is a lambda function
-     * @param {*} arg - the value to test
-     * @returns {boolean} - true if it is a lambda function
+     * Creates a function definition
+     * @param {Function} func - function implementation in Javascript
+     * @param {string} signature - JSONata function signature definition
+     * @returns {{implementation: *, signature: *}} function definition
      */
-    function isLambda(arg) {
-        var result = false;
-        if(arg && typeof arg === 'object' &&
-          arg.lambda === true &&
-          arg.hasOwnProperty('input') &&
-          arg.hasOwnProperty('arguments') &&
-          arg.hasOwnProperty('environment') &&
-          arg.hasOwnProperty('body')) {
-            result = true;
+    function defineFunction(func, signature) {
+        var definition = {
+            _jsonata_function: true,
+            implementation: func
+        };
+        if(typeof signature !== 'undefined') {
+            definition.signature = parseSignature(signature);
         }
-
-        return result;
+        return definition;
     }
 
     /**
@@ -1870,33 +2404,12 @@ var jsonata = (function() {
      * @returns {number} Total value of arguments
      */
     function functionSum(args) {
-        var total = 0;
-
-        if (arguments.length != 1) {
-            throw {
-                message: 'The sum function expects one argument',
-                stack: (new Error()).stack
-            };
-        }
-
         // undefined inputs always return undefined
         if(typeof args === 'undefined') {
             return undefined;
         }
 
-        if(!Array.isArray(args)) {
-            args = [args];
-        }
-
-        // it must be an array of numbers
-        var nonNumerics = args.filter(function(val) {return (typeof val !== 'number');});
-        if(nonNumerics.length > 0) {
-            throw {
-                message: 'Type error: argument of sum function must be an array of numbers',
-                stack: (new Error()).stack,
-                value: nonNumerics
-            };
-        }
+        var total = 0;
         args.forEach(function(num){total += num;});
         return total;
     }
@@ -1907,20 +2420,9 @@ var jsonata = (function() {
      * @returns {number} Number of elements in the array
      */
     function functionCount(args) {
-        if (arguments.length != 1) {
-            throw {
-                message: 'The count function expects one argument',
-                stack: (new Error()).stack
-            };
-        }
-
         // undefined inputs always return undefined
         if(typeof args === 'undefined') {
             return 0;
-        }
-
-        if(!Array.isArray(args)) {
-            args = [args];
         }
 
         return args.length;
@@ -1932,35 +2434,12 @@ var jsonata = (function() {
      * @returns {number} Max element in the array
      */
     function functionMax(args) {
-        var max;
-
-        if (arguments.length != 1) {
-            throw {
-                message: 'The max function expects one argument',
-                stack: (new Error()).stack
-            };
-        }
-
         // undefined inputs always return undefined
-        if(typeof args === 'undefined') {
+        if(typeof args === 'undefined' || args.length === 0) {
             return undefined;
         }
 
-        if(!Array.isArray(args)) {
-            args = [args];
-        }
-
-        // it must be an array of numbers
-        var nonNumerics = args.filter(function(val) {return (typeof val !== 'number');});
-        if(nonNumerics.length > 0) {
-            throw {
-                message: 'Type error: argument of max function must be an array of numbers',
-                stack: (new Error()).stack,
-                value: nonNumerics
-            };
-        }
-        max = Math.max.apply(Math, args);
-        return max;
+        return Math.max.apply(Math, args);
     }
 
     /**
@@ -1969,35 +2448,12 @@ var jsonata = (function() {
      * @returns {number} Min element in the array
      */
     function functionMin(args) {
-        var min;
-
-        if (arguments.length != 1) {
-            throw {
-                message: 'The min function expects one argument',
-                stack: (new Error()).stack
-            };
-        }
-
         // undefined inputs always return undefined
-        if(typeof args === 'undefined') {
+        if(typeof args === 'undefined' || args.length === 0) {
             return undefined;
         }
 
-        if(!Array.isArray(args)) {
-            args = [args];
-        }
-
-        // it must be an array of numbers
-        var nonNumerics = args.filter(function(val) {return (typeof val !== 'number');});
-        if(nonNumerics.length > 0) {
-            throw {
-                message: 'Type error: argument of min function must be an array of numbers',
-                stack: (new Error()).stack,
-                value: nonNumerics
-            };
-        }
-        min = Math.min.apply(Math, args);
-        return min;
+        return Math.min.apply(Math, args);
     }
 
     /**
@@ -2006,33 +2462,12 @@ var jsonata = (function() {
      * @returns {number} Average element in the array
      */
     function functionAverage(args) {
-        var total = 0;
-
-        if (arguments.length != 1) {
-            throw {
-                message: 'The average function expects one argument',
-                stack: (new Error()).stack
-            };
-        }
-
         // undefined inputs always return undefined
-        if(typeof args === 'undefined') {
+        if(typeof args === 'undefined' || args.length === 0) {
             return undefined;
         }
 
-        if(!Array.isArray(args)) {
-            args = [args];
-        }
-
-        // it must be an array of numbers
-        var nonNumerics = args.filter(function(val) {return (typeof val !== 'number');});
-        if(nonNumerics.length > 0) {
-            throw {
-                message: 'Type error: argument of average function must be an array of numbers',
-                stack: (new Error()).stack,
-                value: nonNumerics
-            };
-        }
+        var total = 0;
         args.forEach(function(num){total += num;});
         return total/args.length;
     }
@@ -2043,37 +2478,29 @@ var jsonata = (function() {
      * @returns {String} String from arguments
      */
     function functionString(arg) {
-        var str;
-
-        if(arguments.length != 1) {
-            throw {
-                message: 'The string function expects one argument',
-                stack: (new Error()).stack
-            };
-        }
-
         // undefined inputs always return undefined
         if(typeof arg === 'undefined') {
             return undefined;
         }
 
+        var str;
+
         if (typeof arg === 'string') {
             // already a string
             str = arg;
-        } else if(typeof arg === 'function' || isLambda(arg)) {
+        } else if(isFunction(arg)) {
             // functions (built-in and lambda convert to empty string
             str = '';
         } else if (typeof arg === 'number' && !isFinite(arg)) {
             throw {
-                message: "Attempting to invoke string function on Infinity or NaN",
+                code: "D3001",
                 value: arg,
                 stack: (new Error()).stack
             };
         } else
             str = JSON.stringify(arg, function (key, val) {
                 return (typeof val !== 'undefined' && val !== null && val.toPrecision && isNumeric(val)) ? Number(val.toPrecision(13)) :
-                  (val && isLambda(val)) ? '' :
-                    (typeof val === 'function') ? '' : val;
+                  (val && isFunction(val)) ? '' : val;
             });
         return str;
     }
@@ -2086,41 +2513,9 @@ var jsonata = (function() {
      * @returns {string|*} Substring
      */
     function functionSubstring(str, start, length) {
-        if(arguments.length != 2 && arguments.length != 3) {
-            throw {
-                message: 'The substring function expects two or three arguments',
-                stack: (new Error()).stack
-            };
-        }
-
         // undefined inputs always return undefined
         if(typeof str === 'undefined') {
             return undefined;
-        }
-
-        // otherwise it must be a string
-        if(typeof str !== 'string') {
-            throw {
-                message: 'Type error: first argument of substring function must evaluate to a string',
-                stack: (new Error()).stack,
-                value: str
-            };
-        }
-
-        if(typeof start !== 'number') {
-            throw {
-                message: 'Type error: second argument of substring function must evaluate to a number',
-                stack: (new Error()).stack,
-                value: start
-            };
-        }
-
-        if(typeof length !== 'undefined' && typeof length !== 'number') {
-            throw {
-                message: 'Type error: third argument of substring function must evaluate to a number',
-                stack: (new Error()).stack,
-                value: length
-            };
         }
 
         return str.substr(start, length);
@@ -2133,32 +2528,9 @@ var jsonata = (function() {
      * @returns {*} Substring
      */
     function functionSubstringBefore(str, chars) {
-        if(arguments.length != 2) {
-            throw {
-                message: 'The substringBefore function expects two arguments',
-                stack: (new Error()).stack
-            };
-        }
-
         // undefined inputs always return undefined
         if(typeof str === 'undefined') {
             return undefined;
-        }
-
-        // otherwise it must be a string
-        if(typeof str !== 'string') {
-            throw {
-                message: 'Type error: first argument of substringBefore function must evaluate to a string',
-                stack: (new Error()).stack,
-                value: str
-            };
-        }
-        if(typeof chars !== 'string') {
-            throw {
-                message: 'Type error: second argument of substringBefore function must evaluate to a string',
-                stack: (new Error()).stack,
-                value: chars
-            };
         }
 
         var pos = str.indexOf(chars);
@@ -2176,32 +2548,9 @@ var jsonata = (function() {
      * @returns {*} Substring
      */
     function functionSubstringAfter(str, chars) {
-        if(arguments.length != 2) {
-            throw {
-                message: 'The substringAfter function expects two arguments',
-                stack: (new Error()).stack
-            };
-        }
-
         // undefined inputs always return undefined
         if(typeof str === 'undefined') {
             return undefined;
-        }
-
-        // otherwise it must be a string
-        if(typeof str !== 'string') {
-            throw {
-                message: 'Type error: first argument of substringAfter function must evaluate to a string',
-                stack: (new Error()).stack,
-                value: str
-            };
-        }
-        if(typeof chars !== 'string') {
-            throw {
-                message: 'Type error: second argument of substringAfter function must evaluate to a string',
-                stack: (new Error()).stack,
-                value: chars
-            };
         }
 
         var pos = str.indexOf(chars);
@@ -2218,25 +2567,9 @@ var jsonata = (function() {
      * @returns {string} Lowercase string
      */
     function functionLowercase(str) {
-        if(arguments.length != 1) {
-            throw {
-                message: 'The lowercase function expects one argument',
-                stack: (new Error()).stack
-            };
-        }
-
         // undefined inputs always return undefined
         if(typeof str === 'undefined') {
             return undefined;
-        }
-
-        // otherwise it must be a string
-        if(typeof str !== 'string') {
-            throw {
-                message: 'Type error: argument of lowercase function must evaluate to a string',
-                stack: (new Error()).stack,
-                value: str
-            };
         }
 
         return str.toLowerCase();
@@ -2248,25 +2581,9 @@ var jsonata = (function() {
      * @returns {string} Uppercase string
      */
     function functionUppercase(str) {
-        if(arguments.length != 1) {
-            throw {
-                message: 'The uppercase function expects one argument',
-                stack: (new Error()).stack
-            };
-        }
-
-        // undefined inputs always return undefined
+         // undefined inputs always return undefined
         if(typeof str === 'undefined') {
             return undefined;
-        }
-
-        // otherwise it must be a string
-        if(typeof str !== 'string') {
-            throw {
-                message: 'Type error: argument of uppercase function must evaluate to a string',
-                stack: (new Error()).stack,
-                value: str
-            };
         }
 
         return str.toUpperCase();
@@ -2278,78 +2595,292 @@ var jsonata = (function() {
      * @returns {Number} The number of characters in the string
      */
     function functionLength(str) {
-        if(arguments.length != 1) {
-            throw {
-                message: 'The length function expects one argument',
-                stack: (new Error()).stack
-            };
-        }
-
         // undefined inputs always return undefined
         if(typeof str === 'undefined') {
             return undefined;
-        }
-
-        // otherwise it must be a string
-        if(typeof str !== 'string') {
-            throw {
-                message: 'Type error: argument of length function must evaluate to a string',
-                stack: (new Error()).stack,
-                value: str
-            };
         }
 
         return str.length;
     }
 
     /**
-     * Split a string into an array of substrings
-     * @param {String} str - string
-     * @param {String} separator - the token that splits the string
-     * @param {Integer} [limit] - max number of substrings
-     * @returns {Array} The array of string
+     * Normalize and trim whitespace within a string
+     * @param {string} str - string to be trimmed
+     * @returns {string} - trimmed string
      */
-    function functionSplit(str, separator, limit) {
-        if(arguments.length != 2 && arguments.length != 3) {
-            throw {
-                message: 'The split function expects two or three arguments',
-                stack: (new Error()).stack
-            };
-        }
-
+    function functionTrim(str) {
         // undefined inputs always return undefined
         if(typeof str === 'undefined') {
             return undefined;
         }
 
-        // otherwise it must be a string
-        if(typeof str !== 'string') {
+        // normalize whitespace
+        var result = str.replace(/[ \t\n\r]+/gm, ' ');
+        if(result.charAt(0) === ' ') {
+            // strip leading space
+            result = result.substring(1);
+        }
+        if(result.charAt(result.length - 1) === ' ') {
+            // strip trailing space
+            result = result.substring(0, result.length - 1);
+        }
+        return result;
+    }
+
+    /**
+     * Tests if the str contains the token
+     * @param {String} str - string to test
+     * @param {String} token - substring or regex to find
+     * @returns {Boolean} - true if str contains token
+     */
+    function functionContains(str, token) {
+         // undefined inputs always return undefined
+        if(typeof str === 'undefined') {
+            return undefined;
+        }
+
+        var result;
+
+        if(typeof token === 'string') {
+            result = (str.indexOf(token) !== -1);
+        } else {
+            var matches = token(str);
+            result = (typeof matches !== 'undefined');
+        }
+
+        return result;
+    }
+
+    /**
+     * Match a string with a regex returning an array of object containing details of each match
+     * @param {String} str - string
+     * @param {String} regex - the regex applied to the string
+     * @param {Integer} [limit] - max number of matches to return
+     * @returns {Array} The array of match objects
+     */
+    function functionMatch(str, regex, limit) {
+        // undefined inputs always return undefined
+        if(typeof str === 'undefined') {
+            return undefined;
+        }
+
+        // limit, if specified, must be a non-negative number
+        if(limit < 0) {
             throw {
-                message: 'Type error: first argument of split function must evaluate to a string',
                 stack: (new Error()).stack,
-                value: str
+                value: limit,
+                code: 'D3040',
+                index: 3
             };
         }
 
-        // separator must be a string
-        if(typeof separator !== 'string') {
+        var result = [];
+
+        if(typeof limit === 'undefined' || limit > 0) {
+            var count = 0;
+            var matches = regex(str);
+            if (typeof matches !== 'undefined') {
+                while (typeof matches !== 'undefined' && (typeof limit === 'undefined' || count < limit)) {
+                    result.push({
+                        match: matches.match,
+                        index: matches.start,
+                        groups: matches.groups
+                    });
+                    matches = matches.next();
+                    count++;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Match a string with a regex returning an array of object containing details of each match
+     * @param {String} str - string
+     * @param {String} pattern - the substring/regex applied to the string
+     * @param {String} replacement - text to replace the matched substrings
+     * @param {Integer} [limit] - max number of matches to return
+     * @returns {Array} The array of match objects
+     */
+    function functionReplace(str, pattern, replacement, limit) {
+        // undefined inputs always return undefined
+        if(typeof str === 'undefined') {
+            return undefined;
+        }
+
+        // pattern cannot be an empty string
+        if(pattern === '') {
             throw {
-                message: 'Type error: second argument of split function must evaluate to a string',
+                code: "D3010",
                 stack: (new Error()).stack,
-                value: separator
+                value: pattern,
+                index: 2
             };
         }
 
-        // limit, if specified, must be a number
-        if(typeof limit !== 'undefined' && (typeof limit !== 'number' || limit < 0)) {
+        // limit, if specified, must be a non-negative number
+        if(limit < 0) {
             throw {
-                message: 'Type error: third argument of split function must evaluate to a positive number',
+                code: "D3011",
                 stack: (new Error()).stack,
-                value: limit
+                value: limit,
+                index: 4
             };
         }
 
-        return str.split(separator, limit);
+        var replacer;
+        if(typeof replacement === 'string') {
+            replacer = function (regexMatch) {
+                var substitute = '';
+                // scan forward, copying the replacement text into the substitute string
+                // and replace any occurrence of $n with the values matched by the regex
+                var position = 0;
+                var index = replacement.indexOf('$', position);
+                while (index !== -1 && position < replacement.length) {
+                    substitute += replacement.substring(position, index);
+                    position = index + 1;
+                    var dollarVal = replacement.charAt(position);
+                    if (dollarVal === '$') {
+                        // literal $
+                        substitute += '$';
+                        position++;
+                    } else if (dollarVal === '0') {
+                        substitute += regexMatch.match;
+                        position++;
+                    } else {
+                        var maxDigits;
+                        if(regexMatch.groups.length === 0) {
+                            // no sub-matches; any $ followed by a digit will be replaced by an empty string
+                            maxDigits = 1;
+                        } else {
+                            // max number of digits to parse following the $
+                            maxDigits = Math.floor(Math.log(regexMatch.groups.length) * Math.LOG10E) + 1;
+                        }
+                        index = parseInt(replacement.substring(position, position + maxDigits), 10);
+                        if(maxDigits > 1 && index > regexMatch.groups.length) {
+                            index = parseInt(replacement.substring(position, position + maxDigits - 1), 10);
+                        }
+                        if (!isNaN(index)) {
+                            if(regexMatch.groups.length > 0 ) {
+                                var submatch = regexMatch.groups[index - 1];
+                                if (typeof submatch !== 'undefined') {
+                                    substitute += submatch;
+                                }
+                            }
+                            position += index.toString().length;
+                        } else {
+                            // not a capture group, treat the $ as literal
+                            substitute += '$';
+                        }
+                    }
+                    index = replacement.indexOf('$', position);
+                }
+                substitute += replacement.substring(position);
+                return substitute;
+            };
+        } else {
+            replacer = replacement;
+        }
+
+        var result = '';
+        var position = 0;
+
+        if(typeof limit === 'undefined' || limit > 0) {
+            var count = 0;
+            if(typeof pattern === 'string') {
+                var index = str.indexOf(pattern, position);
+                while(index !== -1 && (typeof limit === 'undefined' || count < limit)) {
+                    result += str.substring(position, index);
+                    result += replacement;
+                    position = index + pattern.length;
+                    count++;
+                    index = str.indexOf(pattern, position);
+                }
+                result += str.substring(position);
+            } else {
+                var matches = pattern(str);
+                if (typeof matches !== 'undefined') {
+                    while (typeof matches !== 'undefined' && (typeof limit === 'undefined' || count < limit)) {
+                        result += str.substring(position, matches.start);
+                        var replacedWith = apply(replacer, [matches], null);
+                        // check replacedWith is a string
+                        if(typeof replacedWith === 'string') {
+                            result += replacedWith;
+                        } else {
+                            // not a string - throw error
+                            throw {
+                                code: "D3012",
+                                stack: (new Error()).stack,
+                                value: replacedWith
+                            };
+                        }
+                        position = matches.start + matches.match.length;
+                        count++;
+                        matches = matches.next();
+                    }
+                    result += str.substring(position);
+                } else {
+                    result = str;
+                }
+            }
+        } else {
+            result = str;
+        }
+
+        return result;
+    }
+
+
+    /**
+     * Split a string into an array of substrings
+     * @param {String} str - string
+     * @param {String} separator - the token or regex that splits the string
+     * @param {Integer} [limit] - max number of substrings
+     * @returns {Array} The array of string
+     */
+    function functionSplit(str, separator, limit) {
+        // undefined inputs always return undefined
+        if(typeof str === 'undefined') {
+            return undefined;
+        }
+
+        // limit, if specified, must be a non-negative number
+        if(limit < 0) {
+            throw {
+                code: "D3020",
+                stack: (new Error()).stack,
+                value: limit,
+                index: 3
+            };
+        }
+
+        var result = [];
+
+        if(typeof limit === 'undefined' || limit > 0) {
+            if (typeof separator === 'string') {
+                result = str.split(separator, limit);
+            } else {
+                var count = 0;
+                var matches = separator(str);
+                if (typeof matches !== 'undefined') {
+                    var start = 0;
+                    while (typeof matches !== 'undefined' && (typeof limit === 'undefined' || count < limit)) {
+                        result.push(str.substring(start, matches.start));
+                        start = matches.end;
+                        matches = matches.next();
+                        count++;
+                    }
+                    if(typeof limit === 'undefined' || count < limit) {
+                        result.push(str.substring(start));
+                    }
+                } else {
+                    result = [str];
+                }
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -2359,45 +2890,14 @@ var jsonata = (function() {
      * @returns {String} The concatenated string
      */
     function functionJoin(strs, separator) {
-        if(arguments.length != 1 && arguments.length != 2) {
-            throw {
-                message: 'The join function expects one or two arguments',
-                stack: (new Error()).stack
-            };
-        }
-
         // undefined inputs always return undefined
         if(typeof strs === 'undefined') {
             return undefined;
         }
 
-        if(!Array.isArray(strs)) {
-            strs = [strs];
-        }
-
-        // it must be an array of strings
-        var nonStrings = strs.filter(function(val) {return (typeof val !== 'string');});
-        if(nonStrings.length > 0) {
-            throw {
-                message: 'Type error: first argument of join function must be an array of strings',
-                stack: (new Error()).stack,
-                value: nonStrings
-            };
-        }
-
-
         // if separator is not specified, default to empty string
         if(typeof separator === 'undefined') {
             separator = "";
-        }
-
-        // separator, if specified, must be a string
-        if(typeof separator !== 'string') {
-            throw {
-                message: 'Type error: second argument of split function must evaluate to a string',
-                stack: (new Error()).stack,
-                value: separator
-            };
         }
 
         return strs.join(separator);
@@ -2411,13 +2911,6 @@ var jsonata = (function() {
     function functionNumber(arg) {
         var result;
 
-        if(arguments.length != 1) {
-            throw {
-                message: 'The number function expects one argument',
-                stack: (new Error()).stack
-            };
-        }
-
         // undefined inputs always return undefined
         if(typeof arg === 'undefined') {
             return undefined;
@@ -2430,9 +2923,10 @@ var jsonata = (function() {
             result = parseFloat(arg);
         } else {
             throw {
-                message: "Unable to cast value to a number",
+                code: "D3030",
                 value: arg,
-                stack: (new Error()).stack
+                stack: (new Error()).stack,
+                index: 1
             };
         }
         return result;
@@ -2453,13 +2947,6 @@ var jsonata = (function() {
         // array: empty -> false; length > 1 -> true
         // object: empty -> false; non-empty -> true
         // function -> false
-
-        if(arguments.length != 1) {
-            throw {
-                message: 'The boolean function expects one argument',
-                stack: (new Error()).stack
-            };
-        }
 
         // undefined inputs always return undefined
         if(typeof arg === 'undefined') {
@@ -2485,7 +2972,7 @@ var jsonata = (function() {
         } else if (arg != null && typeof arg === 'object') {
             if (Object.keys(arg).length > 0) {
                 // make sure it's not a lambda function
-                if (!(isLambda(arg))) {
+                if (!(isLambda(arg) || arg._jsonata_function)) {
                     result = true;
                 }
             }
@@ -2507,35 +2994,33 @@ var jsonata = (function() {
     /**
      * Create a map from an array of arguments
      * @param {Function} func - function to apply
+     * @param {Array} [arr] - array to map over
      * @returns {Array} Map array
      */
-    function functionMap(func) {
+    function functionMap(func, arr) {
         // this can take a variable number of arguments - each one should be mapped to the equivalent arg of func
         // assert that func is a function
         var varargs = arguments;
         var result = [];
 
         // each subsequent arg must be an array - coerce if not
-        var args = [];
+        var args = arr;
+        args = [];
         for (var ii = 1; ii < varargs.length; ii++) {
-            if (Array.isArray(varargs[ii])) {
-                args.push(varargs[ii]);
-            } else {
-                args.push([varargs[ii]]);
-            }
-
+            args.push(varargs[ii]);
         }
         // do the map - iterate over the arrays, and invoke func
-        if (args.length > 0) {
-            for (var i = 0; i < args[0].length; i++) {
-                var func_args = [];
-                for (var j = 0; j < func.arguments.length; j++) {
-                    func_args.push(args[j][i]);
-                }
-                // invoke func
-                result.push(apply(func, func_args, null, null));
+        for (var i = 0; i < args[0].length; i++) {
+            var func_args = [];
+            var length = typeof func === 'function' ? func.length :
+              func._jsonata_function === true ? func.implementation.length : func.arguments.length;
+            for (var j = 0; j < length; j++) {
+                func_args.push(args[j][i]);
             }
+            // invoke func
+            result.push(apply(func, func_args, null));
         }
+
         return result;
     }
 
@@ -2549,15 +3034,12 @@ var jsonata = (function() {
     function functionFoldLeft(func, sequence, init) {
         var result;
 
-        if (!(func.length == 2 || func.arguments.length == 2)) {
+        if (!(func.length == 2 || (func._jsonata_function === true && func.implementation.length == 2) || func.arguments.length == 2)) {
             throw {
-                message: 'The first argument of the reduce function must be a function of arity 2',
-                stack: (new Error()).stack
+                stack: (new Error()).stack,
+                code: "D3050",
+                index: 1
             };
-        }
-
-        if (!Array.isArray(sequence)) {
-            sequence = [sequence];
         }
 
         var index;
@@ -2570,7 +3052,7 @@ var jsonata = (function() {
         }
 
         while (index < sequence.length) {
-            result = apply(func, [result, sequence[index]], null, null);
+            result = apply(func, [result, sequence[index]], null);
             index++;
         }
 
@@ -2650,13 +3132,6 @@ var jsonata = (function() {
      * @returns {boolean} False if argument undefined, otherwise true
      */
     function functionExists(arg){
-        if (arguments.length != 1) {
-            throw {
-                message: 'The exists function expects one argument',
-                stack: (new Error()).stack
-            };
-        }
-
         if (typeof arg === 'undefined') {
             return false;
         } else {
@@ -2712,32 +3187,100 @@ var jsonata = (function() {
         };
     }
 
-    var staticFrame = createFrame(null);
+    // Function registration
+    staticFrame.bind('sum', defineFunction(functionSum, '<a<n>:n>'));
+    staticFrame.bind('count', defineFunction(functionCount, '<a:n>'));
+    staticFrame.bind('max', defineFunction(functionMax, '<a<n>:n>'));
+    staticFrame.bind('min', defineFunction(functionMin, '<a<n>:n>'));
+    staticFrame.bind('average', defineFunction(functionAverage, '<a<n>:n>'));
+    staticFrame.bind('string', defineFunction(functionString, '<x-:s>'));
+    staticFrame.bind('substring', defineFunction(functionSubstring, '<s-nn?:s>'));
+    staticFrame.bind('substringBefore', defineFunction(functionSubstringBefore, '<s-s:s>'));
+    staticFrame.bind('substringAfter', defineFunction(functionSubstringAfter, '<s-s:s>'));
+    staticFrame.bind('lowercase', defineFunction(functionLowercase, '<s-:s>'));
+    staticFrame.bind('uppercase', defineFunction(functionUppercase, '<s-:s>'));
+    staticFrame.bind('length', defineFunction(functionLength, '<s-:n>'));
+    staticFrame.bind('trim', defineFunction(functionTrim, '<s-:s>'));
+    staticFrame.bind('match', defineFunction(functionMatch, '<s-f<s:o>n?:a<o>>'));
+    staticFrame.bind('contains', defineFunction(functionContains, '<s-(sf):b>')); // TODO <s-(sf<s:o>):b>
+    staticFrame.bind('replace', defineFunction(functionReplace, '<s-(sf)(sf)n?:s>')); // TODO <s-(sf<s:o>)(sf<o:s>)n?:s>
+    staticFrame.bind('split', defineFunction(functionSplit, '<s-(sf)n?:a<s>>')); // TODO <s-(sf<s:o>)n?:a<s>>
+    staticFrame.bind('join', defineFunction(functionJoin, '<a<s>s?:s>'));
+    staticFrame.bind('number', defineFunction(functionNumber, '<(ns)-:n>'));
+    staticFrame.bind('boolean', defineFunction(functionBoolean, '<x-:b>'));
+    staticFrame.bind('not', defineFunction(functionNot, '<x-:b>'));
+    staticFrame.bind('map', defineFunction(functionMap, '<fa+>'));
+    staticFrame.bind('reduce', defineFunction(functionFoldLeft, '<faj?:j>')); // TODO <f<jj:j>a<j>j?:j>
+    staticFrame.bind('keys', defineFunction(functionKeys, '<x-:a<s>>'));
+    staticFrame.bind('lookup', defineFunction(functionLookup, '<x-s:x>'));
+    staticFrame.bind('append', defineFunction(functionAppend, '<xx:a>'));
+    staticFrame.bind('exists', defineFunction(functionExists, '<x:b>'));
+    staticFrame.bind('spread', defineFunction(functionSpread, '<x-:a<o>>'));
 
-    staticFrame.bind('sum', functionSum);
-    staticFrame.bind('count', functionCount);
-    staticFrame.bind('max', functionMax);
-    staticFrame.bind('min', functionMin);
-    staticFrame.bind('average', functionAverage);
-    staticFrame.bind('string', functionString);
-    staticFrame.bind('substring', functionSubstring);
-    staticFrame.bind('substringBefore', functionSubstringBefore);
-    staticFrame.bind('substringAfter', functionSubstringAfter);
-    staticFrame.bind('lowercase', functionLowercase);
-    staticFrame.bind('uppercase', functionUppercase);
-    staticFrame.bind('length', functionLength);
-    staticFrame.bind('split', functionSplit);
-    staticFrame.bind('join', functionJoin);
-    staticFrame.bind('number', functionNumber);
-    staticFrame.bind('boolean', functionBoolean);
-    staticFrame.bind('not', functionNot);
-    staticFrame.bind('map', functionMap);
-    staticFrame.bind('reduce', functionFoldLeft);
-    staticFrame.bind('keys', functionKeys);
-    staticFrame.bind('lookup', functionLookup);
-    staticFrame.bind('append', functionAppend);
-    staticFrame.bind('exists', functionExists);
-    staticFrame.bind('spread', functionSpread);
+    /**
+     * Error codes
+     *
+     */
+    var errorCodes = {
+        "S0101": "No terminating quote found in string literal",
+        "S0102": "Number out of range: {{token}}",
+        "S0103": "unsupported escape sequence: \\{{token}}",
+        "S0104": "The escape sequence \\u must be followed by 4 hex digits",
+        "S0203": "Syntax error: expected '{{value}}' before end of expression",
+        "S0202": "Syntax error: expected '{{value}}', got '{{token}}'",
+        "S0204": "Unknown operator: {{token}}",
+        "S0205": "Unexpected token: {{token}}",
+        "S0208": "Parameter {{value}} of function definition must be a variable name (start with $)",
+        "S0209": "A predicate cannot follow a grouping expression in a step.",
+        "S0210": "Each step can only have one grouping expression.",
+        "S0201": "Syntax error: {{token}}",
+        "S0206": "Unknown expression type: {{token}}",
+        "S0207": "Syntax error: unexpected end of expression",
+        "S0301": "Empty regular expressions are not allowed",
+        "S0302": "No terminating / in regular expression",
+        "S0402": "Choice groups containing parameterized types not supported",
+        "S0401": "Type parameters can only be applied to functions and arrays",
+        "T0410": "Argument {{index}} of function '{{token}}' does not match function signature",
+        "T0411": "Context value is not a compatible type with argument {{index}} of function '{{token}}'",
+        "T0412": "Argument {{index}} of function '{{token}}' must be an array of {{type}}",
+        "D1001": "Number out of range: {{value}}",
+        "D1002": "Cannot negate a non-numeric value: {{value}}",
+        "T2001": "LHS of {{token}} operator must evaluate to a number",
+        "T2002": "RHS of {{token}} operator must evaluate to a number",
+        "T1003": "Key in object structure must evaluate to a string. Got: {{value}}",
+        "T2003": "LHS of range operator (..) must evaluate to an integer",
+        "T2004": "RHS of range operator (..) must evaluate to an integer",
+        "D2005": "Left hand side of := must be a variable name (start with $)",
+        "D1004": "Regular expression matches zero length string",
+        "T2006": "RHS of function application operator ~> is not a function",
+        "T1005": "Attempted to invoke a non-function. Did you mean '${{token}}'?",
+        "T1006": "Attempted to invoke a non-function",
+        "T1007": "Attempted to partially apply a non-function. Did you mean '${{token}}'?",
+        "T1008": "Attempted to partially apply a non-function",
+        "D3001": "Attempting to invoke string function on Infinity or NaN",
+        "D3010": "Second argument of replace function cannot be an empty string",
+        "D3011": "Forth argument of replace function must evaluate to a positive number",
+        "D3012": "Attempted to replace a matched string with a non-string value",
+        "D3020": "Third argument of split function must evaluate to a positive number",
+        "D3030": "Unable to cast value to a number: {{value}}"
+    };
+
+    /**
+     * lookup a message template from the catalog and substitute the inserts
+     * @param {string} err - error code to lookup
+     * @returns {string} message
+     */
+    function lookupMessage(err) {
+        var message = 'Unknown error';
+        var template = errorCodes[err.code];
+        if(typeof template !== 'undefined') {
+            // if there are any handlebars, replace them with the field references
+            message = template.replace(/\{\{([^}]+)}}/g, function() {
+                return err[arguments[1]];
+            });
+        }
+        return message;
+    }
 
     /**
      * JSONata
@@ -2745,7 +3288,14 @@ var jsonata = (function() {
      * @returns {{evaluate: evaluate, assign: assign}} Evaluated expression
      */
     function jsonata(expr) {
-        var ast = parser(expr);
+        var ast;
+        try {
+            ast = parser(expr);
+        } catch(err) {
+            // insert error message into structure
+            err.message = lookupMessage(err);
+            throw err;
+        }
         var environment = createFrame(staticFrame);
         return {
             evaluate: function (input, bindings) {
@@ -2761,10 +3311,22 @@ var jsonata = (function() {
                 }
                 // put the input document into the environment as the root object
                 exec_env.bind('$', input);
-                return evaluate(ast, input, exec_env);
+                var result;
+                try {
+                    result = evaluate(ast, input, exec_env);
+                } catch(err) {
+                    // insert error message into structure
+                    err.message = lookupMessage(err);
+                    throw err;
+                }
+                return result;
             },
             assign: function (name, value) {
                 environment.bind(name, value);
+            },
+            registerFunction: function(name, implementation, signature) {
+                var func = defineFunction(implementation, signature);
+                environment.bind(name, func);
             }
         };
     }
