@@ -2080,7 +2080,7 @@ var jsonata = (function() {
      * @returns {boolean} - true if it is a function (lambda or built-in)
      */
     function isFunction(arg) {
-        return (typeof arg === 'function' || isLambda(arg) || (arg && arg._jsonata_function === true));
+        return ((arg && (arg._jsonata_function === true || arg._jsonata_lambda === true)) || typeof arg === 'function');
     }
 
     /**
@@ -2089,17 +2089,7 @@ var jsonata = (function() {
      * @returns {boolean} - true if it is a lambda function
      */
     function isLambda(arg) {
-        var result = false;
-        if(arg && typeof arg === 'object' &&
-          arg.lambda === true &&
-          arg.hasOwnProperty('input') &&
-          arg.hasOwnProperty('arguments') &&
-          arg.hasOwnProperty('environment') &&
-          arg.hasOwnProperty('body')) {
-            result = true;
-        }
-
-        return result;
+        return arg && arg._jsonata_lambda === true;
     }
 
     /**
@@ -2213,7 +2203,7 @@ var jsonata = (function() {
     function evaluateLambda(expr, input, environment) {
         // make a function (closure)
         var procedure = {
-            lambda: true,
+            _jsonata_lambda: true,
             input: input,
             environment: environment,
             arguments: expr.arguments,
@@ -2330,7 +2320,7 @@ var jsonata = (function() {
             }
         });
         var procedure = {
-            lambda: true,
+            _jsonata_lambda: true,
             input: proc.input,
             environment: env,
             arguments: unboundArgs,
