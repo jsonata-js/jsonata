@@ -1300,6 +1300,15 @@ describe('Evaluator - inclusion operator', function () {
         });
     });
 
+    describe('content.integration.$lowercase(name)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('content.integration.$lowercase(name)');
+            var result = expr.evaluate([{"content":{"integration":{"name":"fakeIntegrationName"}}}]);
+            var expected = "fakeintegrationname";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
 
 });
 
@@ -5905,6 +5914,16 @@ describe('Evaluator - Boolean expressions', function () {
             var expected = true;
             expect(result).to.deep.equal(expected);
         });
+
+        describe('$[].content.origin.$lowercase(name)', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$[].content.origin.$lowercase(name)');
+                var result = expr.evaluate([{"content":{"origin":{"name":"fakeIntegrationName"}}}]);
+                var expected = ["fakeintegrationname"];
+                expect(result).to.deep.equal(expected);
+            });
+        });
+
     });
 });
 
@@ -7388,6 +7407,15 @@ describe('Evaluator - function application operator', function () {
             var expr = jsonata('Account.Order.Product.(Price * Quantity) ~> $sum()');
             var result = expr.evaluate(testdata2);
             var expected = 336.36;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('( $uppertrim := $trim ~> $uppercase;  $uppertrim("   Hello    World   ") )', function () {
+        it('should return result object', function () {
+            var expr = jsonata('( $uppertrim := $trim ~> $uppercase;  $uppertrim("   Hello    World   ") )');
+            var result = expr.evaluate();
+            var expected = "HELLO WORLD";
             expect(result).to.deep.equal(expected);
         });
     });
