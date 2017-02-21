@@ -2048,7 +2048,7 @@ var jsonata = (function() {
 
         if(expr.rhs.type === 'function') {
             // this is a function _invocation_; invoke it with arg1 at the start
-            result = evaluateFunction(expr.rhs, input, environment, arg1);
+            result = evaluateFunction(expr.rhs, input, environment, {context: arg1});
         } else {
             var func = evaluate(expr.rhs, input, environment);
 
@@ -2109,7 +2109,7 @@ var jsonata = (function() {
         });
         if(applyto) {
             // insert the first argument from the LHS of ~>
-            evaluatedArgs.unshift(applyto);
+            evaluatedArgs.unshift(applyto.context);
         }
         // lambda function on lhs
         // create the procedure

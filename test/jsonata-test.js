@@ -7392,6 +7392,42 @@ describe('Evaluator - function application operator', function () {
         });
     });
 
+    describe('"john@example.com" ~> $substringAfter("@") ~> $substringBefore(".") ', function () {
+        it('should return result object', function () {
+            var expr = jsonata('"john@example.com" ~> $substringAfter("@") ~> $substringBefore(".") ');
+            var result = expr.evaluate();
+            var expected = "example";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('"" ~> $substringAfter("@") ~> $substringBefore(".") ', function () {
+        it('should return result object', function () {
+            var expr = jsonata('"" ~> $substringAfter("@") ~> $substringBefore(".") ');
+            var result = expr.evaluate("test");
+            var expected = "";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('foo ~> $substringAfter("@") ~> $substringBefore(".") ', function () {
+        it('should return result object', function () {
+            var expr = jsonata('foo ~> $substringAfter("@") ~> $substringBefore(".") ');
+            var result = expr.evaluate("test");
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('( $domain := $substringAfter(?,"@") ~> $substringBefore(?,"."); $domain("john@example.com") )', function () {
+        it('should return result object', function () {
+            var expr = jsonata('( $domain := $substringAfter(?,"@") ~> $substringBefore(?,"."); $domain("john@example.com") )');
+            var result = expr.evaluate();
+            var expected = "example";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
     describe('( $square := function($x){$x*$x}; [1..5] ~> $map($square, ?) ) ', function () {
         it('should return result object', function () {
             var expr = jsonata('( $square := function($x){$x*$x}; [1..5] ~> $map($square, ?) ) ');
