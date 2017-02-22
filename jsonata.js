@@ -2242,7 +2242,7 @@ var jsonata = (function() {
             signature: expr.signature,
             body: expr.body
         };
-        if(expr.thunk == true) {
+        if(expr.thunk === true) {
             procedure.thunk = true;
         }
         return procedure;
@@ -3008,7 +3008,7 @@ var jsonata = (function() {
                     result = true;
                 }
             }
-        } else if (typeof arg === 'boolean' && arg == true) {
+        } else if (typeof arg === 'boolean' && arg === true) {
             result = true;
         }
         return result;
