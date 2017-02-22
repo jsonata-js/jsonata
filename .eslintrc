@@ -19,6 +19,7 @@
     "array-bracket-spacing": ["error", "never"],
     "brace-style": ["error", "1tbs", {"allowSingleLine": true}],
     "dot-notation": "error",
+    "eqeqeq": "error",
     "ideal/no-tabs-in-file": "error",
     "indent": ["error", 4, {"SwitchCase": 1}],
     "max-len": ["error", 1000, {"ignoreComments": true}],

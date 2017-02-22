@@ -252,7 +252,7 @@ var jsonata = (function() {
             var name;
             for (;;) {
                 ch = path.charAt(i);
-                if (i == length || ' \t\n\r\v'.indexOf(ch) > -1 || operators.hasOwnProperty(ch)) {
+                if (i === length || ' \t\n\r\v'.indexOf(ch) > -1 || operators.hasOwnProperty(ch)) {
                     if (path.charAt(position) === '$') {
                         // variable reference
                         name = path.substring(position + 1, i);
@@ -273,7 +273,7 @@ var jsonata = (function() {
                             case 'null':
                                 return create('value', null);
                             default:
-                                if (position == length && name === '') {
+                                if (position === length && name === '') {
                                     // whitespace at end of input
                                     return null;
                                 }
@@ -1203,7 +1203,7 @@ var jsonata = (function() {
     function isArrayOfNumbers(arg) {
         var result = false;
         if(Array.isArray(arg)) {
-            result = (arg.filter(function(item){return !isNumeric(item);}).length == 0);
+            result = (arg.filter(function(item){return !isNumeric(item);}).length === 0);
         }
         return result;
     }
@@ -1346,7 +1346,7 @@ var jsonata = (function() {
                     }
                 }
             });
-            if (resultSequence.length == 1) {
+            if (resultSequence.length === 1) {
                 if(keepSingletonArray) {
                     result = resultSequence;
                 } else {
@@ -1416,7 +1416,7 @@ var jsonata = (function() {
                                 // count in from end of array
                                 ires = inputSequence.length + ires;
                             }
-                            if (ires == index) {
+                            if (ires === index) {
                                 results.push(item);
                             }
                         });
@@ -1425,7 +1425,7 @@ var jsonata = (function() {
                     }
                 });
             }
-            if (results.length == 1) {
+            if (results.length === 1) {
                 result = results[0];
             } else if (results.length > 1) {
                 result = results;
@@ -1550,7 +1550,7 @@ var jsonata = (function() {
                     results.push(res);
                 }
             });
-            if (results.length == 1) {
+            if (results.length === 1) {
                 result = results[0];
             } else if (results.length > 1) {
                 result = results;
@@ -1591,7 +1591,7 @@ var jsonata = (function() {
             });
         }
 
-        if (results.length == 1) {
+        if (results.length === 1) {
             result = results[0];
         } else if (results.length > 1) {
             result = results;
@@ -1631,7 +1631,7 @@ var jsonata = (function() {
         if (typeof input !== 'undefined') {
             // traverse all descendants of this object/array
             recurseDescendants(input, resultSequence);
-            if (resultSequence.length == 1) {
+            if (resultSequence.length === 1) {
                 result = resultSequence[0];
             } else {
                 result = resultSequence;
@@ -1738,10 +1738,10 @@ var jsonata = (function() {
 
         switch (expr.value) {
             case '=':
-                result = lhs == rhs;
+                result = lhs === rhs;
                 break;
             case '!=':
-                result = (lhs != rhs);
+                result = (lhs !== rhs);
                 break;
             case '<':
                 result = lhs < rhs;
@@ -2987,7 +2987,7 @@ var jsonata = (function() {
 
         var result = false;
         if (Array.isArray(arg)) {
-            if (arg.length == 1) {
+            if (arg.length === 1) {
                 result = functionBoolean(arg[0]);
             } else if (arg.length > 1) {
                 var trues = arg.filter(function(val) {return functionBoolean(val);});
@@ -2998,10 +2998,10 @@ var jsonata = (function() {
                 result = true;
             }
         } else if (isNumeric(arg)) {
-            if (arg != 0) {
+            if (arg !== 0) {
                 result = true;
             }
-        } else if (arg != null && typeof arg === 'object') {
+        } else if (arg !== null && typeof arg === 'object') {
             if (Object.keys(arg).length > 0) {
                 // make sure it's not a lambda function
                 if (!(isLambda(arg) || arg._jsonata_function)) {
@@ -3066,7 +3066,7 @@ var jsonata = (function() {
     function functionFoldLeft(func, sequence, init) {
         var result;
 
-        if (!(func.length == 2 || (func._jsonata_function === true && func.implementation.length == 2) || func.arguments.length == 2)) {
+        if (!(func.length === 2 || (func._jsonata_function === true && func.implementation.length === 2) || func.arguments.length === 2)) {
             throw {
                 stack: (new Error()).stack,
                 code: "D3050",
@@ -3111,9 +3111,9 @@ var jsonata = (function() {
                 }
             });
             result = functionKeys(merge);
-        } else if(arg != null && typeof arg === 'object' && !(isLambda(arg))) {
+        } else if(arg !== null && typeof arg === 'object' && !(isLambda(arg))) {
             result = Object.keys(arg);
-            if(result.length == 0) {
+            if(result.length === 0) {
                 result = undefined;
             }
         } else {
@@ -3184,7 +3184,7 @@ var jsonata = (function() {
             arg.forEach(function(item) {
                 result = functionAppend(result, functionSpread(item));
             });
-        } else if(arg != null && typeof arg === 'object' && !isLambda(arg)) {
+        } else if(arg !== null && typeof arg === 'object' && !isLambda(arg)) {
             for(var key in arg) {
                 var obj = {};
                 obj[key] = arg[key];
