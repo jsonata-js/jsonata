@@ -12,7 +12,7 @@
     "test": "node ./node_modules/istanbul/lib/cli.js cover --report cobertura --report html ./node_modules/mocha/bin/_mocha -- \"test/**/*.js\"",
     "posttest": "npm run check-coverage && npm run minify",
     "check-coverage": "istanbul check-coverage -statement 100 -branch 100 -function 100 -line 100",
-    "minify": "uglifyjs jsonata.js -o jsonata.min.js",
+    "minify": "uglifyjs jsonata.js -o jsonata.min.js --compress --mangle",
     "lint": "eslint .",
     "postlint": "npm run doc",
     "doc": "jsdoc --configure jsdoc.json .",
