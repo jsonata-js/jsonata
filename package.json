@@ -1,8 +1,9 @@
 {
   "name": "jsonata",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "JSON query and transformation language",
   "main": "jsonata.js",
+  "homepage": "http://jsonata.org/",
   "repository": {
     "type": "git",
     "url": "https://github.com/jsonata-js/jsonata.git"

@@ -1,3 +1,12 @@
+#### 1.1.1 Maintenance Release
+
+- fix chaining operator for falsy inputs
+- fix tokenizer regression for name tokens that start with "in" and "or"
+- Make minified version appear in npm
+- Enforce eqeqeq rule in JSONata (#41)
+- fix regression: some instances of divide token were incorrectly parsed as start of regex
+
+
 #### 1.1.0 Milestone Release
 
 - New syntax to create regular expressions

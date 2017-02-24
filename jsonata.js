@@ -492,7 +492,6 @@ var jsonata = (function() {
                     suppliedSig += getSymbol(arg);
                 });
                 var isValid = regex.exec(suppliedSig);
-//            console.log(isValid, params);
                 if(isValid) {
                     var validatedArgs = [];
                     var argIndex = 0;
@@ -2308,7 +2307,6 @@ var jsonata = (function() {
             return args;
         }
         var validatedArgs = signature.validate(args, context);
-//        console.log(args, validatedArgs);
         return validatedArgs;
     }
 
