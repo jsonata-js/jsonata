@@ -800,7 +800,7 @@ var jsonata = (function() {
                     advance(',');
                 }
             }
-            advance(")");
+            advance(")", true);
             // if the name of the function is 'function' or λ, then this is function definition (lambda function)
             if (left.type === 'name' && (left.value === 'function' || left.value === '\u03BB')) {
                 // all of the args must be VARIABLE tokens
@@ -857,7 +857,7 @@ var jsonata = (function() {
                 }
                 advance(";");
             }
-            advance(")");
+            advance(")", true);
             this.type = 'block';
             this.expressions = expressions;
             return this;
@@ -883,7 +883,7 @@ var jsonata = (function() {
                     advance(",");
                 }
             }
-            advance("]");
+            advance("]", true);
             this.lhs = a;
             this.type = "unary";
             return this;
@@ -904,7 +904,7 @@ var jsonata = (function() {
                 this.lhs = left;
                 this.rhs = expression(operators[']']);
                 this.type = 'binary';
-                advance("]");
+                advance("]", true);
                 return this;
             }
         });
@@ -923,7 +923,7 @@ var jsonata = (function() {
                     advance(",");
                 }
             }
-            advance("}");
+            advance("}", true);
             if(typeof left === 'undefined') {
                 // NUD - unary prefix form
                 this.lhs = a;
@@ -3304,6 +3304,9 @@ var jsonata = (function() {
      */
     function lookupMessage(err) {
         var message = 'Unknown error';
+        if(typeof err.message !== 'undefined') {
+            message = err.message;
+        }
         var template = errorCodes[err.code];
         if(typeof template !== 'undefined') {
             // if there are any handlebars, replace them with the field references

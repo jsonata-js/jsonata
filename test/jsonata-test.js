@@ -660,6 +660,15 @@ describe('Evaluator - parenthesis', function () {
         });
     });
 
+    describe('(4 + 2) / 2', function () {
+        it('should return result object', function () {
+            var expr = jsonata('(4 + 2) / 2');
+            var result = expr.evaluate(testdata1);
+            var expected = 3;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
 });
 
 describe('Evaluator - simple array selectors', function () {
@@ -2285,6 +2294,15 @@ describe('Evaluator - functions: count', function () {
             var expr = jsonata('$count(undefined)');
             var result = expr.evaluate();
             var expected = 0;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$count([1,2,3,4]) / 2', function () {
+        it('should throw an error', function () {
+            var expr = jsonata('$count([1,2,3,4]) / 2');
+            var result = expr.evaluate();
+            var expected = 2;
             expect(result).to.deep.equal(expected);
         });
     });
