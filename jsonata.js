@@ -1274,18 +1274,25 @@ var jsonata = (function() {
                 result = evaluatePartialApplication(expr, input, environment);
                 break;
         }
-        if (expr.hasOwnProperty('predicate')) {
-            result = applyPredicates(expr.predicate, result, environment);
-        }
-        if (expr.hasOwnProperty('group')) {
-            result = evaluateGroupExpression(expr.group, result, environment);
-        }
 
-        var exitCallback = environment.lookup('__evaluate_exit');
-        if(exitCallback) {
-            exitCallback(expr, input, environment, result);
-        }
+        result.then(function(res) {
+            if (expr.hasOwnProperty('predicate')) {
+                return applyPredicates(expr.predicate, res, environment);
+            }
+            return Promise.resolve(res);
+        }).then(function(res) {
+            if (expr.hasOwnProperty('group')) {
+                return evaluateGroupExpression(expr.group, res, environment);
+            }
+            return Promise.resolve(res);
+        }).then(function(res) {
+            var exitCallback = environment.lookup('__evaluate_exit');
+            if (exitCallback) {
+                exitCallback(expr, input, environment, res);
+            }
 
+            return Promise.resolve(res);
+        });
         return result;
     }
 
@@ -1304,11 +1311,19 @@ var jsonata = (function() {
         // if the first step is a variable reference ($...), including root reference ($$),
         //   then the path is absolute rather than relative
         if (expr[0].type === 'variable') {
-            expr[0].absolute = true;
+            inputSequence = [input]; // dummy singleton sequence for first (absolute) step
         } else if(expr[0].type === 'unary' && expr[0].value === '[') {
             // array constructor - not relative to the input
-            input = [null];// dummy singleton sequence for first step
+            inputSequence = [null];// dummy singleton sequence for first step
+            expr[0].consarray = true; // TODO push this up to post_parse()
+        } else if (Array.isArray(input)) {
+            inputSequence = input;
+        } else {
+            // if input is not an array, make it so
+            inputSequence = [input];
         }
+
+        var resultSequence = Promise.resolve(inputSequence);
 
         // evaluate each step in turn
         for(var ii = 0; ii < expr.length; ii++) {
@@ -1316,51 +1331,66 @@ var jsonata = (function() {
             if(step.keepArray === true) {
                 keepSingletonArray = true;
             }
-            var resultSequence = [];
-            result = undefined;
-            // if input is not an array, make it so
-            if (step.absolute === true) {
-                inputSequence = [input]; // dummy singleton sequence for first (absolute) step
-            } else if (Array.isArray(input)) {
-                inputSequence = input;
-            } else {
-                inputSequence = [input];
-            }
             // if there is more than one step in the path, handle quoted field names as names not literals
             if (expr.length > 1 && step.type === 'literal') {
-                step.type = 'name';
-            }
-            inputSequence.forEach(function (item) {
-                var res = evaluate(step, item, environment);
-                if (typeof res !== 'undefined') {
-                    if (Array.isArray(res) && (step.value !== '[' )) {
-                        // is res an array - if so, flatten it into the parent array
-                        res.forEach(function (innerRes) {
-                            if (typeof innerRes !== 'undefined') {
-                                resultSequence.push(innerRes);
-                            }
-                        });
-                    } else {
-                        resultSequence.push(res);
-                    }
-                }
-            });
-            if (resultSequence.length === 1) {
-                if(keepSingletonArray) {
-                    result = resultSequence;
-                } else {
-                    result = resultSequence[0];
-                }
-            } else if (resultSequence.length > 1) {
-                result = resultSequence;
+                step.type = 'name';  // TODO push this up to post_parse()
             }
 
-            if(typeof result === 'undefined') {
-                break;
-            }
-            input = result;
+            (function(currentStep) {
+                resultSequence = resultSequence.then(function (inputSeq) {
+                    return evaluateStep(currentStep, inputSeq, environment);
+                }).then(function (resultSequence) {
+                    // if (resultSequence.length === 0) {
+                    //     break;
+                    // }
+                    return resultSequence;
+                });
+            })(step);
         }
-        return result;
+
+        resultSequence = resultSequence.then(function(finalSequence) {
+
+            if (finalSequence.length === 1) {
+                if(keepSingletonArray) {
+                    result = finalSequence;
+                } else {
+                    result = finalSequence[0];
+                }
+            } else if (finalSequence.length > 1) {
+                result = finalSequence;
+            }
+            return result;
+        });
+        return resultSequence;
+    }
+
+    /**
+     * Evaluate a step within a path
+     * @param {Object} expr - JSONata expression
+     * @param {Object} input - Input data to evaluate against
+     * @param {Object} environment - Environment
+     * @returns {*} Evaluated input data
+     */
+    function evaluateStep(expr, input, environment) {
+
+        var allPromises = input.map(function (item) {
+            return evaluate(expr, item, environment);
+        });
+        return Promise.all(allPromises).then(function(resultSequence) {
+            var result = [];
+            resultSequence.forEach(function(res) {
+                if (!(Array.isArray(res) && (expr.value !== '[' )) && !expr.consarray) {
+                    res = [res];
+                }
+                // is res an array - if so, flatten it into the parent array
+                res.forEach(function (innerRes) {
+                    if (typeof innerRes !== 'undefined') {
+                        result.push(innerRes);
+                    }
+                });
+            });
+            return Promise.resolve(result);
+        });
     }
 
     /**
@@ -1400,29 +1430,7 @@ var jsonata = (function() {
                 }
                 result = inputSequence[index];
             } else {
-                inputSequence.forEach(function (item, index) {
-                    var res = evaluate(predicate, item, environment);
-                    if (isNumeric(res)) {
-                        res = [res];
-                    }
-                    if(isArrayOfNumbers(res)) {
-                        res.forEach(function(ires) {
-                            if (!Number.isInteger(ires)) {
-                                // round it down
-                                ires = Math.floor(ires);
-                            }
-                            if (ires < 0) {
-                                // count in from end of array
-                                ires = inputSequence.length + ires;
-                            }
-                            if (ires === index) {
-                                results.push(item);
-                            }
-                        });
-                    } else if (functionBoolean(res)) { // truthy
-                        results.push(item);
-                    }
-                });
+                results = evaluateFilter(predicate, inputSequence, environment);
             }
             if (results.length === 1) {
                 result = results[0];
@@ -1431,10 +1439,50 @@ var jsonata = (function() {
             }
             inputSequence = result;
         });
-        return result;
+        return Promise.resolve(result);
     }
 
     /**
+     * Apply filter predicate to input data
+     * @param {Object} predicate - filter expression
+     * @param {Object} input - Input data to apply predicates against
+     * @param {Object} environment - Environment
+     * @returns {*} Result after applying predicates
+     */
+    function evaluateFilter(predicate, input, environment) {
+        var allPromises = input.map(function (item) {
+            return evaluate(predicate, item, environment);
+        });
+        return Promise.all(allPromises).then(function(resultSequence) {
+            var results = [];
+            resultSequence.forEach(function (res, index) {
+                var item = input[index];
+                if (isNumeric(res)) {
+                    res = [res];
+                }
+                if (isArrayOfNumbers(res)) {
+                    res.forEach(function (ires) {
+                        if (!Number.isInteger(ires)) {
+                            // round it down
+                            ires = Math.floor(ires);
+                        }
+                        if (ires < 0) {
+                            // count in from end of array
+                            ires = input.length + ires;
+                        }
+                        if (ires === index) {
+                            results.push(item);
+                        }
+                    });
+                } else if (functionBoolean(res)) { // truthy
+                    results.push(item);
+                }
+            });
+            return Promise.resolve(results);
+        });
+    }
+
+        /**
      * Evaluate binary expression against input data
      * @param {Object} expr - JSONata expression
      * @param {Object} input - Input data to evaluate against
@@ -1538,26 +1586,38 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function evaluateName(expr, input, environment) {
+    function evaluateName(expr, input) {
         // lookup the 'name' item in the input
         var result;
         if (Array.isArray(input)) {
             var results = [];
-            input.forEach(function (item) {
-                var res = evaluateName(expr, item, environment);
-                if (typeof res !== 'undefined') {
-                    results.push(res);
-                }
-            });
-            if (results.length === 1) {
-                result = results[0];
-            } else if (results.length > 1) {
+            recurseName(expr, input, results);
+            if(results.length > 0) {
                 result = results;
             }
         } else if (input !== null && typeof input === 'object') {
             result = input[expr.value];
         }
-        return result;
+        return Promise.resolve(result);
+    }
+
+    /**
+     * Used by evaluateName to recurse arrays of items
+     * @param {Object} expr - match criteria
+     * @param {Object} input - input
+     * @param {Array} results - array of matching values
+     */
+    function recurseName(expr, input, results) {
+        if (Array.isArray(input)) {
+            input.forEach(function (item) {
+                recurseName(expr, item, results);
+            });
+        } else if (input !== null && typeof input === 'object') {
+            var res = input[expr.value];
+            if (typeof res !== 'undefined') {
+                results.push(res);
+            }
+        }
     }
 
     /**
@@ -1853,9 +1913,17 @@ var jsonata = (function() {
         if (!Array.isArray(input)) {
             input = [input];
         }
+        var allPromises = [];
         input.forEach(function (item) {
             expr.lhs.forEach(function (pair) {
-                var key = evaluate(pair[0], item, environment);
+                allPromises.push(evaluate(pair[0], item, environment));
+            });
+        });
+
+        var it = allPromises.entries();
+        input.forEach(function (item) {
+            expr.lhs.forEach(function (pair) {
+                var key = it.next().value[1];
                 // key has to be a string
                 if (typeof  key !== 'string') {
                     throw {
@@ -1876,11 +1944,18 @@ var jsonata = (function() {
             });
         });
         // iterate over the groups to evaluate the 'value' expression
-        for (var key in groups) {
+        allPromises = [];
+        var key;
+        for (key in groups) {
             var entry = groups[key];
-            var value = evaluate(entry.expr, entry.data, environment);
+            allPromises.push(evaluate(entry.expr, entry.data, environment));
+        }
+        it = allPromises.entries();
+        for (key in groups) {
+            var value = it.next().value[1];
             result[key] = value;
         }
+
         return result;
     }
 
@@ -2063,7 +2138,7 @@ var jsonata = (function() {
         return result;
     }
 
-    var chain = evaluate(parser('function($f, $g) { function($x){ $g($f($x)) } }'), null, staticFrame);
+//    var chain = evaluate(parser('function($f, $g) { function($x){ $g($f($x)) } }'), null, staticFrame);
 
     /**
      * Apply the function on the RHS using the sequence on the LHS as the first argument
@@ -2134,10 +2209,12 @@ var jsonata = (function() {
     function evaluateFunction(expr, input, environment, applyto) {
         var result;
         // evaluate the arguments
-        var evaluatedArgs = [];
-        expr.arguments.forEach(function (arg) {
-            evaluatedArgs.push(evaluate(arg, input, environment));
+        var allPromises = expr.arguments.map(function (arg) {
+            return evaluate(arg, input, environment);
         });
+
+        var evaluatedArgs = allPromises;
+
         if(applyto) {
             // insert the first argument from the LHS of ~>
             evaluatedArgs.unshift(applyto.context);
@@ -3332,8 +3409,38 @@ var jsonata = (function() {
         var environment = createFrame(staticFrame);
         return {
             evaluate: function (input, bindings) {
+ //               try {
+                var exec_env;
+                    if (typeof bindings !== 'undefined') {
+                        // the variable bindings have been passed in - create a frame to hold these
+                        exec_env = createFrame(environment);
+                        for (var v in bindings) {
+                            exec_env.bind(v, bindings[v]);
+                        }
+                    } else {
+                        exec_env = environment;
+                    }
+                    // put the input document into the environment as the root object
+                    exec_env.bind('$', input);
+                    return evaluate(ast, input, exec_env);
+
+                // } catch(err) {
+                //     // insert error message into structure
+                //     err.message = lookupMessage(err);
+                //     throw err;
+                // }
+            },
+            assign: function (name, value) {
+                environment.bind(name, value);
+            },
+            registerFunction: function(name, implementation, signature) {
+                var func = defineFunction(implementation, signature);
+                environment.bind(name, func);
+            },
+            gen: function* (input, bindings) {
+                try {
+                var exec_env;
                 if (typeof bindings !== 'undefined') {
-                    var exec_env;
                     // the variable bindings have been passed in - create a frame to hold these
                     exec_env = createFrame(environment);
                     for (var v in bindings) {
@@ -3344,22 +3451,26 @@ var jsonata = (function() {
                 }
                 // put the input document into the environment as the root object
                 exec_env.bind('$', input);
-                var result;
-                try {
-                    result = evaluate(ast, input, exec_env);
+                var result = yield evaluate(ast, input, exec_env);
+
                 } catch(err) {
                     // insert error message into structure
                     err.message = lookupMessage(err);
                     throw err;
                 }
-                return result;
             },
-            assign: function (name, value) {
-                environment.bind(name, value);
-            },
-            registerFunction: function(name, implementation, signature) {
-                var func = defineFunction(implementation, signature);
-                environment.bind(name, func);
+            eval: function (input, bindings) {
+                var it = this.gen(input, bindings);
+                var p = it.next().value;
+                var result;
+                p.then(
+                  function(res){
+                      result = res;
+                      it.next( res );
+                  },
+                  function(err){
+                      it.throw( err );
+                  });
             }
         };
     }
@@ -3375,3 +3486,7 @@ var jsonata = (function() {
 if(typeof module !== 'undefined') {
     module.exports = jsonata;
 }
+
+//jsonata('foo.bar').evaluate({foo: {bar: 'hello'}}).then(function(result) {console.log(result);});
+jsonata('foo.bar[0]').evaluate({foo: [{bar: 'hello'}, {bar: 'world'}]}).then(function(result) {console.log(result);});;
+
