@@ -42,5 +42,8 @@
   },
   "engines": {
     "node": ">= 4.4"
+  },
+  "dependencies": {
+    "chai-as-promised": "^6.0.0"
   }
 }

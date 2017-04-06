@@ -1006,6 +1006,20 @@ var jsonata = (function() {
                             }
                             Array.prototype.push.apply(result, rest);
                             result.type = 'path';
+                            // any steps within a path that are literals, should be changed to 'name'
+                            result.filter(function(step) {
+                                return step.type === 'literal';
+                            }).forEach(function(lit) {
+                                lit.type = 'name';
+                            });
+                            // any step that signals keeping a singleton array, should be flagged on the path
+                            if(result.filter(function(step) { return step.keepArray === true;}).length > 0) {
+                                result.keepSingletonArray = true;
+                            }
+                            // if first step is a path constructor, flag it for special handling
+                            if(result[0].type === 'unary' && result[0].value === '[') {
+                                result[0].consarray = true;
+                            }
                             break;
                         case '[':
                             // predicated step
@@ -1047,6 +1061,16 @@ var jsonata = (function() {
                                 }),
                                 position: expr.position
                             };
+                            break;
+                        case ':=':
+                            result = {type: 'bind', value: expr.value, position: expr.position};
+                            result.lhs = post_parse(expr.lhs);
+                            result.rhs = post_parse(expr.rhs);
+                            break;
+                        case '~>':
+                            result = {type: 'apply', value: expr.value, position: expr.position};
+                            result.lhs = post_parse(expr.lhs);
+                            result.rhs = post_parse(expr.rhs);
                             break;
                         default:
                             result = {type: expr.type, value: expr.value, position: expr.position};
@@ -1109,6 +1133,9 @@ var jsonata = (function() {
                 case 'name':
                     result = [expr];
                     result.type = 'path';
+                    if(expr.keepArray) {
+                        result.keepSingletonArray = true;
+                    }
                     break;
                 case 'literal':
                 case 'wildcard':
@@ -1222,7 +1249,7 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function evaluate(expr, input, environment) {
+    function* evaluate(expr, input, environment) {
         var result;
 
         var entryCallback = environment.lookup('__evaluate_entry');
@@ -1232,13 +1259,14 @@ var jsonata = (function() {
 
         switch (expr.type) {
             case 'path':
-                result = evaluatePath(expr, input, environment);
+                result = yield * evaluatePath(expr, input, environment);
+                result = normalizeSequence(result, expr.keepSingletonArray);
                 break;
             case 'binary':
-                result = evaluateBinary(expr, input, environment);
+                result = yield * evaluateBinary(expr, input, environment);
                 break;
             case 'unary':
-                result = evaluateUnary(expr, input, environment);
+                result = yield * evaluateUnary(expr, input, environment);
                 break;
             case 'name':
                 result = evaluateName(expr, input, environment);
@@ -1253,16 +1281,19 @@ var jsonata = (function() {
                 result = evaluateDescendants(expr, input, environment);
                 break;
             case 'condition':
-                result = evaluateCondition(expr, input, environment);
+                result = yield * evaluateCondition(expr, input, environment);
                 break;
             case 'block':
-                result = evaluateBlock(expr, input, environment);
+                result = yield * evaluateBlock(expr, input, environment);
+                break;
+            case 'bind':
+                result = yield * evaluateBindExpression(expr, input, environment);
                 break;
             case 'regex':
                 result = evaluateRegex(expr, input, environment);
                 break;
             case 'function':
-                result = evaluateFunction(expr, input, environment);
+                result = yield * evaluateFunction(expr, input, environment);
                 break;
             case 'variable':
                 result = evaluateVariable(expr, input, environment);
@@ -1271,28 +1302,33 @@ var jsonata = (function() {
                 result = evaluateLambda(expr, input, environment);
                 break;
             case 'partial':
-                result = evaluatePartialApplication(expr, input, environment);
+                result = yield * evaluatePartialApplication(expr, input, environment);
+                break;
+            case 'apply':
+                result = yield * evaluateApplyExpression(expr, input, environment);
                 break;
         }
 
-        result.then(function(res) {
-            if (expr.hasOwnProperty('predicate')) {
-                return applyPredicates(expr.predicate, res, environment);
-            }
-            return Promise.resolve(res);
-        }).then(function(res) {
-            if (expr.hasOwnProperty('group')) {
-                return evaluateGroupExpression(expr.group, res, environment);
-            }
-            return Promise.resolve(res);
-        }).then(function(res) {
-            var exitCallback = environment.lookup('__evaluate_exit');
-            if (exitCallback) {
-                exitCallback(expr, input, environment, res);
-            }
+        if(environment.lookup('__jsonata_async') &&
+          (typeof result === 'undefined' || typeof result.then !== 'function')) {
+            result = Promise.resolve(result);
+        }
+        result = yield result;
 
-            return Promise.resolve(res);
-        });
+        if (expr.hasOwnProperty('predicate')) {
+            result = yield * applyPredicates(expr.predicate, result, environment);
+            result = normalizeSequence(result);
+
+        }
+        if (expr.hasOwnProperty('group')) {
+            result = yield * evaluateGroupExpression(expr.group, result, environment);
+        }
+
+        var exitCallback = environment.lookup('__evaluate_exit');
+        if(exitCallback) {
+            exitCallback(expr, input, environment, result);
+        }
+
         return result;
     }
 
@@ -1303,19 +1339,16 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function evaluatePath(expr, input, environment) {
-        var result;
+    function* evaluatePath(expr, input, environment) {
         var inputSequence;
-        var keepSingletonArray = false;
         // expr is an array of steps
         // if the first step is a variable reference ($...), including root reference ($$),
         //   then the path is absolute rather than relative
         if (expr[0].type === 'variable') {
             inputSequence = [input]; // dummy singleton sequence for first (absolute) step
-        } else if(expr[0].type === 'unary' && expr[0].value === '[') {
+        } else if(expr[0].consarray) {
             // array constructor - not relative to the input
             inputSequence = [null];// dummy singleton sequence for first step
-            expr[0].consarray = true; // TODO push this up to post_parse()
         } else if (Array.isArray(input)) {
             inputSequence = input;
         } else {
@@ -1323,45 +1356,45 @@ var jsonata = (function() {
             inputSequence = [input];
         }
 
-        var resultSequence = Promise.resolve(inputSequence);
+        var resultSequence;
 
         // evaluate each step in turn
         for(var ii = 0; ii < expr.length; ii++) {
             var step = expr[ii];
-            if(step.keepArray === true) {
-                keepSingletonArray = true;
-            }
-            // if there is more than one step in the path, handle quoted field names as names not literals
-            if (expr.length > 1 && step.type === 'literal') {
-                step.type = 'name';  // TODO push this up to post_parse()
-            }
 
-            (function(currentStep) {
-                resultSequence = resultSequence.then(function (inputSeq) {
-                    return evaluateStep(currentStep, inputSeq, environment);
-                }).then(function (resultSequence) {
-                    // if (resultSequence.length === 0) {
-                    //     break;
-                    // }
-                    return resultSequence;
-                });
-            })(step);
+            resultSequence = yield * evaluateStep(step, inputSequence, environment);
+
+            if(typeof resultSequence === 'undefined' || resultSequence.length === 0) {
+                break;
+            }
+            inputSequence = resultSequence;
         }
 
-        resultSequence = resultSequence.then(function(finalSequence) {
-
-            if (finalSequence.length === 1) {
-                if(keepSingletonArray) {
-                    result = finalSequence;
-                } else {
-                    result = finalSequence[0];
-                }
-            } else if (finalSequence.length > 1) {
-                result = finalSequence;
-            }
-            return result;
-        });
         return resultSequence;
+    }
+
+    /**
+     * Normalize a JSONata sequence - singleton arrays become atomic values
+     * @param {Array} sequence - input sequence
+     * @param {Boolean} keepSingleton - keep singleton sequences as arrays
+     * @returns {*} normalized sequence
+     */
+    function normalizeSequence(sequence, keepSingleton) {
+        var result;
+        if(typeof sequence === 'undefined') {
+            result = undefined;
+        } else if(!Array.isArray(sequence)) {
+            result = sequence;
+        } else if (sequence.length === 1) {
+            if(keepSingleton) {
+                result = sequence;
+            } else {
+                result = sequence[0];
+            }
+        } else if (sequence.length > 1) {
+            result = sequence;
+        }
+        return result;
     }
 
     /**
@@ -1371,26 +1404,23 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function evaluateStep(expr, input, environment) {
+    function* evaluateStep(expr, input, environment) {
+        var result = [];
 
-        var allPromises = input.map(function (item) {
-            return evaluate(expr, item, environment);
-        });
-        return Promise.all(allPromises).then(function(resultSequence) {
-            var result = [];
-            resultSequence.forEach(function(res) {
-                if (!(Array.isArray(res) && (expr.value !== '[' )) && !expr.consarray) {
-                    res = [res];
+
+        for(var ii = 0; ii < input.length; ii++) {
+            var res = yield * evaluate(expr, input[ii], environment);
+            if (!(Array.isArray(res) && (expr.value !== '[' )) && !expr.consarray) {
+                res = [res];
+            }
+            // is res an array - if so, flatten it into the parent array
+            res.forEach(function (innerRes) {
+                if (typeof innerRes !== 'undefined') {
+                    result.push(innerRes);
                 }
-                // is res an array - if so, flatten it into the parent array
-                res.forEach(function (innerRes) {
-                    if (typeof innerRes !== 'undefined') {
-                        result.push(innerRes);
-                    }
-                });
             });
-            return Promise.resolve(result);
-        });
+        }
+        return result;
     }
 
     /**
@@ -1400,8 +1430,7 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Result after applying predicates
      */
-    function applyPredicates(predicates, input, environment) {
-        var result;
+    function* applyPredicates(predicates, input, environment) {
         var inputSequence = input;
         // lhs potentially holds an array
         // we want to iterate over the array, and only keep the items that are
@@ -1409,7 +1438,8 @@ var jsonata = (function() {
         // if the predicate evaluates to an integer, then select that index
 
         var results = [];
-        predicates.forEach(function (predicate) {
+        for(var ii = 0; ii < predicates.length; ii++) {
+            var predicate = predicates[ii];
             // if it's not an array, turn it into one
             // since in XPath >= 2.0 an item is equivalent to a singleton sequence of that item
             // if input is not an array, make it so
@@ -1417,7 +1447,6 @@ var jsonata = (function() {
                 inputSequence = [inputSequence];
             }
             results = [];
-            result = undefined;
             if (predicate.type === 'literal' && isNumeric(predicate.value)) {
                 var index = predicate.value;
                 if (!Number.isInteger(index)) {
@@ -1428,18 +1457,13 @@ var jsonata = (function() {
                     // count in from end of array
                     index = inputSequence.length + index;
                 }
-                result = inputSequence[index];
+                results = inputSequence[index];
             } else {
-                results = evaluateFilter(predicate, inputSequence, environment);
+                results = yield * evaluateFilter(predicate, inputSequence, environment);
             }
-            if (results.length === 1) {
-                result = results[0];
-            } else if (results.length > 1) {
-                result = results;
-            }
-            inputSequence = result;
-        });
-        return Promise.resolve(result);
+            inputSequence = results;
+        }
+        return results;
     }
 
     /**
@@ -1449,37 +1473,33 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Result after applying predicates
      */
-    function evaluateFilter(predicate, input, environment) {
-        var allPromises = input.map(function (item) {
-            return evaluate(predicate, item, environment);
-        });
-        return Promise.all(allPromises).then(function(resultSequence) {
-            var results = [];
-            resultSequence.forEach(function (res, index) {
-                var item = input[index];
-                if (isNumeric(res)) {
-                    res = [res];
-                }
-                if (isArrayOfNumbers(res)) {
-                    res.forEach(function (ires) {
-                        if (!Number.isInteger(ires)) {
-                            // round it down
-                            ires = Math.floor(ires);
-                        }
-                        if (ires < 0) {
-                            // count in from end of array
-                            ires = input.length + ires;
-                        }
-                        if (ires === index) {
-                            results.push(item);
-                        }
-                    });
-                } else if (functionBoolean(res)) { // truthy
-                    results.push(item);
-                }
-            });
-            return Promise.resolve(results);
-        });
+    function* evaluateFilter(predicate, input, environment) {
+        var results = [];
+        for(var index = 0; index < input.length; index++) {
+            var item = input[index];
+            var res = yield * evaluate(predicate, item, environment);
+            if (isNumeric(res)) {
+                res = [res];
+            }
+            if(isArrayOfNumbers(res)) {
+                res.forEach(function(ires) {
+                    if (!Number.isInteger(ires)) {
+                        // round it down
+                        ires = Math.floor(ires);
+                    }
+                    if (ires < 0) {
+                        // count in from end of array
+                        ires = input.length + ires;
+                    }
+                    if (ires === index) {
+                        results.push(item);
+                    }
+                });
+            } else if (functionBoolean(res)) { // truthy
+                results.push(item);
+            }
+        }
+        return results;
     }
 
         /**
@@ -1489,44 +1509,47 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function evaluateBinary(expr, input, environment) {
+    function * evaluateBinary(expr, input, environment) {
         var result;
+        var lhs = yield * evaluate(expr.lhs, input, environment);
+        var rhs = yield * evaluate(expr.rhs, input, environment);
+        var op = expr.value;
 
-        switch (expr.value) {
-            case '+':
-            case '-':
-            case '*':
-            case '/':
-            case '%':
-                result = evaluateNumericExpression(expr, input, environment);
-                break;
-            case '=':
-            case '!=':
-            case '<':
-            case '<=':
-            case '>':
-            case '>=':
-                result = evaluateComparisonExpression(expr, input, environment);
-                break;
-            case '&':
-                result = evaluateStringConcat(expr, input, environment);
-                break;
-            case 'and':
-            case 'or':
-                result = evaluateBooleanExpression(expr, input, environment);
-                break;
-            case '..':
-                result = evaluateRangeExpression(expr, input, environment);
-                break;
-            case ':=':
-                result = evaluateBindExpression(expr, input, environment);
-                break;
-            case 'in':
-                result = evaluateIncludesExpression(expr, input, environment);
-                break;
-            case '~>':
-                result = evaluateApplyExpression(expr, input, environment);
-                break;
+        try {
+            switch (op) {
+                case '+':
+                case '-':
+                case '*':
+                case '/':
+                case '%':
+                    result = evaluateNumericExpression(lhs, rhs, op);
+                    break;
+                case '=':
+                case '!=':
+                case '<':
+                case '<=':
+                case '>':
+                case '>=':
+                    result = evaluateComparisonExpression(lhs, rhs, op);
+                    break;
+                case '&':
+                    result = evaluateStringConcat(lhs, rhs);
+                    break;
+                case 'and':
+                case 'or':
+                    result = evaluateBooleanExpression(lhs, rhs, op);
+                    break;
+                case '..':
+                    result = evaluateRangeExpression(lhs, rhs);
+                    break;
+                case 'in':
+                    result = evaluateIncludesExpression(lhs, rhs);
+                    break;
+            }
+        } catch(err) {
+            err.position = expr.position;
+            err.token = op;
+            throw err;
         }
         return result;
     }
@@ -1538,12 +1561,12 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function evaluateUnary(expr, input, environment) {
+    function* evaluateUnary(expr, input, environment) {
         var result;
 
         switch (expr.value) {
             case '-':
-                result = evaluate(expr.expression, input, environment);
+                result = yield * evaluate(expr.expression, input, environment);
                 if (isNumeric(result)) {
                     result = -result;
                 } else {
@@ -1559,8 +1582,9 @@ var jsonata = (function() {
             case '[':
                 // array constructor - evaluate each item
                 result = [];
-                expr.lhs.forEach(function (item) {
-                    var value = evaluate(item, input, environment);
+                for(var ii = 0; ii < expr.lhs.length; ii++) {
+                    var item = expr.lhs[ii];
+                    var value = yield * evaluate(item, input, environment);
                     if (typeof value !== 'undefined') {
                         if(item.value === '[') {
                             result.push(value);
@@ -1568,11 +1592,11 @@ var jsonata = (function() {
                             result = functionAppend(result, value);
                         }
                     }
-                });
+                }
                 break;
             case '{':
                 // object constructor - apply grouping
-                result = evaluateGroupExpression(expr, input, environment);
+                result = yield * evaluateGroupExpression(expr, input, environment);
                 break;
 
         }
@@ -1586,38 +1610,22 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function evaluateName(expr, input) {
+    function evaluateName(expr, input, environment) {
         // lookup the 'name' item in the input
         var result;
         if (Array.isArray(input)) {
-            var results = [];
-            recurseName(expr, input, results);
-            if(results.length > 0) {
-                result = results;
+            result = [];
+            for(var ii = 0; ii < input.length; ii++) {
+                var res =  evaluateName(expr, input[ii], environment);
+                if (typeof res !== 'undefined') {
+                    result.push(res);
+                }
             }
         } else if (input !== null && typeof input === 'object') {
             result = input[expr.value];
         }
-        return Promise.resolve(result);
-    }
-
-    /**
-     * Used by evaluateName to recurse arrays of items
-     * @param {Object} expr - match criteria
-     * @param {Object} input - input
-     * @param {Array} results - array of matching values
-     */
-    function recurseName(expr, input, results) {
-        if (Array.isArray(input)) {
-            input.forEach(function (item) {
-                recurseName(expr, item, results);
-            });
-        } else if (input !== null && typeof input === 'object') {
-            var res = input[expr.value];
-            if (typeof res !== 'undefined') {
-                results.push(res);
-            }
-        }
+        result = normalizeSequence(result);
+        return result;
     }
 
     /**
@@ -1650,11 +1658,7 @@ var jsonata = (function() {
             });
         }
 
-        if (results.length === 1) {
-            result = results[0];
-        } else if (results.length > 1) {
-            result = results;
-        }
+        result = normalizeSequence(results);
         return result;
     }
 
@@ -1722,16 +1726,13 @@ var jsonata = (function() {
 
     /**
      * Evaluate numeric expression against input data
-     * @param {Object} expr - JSONata expression
-     * @param {Object} input - Input data to evaluate against
-     * @param {Object} environment - Environment
-     * @returns {*} Evaluated input data
+     * @param {Object} lhs - LHS value
+     * @param {Object} rhs - RHS value
+     * @param {Object} op - opcode
+     * @returns {*} Result
      */
-    function evaluateNumericExpression(expr, input, environment) {
+    function evaluateNumericExpression(lhs, rhs, op) {
         var result;
-
-        var lhs = evaluate(expr.lhs, input, environment);
-        var rhs = evaluate(expr.rhs, input, environment);
 
         if (typeof lhs === 'undefined' || typeof rhs === 'undefined') {
             // if either side is undefined, the result is undefined
@@ -1742,8 +1743,6 @@ var jsonata = (function() {
             throw {
                 code: "T2001",
                 stack: (new Error()).stack,
-                position: expr.position,
-                token: expr.value,
                 value: lhs
             };
         }
@@ -1751,13 +1750,11 @@ var jsonata = (function() {
             throw {
                 code: "T2002",
                 stack: (new Error()).stack,
-                position: expr.position,
-                token: expr.value,
                 value: rhs
             };
         }
 
-        switch (expr.value) {
+        switch (op) {
             case '+':
                 result = lhs + rhs;
                 break;
@@ -1779,23 +1776,20 @@ var jsonata = (function() {
 
     /**
      * Evaluate comparison expression against input data
-     * @param {Object} expr - JSONata expression
-     * @param {Object} input - Input data to evaluate against
-     * @param {Object} environment - Environment
-     * @returns {*} Evaluated input data
+     * @param {Object} lhs - LHS value
+     * @param {Object} rhs - RHS value
+     * @param {Object} op - opcode
+     * @returns {*} Result
      */
-    function evaluateComparisonExpression(expr, input, environment) {
+    function evaluateComparisonExpression(lhs, rhs, op) {
         var result;
-
-        var lhs = evaluate(expr.lhs, input, environment);
-        var rhs = evaluate(expr.rhs, input, environment);
 
         if (typeof lhs === 'undefined' || typeof rhs === 'undefined') {
             // if either side is undefined, the result is false
             return false;
         }
 
-        switch (expr.value) {
+        switch (op) {
             case '=':
                 result = lhs === rhs;
                 break;
@@ -1821,16 +1815,12 @@ var jsonata = (function() {
     /**
      * Inclusion operator - in
      *
-     * @param {Object} expr - AST
-     * @param {*} input - input context
-     * @param {Object} environment - frame
+     * @param {Object} lhs - LHS value
+     * @param {Object} rhs - RHS value
      * @returns {boolean} - true if lhs is a member of rhs
      */
-    function evaluateIncludesExpression(expr, input, environment) {
+    function evaluateIncludesExpression(lhs, rhs) {
         var result = false;
-
-        var lhs = evaluate(expr.lhs, input, environment);
-        var rhs = evaluate(expr.rhs, input, environment);
 
         if (typeof lhs === 'undefined' || typeof rhs === 'undefined') {
             // if either side is undefined, the result is false
@@ -1853,22 +1843,20 @@ var jsonata = (function() {
 
     /**
      * Evaluate boolean expression against input data
-     * @param {Object} expr - JSONata expression
-     * @param {Object} input - Input data to evaluate against
-     * @param {Object} environment - Environment
-     * @returns {*} Evaluated input data
+     * @param {Object} lhs - LHS value
+     * @param {Object} rhs - RHS value
+     * @param {Object} op - opcode
+     * @returns {*} Result
      */
-    function evaluateBooleanExpression(expr, input, environment) {
+    function evaluateBooleanExpression(lhs, rhs, op) {
         var result;
 
-        switch (expr.value) {
+        switch (op) {
             case 'and':
-                result = functionBoolean(evaluate(expr.lhs, input, environment)) &&
-                  functionBoolean(evaluate(expr.rhs, input, environment));
+                result = functionBoolean(lhs) && functionBoolean(rhs);
                 break;
             case 'or':
-                result = functionBoolean(evaluate(expr.lhs, input, environment)) ||
-                  functionBoolean(evaluate(expr.rhs, input, environment));
+                result = functionBoolean(lhs) || functionBoolean(rhs);
                 break;
         }
         return result;
@@ -1876,15 +1864,12 @@ var jsonata = (function() {
 
     /**
      * Evaluate string concatenation against input data
-     * @param {Object} expr - JSONata expression
-     * @param {Object} input - Input data to evaluate against
-     * @param {Object} environment - Environment
-     * @returns {string|*} Evaluated input data
+     * @param {Object} lhs - LHS value
+     * @param {Object} rhs - RHS value
+     * @returns {string|*} Concatenated string
      */
-    function evaluateStringConcat(expr, input, environment) {
+    function evaluateStringConcat(lhs, rhs) {
         var result;
-        var lhs = evaluate(expr.lhs, input, environment);
-        var rhs = evaluate(expr.rhs, input, environment);
 
         var lstr = '';
         var rstr = '';
@@ -1906,7 +1891,7 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {{}} Evaluated input data
      */
-    function evaluateGroupExpression(expr, input, environment) {
+    function* evaluateGroupExpression(expr, input, environment) {
         var result = {};
         var groups = {};
         // group the input sequence by 'key' expression
@@ -1914,11 +1899,11 @@ var jsonata = (function() {
             input = [input];
         }
         var allPromises = [];
-        input.forEach(function (item) {
-            expr.lhs.forEach(function (pair) {
-                allPromises.push(evaluate(pair[0], item, environment));
-            });
-        });
+        for(var itemIndex = 0; itemIndex < input.length; itemIndex++) {
+            for(var pairIndex = 0; pairIndex < expr.lhs.length; pairIndex++) {
+                allPromises.push(yield * evaluate(expr.lhs[pairIndex][0], input[itemIndex], environment));
+            }
+        }
 
         var it = allPromises.entries();
         input.forEach(function (item) {
@@ -1948,7 +1933,7 @@ var jsonata = (function() {
         var key;
         for (key in groups) {
             var entry = groups[key];
-            allPromises.push(evaluate(entry.expr, entry.data, environment));
+            allPromises.push(yield * evaluate(entry.expr, entry.data, environment));
         }
         it = allPromises.entries();
         for (key in groups) {
@@ -1961,16 +1946,12 @@ var jsonata = (function() {
 
     /**
      * Evaluate range expression against input data
-     * @param {Object} expr - JSONata expression
-     * @param {Object} input - Input data to evaluate against
-     * @param {Object} environment - Environment
-     * @returns {*} Evaluated input data
+     * @param {Object} lhs - LHS value
+     * @param {Object} rhs - RHS value
+     * @returns {Array} Resultant array
      */
-    function evaluateRangeExpression(expr, input, environment) {
+    function evaluateRangeExpression(lhs, rhs) {
         var result;
-
-        var lhs = evaluate(expr.lhs, input, environment);
-        var rhs = evaluate(expr.rhs, input, environment);
 
         if (typeof lhs === 'undefined' || typeof rhs === 'undefined') {
             // if either side is undefined, the result is undefined
@@ -1986,8 +1967,6 @@ var jsonata = (function() {
             throw {
                 code: "T2003",
                 stack: (new Error()).stack,
-                position: expr.position,
-                token: expr.value,
                 value: lhs
             };
         }
@@ -1995,8 +1974,6 @@ var jsonata = (function() {
             throw {
                 code: "T2004",
                 stack: (new Error()).stack,
-                position: expr.position,
-                token: expr.value,
                 value: rhs
             };
         }
@@ -2015,10 +1992,10 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function evaluateBindExpression(expr, input, environment) {
+    function* evaluateBindExpression(expr, input, environment) {
         // The RHS is the expression to evaluate
         // The LHS is the name of the variable to bind to - should be a VARIABLE token
-        var value = evaluate(expr.rhs, input, environment);
+        var value = yield * evaluate(expr.rhs, input, environment);
         if (expr.lhs.type !== 'variable') {
             throw {
                 code: "D2005",
@@ -2039,13 +2016,13 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function evaluateCondition(expr, input, environment) {
+    function* evaluateCondition(expr, input, environment) {
         var result;
-        var condition = evaluate(expr.condition, input, environment);
+        var condition = yield * evaluate(expr.condition, input, environment);
         if (functionBoolean(condition)) {
-            result = evaluate(expr.then, input, environment);
+            result = yield * evaluate(expr.then, input, environment);
         } else if (typeof expr.else !== 'undefined') {
-            result = evaluate(expr.else, input, environment);
+            result = yield * evaluate(expr.else, input, environment);
         }
         return result;
     }
@@ -2057,16 +2034,16 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function evaluateBlock(expr, input, environment) {
+    function* evaluateBlock(expr, input, environment) {
         var result;
         // create a new frame to limit the scope of variable assignments
         // TODO, only do this if the post-parse stage has flagged this as required
         var frame = createFrame(environment);
         // invoke each expression in turn
         // only return the result of the last one
-        expr.expressions.forEach(function (expression) {
-            result = evaluate(expression, input, frame);
-        });
+        for(var ii = 0; ii < expr.expressions.length; ii++) {
+            result = yield * evaluate(expr.expressions[ii], input, frame);
+        }
 
         return result;
     }
@@ -2080,7 +2057,6 @@ var jsonata = (function() {
         expr.value.lastIndex = 0;
         var closure = function(str) {
             var re = expr.value;
-            //var result = str.match(expr.value);
             var result;
             var match = re.exec(str);
             if(match !== null) {
@@ -2138,7 +2114,12 @@ var jsonata = (function() {
         return result;
     }
 
-//    var chain = evaluate(parser('function($f, $g) { function($x){ $g($f($x)) } }'), null, staticFrame);
+    var chainGen = evaluate(parser('function($f, $g) { function($x){ $g($f($x)) } }'), null, staticFrame);
+    var chain = chainGen.next();
+    while(!chain.done) {
+        chain = chainGen.next(chain.value);
+    }
+    chain = chain.value;
 
     /**
      * Apply the function on the RHS using the sequence on the LHS as the first argument
@@ -2147,16 +2128,16 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function evaluateApplyExpression(expr, input, environment) {
+    function* evaluateApplyExpression(expr, input, environment) {
         var result;
 
-        var arg1 = evaluate(expr.lhs, input, environment);
+        var arg1 = yield * evaluate(expr.lhs, input, environment);
 
         if(expr.rhs.type === 'function') {
             // this is a function _invocation_; invoke it with arg1 at the start
-            result = evaluateFunction(expr.rhs, input, environment, {context: arg1});
+            result = yield * evaluateFunction(expr.rhs, input, environment, {context: arg1});
         } else {
-            var func = evaluate(expr.rhs, input, environment);
+            var func = yield * evaluate(expr.rhs, input, environment);
 
             if(!isFunction(func)) {
                 throw {
@@ -2170,9 +2151,9 @@ var jsonata = (function() {
             if(isFunction(arg1)) {
                 // this is function chaining (func1 ~> func2)
                 // λ($f, $g) { λ($x){ $g($f($x)) } }
-                result = apply(chain, [arg1, func], environment, null);
+                result = yield * apply(chain, [arg1, func], environment, null);
             } else {
-                result = apply(func, [arg1], environment, null);
+                result = yield * apply(func, [arg1], environment, null);
             }
 
         }
@@ -2199,6 +2180,15 @@ var jsonata = (function() {
     }
 
     /**
+     *
+     * @param {Object} arg - expression to test
+     * @returns {boolean} - true if it is a generator function (function*)
+     */
+    function isGenerator(arg) {
+        return arg.constructor.name === 'GeneratorFunction';
+    }
+
+    /**
      * Evaluate function against input data
      * @param {Object} expr - JSONata expression
      * @param {Object} input - Input data to evaluate against
@@ -2206,15 +2196,13 @@ var jsonata = (function() {
      * @param {Object} [applyto] - LHS of ~> operator
      * @returns {*} Evaluated input data
      */
-    function evaluateFunction(expr, input, environment, applyto) {
+    function* evaluateFunction(expr, input, environment, applyto) {
         var result;
         // evaluate the arguments
-        var allPromises = expr.arguments.map(function (arg) {
-            return evaluate(arg, input, environment);
-        });
-
-        var evaluatedArgs = allPromises;
-
+        var evaluatedArgs = [];
+        for(var ii = 0; ii < expr.arguments.length; ii++) {
+            evaluatedArgs.push(yield * evaluate(expr.arguments[ii], input, environment));
+        }
         if(applyto) {
             // insert the first argument from the LHS of ~>
             evaluatedArgs.unshift(applyto.context);
@@ -2224,7 +2212,7 @@ var jsonata = (function() {
         // can't assume that expr.procedure is a lambda type directly
         // could be an expression that evaluates to a function (e.g. variable reference, parens expr etc.
         // evaluate it generically first, then check that it is a function.  Throw error if not.
-        var proc = evaluate(expr.procedure, input, environment);
+        var proc = yield * evaluate(expr.procedure, input, environment);
 
         if (typeof proc === 'undefined' && expr.procedure.type === 'path' && environment.lookup(expr.procedure[0].value)) {
             // help the user out here if they simply forgot the leading $
@@ -2241,7 +2229,7 @@ var jsonata = (function() {
             if(proc) {
                 validatedArgs = validateArguments(proc.signature, evaluatedArgs, input);
             }
-            result = apply(proc, validatedArgs, input);
+            result = yield * apply(proc, validatedArgs, input);
         } catch (err) {
             // add the position field to the error
             err.position = expr.position;
@@ -2259,20 +2247,20 @@ var jsonata = (function() {
      * @param {Object} self - Self
      * @returns {*} Result of procedure
      */
-    function apply(proc, args, self) {
+    function* apply(proc, args, self) {
         var result;
-        result = applyInner(proc, args, self);
+        result = yield * applyInner(proc, args, self);
         while(isLambda(result) && result.thunk === true) {
             // trampoline loop - this gets invoked as a result of tail-call optimization
             // the function returned a tail-call thunk
             // unpack it, evaluate its arguments, and apply the tail call
-            var next = evaluate(result.body.procedure, result.input, result.environment);
+            var next = yield * evaluate(result.body.procedure, result.input, result.environment);
             var evaluatedArgs = [];
-            result.body.arguments.forEach(function (arg) {
-                evaluatedArgs.push(evaluate(arg, result.input, result.environment));
-            });
+            for(var ii = 0; ii < result.body.arguments.length; ii++) {
+                evaluatedArgs.push(yield * evaluate(result.body.arguments[ii], result.input, result.environment));
+            }
 
-            result = applyInner(next, evaluatedArgs, self);
+            result = yield * applyInner(next, evaluatedArgs, self);
         }
         return result;
     }
@@ -2284,12 +2272,16 @@ var jsonata = (function() {
      * @param {Object} self - Self
      * @returns {*} Result of procedure
      */
-    function applyInner(proc, args, self) {
+    function* applyInner(proc, args, self) {
         var result;
         if (isLambda(proc)) {
-            result = applyProcedure(proc, args);
+            result = yield * applyProcedure(proc, args);
         } else if (proc && proc._jsonata_function === true) {
             result = proc.implementation.apply(self, args);
+            // this might be a function* generator - if so, yield
+            if(isGenerator(proc.implementation)) {
+                result = yield *result;
+            }
         } else if (typeof proc === 'function') {
             result = proc.apply(self, args);
         } else {
@@ -2331,20 +2323,21 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function evaluatePartialApplication(expr, input, environment) {
+    function* evaluatePartialApplication(expr, input, environment) {
         // partially apply a function
         var result;
         // evaluate the arguments
         var evaluatedArgs = [];
-        expr.arguments.forEach(function (arg) {
+        for(var ii = 0; ii < expr.arguments.length; ii++) {
+            var arg = expr.arguments[ii];
             if (arg.type === 'operator' && arg.value === '?') {
                 evaluatedArgs.push(arg);
             } else {
-                evaluatedArgs.push(evaluate(arg, input, environment));
+                evaluatedArgs.push(yield * evaluate(arg, input, environment));
             }
-        });
+        }
         // lookup the procedure
-        var proc = evaluate(expr.procedure, input, environment);
+        var proc = yield * evaluate(expr.procedure, input, environment);
         if (typeof proc === 'undefined' && expr.procedure.type === 'path' && environment.lookup(expr.procedure[0].value)) {
             // help the user out here if they simply forgot the leading $
             throw {
@@ -2393,7 +2386,7 @@ var jsonata = (function() {
      * @param {Array} args - Arguments
      * @returns {*} Result of procedure
      */
-    function applyProcedure(proc, args) {
+    function* applyProcedure(proc, args) {
         var result;
         var env = createFrame(proc.environment);
         proc.arguments.forEach(function (param, index) {
@@ -2401,9 +2394,9 @@ var jsonata = (function() {
         });
         if (typeof proc.body === 'function') {
             // this is a lambda that wraps a native function - generated by partially evaluating a native
-            result = applyNativeFunction(proc.body, env);
+            result = yield * applyNativeFunction(proc.body, env);
         } else {
-            result = evaluate(proc.body, proc.input, env);
+            result = yield * evaluate(proc.body, proc.input, env);
         }
         return result;
     }
@@ -2465,7 +2458,7 @@ var jsonata = (function() {
      * @param {Object} env - Environment
      * @returns {*} Result of applying native function
      */
-    function applyNativeFunction(proc, env) {
+    function* applyNativeFunction(proc, env) {
         var sigArgs = getNativeFunctionArguments(proc);
         // generate the array of arguments for invoking the function - look them up in the environment
         var args = sigArgs.map(function (sigArg) {
@@ -2473,6 +2466,9 @@ var jsonata = (function() {
         });
 
         var result = proc.apply(null, args);
+        if(isGenerator(proc)) {
+            result = yield * result;
+        }
         return result;
     }
 
@@ -2810,7 +2806,7 @@ var jsonata = (function() {
      * @param {Integer} [limit] - max number of matches to return
      * @returns {Array} The array of match objects
      */
-    function functionReplace(str, pattern, replacement, limit) {
+    function* functionReplace(str, pattern, replacement, limit) {
         // undefined inputs always return undefined
         if(typeof str === 'undefined') {
             return undefined;
@@ -2910,7 +2906,7 @@ var jsonata = (function() {
                 if (typeof matches !== 'undefined') {
                     while (typeof matches !== 'undefined' && (typeof limit === 'undefined' || count < limit)) {
                         result += str.substring(position, matches.start);
-                        var replacedWith = apply(replacer, [matches], null);
+                        var replacedWith = yield * apply(replacer, [matches], null);
                         // check replacedWith is a string
                         if(typeof replacedWith === 'string') {
                             result += replacedWith;
@@ -3104,7 +3100,7 @@ var jsonata = (function() {
      * @param {Array} [arr] - array to map over
      * @returns {Array} Map array
      */
-    function functionMap(func, arr) {
+    function* functionMap(func, arr) {
         // this can take a variable number of arguments - each one should be mapped to the equivalent arg of func
         // assert that func is a function
         var varargs = arguments;
@@ -3125,7 +3121,7 @@ var jsonata = (function() {
                 func_args.push(args[j][i]);
             }
             // invoke func
-            result.push(apply(func, func_args, null));
+            result.push(yield * apply(func, func_args, null));
         }
 
         return result;
@@ -3138,7 +3134,7 @@ var jsonata = (function() {
      * @param {Object} init - Initial value
      * @returns {*} Result
      */
-    function functionFoldLeft(func, sequence, init) {
+    function* functionFoldLeft(func, sequence, init) {
         var result;
 
         if (!(func.length === 2 || (func._jsonata_function === true && func.implementation.length === 2) || func.arguments.length === 2)) {
@@ -3159,7 +3155,7 @@ var jsonata = (function() {
         }
 
         while (index < sequence.length) {
-            result = apply(func, [result, sequence[index]], null);
+            result = yield * apply(func, [result, sequence[index]], null);
             index++;
         }
 
@@ -3408,39 +3404,9 @@ var jsonata = (function() {
         }
         var environment = createFrame(staticFrame);
         return {
-            evaluate: function (input, bindings) {
- //               try {
-                var exec_env;
-                    if (typeof bindings !== 'undefined') {
-                        // the variable bindings have been passed in - create a frame to hold these
-                        exec_env = createFrame(environment);
-                        for (var v in bindings) {
-                            exec_env.bind(v, bindings[v]);
-                        }
-                    } else {
-                        exec_env = environment;
-                    }
-                    // put the input document into the environment as the root object
-                    exec_env.bind('$', input);
-                    return evaluate(ast, input, exec_env);
-
-                // } catch(err) {
-                //     // insert error message into structure
-                //     err.message = lookupMessage(err);
-                //     throw err;
-                // }
-            },
-            assign: function (name, value) {
-                environment.bind(name, value);
-            },
-            registerFunction: function(name, implementation, signature) {
-                var func = defineFunction(implementation, signature);
-                environment.bind(name, func);
-            },
-            gen: function* (input, bindings) {
-                try {
-                var exec_env;
+            evaluate: function (input, bindings, callback) {
                 if (typeof bindings !== 'undefined') {
+                    var exec_env;
                     // the variable bindings have been passed in - create a frame to hold these
                     exec_env = createFrame(environment);
                     for (var v in bindings) {
@@ -3451,26 +3417,49 @@ var jsonata = (function() {
                 }
                 // put the input document into the environment as the root object
                 exec_env.bind('$', input);
-                var result = yield evaluate(ast, input, exec_env);
 
-                } catch(err) {
-                    // insert error message into structure
-                    err.message = lookupMessage(err);
-                    throw err;
+                var result, it;
+                // if a callback function is supplied, then drive the generator in a promise chain
+                if(typeof callback === 'function') {
+                    exec_env.bind('__jsonata_async', true);
+                    var thenHandler = function (response) {
+//                    console.log('THEN: ', response);
+                        result = it.next(response);
+                        if (result.done) {
+                            callback(null, result.value);
+                        } else {
+                            result.value.then(thenHandler)
+                              .catch(function (err) {
+                                  err.message = lookupMessage(err);
+                                  callback(err, null);
+                              });
+                        }
+                    };
+                    it = evaluate(ast, input, exec_env);
+                    result = it.next();
+                    result.value.then(thenHandler);
+                } else {
+                    // no callback function - drive the generator to completion synchronously
+                    try {
+                        it = evaluate(ast, input, exec_env);
+                        result = it.next();
+                        while (!result.done) {
+                            result = it.next(result.value);
+                        }
+                        return result.value;
+                    } catch (err) {
+                        // insert error message into structure
+                        err.message = lookupMessage(err);
+                        throw err;
+                    }
                 }
             },
-            eval: function (input, bindings) {
-                var it = this.gen(input, bindings);
-                var p = it.next().value;
-                var result;
-                p.then(
-                  function(res){
-                      result = res;
-                      it.next( res );
-                  },
-                  function(err){
-                      it.throw( err );
-                  });
+            assign: function (name, value) {
+                environment.bind(name, value);
+            },
+            registerFunction: function(name, implementation, signature) {
+                var func = defineFunction(implementation, signature);
+                environment.bind(name, func);
             }
         };
     }
@@ -3486,7 +3475,4 @@ var jsonata = (function() {
 if(typeof module !== 'undefined') {
     module.exports = jsonata;
 }
-
-//jsonata('foo.bar').evaluate({foo: {bar: 'hello'}}).then(function(result) {console.log(result);});
-jsonata('foo.bar[0]').evaluate({foo: [{bar: 'hello'}, {bar: 'world'}]}).then(function(result) {console.log(result);});;
 
