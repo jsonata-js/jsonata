@@ -39,6 +39,7 @@
     "jsdoc": "^3.4.0",
     "mocha": "^3.0.2",
     "mocha-lcov-reporter": "^1.2.0",
+    "request": "^2.81.0",
     "uglify-js": "mishoo/UglifyJS2#harmony"
   },
   "engines": {
