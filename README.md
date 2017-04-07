@@ -2,7 +2,6 @@
 
 <div>
   <a href="https://nodei.co/npm/jsonata/"><img src="https://nodei.co/npm/jsonata.png?downloads=true&downloadRank=true"></a>
-  <a href="http://jsonata.org/"><img src="http://jsonata.org/images/jsonata-button.png" style="height:69px; width: 69px; float: right"></a>
 </div>
 
 [![Build Status](https://travis-ci.org/jsonata-js/jsonata.svg)](https://travis-ci.org/jsonata-js/jsonata)
