@@ -1,17 +1,17 @@
 # JSONata
 JSON query and transformation language
 
-###Introduction
+### Introduction
 The primary purpose of this language is to extract values from JSON documents, with the
 additional capabilities to combine these values using a set of basic functions
 and operators, and also the ability to format the output into any arbitrary JSON structure.
 
-###Basic Selection
+### Basic Selection
 To support the extraction of values from a JSON structure, a location path syntax is defined.
 In common with XPath, this will select all possible values in the document that match the
 specified location path.  The two structural constructs of JSON are objects and arrays.
 
-####Navigating JSON Objects
+#### Navigating JSON Objects
 A JSON object is an associative array (a.k.a map or hash).
 The location path syntax to navigate into an arbitrarily deeply nested structure of
 JSON objects comprises the field names separated by dot '.' delimiters.
@@ -84,7 +84,7 @@ The following expressions yield the following results when applied to this JSON 
 
 
 
-####Navigating JSON Arrays
+#### Navigating JSON Arrays
 JSON arrays are used when an ordered collection of values is required.  
 Each value in the array is associated with an index (position) rather than a name, so in order to address
 individual values in an array, extra syntax is required to specify the index.
@@ -113,7 +113,7 @@ array will be queried for selection.
 | `Phone.number[0]`| `[ "0203 544 1234", "01962 001234", "01962 001235", "077 7700 1234" ]`| Might expect it to just return the first number, <br>but it returns the first number of each of the items selected by `Phone`
 | `(Phone.number)[0]`| `"0203 544 1234"`| Applies the index to the array returned by `Phone.number`. One use of [parentheses](#parenthesized-expressions-and-blocks).
 
-#####Top level arrays, nested arrays and array flattening
+##### Top level arrays, nested arrays and array flattening
 Consider the JSON document:
 ```
 [
@@ -133,9 +133,9 @@ the document as follows:
 | `$[0].ref[0]` | `1` | returns element on first position of the internal array
 | `$.ref` | `[ 1, 2, 3, 4 ]` | Despite the structure of the nested array, the resultant selection<br>is flattened into a single flat array.  The original nested structure<br>of the input arrays is lost. See [Array constructors](#array-constructors) for how to<br>maintain the original structure in the results.
 
-###Complex selection
+### Complex selection
 
-####Wildcards
+#### Wildcards
 Use of `*` instead of field name to select all fields in an object
 
  Expression | Output | Comments|
@@ -143,14 +143,14 @@ Use of `*` instead of field name to select all fields in an object
 | `Address.*` | `[ "Hursley Park", "Winchester", "SO21 2JN" ]` | Select the values of all the fields of `Address`
 | `*.Postcode` | `"SO21 2JN"` | Select the `Postcode` value of any child object
 
-####Navigate arbitrary depths
+#### Navigate arbitrary depths
 Descendant wildcard `**` instead of `*` will traverse all descendants (multi-level wildcard).
 
  Expression | Output | Comments|
 | ---------- | ------ |----|
 | `**.Postcode` | `[ "SO21 2JN", "E1 6RF" ]` | Select all `Postcode` values, regardless of how deeply nested they are in the structure
 
-####Predicates
+#### Predicates
 At any step in a location path, the selected items can be filtered using a predicate - [expr]
 where expr evaluates to a Boolean value.  Each item in the selection is tested against
 the expression, if it evaluates to true, then the item is kept; if false, it is removed
@@ -165,7 +165,7 @@ Expression | Output | Comments|
 | `Phone[type='mobile'].number` | `"077 7700 1234"` | Select the mobile phone number
 | `Phone[type='office'].number` | `[ "01962 001234",  "01962 001235" ]` | Select the office phone numbers - there are two of them!
 
-####Singleton array and value equivalence
+#### Singleton array and value equivalence
 Within a JSONata expression or subexpression, any value (which is not itself an array) and an array
 containing just that value are deemed to be equivalent.  This allows the language to be composable
 such that location paths that extract a single value from and object and location paths
@@ -196,9 +196,9 @@ to always return an array as follows:
 
 Note that the `[]` can be placed either side of the predicates and on any step in the path expression
 
-###Combining values
+### Combining values
 
-####String expressions
+#### String expressions
 Path expressions that point to a string value will return that value.
 Strings can be combined using the concatenation operator '&'
 
@@ -217,7 +217,7 @@ Consider the following JSON document:
 ```
 
 
-####Numeric expressions
+#### Numeric expressions
 Path expressions that point to a number value will return that value.
 Numbers can be combined using the usual mathematical operators to produce
 a resulting number.  Supported operators:
@@ -238,7 +238,7 @@ Expression | Output | Comments
 | `Numbers[2] % Numbers[5]` | 3.5 |Modulo operator|
 
 
-####Comparison expressions
+#### Comparison expressions
 Often used in predicates, for comparison of two values.  Returns Boolean true or false
 Supported operators:
 - `=` equals
@@ -262,7 +262,7 @@ Expression | Output | Comments
 | `Numbers[2] >= Numbers[4]` | false |Greater than or equal|
 | `"01962 001234" in Phone.number` | true | Value is contained in|
 
-####Boolean expressions
+#### Boolean expressions
 Used to combine Boolean results, often to support more sophisticated predicate expressions.
 Supported operators:
 - `and`
@@ -278,12 +278,12 @@ Expression | Output | Comments
 | `(Numbers[2] != 0) or (Numbers[5] = Numbers[1])` | true | `or` operator |
 
 
-###Specifying result structures
+### Specifying result structures
 
 So far, we have discovered how to extract values from a JSON document, and how to manipulate the data using numeric, string and other operators.
 It is useful to be able to specify how this processed data is presented in the output.
 
-####Array constructors
+#### Array constructors
 As previously observed, when a location path matches multiple values in the input document, these values are returned
 as an array.  The values might be objects or arrays, and as such will have their own structure,
 but the _matched values_ themselves are at the top level in the resultant array.
@@ -304,7 +304,7 @@ Expression | Output | Comments|
 | `[Address, Other.'Alternative.Address'].City` | `[ "Winchester", "London" ]` | Selects the `City` value of both <br>`Address` and `Alternative.Address` objects
 
 
-####Object constructors
+#### Object constructors
 In a similar manner to the way arrays can be constructed, JSON objects can also be constructed in the output.
 At any point in a location path where a field reference is expected, a pair of braces `{}` containing key/value
 pairs separated by commas, with each key and value separated by a colon: `{key1: value2, key2:value2}`.  The
@@ -322,7 +322,7 @@ Expression | Output | Comments|
 | `Phone{type: number}` | `{ "home": "0203 544 1234", "office": "01962 001235", "mobile": "077 7700 1234" }` | One of the `office` numbers was lost because it had a duplicate key
 | `Phone.{type: number}` | `[ { "home": "0203 544 1234" }, { "office": "01962 001234" }, { "office": "01962 001235" }, { "mobile": "077 7700 1234"  } ]` | Produces an array of objects
 
-####JSON literals
+#### JSON literals
 The array and object constructors use the standard JSON syntax for JSON arrays and JSON objects.  In addition to this
 values of the other JSON data types can be entered into an expression using their native JSON syntax:
 - strings - `"hello world"`
@@ -336,19 +336,19 @@ This means that any valid JSON document is also a valid expression.  This proper
 as a template for the desired output, and then replace parts of it with expressions to insert data into the output
 from the input document.
 
-###Programming Constructs
+### Programming Constructs
 So far, we have introduced all the parts of the language that allow us to extract data from an input JSON document,
 combine the data using string and numeric operators, and format the structure of the output JSON document.  What
 follows are the parts that turn this into a Turing complete, functional programming language.
 
-####Conditional expressions
+#### Conditional expressions
 If/then/else constructs can be written using the ternary operator "? :".
 `predicate ? expr1 : expr2`
 
 The expression `predicate` is evaluated.  If its effective boolean value (see definition) is `true`
 then `expr1` is evaluated and returned, otherwise `expr2` is evaluated and returned.
 
-####Parenthesized expressions and blocks
+#### Parenthesized expressions and blocks
 Used to override the operator precedence rules.  E.g.
 - `(5 + 3) * 4`
 
@@ -362,18 +362,18 @@ Used to support 'code blocks' - multiple expressions, separated by semicolons
 Each expression in the block is evaluated _in sequential order_; the result of the last expression
 is returned from the block.
 
-####Variables
+#### Variables
 Any name that starts with a dollar '$' is a variable.  A variable is a named reference to a value.
 The value can be one of any type in the language's type system (link).
 
-#####Built-in variables
+##### Built-in variables
 
 - `$` The variable with no name refers to the context value at any point in the input JSON hierarchy. Examples
 - `$$` The root of the input JSON.  Only needed if you need to break out of the
 current context to temporarily navigate down a different path.  E.g. for cross-referencing or joining data. Examples
 - Native (built-in) functions.  See function library.
 
-#####Variable assignment
+##### Variable assignment
 Values (of any type in the type system) can be assigned to variables
 
 `$var_name := "value"`
@@ -391,14 +391,14 @@ Invoice.(
 ```
 Returns Price multiplied by Quantity for the Product in the Invoice.
 
-####Functions
+#### Functions
 The function is a first-class type, and can be stored in a variable just like any other
 data type.  A library of built-in functions is provided (link) and assigned to variables
 in the global scope.  For example, `$uppercase` contains a function which, when invoked
 with a string argument, `str`, will
 return a string with all the characters in `str` changed to uppercase.
 
-#####Invoking a function
+##### Invoking a function
 A function is invoked by following its reference (or definition) by parentheses containing
 a comma delimited sequence of arguments. Examples:
 
@@ -406,7 +406,7 @@ a comma delimited sequence of arguments. Examples:
 - `$substring("hello world", 0, 5)` returns the string "hello"
 - `$sum([1,2,3])` returns the number 6
 
-#####Defining a function
+##### Defining a function
 Anonymous (lambda) functions can be defined using the following syntax:
 
 `function($l, $w, $h){ $l * $w * $h }`
@@ -424,7 +424,7 @@ The function can also be assigned to a variable for future use (within the block
 )
 ```
 
-#####Recursive functions
+##### Recursive functions
 Functions that have been assigned to variables can invoke themselves using
 that variable reference.  This allows recursive functions to be defined.  Eg.
 
@@ -440,7 +440,7 @@ Note that it is actually possible to write a recursive function using purely ano
 which might be an interesting [diversion](#advanced-stuff) for those interested in functional programming.
 
 
-#####Higher order functions
+##### Higher order functions
 A function, being a first-class data type, can be passed as a parameter to
 another function, or returned from a function.  Functions that process other functions
 are known as higher order functions.  Consider the following example:
@@ -464,7 +464,7 @@ invoked yet, but rather assigned to the variable `add6`.
 - Finally the function in `$add6` is invoked with the argument 7, resulting in 3 being added to it twice.
 It returns 13.
 
-#####Functions are closures
+##### Functions are closures
 When a lambda function is defined, the evaluation engine takes a snapshot of the environment and stores it with the
 function body definition.  The environment comprises the context item (i.e. the current value in the location path)
 together with the current in-scope variable bindings.  When the lambda function is later invoked, it is done so in that
@@ -495,7 +495,7 @@ The expression produces the following result:
 }
 ```
 
-#####Advanced stuff
+##### Advanced stuff
 There is no need to read this section - it will do nothing for your sanity or ability to manipulate JSON data.
 
 Earlier we learned how to write a recursive function to calculate the factorial of a number and hinted that this
