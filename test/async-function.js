@@ -35,7 +35,10 @@ var jsonataPromise = function(expr, data, bindings) {
 var httpget = function(url) {
     return new Promise(function(resolve, reject) {
         request(url, function(error, response, body) {
-            if(error) reject(error);
+            if(error) {
+                reject(error);
+                return;
+            }
             resolve(JSON.parse(body));
         });
     });

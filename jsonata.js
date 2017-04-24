@@ -988,47 +988,47 @@ var jsonata = (function() {
         // the purpose of this is flatten the parts of the AST representing location paths,
         // converting them to arrays of steps which in turn may contain arrays of predicates.
         // following this, nodes containing '.' and '[' should be eliminated from the AST.
-        var post_parse = function (expr) {
-            var result = [];
+        var ast_optimize = function (expr) {
+            var result;
             switch (expr.type) {
                 case 'binary':
                     switch (expr.value) {
                         case '.':
-                            var lstep = post_parse(expr.lhs);
+                            var lstep = ast_optimize(expr.lhs);
+                            result = {type: 'path', steps: []};
                             if (lstep.type === 'path') {
-                                Array.prototype.push.apply(result, lstep);
+                                Array.prototype.push.apply(result.steps, lstep.steps);
                             } else {
-                                result.push(lstep);
+                                result.steps = [lstep];
                             }
-                            var rest = post_parse(expr.rhs);
+                            var rest = ast_optimize(expr.rhs);
                             if(rest.type !== 'path') {
-                                rest = [rest];
+                                rest = {type: 'path', steps: [rest]};
                             }
-                            Array.prototype.push.apply(result, rest);
-                            result.type = 'path';
+                            Array.prototype.push.apply(result.steps, rest.steps);
                             // any steps within a path that are literals, should be changed to 'name'
-                            result.filter(function(step) {
+                            result.steps.filter(function(step) {
                                 return step.type === 'literal';
                             }).forEach(function(lit) {
                                 lit.type = 'name';
                             });
                             // any step that signals keeping a singleton array, should be flagged on the path
-                            if(result.filter(function(step) { return step.keepArray === true;}).length > 0) {
+                            if(result.steps.filter(function(step) { return step.keepArray === true;}).length > 0) {
                                 result.keepSingletonArray = true;
                             }
                             // if first step is a path constructor, flag it for special handling
-                            if(result[0].type === 'unary' && result[0].value === '[') {
-                                result[0].consarray = true;
+                            if(result.steps[0].type === 'unary' && result.steps[0].value === '[') {
+                                result.steps[0].consarray = true;
                             }
                             break;
                         case '[':
                             // predicated step
                             // LHS is a step or a predicated step
                             // RHS is the predicate expr
-                            result = post_parse(expr.lhs);
+                            result = ast_optimize(expr.lhs);
                             var step = result;
                             if(result.type === 'path') {
-                                step = result[result.length - 1];
+                                step = result.steps[result.steps.length - 1];
                             }
                             if (typeof step.group !== 'undefined') {
                                 throw {
@@ -1040,13 +1040,13 @@ var jsonata = (function() {
                             if (typeof step.predicate === 'undefined') {
                                 step.predicate = [];
                             }
-                            step.predicate.push(post_parse(expr.rhs));
+                            step.predicate.push(ast_optimize(expr.rhs));
                             break;
                         case '{':
                             // group-by
                             // LHS is a step or a predicated step
                             // RHS is the object constructor expr
-                            result = post_parse(expr.lhs);
+                            result = ast_optimize(expr.lhs);
                             if (typeof result.group !== 'undefined') {
                                 throw {
                                     code: "S0210",
@@ -1057,25 +1057,25 @@ var jsonata = (function() {
                             // object constructor - process each pair
                             result.group = {
                                 lhs: expr.rhs.map(function (pair) {
-                                    return [post_parse(pair[0]), post_parse(pair[1])];
+                                    return [ast_optimize(pair[0]), ast_optimize(pair[1])];
                                 }),
                                 position: expr.position
                             };
                             break;
                         case ':=':
                             result = {type: 'bind', value: expr.value, position: expr.position};
-                            result.lhs = post_parse(expr.lhs);
-                            result.rhs = post_parse(expr.rhs);
+                            result.lhs = ast_optimize(expr.lhs);
+                            result.rhs = ast_optimize(expr.rhs);
                             break;
                         case '~>':
                             result = {type: 'apply', value: expr.value, position: expr.position};
-                            result.lhs = post_parse(expr.lhs);
-                            result.rhs = post_parse(expr.rhs);
+                            result.lhs = ast_optimize(expr.lhs);
+                            result.rhs = ast_optimize(expr.rhs);
                             break;
                         default:
                             result = {type: expr.type, value: expr.value, position: expr.position};
-                            result.lhs = post_parse(expr.lhs);
-                            result.rhs = post_parse(expr.rhs);
+                            result.lhs = ast_optimize(expr.lhs);
+                            result.rhs = ast_optimize(expr.rhs);
                     }
                     break;
                 case 'unary':
@@ -1083,16 +1083,16 @@ var jsonata = (function() {
                     if (expr.value === '[') {
                         // array constructor - process each item
                         result.lhs = expr.lhs.map(function (item) {
-                            return post_parse(item);
+                            return ast_optimize(item);
                         });
                     } else if (expr.value === '{') {
                         // object constructor - process each pair
                         result.lhs = expr.lhs.map(function (pair) {
-                            return [post_parse(pair[0]), post_parse(pair[1])];
+                            return [ast_optimize(pair[0]), ast_optimize(pair[1])];
                         });
                     } else {
                         // all other unary expressions - just process the expression
-                        result.expression = post_parse(expr.expression);
+                        result.expression = ast_optimize(expr.expression);
                         // if unary minus on a number, then pre-process
                         if (expr.value === '-' && result.expression.type === 'literal' && isNumeric(result.expression.value)) {
                             result = result.expression;
@@ -1104,35 +1104,35 @@ var jsonata = (function() {
                 case 'partial':
                     result = {type: expr.type, name: expr.name, value: expr.value, position: expr.position};
                     result.arguments = expr.arguments.map(function (arg) {
-                        return post_parse(arg);
+                        return ast_optimize(arg);
                     });
-                    result.procedure = post_parse(expr.procedure);
+                    result.procedure = ast_optimize(expr.procedure);
                     break;
                 case 'lambda':
                     result = {type: expr.type, arguments: expr.arguments, signature: expr.signature, position: expr.position};
-                    var body = post_parse(expr.body);
+                    var body = ast_optimize(expr.body);
                     result.body = tail_call_optimize(body);
                     break;
                 case 'condition':
                     result = {type: expr.type, position: expr.position};
-                    result.condition = post_parse(expr.condition);
-                    result.then = post_parse(expr.then);
+                    result.condition = ast_optimize(expr.condition);
+                    result.then = ast_optimize(expr.then);
                     if (typeof expr.else !== 'undefined') {
-                        result.else = post_parse(expr.else);
+                        result.else = ast_optimize(expr.else);
                     }
                     break;
                 case 'block':
                     result = {type: expr.type, position: expr.position};
                     // array of expressions - process each one
                     result.expressions = expr.expressions.map(function (item) {
-                        return post_parse(item);
+                        return ast_optimize(item);
                     });
                     // TODO scan the array of expressions to see if any of them assign variables
                     // if so, need to mark the block as one that needs to create a new frame
                     break;
                 case 'name':
-                    result = [expr];
-                    result.type = 'path';
+                    result = {type: 'path', steps: [expr]};
+//                    result.type = 'path';
                     if(expr.keepArray) {
                         result.keepSingletonArray = true;
                     }
@@ -1148,7 +1148,7 @@ var jsonata = (function() {
                     // the tokens 'and' and 'or' might have been used as a name rather than an operator
                     if (expr.value === 'and' || expr.value === 'or' || expr.value === 'in') {
                         expr.type = 'name';
-                        result = post_parse(expr);
+                        result = ast_optimize(expr);
                     } else if (expr.value === '?') {
                         // partial application
                         result = expr;
@@ -1178,7 +1178,6 @@ var jsonata = (function() {
         };
 
         // now invoke the tokenizer and the parser and return the syntax tree
-
         lexer = tokenizer(source);
         advance();
         // parse the tokens
@@ -1191,7 +1190,7 @@ var jsonata = (function() {
                 token: node.value
             };
         }
-        expr = post_parse(expr);
+        expr = ast_optimize(expr);
 
         return expr;
     };
@@ -1259,7 +1258,7 @@ var jsonata = (function() {
 
         switch (expr.type) {
             case 'path':
-                result = yield * evaluatePath(expr, input, environment);
+                result = yield * evaluatePath(expr.steps, input, environment);
                 result = normalizeSequence(result, expr.keepSingletonArray);
                 break;
             case 'binary':
@@ -2002,7 +2001,7 @@ var jsonata = (function() {
                 stack: (new Error()).stack,
                 position: expr.position,
                 token: expr.value,
-                value: expr.lhs.type === 'path' ? expr.lhs[0].value : expr.lhs.value
+                value: expr.lhs.type === 'path' ? expr.lhs.steps[0].value : expr.lhs.value
             };
         }
         environment.bind(expr.lhs.value, value);
@@ -2214,13 +2213,13 @@ var jsonata = (function() {
         // evaluate it generically first, then check that it is a function.  Throw error if not.
         var proc = yield * evaluate(expr.procedure, input, environment);
 
-        if (typeof proc === 'undefined' && expr.procedure.type === 'path' && environment.lookup(expr.procedure[0].value)) {
+        if (typeof proc === 'undefined' && expr.procedure.type === 'path' && environment.lookup(expr.procedure.steps[0].value)) {
             // help the user out here if they simply forgot the leading $
             throw {
                 code: "T1005",
                 stack: (new Error()).stack,
                 position: expr.position,
-                token: expr.procedure[0].value
+                token: expr.procedure.steps[0].value
             };
         }
         // apply the procedure
@@ -2234,7 +2233,7 @@ var jsonata = (function() {
             // add the position field to the error
             err.position = expr.position;
             // and the function identifier
-            err.token = expr.procedure.type === 'path' ? expr.procedure[0].value : expr.procedure.value;
+            err.token = expr.procedure.type === 'path' ? expr.procedure.steps[0].value : expr.procedure.value;
             throw err;
         }
         return result;
@@ -2338,13 +2337,13 @@ var jsonata = (function() {
         }
         // lookup the procedure
         var proc = yield * evaluate(expr.procedure, input, environment);
-        if (typeof proc === 'undefined' && expr.procedure.type === 'path' && environment.lookup(expr.procedure[0].value)) {
+        if (typeof proc === 'undefined' && expr.procedure.type === 'path' && environment.lookup(expr.procedure.steps[0].value)) {
             // help the user out here if they simply forgot the leading $
             throw {
                 code: "T1007",
                 stack: (new Error()).stack,
                 position: expr.position,
-                token: expr.procedure[0].value
+                token: expr.procedure.steps[0].value
             };
         }
         if (isLambda(proc)) {
@@ -2358,7 +2357,7 @@ var jsonata = (function() {
                 code: "T1008",
                 stack: (new Error()).stack,
                 position: expr.position,
-                token: expr.procedure.type === 'path' ? expr.procedure[0].value : expr.procedure.value
+                token: expr.procedure.type === 'path' ? expr.procedure.steps[0].value : expr.procedure.value
             };
         }
         return result;
