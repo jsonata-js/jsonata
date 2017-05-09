@@ -42,6 +42,7 @@ var jsonata = (function() {
         '<': 40,
         '>': 40,
         '`': 80,
+        '^': 40,
         '**': 60,
         '..': 20,
         ':=': 10,
@@ -908,6 +909,38 @@ var jsonata = (function() {
             }
         });
 
+        // order-by
+        infix("^", operators['^'], function (left) {
+            advance("(");
+            var terms = [];
+            for(;;) {
+                var term = {
+                    descending: false
+                };
+                if (node.id === "<") {
+                    // ascending sort
+                    advance("<");
+                } else if (node.id === ">") {
+                    // descending sort
+                    term.descending = true;
+                    advance(">");
+                } else {
+                    //unspecified - default to ascending
+                }
+                term.expression = expression(0);
+                terms.push(term);
+                if(node.id !== ",") {
+                    break;
+                }
+                advance(",");
+            }
+            advance(")");
+            this.lhs = left;
+            this.rhs = terms;
+            this.type = 'binary';
+            return this;
+        });
+
         var objectParser = function (left) {
             var a = [];
             if (node.id !== "}") {
@@ -969,7 +1002,9 @@ var jsonata = (function() {
             } else if(expr.type === 'condition') {
                 // analyse both branches
                 expr.then = tail_call_optimize(expr.then);
-                expr.else = tail_call_optimize(expr.else);
+                if(typeof expr.else !== 'undefined') {
+                    expr.else = tail_call_optimize(expr.else);
+                }
                 result = expr;
             } else if(expr.type === 'block') {
                 // only the last expression in the block
@@ -1061,6 +1096,19 @@ var jsonata = (function() {
                                 }),
                                 position: expr.position
                             };
+                            break;
+                        case '^':
+                            // order-by
+                            // LHS is the array to be ordered
+                            // RHS defines the terms
+                            result = {type: 'sort', value: expr.value, position: expr.position};
+                            result.lhs = ast_optimize(expr.lhs);
+                            result.rhs = expr.rhs.map(function (terms) {
+                                return {
+                                    descending: terms.descending,
+                                    expression: ast_optimize(terms.expression)
+                                };
+                            });
                             break;
                         case ':=':
                             result = {type: 'bind', value: expr.value, position: expr.position};
@@ -1221,6 +1269,20 @@ var jsonata = (function() {
     }
 
     /**
+     * Returns true if the arg is an array of strings
+     * @param {*} arg - the item to test
+     * @returns {boolean} True if arg is an array of strings
+     */
+    function isArrayOfStrings(arg) {
+        var result = false;
+        /* istanbul ignore else */
+        if(Array.isArray(arg)) {
+            result = (arg.filter(function(item){return typeof item !== 'string';}).length === 0);
+        }
+        return result;
+    }
+
+    /**
      * Returns true if the arg is an array of numbers
      * @param {*} arg - the item to test
      * @returns {boolean} True if arg is an array of numbers
@@ -1305,6 +1367,9 @@ var jsonata = (function() {
                 break;
             case 'apply':
                 result = yield * evaluateApplyExpression(expr, input, environment);
+                break;
+            case 'sort':
+                result = yield * evaluateSortExpression(expr, input, environment);
                 break;
         }
 
@@ -2113,12 +2178,70 @@ var jsonata = (function() {
         return result;
     }
 
-    var chainGen = evaluate(parser('function($f, $g) { function($x){ $g($f($x)) } }'), null, staticFrame);
-    var chain = chainGen.next();
-    while(!chain.done) {
-        chain = chainGen.next(chain.value);
+    /**
+     * sort / order-by operator
+     * @param {Object} expr - AST for operator
+     * @param {Object} input - Input data to evaluate against
+     * @param {Object} environment - Environment
+     * @returns {*} Ordered sequence
+     */
+    function* evaluateSortExpression(expr, input, environment) {
+        var result;
+
+        // evaluate the lhs, then sort the results in order according to rhs expression
+        var lhs = yield * evaluate(expr.lhs, input, environment);
+
+        // sort the lhs array
+        // use comparator function
+        var comparator = function(a, b) {
+            // expr.rhs is an array of order-by in priority order
+            var comp = 0;
+            for(var index = 0; comp === 0 && index < expr.rhs.length; index++) {
+                var term = expr.rhs[index];
+                //evaluate the rhs expression in the context of a
+                var aa = driveGenerator(term.expression, a, environment);
+                //evaluate the rhs expression in the context of b
+                var bb = driveGenerator(term.expression, b, environment);
+                //TODO error checking = if a and b are not of the same type, and neither number or string, then throw error
+                if(aa === bb) {
+                    // both the same - move on to next term
+                    continue;
+                } else if (aa < bb) {
+                    comp = -1;
+                } else {
+                    comp = 1;
+                }
+                if(term.descending === true) {
+                    comp = -comp;
+                }
+            }
+            return comp;
+        };
+
+        result = lhs.sort(comparator);
+
+        return result;
     }
-    chain = chain.value;
+
+    /**
+     * Evaluate an expression by driving the generator to completion
+     * Used when it's not possible to yield
+     * @param {Object} expr - AST
+     * @param {Object} input - Input data to evaluate against
+     * @param {Object} environment - Environment
+     * @returns {*} result
+     */
+    function driveGenerator(expr, input, environment) {
+        var gen = evaluate(expr, input, environment);
+        // returns a generator - so iterate over it
+        var comp = gen.next();
+        while (!comp.done) {
+            comp = gen.next(comp.value);
+        }
+        return comp.value;
+    }
+
+    var chain = driveGenerator(parser('function($f, $g) { function($x){ $g($f($x)) } }'), null, staticFrame);
 
     /**
      * Apply the function on the RHS using the sequence on the LHS as the first argument
@@ -2224,11 +2347,7 @@ var jsonata = (function() {
         }
         // apply the procedure
         try {
-            var validatedArgs = evaluatedArgs;
-            if(proc) {
-                validatedArgs = validateArguments(proc.signature, evaluatedArgs, input);
-            }
-            result = yield * apply(proc, validatedArgs, input);
+            result = yield * apply(proc, evaluatedArgs, input);
         } catch (err) {
             // add the position field to the error
             err.position = expr.position;
@@ -2273,16 +2392,20 @@ var jsonata = (function() {
      */
     function* applyInner(proc, args, self) {
         var result;
+        var validatedArgs = args;
+        if(proc) {
+            validatedArgs = validateArguments(proc.signature, args, self);
+        }
         if (isLambda(proc)) {
-            result = yield * applyProcedure(proc, args);
+            result = yield * applyProcedure(proc, validatedArgs);
         } else if (proc && proc._jsonata_function === true) {
-            result = proc.implementation.apply(self, args);
+            result = proc.implementation.apply(self, validatedArgs);
             // this might be a function* generator - if so, yield
             if(isGenerator(proc.implementation)) {
                 result = yield *result;
             }
         } else if (typeof proc === 'function') {
-            result = proc.apply(self, args);
+            result = proc.apply(self, validatedArgs);
         } else {
             throw {
                 code: "T1006",
@@ -3034,6 +3157,157 @@ var jsonata = (function() {
         return result;
     }
 
+    /**
+     * Absolute value of a number
+     * @param {Number} arg - Argument
+     * @returns {Number} absolute value of argument
+     */
+    function functionAbs(arg) {
+        var result;
+
+        // undefined inputs always return undefined
+        if(typeof arg === 'undefined') {
+            return undefined;
+        }
+
+        result = Math.abs(arg);
+        return result;
+    }
+
+    /**
+     * Rounds a number down to integer
+     * @param {Number} arg - Argument
+     * @returns {Number} rounded integer
+     */
+    function functionFloor(arg) {
+        var result;
+
+        // undefined inputs always return undefined
+        if(typeof arg === 'undefined') {
+            return undefined;
+        }
+
+        result = Math.floor(arg);
+        return result;
+    }
+
+    /**
+     * Rounds a number up to integer
+     * @param {Number} arg - Argument
+     * @returns {Number} rounded integer
+     */
+    function functionCeil(arg) {
+        var result;
+
+        // undefined inputs always return undefined
+        if(typeof arg === 'undefined') {
+            return undefined;
+        }
+
+        result = Math.ceil(arg);
+        return result;
+    }
+
+    /**
+     * Round to half even
+     * @param {Number} arg - Argument
+     * @param {Number} precision - number of decimal places
+     * @returns {Number} rounded integer
+     */
+    function functionRound(arg, precision) {
+        var result;
+
+        // undefined inputs always return undefined
+        if(typeof arg === 'undefined') {
+            return undefined;
+        }
+
+        if(precision) {
+            // shift the decimal place - this needs to be done in a string since multiplying
+            // by a power of ten can introduce floating point precision errors which mess up
+            // this rounding algorithm - See 'Decimal rounding' in
+            // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round
+            // Shift
+            var value = arg.toString().split('e');
+            arg = +(value[0] + 'e' + (value[1] ? (+value[1] + precision) : precision));
+
+        }
+
+        // round up to nearest int
+        result = Math.round(arg);
+        var diff = result - arg;
+        if(Math.abs(diff) === 0.5 && Math.abs(result % 2) === 1) {
+            // rounded the wrong way - adjust to nearest even number
+            result = result - 1;
+        }
+        if(precision) {
+            // Shift back
+            value = result.toString().split('e');
+            /* istanbul ignore next */
+            result = +(value[0] + 'e' + (value[1] ? (+value[1] - precision) : -precision));
+        }
+        if(result === -0) {
+            // JSON doesn't do -0
+            result = 0;
+        }
+        return result;
+    }
+
+    /**
+     * Square root of number
+     * @param {Number} arg - Argument
+     * @returns {Number} square root
+     */
+    function functionSqrt(arg) {
+        var result;
+
+        // undefined inputs always return undefined
+        if(typeof arg === 'undefined') {
+            return undefined;
+        }
+
+        if(arg < 0) {
+            throw {
+                stack: (new Error()).stack,
+                code: "D3060",
+                index: 1,
+                value: arg
+            };
+        }
+
+        result = Math.sqrt(arg);
+
+        return result;
+    }
+
+    /**
+     * Raises number to the power of the second number
+     * @param {Number} arg - the base
+     * @param {Number} exp - the exponent
+     * @returns {Number} rounded integer
+     */
+    function functionPower(arg, exp) {
+        var result;
+
+        // undefined inputs always return undefined
+        if(typeof arg === 'undefined') {
+            return undefined;
+        }
+
+        result = Math.pow(arg, exp);
+
+        if(!isFinite(result)) {
+            throw {
+                stack: (new Error()).stack,
+                code: "D3061",
+                index: 1,
+                value: arg,
+                exp: exp
+            };
+        }
+
+        return result;
+    }
 
     /**
      * Evaluate an input and return a boolean
@@ -3267,6 +3541,135 @@ var jsonata = (function() {
     }
 
     /**
+     *
+     * @param {*} obj - the input object to iterate over
+     * @param {*} func - the function to apply to each key/value pair
+     * @returns {Array} - the resultant array
+     */
+    function* functionEach(obj, func) {
+        var result = [];
+
+        for(var key in obj) {
+            var func_args = [key, obj[key]];
+            // invoke func
+            result.push(yield * apply(func, func_args, null));
+        }
+
+        return result;
+    }
+
+    /**
+     * Implements the merge sort (stable) with optional comparator function
+     *
+     * @param {Array} arr - the array to sort
+     * @param {*} comparator - comparator function
+     * @returns {Array} - sorted array
+     */
+    function functionSort(arr, comparator) {
+        // undefined inputs always return undefined
+        if(typeof arr === 'undefined') {
+            return undefined;
+        }
+
+        if(arr.length <= 1) {
+            return arr;
+        }
+
+        var comp;
+        if(typeof comparator === 'undefined') {
+            // inject a default comparator - only works for numeric or string arrays
+            if(!isArrayOfNumbers(arr) && !isArrayOfStrings(arr)) {
+                throw {
+                    stack: (new Error()).stack,
+                    code: "D3070",
+                    index: 1
+                };
+            }
+
+            comp = function(a, b) {
+                return a < b;
+            };
+        } else {
+            comp = function (a, b) {
+                var it = apply(comparator, [a, b], null);
+                // returns a generator - so iterate over it
+                var comp = it.next();
+                while (!comp.done) {
+                    comp = it.next(comp.value);
+                }
+                return comp.value;
+            };
+        }
+
+        var merge = function(l, r) {
+            var merge_iter = function(result, left, right) {
+                if (left.length === 0) {
+                    Array.prototype.push.apply(result, right);
+                } else if (right.length === 0) {
+                    Array.prototype.push.apply(result, left);
+                } else if (comp(left[0], right[0])) { // invoke the comparator function
+                    result.push(left[0]);
+                    merge_iter(result, left.slice(1), right);
+                } else {
+                    result.push(right[0]);
+                    merge_iter(result, left, right.slice(1));
+                }
+            };
+            var merged = [];
+            merge_iter(merged, l, r);
+            return merged;
+        };
+
+        var sort = function(array) {
+            if(array.length <= 1) {
+                return array;
+            } else {
+                var middle = Math.floor(array.length / 2);
+                var left = array.slice(0, middle);
+                var right = array.slice(middle);
+                left = sort(left);
+                right = sort(right);
+                return merge(left, right);
+            }
+        };
+
+        var result = sort(arr);
+
+        // // the javascript sort function does an in-place sort which breaks our functional (no side effects) model
+        // // create a shallow copy of the array
+        // var copy = arr.map(function(item) { return item;});
+        //
+        // if(typeof comparator === 'undefined') {
+        //     if(isArrayOfNumbers(arr)) {
+        //         result = copy.sort(function(a, b) {
+        //             return a - b;
+        //         });
+        //     } else if(isArrayOfStrings(arr)) {
+        //         result = copy.sort();
+        //     } else {
+        //         throw {
+        //             stack: (new Error()).stack,
+        //             code: "D3070",
+        //             index: 1
+        //         };
+        //     }
+        // } else {
+        //     // use comparator function
+        //     result = copy.sort(function (a, b) {
+        //         var it = apply(comparator, [a, b], null);
+        //         // returns a generator - so iterate over it
+        //         var comp = it.next();
+        //         while (!comp.done) {
+        //             comp = it.next(comp.value);
+        //         }
+        //         return comp.value;
+        //     });
+        // }
+
+        return result;
+    }
+
+    /**
      * Create frame
      * @param {Object} enclosingEnvironment - Enclosing environment
      * @returns {{bind: bind, lookup: lookup}} Created frame
@@ -3309,6 +3712,12 @@ var jsonata = (function() {
     staticFrame.bind('split', defineFunction(functionSplit, '<s-(sf)n?:a<s>>')); // TODO <s-(sf<s:o>)n?:a<s>>
     staticFrame.bind('join', defineFunction(functionJoin, '<a<s>s?:s>'));
     staticFrame.bind('number', defineFunction(functionNumber, '<(ns)-:n>'));
+    staticFrame.bind('floor', defineFunction(functionFloor, '<n-:n>'));
+    staticFrame.bind('ceil', defineFunction(functionCeil, '<n-:n>'));
+    staticFrame.bind('round', defineFunction(functionRound, '<n-n?:n>'));
+    staticFrame.bind('abs', defineFunction(functionAbs, '<n-:n>'));
+    staticFrame.bind('sqrt', defineFunction(functionSqrt, '<n-:n>'));
+    staticFrame.bind('power', defineFunction(functionPower, '<n-n:n>'));
     staticFrame.bind('boolean', defineFunction(functionBoolean, '<x-:b>'));
     staticFrame.bind('not', defineFunction(functionNot, '<x-:b>'));
     staticFrame.bind('map', defineFunction(functionMap, '<fa+>'));
@@ -3318,6 +3727,8 @@ var jsonata = (function() {
     staticFrame.bind('append', defineFunction(functionAppend, '<xx:a>'));
     staticFrame.bind('exists', defineFunction(functionExists, '<x:b>'));
     staticFrame.bind('spread', defineFunction(functionSpread, '<x-:a<o>>'));
+    staticFrame.bind('each', defineFunction(functionEach, '<o-f:a>'));
+    staticFrame.bind('sort', defineFunction(functionSort, '<af?:a>'));
 
     /**
      * Error codes
@@ -3364,7 +3775,12 @@ var jsonata = (function() {
         "D3011": "Forth argument of replace function must evaluate to a positive number",
         "D3012": "Attempted to replace a matched string with a non-string value",
         "D3020": "Third argument of split function must evaluate to a positive number",
-        "D3030": "Unable to cast value to a number: {{value}}"
+        "D3030": "Unable to cast value to a number: {{value}}",
+        "D3040": "Third argument of match function must evaluate to a positive number",
+        "D3050": "First argument of reduce function must be a function with two arguments",
+        "D3060": "The sqrt function cannot be applied to a negative number: {{value}}",
+        "D3061": "The power function has resulted in a value that cannot be represented as a JSON number: base={{value}}, exponent={{exp}}",
+        "D3070": "The single argument form of the sort function can only be applied to an array of strings or an array of numbers.  Use the second argument to specify a comparison function"
     };
 
     /**
@@ -3416,6 +3832,13 @@ var jsonata = (function() {
                 }
                 // put the input document into the environment as the root object
                 exec_env.bind('$', input);
+
+                // capture the timestamp and put it in the execution environment
+                // the $now() function will return this value - whenever it is called
+                var timestamp = (new Date()).toJSON();
+                exec_env.bind('now', defineFunction(function() {
+                    return timestamp;
+                }, '<:s>'));
 
                 var result, it;
                 // if a callback function is supplied, then drive the generator in a promise chain
