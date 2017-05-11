@@ -1104,6 +1104,108 @@ describe('Evaluator - numeric operators', function () {
 
 describe('Evaluator - comparison operators', function () {
 
+    describe('3>-3', function () {
+        it('should return result object', function () {
+            var expr = jsonata('3>-3');
+            var result = expr.evaluate();
+            var expected = true;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('3>3', function () {
+        it('should return result object', function () {
+            var expr = jsonata('3>3');
+            var result = expr.evaluate();
+            var expected = false;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('3=3', function () {
+        it('should return result object', function () {
+            var expr = jsonata('3=3');
+            var result = expr.evaluate();
+            var expected = true;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('"3"="3"', function () {
+        it('should return result object', function () {
+            var expr = jsonata('"3"="3"');
+            var result = expr.evaluate();
+            var expected = true;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('"3"=3', function () {
+        it('should return result object', function () {
+            var expr = jsonata('"3"=3');
+            var result = expr.evaluate();
+            var expected = false;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('"hello" = "hello"', function () {
+        it('should return result object', function () {
+            var expr = jsonata('"hello" = "hello"');
+            var result = expr.evaluate();
+            var expected = true;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('"hello" != "world"', function () {
+        it('should return result object', function () {
+            var expr = jsonata('"hello" != "world"');
+            var result = expr.evaluate();
+            var expected = true;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('"hello" < "world"', function () {
+        it('should return result object', function () {
+            var expr = jsonata('"hello" < "world"');
+            var result = expr.evaluate();
+            var expected = true;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('"32" < 42', function () {
+        it('should return result object', function () {
+            expect(function () {
+                var expr = jsonata('"32" < 42');
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 6, code: 'T2009', value: "32", value2: 42});
+        });
+    });
+
+    describe('null <= "world"', function () {
+        it('should return result object', function () {
+            expect(function () {
+                var expr = jsonata('null <= "world"');
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 7, code: 'T2010', value: null});
+        });
+    });
+
+    describe('3 >= true', function () {
+        it('should return result object', function () {
+            expect(function () {
+                var expr = jsonata('3 >= true');
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 4, code: 'T2010', value: true});
+        });
+    });
+
     describe('foo.bar > bar', function () {
         it('should return result object', function () {
             var expr = jsonata('foo.bar > bar');

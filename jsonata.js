@@ -1848,10 +1848,35 @@ var jsonata = (function() {
     function evaluateComparisonExpression(lhs, rhs, op) {
         var result;
 
-        if (typeof lhs === 'undefined' || typeof rhs === 'undefined') {
+        // type checks
+        var ltype = typeof lhs;
+        var rtype = typeof rhs;
+
+        if (ltype === 'undefined' || rtype === 'undefined') {
             // if either side is undefined, the result is false
             return false;
         }
+
+        var validate = function() {
+            // if aa or bb are not string or numeric values, then throw an error
+            if (!(ltype === 'string' || ltype === 'number') || !(rtype === 'string' || rtype === 'number')) {
+                throw {
+                    code: "T2010",
+                    stack: (new Error()).stack,
+                    value: !(ltype === 'string' || ltype === 'number') ? lhs : rhs
+                };
+            }
+
+            //if aa and bb are not of the same type
+            if (ltype !== rtype) {
+                throw {
+                    code: "T2009",
+                    stack: (new Error()).stack,
+                    value: lhs,
+                    value2: rhs
+                };
+            }
+        };
 
         switch (op) {
             case '=':
@@ -1861,15 +1886,19 @@ var jsonata = (function() {
                 result = (lhs !== rhs);
                 break;
             case '<':
+                validate();
                 result = lhs < rhs;
                 break;
             case '<=':
+                validate();
                 result = lhs <= rhs;
                 break;
             case '>':
+                validate();
                 result = lhs > rhs;
                 break;
             case '>=':
+                validate();
                 result = lhs >= rhs;
                 break;
         }
@@ -3777,6 +3806,8 @@ var jsonata = (function() {
         "T2006": "RHS of function application operator ~> is not a function",
         "T2007": "Type mismatch when comparing values {{value}} and {{value2}} in order-by clause",
         "T2008": "The expressions within an order-by clause must evaluate to numeric or string values",
+        "T2009": "The values {{value}} and {{value2}} either side of operator {{token}} are not of the same data type",
+        "T2010": "The expressions either side of operator {{token}} must evaluate to numeric or string values",
         "T1005": "Attempted to invoke a non-function. Did you mean '${{token}}'?",
         "T1006": "Attempted to invoke a non-function",
         "T1007": "Attempted to partially apply a non-function. Did you mean '${{token}}'?",
@@ -3808,7 +3839,7 @@ var jsonata = (function() {
         if(typeof template !== 'undefined') {
             // if there are any handlebars, replace them with the field references
             message = template.replace(/\{\{([^}]+)}}/g, function() {
-                return err[arguments[1]];
+                return JSON.stringify(err[arguments[1]]);
             });
         }
         return message;
