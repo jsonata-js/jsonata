@@ -2202,7 +2202,41 @@ var jsonata = (function() {
                 var aa = driveGenerator(term.expression, a, environment);
                 //evaluate the rhs expression in the context of b
                 var bb = driveGenerator(term.expression, b, environment);
-                //TODO error checking = if a and b are not of the same type, and neither number or string, then throw error
+
+                // type checks
+                var atype = typeof aa;
+                var btype = typeof bb;
+                // undefined should be last in sort order
+                if(atype === 'undefined') {
+                    // swap them, unless btype is also undefined
+                    comp = (btype === 'undefined') ? 0 : 1;
+                    continue;
+                }
+                if(btype === 'undefined') {
+                    comp = -1;
+                    continue;
+                }
+
+                // if aa or bb are not string or numeric values, then throw an error
+                if(!(atype === 'string' || atype === 'number') || !(btype === 'string' || btype === 'number')) {
+                    throw {
+                        code: "T2008",
+                        stack: (new Error()).stack,
+                        position: expr.position,
+                        value: !(atype === 'string' || atype === 'number') ? aa : bb
+                    };
+                }
+
+                //if aa and bb are not of the same type
+                if(atype !== btype) {
+                    throw {
+                        code: "T2007",
+                        stack: (new Error()).stack,
+                        position: expr.position,
+                        value: aa,
+                        value2: bb
+                    };
+                }
                 if(aa === bb) {
                     // both the same - move on to next term
                     continue;
@@ -2215,10 +2249,11 @@ var jsonata = (function() {
                     comp = -comp;
                 }
             }
-            return comp;
+            // only swap a & b if comp equals 1
+            return comp === 1;
         };
 
-        result = lhs.sort(comparator);
+        result = functionSort(lhs, comparator);
 
         return result;
     }
@@ -3578,7 +3613,7 @@ var jsonata = (function() {
         var comp;
         if(typeof comparator === 'undefined') {
             // inject a default comparator - only works for numeric or string arrays
-            if(!isArrayOfNumbers(arr) && !isArrayOfStrings(arr)) {
+            if (!isArrayOfNumbers(arr) && !isArrayOfStrings(arr)) {
                 throw {
                     stack: (new Error()).stack,
                     code: "D3070",
@@ -3586,9 +3621,12 @@ var jsonata = (function() {
                 };
             }
 
-            comp = function(a, b) {
-                return a < b;
+            comp = function (a, b) {
+                return a > b;
             };
+        } else if(typeof comparator === 'function') {
+            // for internal usage of functionSort (i.e. order-by syntax)
+            comp = comparator;
         } else {
             comp = function (a, b) {
                 var it = apply(comparator, [a, b], null);
@@ -3608,11 +3646,13 @@ var jsonata = (function() {
                 } else if (right.length === 0) {
                     Array.prototype.push.apply(result, left);
                 } else if (comp(left[0], right[0])) { // invoke the comparator function
-                    result.push(left[0]);
-                    merge_iter(result, left.slice(1), right);
-                } else {
+                    // if it returns true - swap left and right
                     result.push(right[0]);
                     merge_iter(result, left, right.slice(1));
+                } else {
+                    // otherwise keep the same order
+                    result.push(left[0]);
+                    merge_iter(result, left.slice(1), right);
                 }
             };
             var merged = [];
@@ -3634,37 +3674,6 @@ var jsonata = (function() {
         };
 
         var result = sort(arr);
-
-        // // the javascript sort function does an in-place sort which breaks our functional (no side effects) model
-        // // create a shallow copy of the array
-        // var copy = arr.map(function(item) { return item;});
-        //
-        // if(typeof comparator === 'undefined') {
-        //     if(isArrayOfNumbers(arr)) {
-        //         result = copy.sort(function(a, b) {
-        //             return a - b;
-        //         });
-        //     } else if(isArrayOfStrings(arr)) {
-        //         result = copy.sort();
-        //     } else {
-        //         throw {
-        //             stack: (new Error()).stack,
-        //             code: "D3070",
-        //             index: 1
-        //         };
-        //     }
-        // } else {
-        //     // use comparator function
-        //     result = copy.sort(function (a, b) {
-        //         var it = apply(comparator, [a, b], null);
-        //         // returns a generator - so iterate over it
-        //         var comp = it.next();
-        //         while (!comp.done) {
-        //             comp = it.next(comp.value);
-        //         }
-        //         return comp.value;
-        //     });
-        // }
 
         return result;
     }
@@ -3766,6 +3775,8 @@ var jsonata = (function() {
         "D2005": "Left hand side of := must be a variable name (start with $)",
         "D1004": "Regular expression matches zero length string",
         "T2006": "RHS of function application operator ~> is not a function",
+        "T2007": "Type mismatch when comparing values {{value}} and {{value2}} in order-by clause",
+        "T2008": "The expressions within an order-by clause must evaluate to numeric or string values",
         "T1005": "Attempted to invoke a non-function. Did you mean '${{token}}'?",
         "T1006": "Attempted to invoke a non-function",
         "T1007": "Attempted to partially apply a non-function. Did you mean '${{token}}'?",

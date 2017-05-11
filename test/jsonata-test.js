@@ -5215,15 +5215,48 @@ describe('Evaluator - function: sort', function () {
         });
     });
 
-    describe('$sort(Account.Order.Product, function($a, $b) { $a.(Price * Quantity) < $b.(Price * Quantity) }).(Price & " x " & Quantity)', function () {
+    describe('$sort(Account.Order.Product, function($a, $b) { $a.(Price * Quantity) > $b.(Price * Quantity) }).(Price & " x " & Quantity)', function () {
         it('should return result object', function () {
-            var expr = jsonata('$sort(Account.Order.Product, function($a, $b) { $a.(Price * Quantity) < $b.(Price * Quantity) }).(Price & " x " & Quantity)');
+            var expr = jsonata('$sort(Account.Order.Product, function($a, $b) { $a.(Price * Quantity) > $b.(Price * Quantity) }).(Price & " x " & Quantity)');
             var result = expr.evaluate(testdata2);
             var expected = [
                 "21.67 x 1",
                 "34.45 x 2",
                 "107.99 x 1",
                 "34.45 x 4"
+            ];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$sort must be stable', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$sort(Account.Order.Product, function($a, $b) { $a.Price > $b.Price }).SKU');
+            var result = expr.evaluate(testdata2);
+            var expected = [
+                "0406634348",
+                "0406654608",
+                "040657863",
+                "0406654603"
+            ];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$sort must be stable - with secondary sort', function () {
+        it('should return result object', function () {
+            var expr = jsonata(`
+                (Account.Order.Product
+                  ~> $sort(λ($a,$b){$a.Quantity < $b.Quantity})
+                  ~> $sort(λ($a,$b){$a.Price > $b.Price})
+                ).SKU
+            `);
+            var result = expr.evaluate(testdata2);
+            var expected = [
+                "0406634348",
+                "040657863",
+                "0406654608",
+                "0406654603"
             ];
             expect(result).to.deep.equal(expected);
         });
@@ -6356,6 +6389,15 @@ describe('Evaluator - Order-by', function () {
         });
     });
 
+    describe('Account.Order.Product^(Price).SKU', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.Product^(Price).SKU');
+            var result = expr.evaluate(testdata2);
+            var expected = ["0406634348", "0406654608", "040657863", "0406654603"];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
     describe('Account.Order.Product^(Price * Quantity).Description.Colour', function () {
         it('should return result object', function () {
             var expr = jsonata('Account.Order.Product^(Price * Quantity).Description.Colour');
@@ -6383,6 +6425,75 @@ describe('Evaluator - Order-by', function () {
         });
     });
 
+    describe('Order-by term that matches undefined should send it to the end', function () {
+        it('should return result object', function () {
+            var clone = JSON.parse(JSON.stringify(testdata2));
+            delete clone.Account.Order[0].Product[0].Price;
+            var expr = jsonata('Account.Order.Product^(Price).SKU');
+            var result = expr.evaluate(clone);
+            var expected = ["0406634348", "040657863", "0406654603", "0406654608"];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('Order-by term that matches undefined should send it to the end', function () {
+        it('should return result object', function () {
+            var clone = JSON.parse(JSON.stringify(testdata2));
+            delete clone.Account.Order[0].Product[1].Price;
+            var expr = jsonata('Account.Order.Product^(Price).SKU');
+            var result = expr.evaluate(clone);
+            var expected = ["0406654608", "040657863", "0406654603", "0406634348"];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('Order-by term that matches undefined should send it to the end', function () {
+        it('should return result object', function () {
+            var clone = JSON.parse(JSON.stringify(testdata2));
+            delete clone.Account.Order[0].Product[0].Price;
+            delete clone.Account.Order[0].Product[1].Price;
+            var expr = jsonata('Account.Order.Product^(Price).SKU');
+            var result = expr.evaluate(clone);
+            var expected = ["040657863", "0406654603", "0406654608", "0406634348"];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('type mis-match in order-by term', function () {
+        it('should return result object', function () {
+            var clone = JSON.parse(JSON.stringify(testdata2));
+            clone.Account.Order[0].Product[0].Price = "foo";
+            expect(function () {
+                var expr = jsonata('Account.Order.Product^(Price).SKU');
+                expr.evaluate(clone);
+            }).to.throw()
+              .to.deep.contain({position: 22, code: 'T2007', value: "foo", value2: 21.67});
+        });
+    });
+
+    describe('invalid types in order-by term', function () {
+        it('should return result object', function () {
+            var clone = JSON.parse(JSON.stringify(testdata2));
+            clone.Account.Order[0].Product[0].Price = true;
+            expect(function () {
+                var expr = jsonata('Account.Order.Product^(Price).SKU');
+                expr.evaluate(clone);
+            }).to.throw()
+              .to.deep.contain({position: 22, code: 'T2008', value: true});
+        });
+    });
+
+    describe('invalid types in order-by term', function () {
+        it('should return result object', function () {
+            var clone = JSON.parse(JSON.stringify(testdata2));
+            clone.Account.Order[0].Product[1].Price = null;
+            expect(function () {
+                var expr = jsonata('Account.Order.Product^(Price).SKU');
+                expr.evaluate(clone);
+            }).to.throw()
+              .to.deep.contain({position: 22, code: 'T2008', value: null});
+        });
+    });
 });
 
 describe('Evaluator - Conditional expressions', function () {
