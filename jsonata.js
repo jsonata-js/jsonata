@@ -3433,11 +3433,38 @@ var jsonata = (function() {
 
     /**
      * Create a map from an array of arguments
+     * @param {Array} [arr] - array to map over
+     * @param {Function} func - function to apply
+     * @returns {Array} Map array
+     */
+    function* functionMap(arr, func) {
+        var result = [];
+        // do the map - iterate over the arrays, and invoke func
+        for (var i = 0; i < arr.length; i++) {
+            var func_args = [arr[i]]; // the first arg (value) is required
+            // the other two are optional - only supply it if the function can take it
+            var length = typeof func === 'function' ? func.length :
+              func._jsonata_function === true ? func.implementation.length : func.arguments.length;
+            if(length >= 2) {
+                func_args.push(i);
+            }
+            if(length >= 3) {
+                func_args.push(arr);
+            }
+            // invoke func
+            result.push(yield * apply(func, func_args, null));
+        }
+
+        return result;
+    }
+
+    /**
+     * Create a map from an array of arguments
      * @param {Function} func - function to apply
      * @param {Array} [arr] - array to map over
      * @returns {Array} Map array
      */
-    function* functionMap(func, arr) {
+    function* functionZip(func, arr) {
         // this can take a variable number of arguments - each one should be mapped to the equivalent arg of func
         // assert that func is a function
         var varargs = arguments;
@@ -3466,12 +3493,12 @@ var jsonata = (function() {
 
     /**
      * Fold left function
-     * @param {Function} func - Function
      * @param {Array} sequence - Sequence
+     * @param {Function} func - Function
      * @param {Object} init - Initial value
      * @returns {*} Result
      */
-    function* functionFoldLeft(func, sequence, init) {
+    function* functionFoldLeft(sequence, func, init) {
         var result;
 
         if (!(func.length === 2 || (func._jsonata_function === true && func.implementation.length === 2) || func.arguments.length === 2)) {
@@ -3794,8 +3821,9 @@ var jsonata = (function() {
     staticFrame.bind('power', defineFunction(functionPower, '<n-n:n>'));
     staticFrame.bind('boolean', defineFunction(functionBoolean, '<x-:b>'));
     staticFrame.bind('not', defineFunction(functionNot, '<x-:b>'));
-    staticFrame.bind('map', defineFunction(functionMap, '<fa+>'));
-    staticFrame.bind('reduce', defineFunction(functionFoldLeft, '<faj?:j>')); // TODO <f<jj:j>a<j>j?:j>
+    staticFrame.bind('map', defineFunction(functionMap, '<af>'));
+    staticFrame.bind('zip', defineFunction(functionZip, '<fa+>'));
+    staticFrame.bind('reduce', defineFunction(functionFoldLeft, '<afj?:j>')); // TODO <f<jj:j>a<j>j?:j>
     staticFrame.bind('keys', defineFunction(functionKeys, '<x-:a<s>>'));
     staticFrame.bind('lookup', defineFunction(functionLookup, '<x-s:x>'));
     staticFrame.bind('append', defineFunction(functionAppend, '<xx:a>'));
@@ -3843,7 +3871,7 @@ var jsonata = (function() {
         "T2006": "The right side of the function application operator ~> must be a function",
         "T2007": "Type mismatch when comparing values {{value}} and {{value2}} in order-by clause",
         "T2008": "The expressions within an order-by clause must evaluate to numeric or string values",
-        "T2009": "The values {{value}} and {{value2}} either side of operator {{token}} are not of the same data type",
+        "T2009": "The values {{value}} and {{value2}} either side of operator {{token}} must be of the same data type",
         "T2010": "The expressions either side of operator {{token}} must evaluate to numeric or string values",
         "T1005": "Attempted to invoke a non-function. Did you mean '${{token}}'?",
         "T1006": "Attempted to invoke a non-function",
