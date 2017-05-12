@@ -3708,6 +3708,42 @@ var jsonata = (function() {
     }
 
     /**
+     * Applies a predicate function to each key/value pair in an object, and returns an object containing
+     * only the key/value pairs that passed the predicate
+     *
+     * @param {object} arg - the object to be sifted
+     * @param {object} func - the predicate function (lambda or native)
+     * @returns {object} - sifted object
+     */
+    function functionSift(arg, func) {
+        var result = {};
+
+        var predicate = function (value, key, object) {
+            var it = apply(func, [value, key, object], null);
+            // returns a generator - so iterate over it
+            var res = it.next();
+            while (!res.done) {
+                res = it.next(res.value);
+            }
+            return res.value;
+        };
+
+        for(var item in arg) {
+            var entry = arg[item];
+            if(functionBoolean(predicate(entry, item, arg))) {
+                result[item] = entry;
+            }
+        }
+
+        // empty objects should be changed to undefined
+        if(Object.keys(result).length === 0) {
+            result = undefined;
+        }
+
+        return result;
+    }
+
+    /**
      * Create frame
      * @param {Object} enclosingEnvironment - Enclosing environment
      * @returns {{bind: bind, lookup: lookup}} Created frame
@@ -3767,6 +3803,7 @@ var jsonata = (function() {
     staticFrame.bind('spread', defineFunction(functionSpread, '<x-:a<o>>'));
     staticFrame.bind('each', defineFunction(functionEach, '<o-f:a>'));
     staticFrame.bind('sort', defineFunction(functionSort, '<af?:a>'));
+    staticFrame.bind('sift', defineFunction(functionSift, '<o-f?:o>'));
 
     /**
      * Error codes

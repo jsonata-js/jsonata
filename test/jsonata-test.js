@@ -5366,6 +5366,77 @@ describe('Evaluator - function: sort', function () {
 
 });
 
+describe('Evaluator - function: sift', function () {
+
+    describe('$sift(λ($v){$v.**.Postcode})', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$sift(λ($v){$v.**.Postcode})');
+            var result = expr.evaluate(testdata4);
+            // follows this pattern - "2017-05-09T10:10:16.918Z"
+            var expected = {
+                "Address": {
+                    "Street": "Hursley Park",
+                    "City": "Winchester",
+                    "Postcode": "SO21 2JN"
+                },
+                "Other": {
+                    "Over 18 ?": true,
+                    "Misc": null,
+                    "Alternative.Address": {
+                        "Street": "Brick Lane",
+                        "City": "London",
+                        "Postcode": "E1 6RF"
+                    }
+                }
+            };
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('**[*].$sift(λ($v){$v.Postcode})', function () {
+        it('should return result object', function () {
+            var expr = jsonata('**[*].$sift(λ($v){$v.Postcode})');
+            var result = expr.evaluate(testdata4);
+            // follows this pattern - "2017-05-09T10:10:16.918Z"
+            var expected = [
+                {
+                    "Address": {
+                        "Street": "Hursley Park",
+                        "City": "Winchester",
+                        "Postcode": "SO21 2JN"
+                    }
+                },
+                {
+                    "Alternative.Address": {
+                        "Street": "Brick Lane",
+                        "City": "London",
+                        "Postcode": "E1 6RF"
+                    }
+                }
+            ];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$sift(λ($v, $k){$k ~> /^A/})', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$sift(λ($v, $k){$k ~> /^A/})');
+            var result = expr.evaluate(testdata4);
+            // follows this pattern - "2017-05-09T10:10:16.918Z"
+            var expected = {
+                "Age": 28,
+                "Address": {
+                    "Street": "Hursley Park",
+                    "City": "Winchester",
+                    "Postcode": "SO21 2JN"
+                }
+            };
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+});
+
 describe('Evaluator - function: now', function () {
 
     describe('$now() returns timestamp', function () {
