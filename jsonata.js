@@ -3452,7 +3452,10 @@ var jsonata = (function() {
                 func_args.push(arr);
             }
             // invoke func
-            result.push(yield * apply(func, func_args, null));
+            var res = yield * apply(func, func_args, null);
+            if(typeof res !== 'undefined') {
+                result.push(res);
+            }
         }
 
         return result;

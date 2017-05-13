@@ -7348,6 +7348,34 @@ describe('HOF - map', function () {
             expect(result).to.deep.equal(expected);
         });
     });
+
+    describe('map function with predicate - remove undefined', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$map(Phone, function($v, $i) {$i[$v.type="office"]})');
+            var result = expr.evaluate(testdata4);
+            var expected = [1,2];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('map function with condition - remove undefined', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$map(Phone, function($v, $i) {$v.type="office" ? $i})');
+            var result = expr.evaluate(testdata4);
+            var expected = [1,2];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('map function with condition', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$map(Phone, function($v, $i) {$v.type="office" ? $i: null})');
+            var result = expr.evaluate(testdata4);
+            var expected = [null, 1, 2, null];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
 });
 
 describe('HOF - zip', function () {
