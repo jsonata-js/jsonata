@@ -3374,6 +3374,14 @@ var jsonata = (function() {
     }
 
     /**
+     * Returns a random number 0 <= n < 1
+     * @returns {number} random number
+     */
+    function functionRandom() {
+        return Math.random();
+    }
+
+    /**
      * Evaluate an input and return a boolean
      * @param {*} arg - Arguments
      * @returns {boolean} Boolean
@@ -3806,6 +3814,34 @@ var jsonata = (function() {
     }
 
     /**
+     * Randomly shuffles the contents of an array
+     * @param {Array} arr - the input array
+     * @returns {Array} the shuffled array
+     */
+    function functionShuffle(arr) {
+        // undefined inputs always return undefined
+        if(typeof arr === 'undefined') {
+            return undefined;
+        }
+
+        if(arr.length <= 1) {
+            return arr;
+        }
+
+        // shuffle using the 'inside-out' variant of the Fisher-Yates algorithm
+        var result = new Array(arr.length);
+        for(var i = 0; i < arr.length; i++) {
+            var j = Math.floor(Math.random() * (i + 1)); // random integer such that 0 ≤ j ≤ i
+            if(i !== j) {
+                result[i] = result[j];
+            }
+            result[j] = arr[i];
+        }
+
+        return result;
+    }
+
+    /**
      * Applies a predicate function to each key/value pair in an object, and returns an object containing
      * only the key/value pairs that passed the predicate
      *
@@ -3890,12 +3926,14 @@ var jsonata = (function() {
     staticFrame.bind('abs', defineFunction(functionAbs, '<n-:n>'));
     staticFrame.bind('sqrt', defineFunction(functionSqrt, '<n-:n>'));
     staticFrame.bind('power', defineFunction(functionPower, '<n-n:n>'));
+    staticFrame.bind('random', defineFunction(functionRandom, '<:n>'));
     staticFrame.bind('boolean', defineFunction(functionBoolean, '<x-:b>'));
     staticFrame.bind('not', defineFunction(functionNot, '<x-:b>'));
     staticFrame.bind('map', defineFunction(functionMap, '<af>'));
     staticFrame.bind('zip', defineFunction(functionZip, '<fa+>'));
     staticFrame.bind('filter', defineFunction(functionFilter, '<af>'));
     staticFrame.bind('reduce', defineFunction(functionFoldLeft, '<afj?:j>')); // TODO <f<jj:j>a<j>j?:j>
+    staticFrame.bind('sift', defineFunction(functionSift, '<o-f?:o>'));
     staticFrame.bind('keys', defineFunction(functionKeys, '<x-:a<s>>'));
     staticFrame.bind('lookup', defineFunction(functionLookup, '<x-s:x>'));
     staticFrame.bind('append', defineFunction(functionAppend, '<xx:a>'));
@@ -3904,7 +3942,7 @@ var jsonata = (function() {
     staticFrame.bind('reverse', defineFunction(functionReverse, '<a:a>'));
     staticFrame.bind('each', defineFunction(functionEach, '<o-f:a>'));
     staticFrame.bind('sort', defineFunction(functionSort, '<af?:a>'));
-    staticFrame.bind('sift', defineFunction(functionSift, '<o-f?:o>'));
+    staticFrame.bind('shuffle', defineFunction(functionShuffle, '<a:a>'));
 
     /**
      * Error codes

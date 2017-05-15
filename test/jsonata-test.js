@@ -4838,6 +4838,28 @@ describe('Evaluator - functions: power', function () {
 
 });
 
+describe('Evaluator - functions: random', function () {
+
+    describe('random number")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$random()');
+            var result = expr.evaluate();
+            var expected = result >= 0 && result < 1;
+            expect(true).to.deep.equal(expected);
+        });
+    });
+
+    describe('consequetive random numbers should be different")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$random() = $random()');
+            var result = expr.evaluate();
+            var expected = false;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+});
+
 describe('Evaluator - functions: boolean', function () {
 
     describe('$boolean("Hello World")', function () {
@@ -5270,6 +5292,46 @@ describe('Evaluator - function: reverse', function () {
     describe('$reverse([1])', function () {
         it('should return result object', function () {
             var expr = jsonata('$reverse([1])');
+            var result = expr.evaluate(testdata4);
+            var expected = [1];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+});
+
+describe('Evaluator - function: shuffle', function () {
+
+    describe('$count($shuffle([1..10]))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$count($shuffle([1..10]))');
+            var result = expr.evaluate(testdata4);
+            var expected = 10;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$sort($shuffle([1..10]))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$sort($shuffle([1..10]))');
+            var result = expr.evaluate(testdata4);
+            var expected = [1,2,3,4,5,6,7,8,9,10];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$shuffle(nothing)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$shuffle(nothing)');
+            var result = expr.evaluate(testdata4);
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$shuffle([1])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$shuffle([1])');
             var result = expr.evaluate(testdata4);
             var expected = [1];
             expect(result).to.deep.equal(expected);
