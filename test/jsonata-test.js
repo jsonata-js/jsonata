@@ -5238,6 +5238,46 @@ describe('Evaluator - function: each', function () {
 
 });
 
+describe('Evaluator - function: reverse', function () {
+
+    describe('$reverse([1..5])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$reverse([1..5])');
+            var result = expr.evaluate(testdata4);
+            var expected = [5,4,3,2,1];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$reverse must not change the input', function () {
+        it('should return result object', function () {
+            var expr = jsonata('[[$], [$reverse($)], [$]]');
+            var result = expr.evaluate([1,2,3]);
+            var expected = [[1,2,3], [3,2,1], [1,2,3]];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$reverse(nothing)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$reverse(nothing)');
+            var result = expr.evaluate(testdata4);
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$reverse([1])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$reverse([1])');
+            var result = expr.evaluate(testdata4);
+            var expected = [1];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+});
+
 describe('Evaluator - function: sort', function () {
 
     describe('$sort(nothing)', function () {
@@ -7376,6 +7416,36 @@ describe('HOF - map', function () {
         });
     });
 
+    describe('map function with undefined input', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$map(Phone, function($v, $i) {$v.type="office" ? $i: null})');
+            var result = expr.evaluate(testdata2);
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+});
+
+describe('HOF - filter', function () {
+    describe('find most expensive book', function () {
+        it('should return result object', function () {
+            var expr = jsonata('(library.books~>$filter(λ($v, $i, $a) {$v.price = $max($a.price)})).isbn');
+            var result = expr.evaluate(testdata5);
+            var expected = "9780262510875";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('filter nothing', function () {
+        it('should return result object', function () {
+            var expr = jsonata('nothing~>$filter(λ($v, $i, $a) {$v.price = $max($a.price)})');
+            var result = expr.evaluate(testdata5);
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
 });
 
 describe('HOF - zip', function () {
@@ -7579,6 +7649,15 @@ describe('HOF - reduce', function () {
             var expr = jsonata('$reduce(Account.Order.Product.Quantity, $append)');
             var result = expr.evaluate(testdata2);
             var expected = [2, 1, 4, 1];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('reduce with undefined input', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$reduce(Account.Order.Product.Quantity, $append)');
+            var result = expr.evaluate(testdata4);
+            var expected = undefined;
             expect(result).to.deep.equal(expected);
         });
     });

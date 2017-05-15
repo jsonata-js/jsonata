@@ -3438,6 +3438,11 @@ var jsonata = (function() {
      * @returns {Array} Map array
      */
     function* functionMap(arr, func) {
+        // undefined inputs always return undefined
+        if(typeof arr === 'undefined') {
+            return undefined;
+        }
+
         var result = [];
         // do the map - iterate over the arrays, and invoke func
         for (var i = 0; i < arr.length; i++) {
@@ -3455,6 +3460,40 @@ var jsonata = (function() {
             var res = yield * apply(func, func_args, null);
             if(typeof res !== 'undefined') {
                 result.push(res);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Create a map from an array of arguments
+     * @param {Array} [arr] - array to filter
+     * @param {Function} func - predicate function
+     * @returns {Array} Map array
+     */
+    function* functionFilter(arr, func) {
+        // undefined inputs always return undefined
+        if(typeof arr === 'undefined') {
+            return undefined;
+        }
+
+        var result = [];
+
+        var predicate = function (value, index, array) {
+            var it = apply(func, [value, index, array], null);
+            // returns a generator - so iterate over it
+            var res = it.next();
+            while (!res.done) {
+                res = it.next(res.value);
+            }
+            return res.value;
+        };
+
+        for(var i = 0; i < arr.length; i++) {
+            var entry = arr[i];
+            if(functionBoolean(predicate(entry, i, arr))) {
+                result.push(entry);
             }
         }
 
@@ -3502,6 +3541,11 @@ var jsonata = (function() {
      * @returns {*} Result
      */
     function* functionFoldLeft(sequence, func, init) {
+        // undefined inputs always return undefined
+        if(typeof sequence === 'undefined') {
+            return undefined;
+        }
+
         var result;
 
         if (!(func.length === 2 || (func._jsonata_function === true && func.implementation.length === 2) || func.arguments.length === 2)) {
@@ -3631,6 +3675,30 @@ var jsonata = (function() {
         } else {
             result = arg;
         }
+        return result;
+    }
+
+    /**
+     * Reverses the order of items in an array
+     * @param {Array} arr - the array to reverse
+     * @returns {Array} - the reversed array
+     */
+    function functionReverse(arr) {
+        // undefined inputs always return undefined
+        if(typeof arr === 'undefined') {
+            return undefined;
+        }
+
+        if(arr.length <= 1) {
+            return arr;
+        }
+
+        var length = arr.length;
+        var result = new Array(length);
+        for(var i = 0; i < length; i++) {
+            result[length - i - 1] = arr[i];
+        }
+
         return result;
     }
 
@@ -3826,12 +3894,14 @@ var jsonata = (function() {
     staticFrame.bind('not', defineFunction(functionNot, '<x-:b>'));
     staticFrame.bind('map', defineFunction(functionMap, '<af>'));
     staticFrame.bind('zip', defineFunction(functionZip, '<fa+>'));
+    staticFrame.bind('filter', defineFunction(functionFilter, '<af>'));
     staticFrame.bind('reduce', defineFunction(functionFoldLeft, '<afj?:j>')); // TODO <f<jj:j>a<j>j?:j>
     staticFrame.bind('keys', defineFunction(functionKeys, '<x-:a<s>>'));
     staticFrame.bind('lookup', defineFunction(functionLookup, '<x-s:x>'));
     staticFrame.bind('append', defineFunction(functionAppend, '<xx:a>'));
     staticFrame.bind('exists', defineFunction(functionExists, '<x:b>'));
     staticFrame.bind('spread', defineFunction(functionSpread, '<x-:a<o>>'));
+    staticFrame.bind('reverse', defineFunction(functionReverse, '<a:a>'));
     staticFrame.bind('each', defineFunction(functionEach, '<o-f:a>'));
     staticFrame.bind('sort', defineFunction(functionSort, '<af?:a>'));
     staticFrame.bind('sift', defineFunction(functionSift, '<o-f?:o>'));
