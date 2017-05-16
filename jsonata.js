@@ -42,6 +42,7 @@ var jsonata = (function() {
         '<': 40,
         '>': 40,
         '`': 80,
+        '^': 40,
         '**': 60,
         '..': 20,
         ':=': 10,
@@ -908,6 +909,38 @@ var jsonata = (function() {
             }
         });
 
+        // order-by
+        infix("^", operators['^'], function (left) {
+            advance("(");
+            var terms = [];
+            for(;;) {
+                var term = {
+                    descending: false
+                };
+                if (node.id === "<") {
+                    // ascending sort
+                    advance("<");
+                } else if (node.id === ">") {
+                    // descending sort
+                    term.descending = true;
+                    advance(">");
+                } else {
+                    //unspecified - default to ascending
+                }
+                term.expression = expression(0);
+                terms.push(term);
+                if(node.id !== ",") {
+                    break;
+                }
+                advance(",");
+            }
+            advance(")");
+            this.lhs = left;
+            this.rhs = terms;
+            this.type = 'binary';
+            return this;
+        });
+
         var objectParser = function (left) {
             var a = [];
             if (node.id !== "}") {
@@ -969,7 +1002,9 @@ var jsonata = (function() {
             } else if(expr.type === 'condition') {
                 // analyse both branches
                 expr.then = tail_call_optimize(expr.then);
-                expr.else = tail_call_optimize(expr.else);
+                if(typeof expr.else !== 'undefined') {
+                    expr.else = tail_call_optimize(expr.else);
+                }
                 result = expr;
             } else if(expr.type === 'block') {
                 // only the last expression in the block
@@ -988,33 +1023,47 @@ var jsonata = (function() {
         // the purpose of this is flatten the parts of the AST representing location paths,
         // converting them to arrays of steps which in turn may contain arrays of predicates.
         // following this, nodes containing '.' and '[' should be eliminated from the AST.
-        var post_parse = function (expr) {
-            var result = [];
+        var ast_optimize = function (expr) {
+            var result;
             switch (expr.type) {
                 case 'binary':
                     switch (expr.value) {
                         case '.':
-                            var lstep = post_parse(expr.lhs);
+                            var lstep = ast_optimize(expr.lhs);
+                            result = {type: 'path', steps: []};
                             if (lstep.type === 'path') {
-                                Array.prototype.push.apply(result, lstep);
+                                Array.prototype.push.apply(result.steps, lstep.steps);
                             } else {
-                                result.push(lstep);
+                                result.steps = [lstep];
                             }
-                            var rest = post_parse(expr.rhs);
+                            var rest = ast_optimize(expr.rhs);
                             if(rest.type !== 'path') {
-                                rest = [rest];
+                                rest = {type: 'path', steps: [rest]};
                             }
-                            Array.prototype.push.apply(result, rest);
-                            result.type = 'path';
+                            Array.prototype.push.apply(result.steps, rest.steps);
+                            // any steps within a path that are literals, should be changed to 'name'
+                            result.steps.filter(function(step) {
+                                return step.type === 'literal';
+                            }).forEach(function(lit) {
+                                lit.type = 'name';
+                            });
+                            // any step that signals keeping a singleton array, should be flagged on the path
+                            if(result.steps.filter(function(step) { return step.keepArray === true;}).length > 0) {
+                                result.keepSingletonArray = true;
+                            }
+                            // if first step is a path constructor, flag it for special handling
+                            if(result.steps[0].type === 'unary' && result.steps[0].value === '[') {
+                                result.steps[0].consarray = true;
+                            }
                             break;
                         case '[':
                             // predicated step
                             // LHS is a step or a predicated step
                             // RHS is the predicate expr
-                            result = post_parse(expr.lhs);
+                            result = ast_optimize(expr.lhs);
                             var step = result;
                             if(result.type === 'path') {
-                                step = result[result.length - 1];
+                                step = result.steps[result.steps.length - 1];
                             }
                             if (typeof step.group !== 'undefined') {
                                 throw {
@@ -1026,13 +1075,13 @@ var jsonata = (function() {
                             if (typeof step.predicate === 'undefined') {
                                 step.predicate = [];
                             }
-                            step.predicate.push(post_parse(expr.rhs));
+                            step.predicate.push(ast_optimize(expr.rhs));
                             break;
                         case '{':
                             // group-by
                             // LHS is a step or a predicated step
                             // RHS is the object constructor expr
-                            result = post_parse(expr.lhs);
+                            result = ast_optimize(expr.lhs);
                             if (typeof result.group !== 'undefined') {
                                 throw {
                                     code: "S0210",
@@ -1043,15 +1092,38 @@ var jsonata = (function() {
                             // object constructor - process each pair
                             result.group = {
                                 lhs: expr.rhs.map(function (pair) {
-                                    return [post_parse(pair[0]), post_parse(pair[1])];
+                                    return [ast_optimize(pair[0]), ast_optimize(pair[1])];
                                 }),
                                 position: expr.position
                             };
                             break;
+                        case '^':
+                            // order-by
+                            // LHS is the array to be ordered
+                            // RHS defines the terms
+                            result = {type: 'sort', value: expr.value, position: expr.position};
+                            result.lhs = ast_optimize(expr.lhs);
+                            result.rhs = expr.rhs.map(function (terms) {
+                                return {
+                                    descending: terms.descending,
+                                    expression: ast_optimize(terms.expression)
+                                };
+                            });
+                            break;
+                        case ':=':
+                            result = {type: 'bind', value: expr.value, position: expr.position};
+                            result.lhs = ast_optimize(expr.lhs);
+                            result.rhs = ast_optimize(expr.rhs);
+                            break;
+                        case '~>':
+                            result = {type: 'apply', value: expr.value, position: expr.position};
+                            result.lhs = ast_optimize(expr.lhs);
+                            result.rhs = ast_optimize(expr.rhs);
+                            break;
                         default:
                             result = {type: expr.type, value: expr.value, position: expr.position};
-                            result.lhs = post_parse(expr.lhs);
-                            result.rhs = post_parse(expr.rhs);
+                            result.lhs = ast_optimize(expr.lhs);
+                            result.rhs = ast_optimize(expr.rhs);
                     }
                     break;
                 case 'unary':
@@ -1059,16 +1131,16 @@ var jsonata = (function() {
                     if (expr.value === '[') {
                         // array constructor - process each item
                         result.lhs = expr.lhs.map(function (item) {
-                            return post_parse(item);
+                            return ast_optimize(item);
                         });
                     } else if (expr.value === '{') {
                         // object constructor - process each pair
                         result.lhs = expr.lhs.map(function (pair) {
-                            return [post_parse(pair[0]), post_parse(pair[1])];
+                            return [ast_optimize(pair[0]), ast_optimize(pair[1])];
                         });
                     } else {
                         // all other unary expressions - just process the expression
-                        result.expression = post_parse(expr.expression);
+                        result.expression = ast_optimize(expr.expression);
                         // if unary minus on a number, then pre-process
                         if (expr.value === '-' && result.expression.type === 'literal' && isNumeric(result.expression.value)) {
                             result = result.expression;
@@ -1080,35 +1152,38 @@ var jsonata = (function() {
                 case 'partial':
                     result = {type: expr.type, name: expr.name, value: expr.value, position: expr.position};
                     result.arguments = expr.arguments.map(function (arg) {
-                        return post_parse(arg);
+                        return ast_optimize(arg);
                     });
-                    result.procedure = post_parse(expr.procedure);
+                    result.procedure = ast_optimize(expr.procedure);
                     break;
                 case 'lambda':
                     result = {type: expr.type, arguments: expr.arguments, signature: expr.signature, position: expr.position};
-                    var body = post_parse(expr.body);
+                    var body = ast_optimize(expr.body);
                     result.body = tail_call_optimize(body);
                     break;
                 case 'condition':
                     result = {type: expr.type, position: expr.position};
-                    result.condition = post_parse(expr.condition);
-                    result.then = post_parse(expr.then);
+                    result.condition = ast_optimize(expr.condition);
+                    result.then = ast_optimize(expr.then);
                     if (typeof expr.else !== 'undefined') {
-                        result.else = post_parse(expr.else);
+                        result.else = ast_optimize(expr.else);
                     }
                     break;
                 case 'block':
                     result = {type: expr.type, position: expr.position};
                     // array of expressions - process each one
                     result.expressions = expr.expressions.map(function (item) {
-                        return post_parse(item);
+                        return ast_optimize(item);
                     });
                     // TODO scan the array of expressions to see if any of them assign variables
                     // if so, need to mark the block as one that needs to create a new frame
                     break;
                 case 'name':
-                    result = [expr];
-                    result.type = 'path';
+                    result = {type: 'path', steps: [expr]};
+//                    result.type = 'path';
+                    if(expr.keepArray) {
+                        result.keepSingletonArray = true;
+                    }
                     break;
                 case 'literal':
                 case 'wildcard':
@@ -1121,7 +1196,7 @@ var jsonata = (function() {
                     // the tokens 'and' and 'or' might have been used as a name rather than an operator
                     if (expr.value === 'and' || expr.value === 'or' || expr.value === 'in') {
                         expr.type = 'name';
-                        result = post_parse(expr);
+                        result = ast_optimize(expr);
                     } else if (expr.value === '?') {
                         // partial application
                         result = expr;
@@ -1151,7 +1226,6 @@ var jsonata = (function() {
         };
 
         // now invoke the tokenizer and the parser and return the syntax tree
-
         lexer = tokenizer(source);
         advance();
         // parse the tokens
@@ -1164,7 +1238,7 @@ var jsonata = (function() {
                 token: node.value
             };
         }
-        expr = post_parse(expr);
+        expr = ast_optimize(expr);
 
         return expr;
     };
@@ -1195,6 +1269,20 @@ var jsonata = (function() {
     }
 
     /**
+     * Returns true if the arg is an array of strings
+     * @param {*} arg - the item to test
+     * @returns {boolean} True if arg is an array of strings
+     */
+    function isArrayOfStrings(arg) {
+        var result = false;
+        /* istanbul ignore else */
+        if(Array.isArray(arg)) {
+            result = (arg.filter(function(item){return typeof item !== 'string';}).length === 0);
+        }
+        return result;
+    }
+
+    /**
      * Returns true if the arg is an array of numbers
      * @param {*} arg - the item to test
      * @returns {boolean} True if arg is an array of numbers
@@ -1222,7 +1310,7 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function evaluate(expr, input, environment) {
+    function* evaluate(expr, input, environment) {
         var result;
 
         var entryCallback = environment.lookup('__evaluate_entry');
@@ -1232,13 +1320,14 @@ var jsonata = (function() {
 
         switch (expr.type) {
             case 'path':
-                result = evaluatePath(expr, input, environment);
+                result = yield * evaluatePath(expr.steps, input, environment);
+                result = normalizeSequence(result, expr.keepSingletonArray);
                 break;
             case 'binary':
-                result = evaluateBinary(expr, input, environment);
+                result = yield * evaluateBinary(expr, input, environment);
                 break;
             case 'unary':
-                result = evaluateUnary(expr, input, environment);
+                result = yield * evaluateUnary(expr, input, environment);
                 break;
             case 'name':
                 result = evaluateName(expr, input, environment);
@@ -1253,16 +1342,19 @@ var jsonata = (function() {
                 result = evaluateDescendants(expr, input, environment);
                 break;
             case 'condition':
-                result = evaluateCondition(expr, input, environment);
+                result = yield * evaluateCondition(expr, input, environment);
                 break;
             case 'block':
-                result = evaluateBlock(expr, input, environment);
+                result = yield * evaluateBlock(expr, input, environment);
+                break;
+            case 'bind':
+                result = yield * evaluateBindExpression(expr, input, environment);
                 break;
             case 'regex':
                 result = evaluateRegex(expr, input, environment);
                 break;
             case 'function':
-                result = evaluateFunction(expr, input, environment);
+                result = yield * evaluateFunction(expr, input, environment);
                 break;
             case 'variable':
                 result = evaluateVariable(expr, input, environment);
@@ -1271,14 +1363,29 @@ var jsonata = (function() {
                 result = evaluateLambda(expr, input, environment);
                 break;
             case 'partial':
-                result = evaluatePartialApplication(expr, input, environment);
+                result = yield * evaluatePartialApplication(expr, input, environment);
+                break;
+            case 'apply':
+                result = yield * evaluateApplyExpression(expr, input, environment);
+                break;
+            case 'sort':
+                result = yield * evaluateSortExpression(expr, input, environment);
                 break;
         }
+
+        if(environment.lookup('__jsonata_async') &&
+          (typeof result === 'undefined' || typeof result.then !== 'function')) {
+            result = Promise.resolve(result);
+        }
+        result = yield result;
+
         if (expr.hasOwnProperty('predicate')) {
-            result = applyPredicates(expr.predicate, result, environment);
+            result = yield * applyPredicates(expr.predicate, result, environment);
+            result = normalizeSequence(result);
+
         }
         if (expr.hasOwnProperty('group')) {
-            result = evaluateGroupExpression(expr.group, result, environment);
+            result = yield * evaluateGroupExpression(expr.group, result, environment);
         }
 
         var exitCallback = environment.lookup('__evaluate_exit');
@@ -1296,69 +1403,86 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function evaluatePath(expr, input, environment) {
-        var result;
+    function* evaluatePath(expr, input, environment) {
         var inputSequence;
-        var keepSingletonArray = false;
         // expr is an array of steps
         // if the first step is a variable reference ($...), including root reference ($$),
         //   then the path is absolute rather than relative
         if (expr[0].type === 'variable') {
-            expr[0].absolute = true;
-        } else if(expr[0].type === 'unary' && expr[0].value === '[') {
+            inputSequence = [input]; // dummy singleton sequence for first (absolute) step
+        } else if(expr[0].consarray) {
             // array constructor - not relative to the input
-            input = [null];// dummy singleton sequence for first step
+            inputSequence = [null];// dummy singleton sequence for first step
+        } else if (Array.isArray(input)) {
+            inputSequence = input;
+        } else {
+            // if input is not an array, make it so
+            inputSequence = [input];
         }
+
+        var resultSequence;
 
         // evaluate each step in turn
         for(var ii = 0; ii < expr.length; ii++) {
             var step = expr[ii];
-            if(step.keepArray === true) {
-                keepSingletonArray = true;
-            }
-            var resultSequence = [];
-            result = undefined;
-            // if input is not an array, make it so
-            if (step.absolute === true) {
-                inputSequence = [input]; // dummy singleton sequence for first (absolute) step
-            } else if (Array.isArray(input)) {
-                inputSequence = input;
-            } else {
-                inputSequence = [input];
-            }
-            // if there is more than one step in the path, handle quoted field names as names not literals
-            if (expr.length > 1 && step.type === 'literal') {
-                step.type = 'name';
-            }
-            inputSequence.forEach(function (item) {
-                var res = evaluate(step, item, environment);
-                if (typeof res !== 'undefined') {
-                    if (Array.isArray(res) && (step.value !== '[' )) {
-                        // is res an array - if so, flatten it into the parent array
-                        res.forEach(function (innerRes) {
-                            if (typeof innerRes !== 'undefined') {
-                                resultSequence.push(innerRes);
-                            }
-                        });
-                    } else {
-                        resultSequence.push(res);
-                    }
-                }
-            });
-            if (resultSequence.length === 1) {
-                if(keepSingletonArray) {
-                    result = resultSequence;
-                } else {
-                    result = resultSequence[0];
-                }
-            } else if (resultSequence.length > 1) {
-                result = resultSequence;
-            }
 
-            if(typeof result === 'undefined') {
+            resultSequence = yield * evaluateStep(step, inputSequence, environment);
+
+            if(typeof resultSequence === 'undefined' || resultSequence.length === 0) {
                 break;
             }
-            input = result;
+            inputSequence = resultSequence;
+        }
+
+        return resultSequence;
+    }
+
+    /**
+     * Normalize a JSONata sequence - singleton arrays become atomic values
+     * @param {Array} sequence - input sequence
+     * @param {Boolean} keepSingleton - keep singleton sequences as arrays
+     * @returns {*} normalized sequence
+     */
+    function normalizeSequence(sequence, keepSingleton) {
+        var result;
+        if(typeof sequence === 'undefined') {
+            result = undefined;
+        } else if(!Array.isArray(sequence)) {
+            result = sequence;
+        } else if (sequence.length === 1) {
+            if(keepSingleton) {
+                result = sequence;
+            } else {
+                result = sequence[0];
+            }
+        } else if (sequence.length > 1) {
+            result = sequence;
+        }
+        return result;
+    }
+
+    /**
+     * Evaluate a step within a path
+     * @param {Object} expr - JSONata expression
+     * @param {Object} input - Input data to evaluate against
+     * @param {Object} environment - Environment
+     * @returns {*} Evaluated input data
+     */
+    function* evaluateStep(expr, input, environment) {
+        var result = [];
+
+
+        for(var ii = 0; ii < input.length; ii++) {
+            var res = yield * evaluate(expr, input[ii], environment);
+            if (!(Array.isArray(res) && (expr.value !== '[' )) && !expr.consarray) {
+                res = [res];
+            }
+            // is res an array - if so, flatten it into the parent array
+            res.forEach(function (innerRes) {
+                if (typeof innerRes !== 'undefined') {
+                    result.push(innerRes);
+                }
+            });
         }
         return result;
     }
@@ -1370,8 +1494,7 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Result after applying predicates
      */
-    function applyPredicates(predicates, input, environment) {
-        var result;
+    function* applyPredicates(predicates, input, environment) {
         var inputSequence = input;
         // lhs potentially holds an array
         // we want to iterate over the array, and only keep the items that are
@@ -1379,7 +1502,8 @@ var jsonata = (function() {
         // if the predicate evaluates to an integer, then select that index
 
         var results = [];
-        predicates.forEach(function (predicate) {
+        for(var ii = 0; ii < predicates.length; ii++) {
+            var predicate = predicates[ii];
             // if it's not an array, turn it into one
             // since in XPath >= 2.0 an item is equivalent to a singleton sequence of that item
             // if input is not an array, make it so
@@ -1387,7 +1511,6 @@ var jsonata = (function() {
                 inputSequence = [inputSequence];
             }
             results = [];
-            result = undefined;
             if (predicate.type === 'literal' && isNumeric(predicate.value)) {
                 var index = predicate.value;
                 if (!Number.isInteger(index)) {
@@ -1398,87 +1521,99 @@ var jsonata = (function() {
                     // count in from end of array
                     index = inputSequence.length + index;
                 }
-                result = inputSequence[index];
+                results = inputSequence[index];
             } else {
-                inputSequence.forEach(function (item, index) {
-                    var res = evaluate(predicate, item, environment);
-                    if (isNumeric(res)) {
-                        res = [res];
-                    }
-                    if(isArrayOfNumbers(res)) {
-                        res.forEach(function(ires) {
-                            if (!Number.isInteger(ires)) {
-                                // round it down
-                                ires = Math.floor(ires);
-                            }
-                            if (ires < 0) {
-                                // count in from end of array
-                                ires = inputSequence.length + ires;
-                            }
-                            if (ires === index) {
-                                results.push(item);
-                            }
-                        });
-                    } else if (functionBoolean(res)) { // truthy
-                        results.push(item);
-                    }
-                });
+                results = yield * evaluateFilter(predicate, inputSequence, environment);
             }
-            if (results.length === 1) {
-                result = results[0];
-            } else if (results.length > 1) {
-                result = results;
-            }
-            inputSequence = result;
-        });
-        return result;
+            inputSequence = results;
+        }
+        return results;
     }
 
     /**
+     * Apply filter predicate to input data
+     * @param {Object} predicate - filter expression
+     * @param {Object} input - Input data to apply predicates against
+     * @param {Object} environment - Environment
+     * @returns {*} Result after applying predicates
+     */
+    function* evaluateFilter(predicate, input, environment) {
+        var results = [];
+        for(var index = 0; index < input.length; index++) {
+            var item = input[index];
+            var res = yield * evaluate(predicate, item, environment);
+            if (isNumeric(res)) {
+                res = [res];
+            }
+            if(isArrayOfNumbers(res)) {
+                res.forEach(function(ires) {
+                    if (!Number.isInteger(ires)) {
+                        // round it down
+                        ires = Math.floor(ires);
+                    }
+                    if (ires < 0) {
+                        // count in from end of array
+                        ires = input.length + ires;
+                    }
+                    if (ires === index) {
+                        results.push(item);
+                    }
+                });
+            } else if (functionBoolean(res)) { // truthy
+                results.push(item);
+            }
+        }
+        return results;
+    }
+
+        /**
      * Evaluate binary expression against input data
      * @param {Object} expr - JSONata expression
      * @param {Object} input - Input data to evaluate against
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function evaluateBinary(expr, input, environment) {
+    function * evaluateBinary(expr, input, environment) {
         var result;
+        var lhs = yield * evaluate(expr.lhs, input, environment);
+        var rhs = yield * evaluate(expr.rhs, input, environment);
+        var op = expr.value;
 
-        switch (expr.value) {
-            case '+':
-            case '-':
-            case '*':
-            case '/':
-            case '%':
-                result = evaluateNumericExpression(expr, input, environment);
-                break;
-            case '=':
-            case '!=':
-            case '<':
-            case '<=':
-            case '>':
-            case '>=':
-                result = evaluateComparisonExpression(expr, input, environment);
-                break;
-            case '&':
-                result = evaluateStringConcat(expr, input, environment);
-                break;
-            case 'and':
-            case 'or':
-                result = evaluateBooleanExpression(expr, input, environment);
-                break;
-            case '..':
-                result = evaluateRangeExpression(expr, input, environment);
-                break;
-            case ':=':
-                result = evaluateBindExpression(expr, input, environment);
-                break;
-            case 'in':
-                result = evaluateIncludesExpression(expr, input, environment);
-                break;
-            case '~>':
-                result = evaluateApplyExpression(expr, input, environment);
-                break;
+        try {
+            switch (op) {
+                case '+':
+                case '-':
+                case '*':
+                case '/':
+                case '%':
+                    result = evaluateNumericExpression(lhs, rhs, op);
+                    break;
+                case '=':
+                case '!=':
+                case '<':
+                case '<=':
+                case '>':
+                case '>=':
+                    result = evaluateComparisonExpression(lhs, rhs, op);
+                    break;
+                case '&':
+                    result = evaluateStringConcat(lhs, rhs);
+                    break;
+                case 'and':
+                case 'or':
+                    result = evaluateBooleanExpression(lhs, rhs, op);
+                    break;
+                case '..':
+                    result = evaluateRangeExpression(lhs, rhs);
+                    break;
+                case 'in':
+                    result = evaluateIncludesExpression(lhs, rhs);
+                    break;
+            }
+        } catch(err) {
+            err.position = expr.position;
+            err.token = op;
+            throw err;
         }
         return result;
     }
@@ -1490,12 +1625,12 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function evaluateUnary(expr, input, environment) {
+    function* evaluateUnary(expr, input, environment) {
         var result;
 
         switch (expr.value) {
             case '-':
-                result = evaluate(expr.expression, input, environment);
+                result = yield * evaluate(expr.expression, input, environment);
                 if (isNumeric(result)) {
                     result = -result;
                 } else {
@@ -1511,8 +1646,9 @@ var jsonata = (function() {
             case '[':
                 // array constructor - evaluate each item
                 result = [];
-                expr.lhs.forEach(function (item) {
-                    var value = evaluate(item, input, environment);
+                for(var ii = 0; ii < expr.lhs.length; ii++) {
+                    var item = expr.lhs[ii];
+                    var value = yield * evaluate(item, input, environment);
                     if (typeof value !== 'undefined') {
                         if(item.value === '[') {
                             result.push(value);
@@ -1520,11 +1656,11 @@ var jsonata = (function() {
                             result = functionAppend(result, value);
                         }
                     }
-                });
+                }
                 break;
             case '{':
                 // object constructor - apply grouping
-                result = evaluateGroupExpression(expr, input, environment);
+                result = yield * evaluateGroupExpression(expr, input, environment);
                 break;
 
         }
@@ -1542,21 +1678,17 @@ var jsonata = (function() {
         // lookup the 'name' item in the input
         var result;
         if (Array.isArray(input)) {
-            var results = [];
-            input.forEach(function (item) {
-                var res = evaluateName(expr, item, environment);
+            result = [];
+            for(var ii = 0; ii < input.length; ii++) {
+                var res =  evaluateName(expr, input[ii], environment);
                 if (typeof res !== 'undefined') {
-                    results.push(res);
+                    result.push(res);
                 }
-            });
-            if (results.length === 1) {
-                result = results[0];
-            } else if (results.length > 1) {
-                result = results;
             }
         } else if (input !== null && typeof input === 'object') {
             result = input[expr.value];
         }
+        result = normalizeSequence(result);
         return result;
     }
 
@@ -1590,11 +1722,7 @@ var jsonata = (function() {
             });
         }
 
-        if (results.length === 1) {
-            result = results[0];
-        } else if (results.length > 1) {
-            result = results;
-        }
+        result = normalizeSequence(results);
         return result;
     }
 
@@ -1662,16 +1790,13 @@ var jsonata = (function() {
 
     /**
      * Evaluate numeric expression against input data
-     * @param {Object} expr - JSONata expression
-     * @param {Object} input - Input data to evaluate against
-     * @param {Object} environment - Environment
-     * @returns {*} Evaluated input data
+     * @param {Object} lhs - LHS value
+     * @param {Object} rhs - RHS value
+     * @param {Object} op - opcode
+     * @returns {*} Result
      */
-    function evaluateNumericExpression(expr, input, environment) {
+    function evaluateNumericExpression(lhs, rhs, op) {
         var result;
-
-        var lhs = evaluate(expr.lhs, input, environment);
-        var rhs = evaluate(expr.rhs, input, environment);
 
         if (typeof lhs === 'undefined' || typeof rhs === 'undefined') {
             // if either side is undefined, the result is undefined
@@ -1682,8 +1807,6 @@ var jsonata = (function() {
             throw {
                 code: "T2001",
                 stack: (new Error()).stack,
-                position: expr.position,
-                token: expr.value,
                 value: lhs
             };
         }
@@ -1691,13 +1814,11 @@ var jsonata = (function() {
             throw {
                 code: "T2002",
                 stack: (new Error()).stack,
-                position: expr.position,
-                token: expr.value,
                 value: rhs
             };
         }
 
-        switch (expr.value) {
+        switch (op) {
             case '+':
                 result = lhs + rhs;
                 break;
@@ -1719,23 +1840,45 @@ var jsonata = (function() {
 
     /**
      * Evaluate comparison expression against input data
-     * @param {Object} expr - JSONata expression
-     * @param {Object} input - Input data to evaluate against
-     * @param {Object} environment - Environment
-     * @returns {*} Evaluated input data
+     * @param {Object} lhs - LHS value
+     * @param {Object} rhs - RHS value
+     * @param {Object} op - opcode
+     * @returns {*} Result
      */
-    function evaluateComparisonExpression(expr, input, environment) {
+    function evaluateComparisonExpression(lhs, rhs, op) {
         var result;
 
-        var lhs = evaluate(expr.lhs, input, environment);
-        var rhs = evaluate(expr.rhs, input, environment);
+        // type checks
+        var ltype = typeof lhs;
+        var rtype = typeof rhs;
 
-        if (typeof lhs === 'undefined' || typeof rhs === 'undefined') {
+        if (ltype === 'undefined' || rtype === 'undefined') {
             // if either side is undefined, the result is false
             return false;
         }
 
-        switch (expr.value) {
+        var validate = function() {
+            // if aa or bb are not string or numeric values, then throw an error
+            if (!(ltype === 'string' || ltype === 'number') || !(rtype === 'string' || rtype === 'number')) {
+                throw {
+                    code: "T2010",
+                    stack: (new Error()).stack,
+                    value: !(ltype === 'string' || ltype === 'number') ? lhs : rhs
+                };
+            }
+
+            //if aa and bb are not of the same type
+            if (ltype !== rtype) {
+                throw {
+                    code: "T2009",
+                    stack: (new Error()).stack,
+                    value: lhs,
+                    value2: rhs
+                };
+            }
+        };
+
+        switch (op) {
             case '=':
                 result = lhs === rhs;
                 break;
@@ -1743,15 +1886,19 @@ var jsonata = (function() {
                 result = (lhs !== rhs);
                 break;
             case '<':
+                validate();
                 result = lhs < rhs;
                 break;
             case '<=':
+                validate();
                 result = lhs <= rhs;
                 break;
             case '>':
+                validate();
                 result = lhs > rhs;
                 break;
             case '>=':
+                validate();
                 result = lhs >= rhs;
                 break;
         }
@@ -1761,16 +1908,12 @@ var jsonata = (function() {
     /**
      * Inclusion operator - in
      *
-     * @param {Object} expr - AST
-     * @param {*} input - input context
-     * @param {Object} environment - frame
+     * @param {Object} lhs - LHS value
+     * @param {Object} rhs - RHS value
      * @returns {boolean} - true if lhs is a member of rhs
      */
-    function evaluateIncludesExpression(expr, input, environment) {
+    function evaluateIncludesExpression(lhs, rhs) {
         var result = false;
-
-        var lhs = evaluate(expr.lhs, input, environment);
-        var rhs = evaluate(expr.rhs, input, environment);
 
         if (typeof lhs === 'undefined' || typeof rhs === 'undefined') {
             // if either side is undefined, the result is false
@@ -1793,22 +1936,20 @@ var jsonata = (function() {
 
     /**
      * Evaluate boolean expression against input data
-     * @param {Object} expr - JSONata expression
-     * @param {Object} input - Input data to evaluate against
-     * @param {Object} environment - Environment
-     * @returns {*} Evaluated input data
+     * @param {Object} lhs - LHS value
+     * @param {Object} rhs - RHS value
+     * @param {Object} op - opcode
+     * @returns {*} Result
      */
-    function evaluateBooleanExpression(expr, input, environment) {
+    function evaluateBooleanExpression(lhs, rhs, op) {
         var result;
 
-        switch (expr.value) {
+        switch (op) {
             case 'and':
-                result = functionBoolean(evaluate(expr.lhs, input, environment)) &&
-                  functionBoolean(evaluate(expr.rhs, input, environment));
+                result = functionBoolean(lhs) && functionBoolean(rhs);
                 break;
             case 'or':
-                result = functionBoolean(evaluate(expr.lhs, input, environment)) ||
-                  functionBoolean(evaluate(expr.rhs, input, environment));
+                result = functionBoolean(lhs) || functionBoolean(rhs);
                 break;
         }
         return result;
@@ -1816,15 +1957,12 @@ var jsonata = (function() {
 
     /**
      * Evaluate string concatenation against input data
-     * @param {Object} expr - JSONata expression
-     * @param {Object} input - Input data to evaluate against
-     * @param {Object} environment - Environment
-     * @returns {string|*} Evaluated input data
+     * @param {Object} lhs - LHS value
+     * @param {Object} rhs - RHS value
+     * @returns {string|*} Concatenated string
      */
-    function evaluateStringConcat(expr, input, environment) {
+    function evaluateStringConcat(lhs, rhs) {
         var result;
-        var lhs = evaluate(expr.lhs, input, environment);
-        var rhs = evaluate(expr.rhs, input, environment);
 
         var lstr = '';
         var rstr = '';
@@ -1846,16 +1984,24 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {{}} Evaluated input data
      */
-    function evaluateGroupExpression(expr, input, environment) {
+    function* evaluateGroupExpression(expr, input, environment) {
         var result = {};
         var groups = {};
         // group the input sequence by 'key' expression
         if (!Array.isArray(input)) {
             input = [input];
         }
+        var allPromises = [];
+        for(var itemIndex = 0; itemIndex < input.length; itemIndex++) {
+            for(var pairIndex = 0; pairIndex < expr.lhs.length; pairIndex++) {
+                allPromises.push(yield * evaluate(expr.lhs[pairIndex][0], input[itemIndex], environment));
+            }
+        }
+
+        var it = allPromises.entries();
         input.forEach(function (item) {
             expr.lhs.forEach(function (pair) {
-                var key = evaluate(pair[0], item, environment);
+                var key = it.next().value[1];
                 // key has to be a string
                 if (typeof  key !== 'string') {
                     throw {
@@ -1876,26 +2022,29 @@ var jsonata = (function() {
             });
         });
         // iterate over the groups to evaluate the 'value' expression
-        for (var key in groups) {
+        allPromises = [];
+        var key;
+        for (key in groups) {
             var entry = groups[key];
-            var value = evaluate(entry.expr, entry.data, environment);
+            allPromises.push(yield * evaluate(entry.expr, entry.data, environment));
+        }
+        it = allPromises.entries();
+        for (key in groups) {
+            var value = it.next().value[1];
             result[key] = value;
         }
+
         return result;
     }
 
     /**
      * Evaluate range expression against input data
-     * @param {Object} expr - JSONata expression
-     * @param {Object} input - Input data to evaluate against
-     * @param {Object} environment - Environment
-     * @returns {*} Evaluated input data
+     * @param {Object} lhs - LHS value
+     * @param {Object} rhs - RHS value
+     * @returns {Array} Resultant array
      */
-    function evaluateRangeExpression(expr, input, environment) {
+    function evaluateRangeExpression(lhs, rhs) {
         var result;
-
-        var lhs = evaluate(expr.lhs, input, environment);
-        var rhs = evaluate(expr.rhs, input, environment);
 
         if (typeof lhs === 'undefined' || typeof rhs === 'undefined') {
             // if either side is undefined, the result is undefined
@@ -1911,8 +2060,6 @@ var jsonata = (function() {
             throw {
                 code: "T2003",
                 stack: (new Error()).stack,
-                position: expr.position,
-                token: expr.value,
                 value: lhs
             };
         }
@@ -1920,8 +2067,6 @@ var jsonata = (function() {
             throw {
                 code: "T2004",
                 stack: (new Error()).stack,
-                position: expr.position,
-                token: expr.value,
                 value: rhs
             };
         }
@@ -1940,17 +2085,17 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function evaluateBindExpression(expr, input, environment) {
+    function* evaluateBindExpression(expr, input, environment) {
         // The RHS is the expression to evaluate
         // The LHS is the name of the variable to bind to - should be a VARIABLE token
-        var value = evaluate(expr.rhs, input, environment);
+        var value = yield * evaluate(expr.rhs, input, environment);
         if (expr.lhs.type !== 'variable') {
             throw {
                 code: "D2005",
                 stack: (new Error()).stack,
                 position: expr.position,
                 token: expr.value,
-                value: expr.lhs.type === 'path' ? expr.lhs[0].value : expr.lhs.value
+                value: expr.lhs.type === 'path' ? expr.lhs.steps[0].value : expr.lhs.value
             };
         }
         environment.bind(expr.lhs.value, value);
@@ -1964,13 +2109,13 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function evaluateCondition(expr, input, environment) {
+    function* evaluateCondition(expr, input, environment) {
         var result;
-        var condition = evaluate(expr.condition, input, environment);
+        var condition = yield * evaluate(expr.condition, input, environment);
         if (functionBoolean(condition)) {
-            result = evaluate(expr.then, input, environment);
+            result = yield * evaluate(expr.then, input, environment);
         } else if (typeof expr.else !== 'undefined') {
-            result = evaluate(expr.else, input, environment);
+            result = yield * evaluate(expr.else, input, environment);
         }
         return result;
     }
@@ -1982,16 +2127,16 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function evaluateBlock(expr, input, environment) {
+    function* evaluateBlock(expr, input, environment) {
         var result;
         // create a new frame to limit the scope of variable assignments
         // TODO, only do this if the post-parse stage has flagged this as required
         var frame = createFrame(environment);
         // invoke each expression in turn
         // only return the result of the last one
-        expr.expressions.forEach(function (expression) {
-            result = evaluate(expression, input, frame);
-        });
+        for(var ii = 0; ii < expr.expressions.length; ii++) {
+            result = yield * evaluate(expr.expressions[ii], input, frame);
+        }
 
         return result;
     }
@@ -2005,7 +2150,6 @@ var jsonata = (function() {
         expr.value.lastIndex = 0;
         var closure = function(str) {
             var re = expr.value;
-            //var result = str.match(expr.value);
             var result;
             var match = re.exec(str);
             if(match !== null) {
@@ -2063,7 +2207,105 @@ var jsonata = (function() {
         return result;
     }
 
-    var chain = evaluate(parser('function($f, $g) { function($x){ $g($f($x)) } }'), null, staticFrame);
+    /**
+     * sort / order-by operator
+     * @param {Object} expr - AST for operator
+     * @param {Object} input - Input data to evaluate against
+     * @param {Object} environment - Environment
+     * @returns {*} Ordered sequence
+     */
+    function* evaluateSortExpression(expr, input, environment) {
+        var result;
+
+        // evaluate the lhs, then sort the results in order according to rhs expression
+        var lhs = yield * evaluate(expr.lhs, input, environment);
+
+        // sort the lhs array
+        // use comparator function
+        var comparator = function(a, b) {
+            // expr.rhs is an array of order-by in priority order
+            var comp = 0;
+            for(var index = 0; comp === 0 && index < expr.rhs.length; index++) {
+                var term = expr.rhs[index];
+                //evaluate the rhs expression in the context of a
+                var aa = driveGenerator(term.expression, a, environment);
+                //evaluate the rhs expression in the context of b
+                var bb = driveGenerator(term.expression, b, environment);
+
+                // type checks
+                var atype = typeof aa;
+                var btype = typeof bb;
+                // undefined should be last in sort order
+                if(atype === 'undefined') {
+                    // swap them, unless btype is also undefined
+                    comp = (btype === 'undefined') ? 0 : 1;
+                    continue;
+                }
+                if(btype === 'undefined') {
+                    comp = -1;
+                    continue;
+                }
+
+                // if aa or bb are not string or numeric values, then throw an error
+                if(!(atype === 'string' || atype === 'number') || !(btype === 'string' || btype === 'number')) {
+                    throw {
+                        code: "T2008",
+                        stack: (new Error()).stack,
+                        position: expr.position,
+                        value: !(atype === 'string' || atype === 'number') ? aa : bb
+                    };
+                }
+
+                //if aa and bb are not of the same type
+                if(atype !== btype) {
+                    throw {
+                        code: "T2007",
+                        stack: (new Error()).stack,
+                        position: expr.position,
+                        value: aa,
+                        value2: bb
+                    };
+                }
+                if(aa === bb) {
+                    // both the same - move on to next term
+                    continue;
+                } else if (aa < bb) {
+                    comp = -1;
+                } else {
+                    comp = 1;
+                }
+                if(term.descending === true) {
+                    comp = -comp;
+                }
+            }
+            // only swap a & b if comp equals 1
+            return comp === 1;
+        };
+
+        result = functionSort(lhs, comparator);
+
+        return result;
+    }
+
+    /**
+     * Evaluate an expression by driving the generator to completion
+     * Used when it's not possible to yield
+     * @param {Object} expr - AST
+     * @param {Object} input - Input data to evaluate against
+     * @param {Object} environment - Environment
+     * @returns {*} result
+     */
+    function driveGenerator(expr, input, environment) {
+        var gen = evaluate(expr, input, environment);
+        // returns a generator - so iterate over it
+        var comp = gen.next();
+        while (!comp.done) {
+            comp = gen.next(comp.value);
+        }
+        return comp.value;
+    }
+
+    var chain = driveGenerator(parser('function($f, $g) { function($x){ $g($f($x)) } }'), null, staticFrame);
 
     /**
      * Apply the function on the RHS using the sequence on the LHS as the first argument
@@ -2072,16 +2314,16 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function evaluateApplyExpression(expr, input, environment) {
+    function* evaluateApplyExpression(expr, input, environment) {
         var result;
 
-        var arg1 = evaluate(expr.lhs, input, environment);
+        var arg1 = yield * evaluate(expr.lhs, input, environment);
 
         if(expr.rhs.type === 'function') {
             // this is a function _invocation_; invoke it with arg1 at the start
-            result = evaluateFunction(expr.rhs, input, environment, {context: arg1});
+            result = yield * evaluateFunction(expr.rhs, input, environment, {context: arg1});
         } else {
-            var func = evaluate(expr.rhs, input, environment);
+            var func = yield * evaluate(expr.rhs, input, environment);
 
             if(!isFunction(func)) {
                 throw {
@@ -2095,9 +2337,9 @@ var jsonata = (function() {
             if(isFunction(arg1)) {
                 // this is function chaining (func1 ~> func2)
                 // λ($f, $g) { λ($x){ $g($f($x)) } }
-                result = apply(chain, [arg1, func], environment, null);
+                result = yield * apply(chain, [arg1, func], environment, null);
             } else {
-                result = apply(func, [arg1], environment, null);
+                result = yield * apply(func, [arg1], environment, null);
             }
 
         }
@@ -2124,6 +2366,15 @@ var jsonata = (function() {
     }
 
     /**
+     *
+     * @param {Object} arg - expression to test
+     * @returns {boolean} - true if it is a generator function (function*)
+     */
+    function isGenerator(arg) {
+        return arg.constructor.name === 'GeneratorFunction';
+    }
+
+    /**
      * Evaluate function against input data
      * @param {Object} expr - JSONata expression
      * @param {Object} input - Input data to evaluate against
@@ -2131,13 +2382,13 @@ var jsonata = (function() {
      * @param {Object} [applyto] - LHS of ~> operator
      * @returns {*} Evaluated input data
      */
-    function evaluateFunction(expr, input, environment, applyto) {
+    function* evaluateFunction(expr, input, environment, applyto) {
         var result;
         // evaluate the arguments
         var evaluatedArgs = [];
-        expr.arguments.forEach(function (arg) {
-            evaluatedArgs.push(evaluate(arg, input, environment));
-        });
+        for(var ii = 0; ii < expr.arguments.length; ii++) {
+            evaluatedArgs.push(yield * evaluate(expr.arguments[ii], input, environment));
+        }
         if(applyto) {
             // insert the first argument from the LHS of ~>
             evaluatedArgs.unshift(applyto.context);
@@ -2147,29 +2398,25 @@ var jsonata = (function() {
         // can't assume that expr.procedure is a lambda type directly
         // could be an expression that evaluates to a function (e.g. variable reference, parens expr etc.
         // evaluate it generically first, then check that it is a function.  Throw error if not.
-        var proc = evaluate(expr.procedure, input, environment);
+        var proc = yield * evaluate(expr.procedure, input, environment);
 
-        if (typeof proc === 'undefined' && expr.procedure.type === 'path' && environment.lookup(expr.procedure[0].value)) {
+        if (typeof proc === 'undefined' && expr.procedure.type === 'path' && environment.lookup(expr.procedure.steps[0].value)) {
             // help the user out here if they simply forgot the leading $
             throw {
                 code: "T1005",
                 stack: (new Error()).stack,
                 position: expr.position,
-                token: expr.procedure[0].value
+                token: expr.procedure.steps[0].value
             };
         }
         // apply the procedure
         try {
-            var validatedArgs = evaluatedArgs;
-            if(proc) {
-                validatedArgs = validateArguments(proc.signature, evaluatedArgs, input);
-            }
-            result = apply(proc, validatedArgs, input);
+            result = yield * apply(proc, evaluatedArgs, input);
         } catch (err) {
             // add the position field to the error
             err.position = expr.position;
             // and the function identifier
-            err.token = expr.procedure.type === 'path' ? expr.procedure[0].value : expr.procedure.value;
+            err.token = expr.procedure.type === 'path' ? expr.procedure.steps[0].value : expr.procedure.value;
             throw err;
         }
         return result;
@@ -2182,20 +2429,20 @@ var jsonata = (function() {
      * @param {Object} self - Self
      * @returns {*} Result of procedure
      */
-    function apply(proc, args, self) {
+    function* apply(proc, args, self) {
         var result;
-        result = applyInner(proc, args, self);
+        result = yield * applyInner(proc, args, self);
         while(isLambda(result) && result.thunk === true) {
             // trampoline loop - this gets invoked as a result of tail-call optimization
             // the function returned a tail-call thunk
             // unpack it, evaluate its arguments, and apply the tail call
-            var next = evaluate(result.body.procedure, result.input, result.environment);
+            var next = yield * evaluate(result.body.procedure, result.input, result.environment);
             var evaluatedArgs = [];
-            result.body.arguments.forEach(function (arg) {
-                evaluatedArgs.push(evaluate(arg, result.input, result.environment));
-            });
+            for(var ii = 0; ii < result.body.arguments.length; ii++) {
+                evaluatedArgs.push(yield * evaluate(result.body.arguments[ii], result.input, result.environment));
+            }
 
-            result = applyInner(next, evaluatedArgs, self);
+            result = yield * applyInner(next, evaluatedArgs, self);
         }
         return result;
     }
@@ -2207,14 +2454,22 @@ var jsonata = (function() {
      * @param {Object} self - Self
      * @returns {*} Result of procedure
      */
-    function applyInner(proc, args, self) {
+    function* applyInner(proc, args, self) {
         var result;
+        var validatedArgs = args;
+        if(proc) {
+            validatedArgs = validateArguments(proc.signature, args, self);
+        }
         if (isLambda(proc)) {
-            result = applyProcedure(proc, args);
+            result = yield * applyProcedure(proc, validatedArgs);
         } else if (proc && proc._jsonata_function === true) {
-            result = proc.implementation.apply(self, args);
+            result = proc.implementation.apply(self, validatedArgs);
+            // this might be a function* generator - if so, yield
+            if(isGenerator(proc.implementation)) {
+                result = yield *result;
+            }
         } else if (typeof proc === 'function') {
-            result = proc.apply(self, args);
+            result = proc.apply(self, validatedArgs);
         } else {
             throw {
                 code: "T1006",
@@ -2254,27 +2509,28 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function evaluatePartialApplication(expr, input, environment) {
+    function* evaluatePartialApplication(expr, input, environment) {
         // partially apply a function
         var result;
         // evaluate the arguments
         var evaluatedArgs = [];
-        expr.arguments.forEach(function (arg) {
+        for(var ii = 0; ii < expr.arguments.length; ii++) {
+            var arg = expr.arguments[ii];
             if (arg.type === 'operator' && arg.value === '?') {
                 evaluatedArgs.push(arg);
             } else {
-                evaluatedArgs.push(evaluate(arg, input, environment));
+                evaluatedArgs.push(yield * evaluate(arg, input, environment));
             }
-        });
+        }
         // lookup the procedure
-        var proc = evaluate(expr.procedure, input, environment);
-        if (typeof proc === 'undefined' && expr.procedure.type === 'path' && environment.lookup(expr.procedure[0].value)) {
+        var proc = yield * evaluate(expr.procedure, input, environment);
+        if (typeof proc === 'undefined' && expr.procedure.type === 'path' && environment.lookup(expr.procedure.steps[0].value)) {
             // help the user out here if they simply forgot the leading $
             throw {
                 code: "T1007",
                 stack: (new Error()).stack,
                 position: expr.position,
-                token: expr.procedure[0].value
+                token: expr.procedure.steps[0].value
             };
         }
         if (isLambda(proc)) {
@@ -2288,7 +2544,7 @@ var jsonata = (function() {
                 code: "T1008",
                 stack: (new Error()).stack,
                 position: expr.position,
-                token: expr.procedure.type === 'path' ? expr.procedure[0].value : expr.procedure.value
+                token: expr.procedure.type === 'path' ? expr.procedure.steps[0].value : expr.procedure.value
             };
         }
         return result;
@@ -2316,7 +2572,7 @@ var jsonata = (function() {
      * @param {Array} args - Arguments
      * @returns {*} Result of procedure
      */
-    function applyProcedure(proc, args) {
+    function* applyProcedure(proc, args) {
         var result;
         var env = createFrame(proc.environment);
         proc.arguments.forEach(function (param, index) {
@@ -2324,9 +2580,9 @@ var jsonata = (function() {
         });
         if (typeof proc.body === 'function') {
             // this is a lambda that wraps a native function - generated by partially evaluating a native
-            result = applyNativeFunction(proc.body, env);
+            result = yield * applyNativeFunction(proc.body, env);
         } else {
-            result = evaluate(proc.body, proc.input, env);
+            result = yield * evaluate(proc.body, proc.input, env);
         }
         return result;
     }
@@ -2388,7 +2644,7 @@ var jsonata = (function() {
      * @param {Object} env - Environment
      * @returns {*} Result of applying native function
      */
-    function applyNativeFunction(proc, env) {
+    function* applyNativeFunction(proc, env) {
         var sigArgs = getNativeFunctionArguments(proc);
         // generate the array of arguments for invoking the function - look them up in the environment
         var args = sigArgs.map(function (sigArg) {
@@ -2396,6 +2652,9 @@ var jsonata = (function() {
         });
 
         var result = proc.apply(null, args);
+        if(isGenerator(proc)) {
+            result = yield * result;
+        }
         return result;
     }
 
@@ -2733,7 +2992,7 @@ var jsonata = (function() {
      * @param {Integer} [limit] - max number of matches to return
      * @returns {Array} The array of match objects
      */
-    function functionReplace(str, pattern, replacement, limit) {
+    function* functionReplace(str, pattern, replacement, limit) {
         // undefined inputs always return undefined
         if(typeof str === 'undefined') {
             return undefined;
@@ -2833,7 +3092,7 @@ var jsonata = (function() {
                 if (typeof matches !== 'undefined') {
                     while (typeof matches !== 'undefined' && (typeof limit === 'undefined' || count < limit)) {
                         result += str.substring(position, matches.start);
-                        var replacedWith = apply(replacer, [matches], null);
+                        var replacedWith = yield * apply(replacer, [matches], null);
                         // check replacedWith is a string
                         if(typeof replacedWith === 'string') {
                             result += replacedWith;
@@ -2962,6 +3221,165 @@ var jsonata = (function() {
         return result;
     }
 
+    /**
+     * Absolute value of a number
+     * @param {Number} arg - Argument
+     * @returns {Number} absolute value of argument
+     */
+    function functionAbs(arg) {
+        var result;
+
+        // undefined inputs always return undefined
+        if(typeof arg === 'undefined') {
+            return undefined;
+        }
+
+        result = Math.abs(arg);
+        return result;
+    }
+
+    /**
+     * Rounds a number down to integer
+     * @param {Number} arg - Argument
+     * @returns {Number} rounded integer
+     */
+    function functionFloor(arg) {
+        var result;
+
+        // undefined inputs always return undefined
+        if(typeof arg === 'undefined') {
+            return undefined;
+        }
+
+        result = Math.floor(arg);
+        return result;
+    }
+
+    /**
+     * Rounds a number up to integer
+     * @param {Number} arg - Argument
+     * @returns {Number} rounded integer
+     */
+    function functionCeil(arg) {
+        var result;
+
+        // undefined inputs always return undefined
+        if(typeof arg === 'undefined') {
+            return undefined;
+        }
+
+        result = Math.ceil(arg);
+        return result;
+    }
+
+    /**
+     * Round to half even
+     * @param {Number} arg - Argument
+     * @param {Number} precision - number of decimal places
+     * @returns {Number} rounded integer
+     */
+    function functionRound(arg, precision) {
+        var result;
+
+        // undefined inputs always return undefined
+        if(typeof arg === 'undefined') {
+            return undefined;
+        }
+
+        if(precision) {
+            // shift the decimal place - this needs to be done in a string since multiplying
+            // by a power of ten can introduce floating point precision errors which mess up
+            // this rounding algorithm - See 'Decimal rounding' in
+            // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round
+            // Shift
+            var value = arg.toString().split('e');
+            arg = +(value[0] + 'e' + (value[1] ? (+value[1] + precision) : precision));
+
+        }
+
+        // round up to nearest int
+        result = Math.round(arg);
+        var diff = result - arg;
+        if(Math.abs(diff) === 0.5 && Math.abs(result % 2) === 1) {
+            // rounded the wrong way - adjust to nearest even number
+            result = result - 1;
+        }
+        if(precision) {
+            // Shift back
+            value = result.toString().split('e');
+            /* istanbul ignore next */
+            result = +(value[0] + 'e' + (value[1] ? (+value[1] - precision) : -precision));
+        }
+        if(result === -0) {
+            // JSON doesn't do -0
+            result = 0;
+        }
+        return result;
+    }
+
+    /**
+     * Square root of number
+     * @param {Number} arg - Argument
+     * @returns {Number} square root
+     */
+    function functionSqrt(arg) {
+        var result;
+
+        // undefined inputs always return undefined
+        if(typeof arg === 'undefined') {
+            return undefined;
+        }
+
+        if(arg < 0) {
+            throw {
+                stack: (new Error()).stack,
+                code: "D3060",
+                index: 1,
+                value: arg
+            };
+        }
+
+        result = Math.sqrt(arg);
+
+        return result;
+    }
+
+    /**
+     * Raises number to the power of the second number
+     * @param {Number} arg - the base
+     * @param {Number} exp - the exponent
+     * @returns {Number} rounded integer
+     */
+    function functionPower(arg, exp) {
+        var result;
+
+        // undefined inputs always return undefined
+        if(typeof arg === 'undefined') {
+            return undefined;
+        }
+
+        result = Math.pow(arg, exp);
+
+        if(!isFinite(result)) {
+            throw {
+                stack: (new Error()).stack,
+                code: "D3061",
+                index: 1,
+                value: arg,
+                exp: exp
+            };
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns a random number 0 <= n < 1
+     * @returns {number} random number
+     */
+    function functionRandom() {
+        return Math.random();
+    }
 
     /**
      * Evaluate an input and return a boolean
@@ -3023,45 +3441,109 @@ var jsonata = (function() {
 
     /**
      * Create a map from an array of arguments
-     * @param {Function} func - function to apply
      * @param {Array} [arr] - array to map over
+     * @param {Function} func - function to apply
      * @returns {Array} Map array
      */
-    function functionMap(func, arr) {
-        // this can take a variable number of arguments - each one should be mapped to the equivalent arg of func
-        // assert that func is a function
-        var varargs = arguments;
-        var result = [];
-
-        // each subsequent arg must be an array - coerce if not
-        var args = arr;
-        args = [];
-        for (var ii = 1; ii < varargs.length; ii++) {
-            args.push(varargs[ii]);
+    function* functionMap(arr, func) {
+        // undefined inputs always return undefined
+        if(typeof arr === 'undefined') {
+            return undefined;
         }
+
+        var result = [];
         // do the map - iterate over the arrays, and invoke func
-        for (var i = 0; i < args[0].length; i++) {
-            var func_args = [];
+        for (var i = 0; i < arr.length; i++) {
+            var func_args = [arr[i]]; // the first arg (value) is required
+            // the other two are optional - only supply it if the function can take it
             var length = typeof func === 'function' ? func.length :
               func._jsonata_function === true ? func.implementation.length : func.arguments.length;
-            for (var j = 0; j < length; j++) {
-                func_args.push(args[j][i]);
+            if(length >= 2) {
+                func_args.push(i);
+            }
+            if(length >= 3) {
+                func_args.push(arr);
             }
             // invoke func
-            result.push(apply(func, func_args, null));
+            var res = yield * apply(func, func_args, null);
+            if(typeof res !== 'undefined') {
+                result.push(res);
+            }
         }
 
         return result;
     }
 
     /**
+     * Create a map from an array of arguments
+     * @param {Array} [arr] - array to filter
+     * @param {Function} func - predicate function
+     * @returns {Array} Map array
+     */
+    function* functionFilter(arr, func) {
+        // undefined inputs always return undefined
+        if(typeof arr === 'undefined') {
+            return undefined;
+        }
+
+        var result = [];
+
+        var predicate = function (value, index, array) {
+            var it = apply(func, [value, index, array], null);
+            // returns a generator - so iterate over it
+            var res = it.next();
+            while (!res.done) {
+                res = it.next(res.value);
+            }
+            return res.value;
+        };
+
+        for(var i = 0; i < arr.length; i++) {
+            var entry = arr[i];
+            if(functionBoolean(predicate(entry, i, arr))) {
+                result.push(entry);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Convolves (zips) each value from a set of arrays
+     * @param {Array} [args] - arrays to zip
+     * @returns {Array} Zipped array
+     */
+    function functionZip() {
+        // this can take a variable number of arguments
+        var result = [];
+        var args = Array.prototype.slice.call(arguments);
+        // length of the shortest array
+        var length = Math.min.apply(Math, args.map(function(arg) {
+            if(Array.isArray(arg)) {
+                return arg.length;
+            }
+            return 0;
+        }));
+        for(var i = 0; i < length; i++) {
+            var tuple = args.map((arg) => {return arg[i];});
+            result.push(tuple);
+        }
+        return result;
+    }
+
+    /**
      * Fold left function
-     * @param {Function} func - Function
      * @param {Array} sequence - Sequence
+     * @param {Function} func - Function
      * @param {Object} init - Initial value
      * @returns {*} Result
      */
-    function functionFoldLeft(func, sequence, init) {
+    function* functionFoldLeft(sequence, func, init) {
+        // undefined inputs always return undefined
+        if(typeof sequence === 'undefined') {
+            return undefined;
+        }
+
         var result;
 
         if (!(func.length === 2 || (func._jsonata_function === true && func.implementation.length === 2) || func.arguments.length === 2)) {
@@ -3082,7 +3564,7 @@ var jsonata = (function() {
         }
 
         while (index < sequence.length) {
-            result = apply(func, [result, sequence[index]], null);
+            result = yield * apply(func, [result, sequence[index]], null);
             index++;
         }
 
@@ -3195,6 +3677,197 @@ var jsonata = (function() {
     }
 
     /**
+     * Reverses the order of items in an array
+     * @param {Array} arr - the array to reverse
+     * @returns {Array} - the reversed array
+     */
+    function functionReverse(arr) {
+        // undefined inputs always return undefined
+        if(typeof arr === 'undefined') {
+            return undefined;
+        }
+
+        if(arr.length <= 1) {
+            return arr;
+        }
+
+        var length = arr.length;
+        var result = new Array(length);
+        for(var i = 0; i < length; i++) {
+            result[length - i - 1] = arr[i];
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param {*} obj - the input object to iterate over
+     * @param {*} func - the function to apply to each key/value pair
+     * @returns {Array} - the resultant array
+     */
+    function* functionEach(obj, func) {
+        var result = [];
+
+        for(var key in obj) {
+            var func_args = [obj[key], key];
+            // invoke func
+            result.push(yield * apply(func, func_args, null));
+        }
+
+        return result;
+    }
+
+    /**
+     * Implements the merge sort (stable) with optional comparator function
+     *
+     * @param {Array} arr - the array to sort
+     * @param {*} comparator - comparator function
+     * @returns {Array} - sorted array
+     */
+    function functionSort(arr, comparator) {
+        // undefined inputs always return undefined
+        if(typeof arr === 'undefined') {
+            return undefined;
+        }
+
+        if(arr.length <= 1) {
+            return arr;
+        }
+
+        var comp;
+        if(typeof comparator === 'undefined') {
+            // inject a default comparator - only works for numeric or string arrays
+            if (!isArrayOfNumbers(arr) && !isArrayOfStrings(arr)) {
+                throw {
+                    stack: (new Error()).stack,
+                    code: "D3070",
+                    index: 1
+                };
+            }
+
+            comp = function (a, b) {
+                return a > b;
+            };
+        } else if(typeof comparator === 'function') {
+            // for internal usage of functionSort (i.e. order-by syntax)
+            comp = comparator;
+        } else {
+            comp = function (a, b) {
+                var it = apply(comparator, [a, b], null);
+                // returns a generator - so iterate over it
+                var comp = it.next();
+                while (!comp.done) {
+                    comp = it.next(comp.value);
+                }
+                return comp.value;
+            };
+        }
+
+        var merge = function(l, r) {
+            var merge_iter = function(result, left, right) {
+                if (left.length === 0) {
+                    Array.prototype.push.apply(result, right);
+                } else if (right.length === 0) {
+                    Array.prototype.push.apply(result, left);
+                } else if (comp(left[0], right[0])) { // invoke the comparator function
+                    // if it returns true - swap left and right
+                    result.push(right[0]);
+                    merge_iter(result, left, right.slice(1));
+                } else {
+                    // otherwise keep the same order
+                    result.push(left[0]);
+                    merge_iter(result, left.slice(1), right);
+                }
+            };
+            var merged = [];
+            merge_iter(merged, l, r);
+            return merged;
+        };
+
+        var sort = function(array) {
+            if(array.length <= 1) {
+                return array;
+            } else {
+                var middle = Math.floor(array.length / 2);
+                var left = array.slice(0, middle);
+                var right = array.slice(middle);
+                left = sort(left);
+                right = sort(right);
+                return merge(left, right);
+            }
+        };
+
+        var result = sort(arr);
+
+        return result;
+    }
+
+    /**
+     * Randomly shuffles the contents of an array
+     * @param {Array} arr - the input array
+     * @returns {Array} the shuffled array
+     */
+    function functionShuffle(arr) {
+        // undefined inputs always return undefined
+        if(typeof arr === 'undefined') {
+            return undefined;
+        }
+
+        if(arr.length <= 1) {
+            return arr;
+        }
+
+        // shuffle using the 'inside-out' variant of the Fisher-Yates algorithm
+        var result = new Array(arr.length);
+        for(var i = 0; i < arr.length; i++) {
+            var j = Math.floor(Math.random() * (i + 1)); // random integer such that 0 ≤ j ≤ i
+            if(i !== j) {
+                result[i] = result[j];
+            }
+            result[j] = arr[i];
+        }
+
+        return result;
+    }
+
+    /**
+     * Applies a predicate function to each key/value pair in an object, and returns an object containing
+     * only the key/value pairs that passed the predicate
+     *
+     * @param {object} arg - the object to be sifted
+     * @param {object} func - the predicate function (lambda or native)
+     * @returns {object} - sifted object
+     */
+    function functionSift(arg, func) {
+        var result = {};
+
+        var predicate = function (value, key, object) {
+            var it = apply(func, [value, key, object], null);
+            // returns a generator - so iterate over it
+            var res = it.next();
+            while (!res.done) {
+                res = it.next(res.value);
+            }
+            return res.value;
+        };
+
+        for(var item in arg) {
+            var entry = arg[item];
+            if(functionBoolean(predicate(entry, item, arg))) {
+                result[item] = entry;
+            }
+        }
+
+        // empty objects should be changed to undefined
+        if(Object.keys(result).length === 0) {
+            result = undefined;
+        }
+
+        return result;
+    }
+
+    /**
      * Create frame
      * @param {Object} enclosingEnvironment - Enclosing environment
      * @returns {{bind: bind, lookup: lookup}} Created frame
@@ -3237,15 +3910,29 @@ var jsonata = (function() {
     staticFrame.bind('split', defineFunction(functionSplit, '<s-(sf)n?:a<s>>')); // TODO <s-(sf<s:o>)n?:a<s>>
     staticFrame.bind('join', defineFunction(functionJoin, '<a<s>s?:s>'));
     staticFrame.bind('number', defineFunction(functionNumber, '<(ns)-:n>'));
+    staticFrame.bind('floor', defineFunction(functionFloor, '<n-:n>'));
+    staticFrame.bind('ceil', defineFunction(functionCeil, '<n-:n>'));
+    staticFrame.bind('round', defineFunction(functionRound, '<n-n?:n>'));
+    staticFrame.bind('abs', defineFunction(functionAbs, '<n-:n>'));
+    staticFrame.bind('sqrt', defineFunction(functionSqrt, '<n-:n>'));
+    staticFrame.bind('power', defineFunction(functionPower, '<n-n:n>'));
+    staticFrame.bind('random', defineFunction(functionRandom, '<:n>'));
     staticFrame.bind('boolean', defineFunction(functionBoolean, '<x-:b>'));
     staticFrame.bind('not', defineFunction(functionNot, '<x-:b>'));
-    staticFrame.bind('map', defineFunction(functionMap, '<fa+>'));
-    staticFrame.bind('reduce', defineFunction(functionFoldLeft, '<faj?:j>')); // TODO <f<jj:j>a<j>j?:j>
+    staticFrame.bind('map', defineFunction(functionMap, '<af>'));
+    staticFrame.bind('zip', defineFunction(functionZip, '<a+>'));
+    staticFrame.bind('filter', defineFunction(functionFilter, '<af>'));
+    staticFrame.bind('reduce', defineFunction(functionFoldLeft, '<afj?:j>')); // TODO <f<jj:j>a<j>j?:j>
+    staticFrame.bind('sift', defineFunction(functionSift, '<o-f?:o>'));
     staticFrame.bind('keys', defineFunction(functionKeys, '<x-:a<s>>'));
     staticFrame.bind('lookup', defineFunction(functionLookup, '<x-s:x>'));
     staticFrame.bind('append', defineFunction(functionAppend, '<xx:a>'));
     staticFrame.bind('exists', defineFunction(functionExists, '<x:b>'));
     staticFrame.bind('spread', defineFunction(functionSpread, '<x-:a<o>>'));
+    staticFrame.bind('reverse', defineFunction(functionReverse, '<a:a>'));
+    staticFrame.bind('each', defineFunction(functionEach, '<o-f:a>'));
+    staticFrame.bind('sort', defineFunction(functionSort, '<af?:a>'));
+    staticFrame.bind('shuffle', defineFunction(functionShuffle, '<a:a>'));
 
     /**
      * Error codes
@@ -3283,6 +3970,10 @@ var jsonata = (function() {
         "D2005": "The left side of := must be a variable name (start with $)",
         "D1004": "Regular expression matches zero length string",
         "T2006": "The right side of the function application operator ~> must be a function",
+        "T2007": "Type mismatch when comparing values {{value}} and {{value2}} in order-by clause",
+        "T2008": "The expressions within an order-by clause must evaluate to numeric or string values",
+        "T2009": "The values {{value}} and {{value2}} either side of operator {{token}} must be of the same data type",
+        "T2010": "The expressions either side of operator {{token}} must evaluate to numeric or string values",
         "T1005": "Attempted to invoke a non-function. Did you mean '${{token}}'?",
         "T1006": "Attempted to invoke a non-function",
         "T1007": "Attempted to partially apply a non-function. Did you mean '${{token}}'?",
@@ -3292,7 +3983,12 @@ var jsonata = (function() {
         "D3011": "Fourth argument of replace function must evaluate to a positive number",
         "D3012": "Attempted to replace a matched string with a non-string value",
         "D3020": "Third argument of split function must evaluate to a positive number",
-        "D3030": "Unable to cast value to a number: {{value}}"
+        "D3030": "Unable to cast value to a number: {{value}}",
+        "D3040": "Third argument of match function must evaluate to a positive number",
+        "D3050": "First argument of reduce function must be a function with two arguments",
+        "D3060": "The sqrt function cannot be applied to a negative number: {{value}}",
+        "D3061": "The power function has resulted in a value that cannot be represented as a JSON number: base={{value}}, exponent={{exp}}",
+        "D3070": "The single argument form of the sort function can only be applied to an array of strings or an array of numbers.  Use the second argument to specify a comparison function"
     };
 
     /**
@@ -3309,7 +4005,7 @@ var jsonata = (function() {
         if(typeof template !== 'undefined') {
             // if there are any handlebars, replace them with the field references
             message = template.replace(/\{\{([^}]+)}}/g, function() {
-                return err[arguments[1]];
+                return JSON.stringify(err[arguments[1]]);
             });
         }
         return message;
@@ -3331,7 +4027,7 @@ var jsonata = (function() {
         }
         var environment = createFrame(staticFrame);
         return {
-            evaluate: function (input, bindings) {
+            evaluate: function (input, bindings, callback) {
                 if (typeof bindings !== 'undefined') {
                     var exec_env;
                     // the variable bindings have been passed in - create a frame to hold these
@@ -3344,15 +4040,49 @@ var jsonata = (function() {
                 }
                 // put the input document into the environment as the root object
                 exec_env.bind('$', input);
-                var result;
-                try {
-                    result = evaluate(ast, input, exec_env);
-                } catch(err) {
-                    // insert error message into structure
-                    err.message = lookupMessage(err);
-                    throw err;
+
+                // capture the timestamp and put it in the execution environment
+                // the $now() function will return this value - whenever it is called
+                var timestamp = (new Date()).toJSON();
+                exec_env.bind('now', defineFunction(function() {
+                    return timestamp;
+                }, '<:s>'));
+
+                var result, it;
+                // if a callback function is supplied, then drive the generator in a promise chain
+                if(typeof callback === 'function') {
+                    exec_env.bind('__jsonata_async', true);
+                    var thenHandler = function (response) {
+//                    console.log('THEN: ', response);
+                        result = it.next(response);
+                        if (result.done) {
+                            callback(null, result.value);
+                        } else {
+                            result.value.then(thenHandler)
+                              .catch(function (err) {
+                                  err.message = lookupMessage(err);
+                                  callback(err, null);
+                              });
+                        }
+                    };
+                    it = evaluate(ast, input, exec_env);
+                    result = it.next();
+                    result.value.then(thenHandler);
+                } else {
+                    // no callback function - drive the generator to completion synchronously
+                    try {
+                        it = evaluate(ast, input, exec_env);
+                        result = it.next();
+                        while (!result.done) {
+                            result = it.next(result.value);
+                        }
+                        return result.value;
+                    } catch (err) {
+                        // insert error message into structure
+                        err.message = lookupMessage(err);
+                        throw err;
+                    }
                 }
-                return result;
             },
             assign: function (name, value) {
                 environment.bind(name, value);
@@ -3375,3 +4105,4 @@ var jsonata = (function() {
 if(typeof module !== 'undefined') {
     module.exports = jsonata;
 }
+

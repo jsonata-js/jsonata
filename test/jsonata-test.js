@@ -1104,6 +1104,108 @@ describe('Evaluator - numeric operators', function () {
 
 describe('Evaluator - comparison operators', function () {
 
+    describe('3>-3', function () {
+        it('should return result object', function () {
+            var expr = jsonata('3>-3');
+            var result = expr.evaluate();
+            var expected = true;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('3>3', function () {
+        it('should return result object', function () {
+            var expr = jsonata('3>3');
+            var result = expr.evaluate();
+            var expected = false;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('3=3', function () {
+        it('should return result object', function () {
+            var expr = jsonata('3=3');
+            var result = expr.evaluate();
+            var expected = true;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('"3"="3"', function () {
+        it('should return result object', function () {
+            var expr = jsonata('"3"="3"');
+            var result = expr.evaluate();
+            var expected = true;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('"3"=3', function () {
+        it('should return result object', function () {
+            var expr = jsonata('"3"=3');
+            var result = expr.evaluate();
+            var expected = false;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('"hello" = "hello"', function () {
+        it('should return result object', function () {
+            var expr = jsonata('"hello" = "hello"');
+            var result = expr.evaluate();
+            var expected = true;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('"hello" != "world"', function () {
+        it('should return result object', function () {
+            var expr = jsonata('"hello" != "world"');
+            var result = expr.evaluate();
+            var expected = true;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('"hello" < "world"', function () {
+        it('should return result object', function () {
+            var expr = jsonata('"hello" < "world"');
+            var result = expr.evaluate();
+            var expected = true;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('"32" < 42', function () {
+        it('should return result object', function () {
+            expect(function () {
+                var expr = jsonata('"32" < 42');
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 6, code: 'T2009', value: "32", value2: 42});
+        });
+    });
+
+    describe('null <= "world"', function () {
+        it('should return result object', function () {
+            expect(function () {
+                var expr = jsonata('null <= "world"');
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 7, code: 'T2010', value: null});
+        });
+    });
+
+    describe('3 >= true', function () {
+        it('should return result object', function () {
+            expect(function () {
+                var expr = jsonata('3 >= true');
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 4, code: 'T2010', value: true});
+        });
+    });
+
     describe('foo.bar > bar', function () {
         it('should return result object', function () {
             var expr = jsonata('foo.bar > bar');
@@ -4331,6 +4433,433 @@ describe('Evaluator - functions: number', function () {
 
 });
 
+describe('Evaluator - functions: abs', function () {
+
+    describe('$abs(3.7)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$abs(3.7)');
+            var result = expr.evaluate();
+            var expected = 3.7;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$abs(-3.7)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$abs(-3.7)');
+            var result = expr.evaluate();
+            var expected = 3.7;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$abs(0)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$abs(0)');
+            var result = expr.evaluate();
+            var expected = 0;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$abs(nothing)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$abs(nothing)');
+            var result = expr.evaluate();
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+});
+
+describe('Evaluator - functions: floor', function () {
+
+    describe('$floor(3.7)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$floor(3.7)');
+            var result = expr.evaluate();
+            var expected = 3;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$floor(-3.7)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$floor(-3.7)');
+            var result = expr.evaluate();
+            var expected = -4;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$floor(0)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$floor(0)');
+            var result = expr.evaluate();
+            var expected = 0;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$floor(nothing)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$floor(nothing)');
+            var result = expr.evaluate();
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+});
+
+describe('Evaluator - functions: ceil', function () {
+
+    describe('$ceil(3.7)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$ceil(3.7)');
+            var result = expr.evaluate();
+            var expected = 4;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$ceil(-3.7)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$ceil(-3.7)');
+            var result = expr.evaluate();
+            var expected = -3;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$ceil(0)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$ceil(0)');
+            var result = expr.evaluate();
+            var expected = 0;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$ceil(nothing)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$ceil(nothing)');
+            var result = expr.evaluate();
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+});
+
+describe('Evaluator - functions: round', function () {
+
+    describe('$round(4)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$round(4)');
+            var result = expr.evaluate();
+            var expected = 4;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$round(2.3)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$round(2.3)');
+            var result = expr.evaluate();
+            var expected = 2;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$round(2.7)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$round(2.7)');
+            var result = expr.evaluate();
+            var expected = 3;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$round(2.5)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$round(2.5)');
+            var result = expr.evaluate();
+            var expected = 2;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$round(3.5)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$round(3.5)');
+            var result = expr.evaluate();
+            var expected = 4;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$round(-0.5)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$round(-0.5)');
+            var result = expr.evaluate();
+            var expected = 0;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$round(-0.3)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$round(-0.3)');
+            var result = expr.evaluate();
+            var expected = 0;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$round(0.5)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$round(0.5)');
+            var result = expr.evaluate();
+            var expected = 0;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$round(-7.5)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$round(-7.5)');
+            var result = expr.evaluate();
+            var expected = -8;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$round(-8.5)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$round(-8.5)');
+            var result = expr.evaluate();
+            var expected = -8;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$round(4.49, 1)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$round(4.49, 1)');
+            var result = expr.evaluate();
+            var expected = 4.5;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$round(4.525, 2)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$round(4.525, 2)');
+            var result = expr.evaluate();
+            var expected = 4.52;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$round(4.515, 2)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$round(4.515, 2)');
+            var result = expr.evaluate();
+            var expected = 4.52;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$round(12345, -2)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$round(12345, -2)');
+            var result = expr.evaluate();
+            var expected = 12300;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$round(12450, -2)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$round(12450, -2)');
+            var result = expr.evaluate();
+            var expected = 12400;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$round(12350, -2)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$round(12350, -2)');
+            var result = expr.evaluate();
+            var expected = 12400;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$round(6.022e-23, 24)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$round(6.022e-23, 24)');
+            var result = expr.evaluate();
+            var expected = 6.0e-23;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$round(unknown)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$round(unknown)');
+            var result = expr.evaluate();
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+});
+
+describe('Evaluator - functions: sqrt', function () {
+
+    describe('$sqrt(4)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$sqrt(4)');
+            var result = expr.evaluate();
+            var expected = 2;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$sqrt(2)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$sqrt(2)');
+            var result = expr.evaluate();
+            var expected = Math.sqrt(2);
+            expect(result).to.be.closeTo(expected, 1e-13);
+        });
+    });
+
+    describe('$sqrt(10) * $sqrt(10)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$sqrt(10) * $sqrt(10)');
+            var result = expr.evaluate();
+            var expected = 10;
+            expect(result).to.be.closeTo(expected, 1e-13);
+        });
+    });
+
+    describe('$sqrt(nothing)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$sqrt(nothing)');
+            var result = expr.evaluate();
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$sqrt(-2)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$sqrt(-2)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 6, code: 'D3060', token: 'sqrt', index: 1, value: -2});
+        });
+    });
+
+});
+
+describe('Evaluator - functions: power', function () {
+
+    describe('$power(4, 2)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$power(4, 2)');
+            var result = expr.evaluate();
+            var expected = 16;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$power(4, 0.5)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$power(4, 0.5)');
+            var result = expr.evaluate();
+            var expected = 2;
+            expect(result).to.be.closeTo(expected, 1e-13);
+        });
+    });
+
+    describe('$power(10, -2)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$power(10, -2)');
+            var result = expr.evaluate();
+            var expected = 0.01;
+            expect(result).to.be.closeTo(expected, 1e-13);
+        });
+    });
+
+    describe('$power(-2, 3)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$power(-2, 3)');
+            var result = expr.evaluate();
+            var expected = -8;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$power(nothing, 3)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$power(nothing, 3)');
+            var result = expr.evaluate();
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$power(-2, 1/3)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$power(-2, 1/3)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 7, code: 'D3061', token: 'power', index: 1, value: -2, exp: 1/3});
+        });
+    });
+
+    describe('$power(100, 1000)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$power(100, 1000)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 7, code: 'D3061', token: 'power', index: 1, value: 100, exp: 1000});
+        });
+    });
+
+});
+
+describe('Evaluator - functions: random', function () {
+
+    describe('random number")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$random()');
+            var result = expr.evaluate();
+            var expected = result >= 0 && result < 1;
+            expect(true).to.deep.equal(expected);
+        });
+    });
+
+    describe('consequetive random numbers should be different")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$random() = $random()');
+            var result = expr.evaluate();
+            var expected = false;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+});
+
 describe('Evaluator - functions: boolean', function () {
 
     describe('$boolean("Hello World")', function () {
@@ -4714,233 +5243,378 @@ describe('Evaluator - functions: append', function () {
 
 });
 
+describe('Evaluator - function: each', function () {
 
-describe('Evaluator - functions: exists', function () {
-
-    describe('$exists("Hello World")', function () {
-        it('should return true', function () {
-            var expr = jsonata('$exists("Hello World")');
-            var result = expr.evaluate(testdata2);
-            var expected = true;
+    describe('$each(Address, λ($v, $k) {$k & ": " & $v})', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$each(Address, λ($v, $k) {$k & ": " & $v})');
+            var result = expr.evaluate(testdata4);
+            var expected = [
+                "Street: Hursley Park",
+                "City: Winchester",
+                "Postcode: SO21 2JN"
+            ];
             expect(result).to.deep.equal(expected);
         });
     });
 
-    describe('$exists("")', function () {
-        it('should return true', function () {
-            var expr = jsonata('$exists("")');
-            var result = expr.evaluate(testdata2);
-            var expected = true;
+});
+
+describe('Evaluator - function: reverse', function () {
+
+    describe('$reverse([1..5])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$reverse([1..5])');
+            var result = expr.evaluate(testdata4);
+            var expected = [5,4,3,2,1];
             expect(result).to.deep.equal(expected);
         });
     });
 
-    describe('$exists(true)', function () {
-        it('should return true', function () {
-            var expr = jsonata('$exists(true)');
-            var result = expr.evaluate(testdata2);
-            var expected = true;
+    describe('$reverse must not change the input', function () {
+        it('should return result object', function () {
+            var expr = jsonata('[[$], [$reverse($)], [$]]');
+            var result = expr.evaluate([1,2,3]);
+            var expected = [[1,2,3], [3,2,1], [1,2,3]];
             expect(result).to.deep.equal(expected);
         });
     });
 
-    describe('$exists(false)', function () {
-        it('should return true', function () {
-            var expr = jsonata('$exists(false)');
-            var result = expr.evaluate(testdata2);
-            var expected = true;
+    describe('$reverse(nothing)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$reverse(nothing)');
+            var result = expr.evaluate(testdata4);
+            var expected = undefined;
             expect(result).to.deep.equal(expected);
         });
     });
 
-    describe('$exists(0)', function () {
-        it('should return true', function () {
-            var expr = jsonata('$exists(0)');
-            var result = expr.evaluate(testdata2);
-            var expected = true;
+    describe('$reverse([1])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$reverse([1])');
+            var result = expr.evaluate(testdata4);
+            var expected = [1];
             expect(result).to.deep.equal(expected);
         });
     });
 
-    describe('$exists(-0.5)', function () {
-        it('should return true', function () {
-            var expr = jsonata('$exists(-0.5)');
-            var result = expr.evaluate(testdata2);
-            var expected = true;
+});
+
+describe('Evaluator - function: zip', function () {
+
+    describe('zip two arrays', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$zip([1,2,3],[4,5,6])');
+            var result = expr.evaluate();
+            var expected = [[1,4],[2,5],[3,6]];
             expect(result).to.deep.equal(expected);
         });
     });
 
-    describe('$exists(null)', function () {
-        it('should return true', function () {
-            var expr = jsonata('$exists(null)');
-            var result = expr.evaluate(testdata2);
-            var expected = true;
+    describe('zip three arrays', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$zip([1,2,3],[4,5,6],[7,8,9])');
+            var result = expr.evaluate();
+            var expected = [[1,4,7],[2,5,8],[3,6,9]];
             expect(result).to.deep.equal(expected);
         });
     });
 
-    describe('$exists([])', function () {
-        it('should return true', function () {
-            var expr = jsonata('$exists([])');
-            var result = expr.evaluate(testdata2);
-            var expected = true;
+    describe('zip three arrays - unequal length', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$zip([1,2,3],[4,5],[7,8,9])');
+            var result = expr.evaluate();
+            var expected = [[1,4,7],[2,5,8]];
             expect(result).to.deep.equal(expected);
         });
     });
 
-    describe('$exists([0])', function () {
-        it('should return true', function () {
-            var expr = jsonata('$exists([0])');
-            var result = expr.evaluate(testdata2);
-            var expected = true;
+    describe('zip single array', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$zip([1,2,3])');
+            var result = expr.evaluate();
+            var expected = [[1],[2],[3]];
             expect(result).to.deep.equal(expected);
         });
     });
 
-    describe('$exists([1,2,3])', function () {
-        it('should return true', function () {
-            var expr = jsonata('$exists([1,2,3])');
-            var result = expr.evaluate(testdata2);
-            var expected = true;
+    describe('zip non-array values', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$zip(1,2,3)');
+            var result = expr.evaluate();
+            var expected = [[1,2,3]];
             expect(result).to.deep.equal(expected);
         });
     });
 
-    describe('$exists([[]])', function () {
-        it('should return true', function () {
-            var expr = jsonata('$exists([[]])');
-            var result = expr.evaluate(testdata2);
-            var expected = true;
+    describe('zip non-array values', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$zip([1,2,3], [4,5,6], nothing)');
+            var result = expr.evaluate();
+            var expected = [];
             expect(result).to.deep.equal(expected);
         });
     });
 
-    describe('$exists([[null]])', function () {
-        it('should return true', function () {
-            var expr = jsonata('$exists([[null]])');
-            var result = expr.evaluate(testdata2);
-            var expected = true;
+});
+
+describe('Evaluator - function: shuffle', function () {
+
+    describe('$count($shuffle([1..10]))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$count($shuffle([1..10]))');
+            var result = expr.evaluate(testdata4);
+            var expected = 10;
             expect(result).to.deep.equal(expected);
         });
     });
 
-    describe('$exists([[[true]]])', function () {
-        it('should return true', function () {
-            var expr = jsonata('$exists([[[true]]])');
-            var result = expr.evaluate(testdata2);
-            var expected = true;
+    describe('$sort($shuffle([1..10]))', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$sort($shuffle([1..10]))');
+            var result = expr.evaluate(testdata4);
+            var expected = [1,2,3,4,5,6,7,8,9,10];
             expect(result).to.deep.equal(expected);
         });
     });
 
-    describe('$exists({})', function () {
-        it('should return true', function () {
-            var expr = jsonata('$exists({})');
-            var result = expr.evaluate(testdata2);
-            var expected = true;
+    describe('$shuffle(nothing)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$shuffle(nothing)');
+            var result = expr.evaluate(testdata4);
+            var expected = undefined;
             expect(result).to.deep.equal(expected);
         });
     });
 
-    describe('$exists({"hello":"world"})', function () {
-        it('should return true', function () {
-            var expr = jsonata('$exists({"hello":"world"})');
-            var result = expr.evaluate(testdata2);
-            var expected = true;
+    describe('$shuffle([1])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$shuffle([1])');
+            var result = expr.evaluate(testdata4);
+            var expected = [1];
             expect(result).to.deep.equal(expected);
         });
     });
 
-    describe('$exists(Account)', function () {
-        it('should return true', function () {
-            var expr = jsonata('$exists(Account)');
+});
+
+describe('Evaluator - function: sort', function () {
+
+    describe('$sort(nothing)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$sort(nothing)');
             var result = expr.evaluate(testdata2);
-            var expected = true;
+            var expected = undefined;
             expect(result).to.deep.equal(expected);
         });
     });
 
-    describe('$exists(Account.Order.Product.Price)', function () {
-        it('should return true', function () {
-            var expr = jsonata('$exists(Account.Order.Product.Price)');
+    describe('$sort(1)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$sort(1)');
             var result = expr.evaluate(testdata2);
-            var expected = true;
+            var expected = [1];
             expect(result).to.deep.equal(expected);
         });
     });
 
-    describe('$exists($exists)', function () {
-        it('should return true', function () {
-            var expr = jsonata('$exists($exists)');
+    describe('$sort([1,3,2])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$sort([1,3,2])');
             var result = expr.evaluate(testdata2);
-            var expected = true;
+            var expected = [1,2,3];
             expect(result).to.deep.equal(expected);
         });
     });
 
-    describe('$exists(function(){true})', function () {
-        it('should return true', function () {
-            var expr = jsonata('$exists(function(){true})');
+    describe('$sort([1,3,22,11])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$sort([1,3,22,11])');
             var result = expr.evaluate(testdata2);
-            var expected = true;
+            var expected = [1,3,11,22];
             expect(result).to.deep.equal(expected);
         });
     });
 
-    describe('$exists(blah)', function () {
-        it('should return false', function () {
-            var expr = jsonata('$exists(blah)');
-            var result = expr.evaluate(testdata2);
-            var expected = false;
+    describe('[[$], [$sort($)], [$]]', function () {
+        it('should return result object', function () {
+            var expr = jsonata('[[$], [$sort($)], [$]]');
+            var result = expr.evaluate([1,3,2]);
+            var expected = [
+                [1, 3, 2],
+                [1, 2, 3],
+                [1, 3, 2]
+            ];
             expect(result).to.deep.equal(expected);
         });
     });
 
-    describe('$exists(Account.blah)', function () {
-        it('should return false', function () {
-            var expr = jsonata('$exists(Account.blah)');
+    describe('$sort(Account.Order.Product.Price)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$sort(Account.Order.Product.Price)');
             var result = expr.evaluate(testdata2);
-            var expected = false;
+            var expected = [21.67, 34.45, 34.45, 107.99];
             expect(result).to.deep.equal(expected);
         });
     });
 
-    describe('$exists(Account.Order[2])', function () {
-        it('should return false', function () {
-            var expr = jsonata('$exists(Account.Order[2])');
+    describe('$sort(Account.Order.Product."Product Name")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$sort(Account.Order.Product."Product Name")');
             var result = expr.evaluate(testdata2);
-            var expected = false;
+            var expected = ["Bowler Hat", "Bowler Hat", "Cloak", "Trilby hat"];
             expect(result).to.deep.equal(expected);
         });
     });
 
-    describe('$exists(Account.Order[0].blah)', function () {
-        it('should return false', function () {
-            var expr = jsonata('$exists(Account.Order[0].blah)');
-            var result = expr.evaluate(testdata2);
-            var expected = false;
-            expect(result).to.deep.equal(expected);
-        });
-    });
-
-    describe('$exists(2,3)', function () {
-        it('should throw error', function () {
-            var expr = jsonata('$exists(2,3)');
+    describe('$sort(Account.Order.Product)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$sort(Account.Order.Product)');
             expect(function () {
-                expr.evaluate();
+                expr.evaluate(testdata2);
             }).to.throw()
-                .to.deep.contain({position: 8, code: 'T0410', token: 'exists', index: 2, value: 3});
+              .to.deep.contain({position: 6, code: 'D3070', token: 'sort', index: 1});
         });
     });
 
-    describe('$exists()', function () {
-        it('should throw error', function () {
-            var expr = jsonata('$exists()');
-            expect(function () {
-                expr.evaluate();
-            }).to.throw()
-                .to.deep.contain({position: 8, code: 'T0410', token: 'exists', index: 1});
+    describe('$sort(Account.Order.Product, function($a, $b) { $a.(Price * Quantity) > $b.(Price * Quantity) }).(Price & " x " & Quantity)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$sort(Account.Order.Product, function($a, $b) { $a.(Price * Quantity) > $b.(Price * Quantity) }).(Price & " x " & Quantity)');
+            var result = expr.evaluate(testdata2);
+            var expected = [
+                "21.67 x 1",
+                "34.45 x 2",
+                "107.99 x 1",
+                "34.45 x 4"
+            ];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$sort must be stable', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$sort(Account.Order.Product, function($a, $b) { $a.Price > $b.Price }).SKU');
+            var result = expr.evaluate(testdata2);
+            var expected = [
+                "0406634348",
+                "0406654608",
+                "040657863",
+                "0406654603"
+            ];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$sort must be stable - with secondary sort', function () {
+        it('should return result object', function () {
+            var expr = jsonata(`
+                (Account.Order.Product
+                  ~> $sort(λ($a,$b){$a.Quantity < $b.Quantity})
+                  ~> $sort(λ($a,$b){$a.Price > $b.Price})
+                ).SKU
+            `);
+            var result = expr.evaluate(testdata2);
+            var expected = [
+                "0406634348",
+                "040657863",
+                "0406654608",
+                "0406654603"
+            ];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+});
+
+describe('Evaluator - function: sift', function () {
+
+    describe('$sift(λ($v){$v.**.Postcode})', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$sift(λ($v){$v.**.Postcode})');
+            var result = expr.evaluate(testdata4);
+            // follows this pattern - "2017-05-09T10:10:16.918Z"
+            var expected = {
+                "Address": {
+                    "Street": "Hursley Park",
+                    "City": "Winchester",
+                    "Postcode": "SO21 2JN"
+                },
+                "Other": {
+                    "Over 18 ?": true,
+                    "Misc": null,
+                    "Alternative.Address": {
+                        "Street": "Brick Lane",
+                        "City": "London",
+                        "Postcode": "E1 6RF"
+                    }
+                }
+            };
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('**[*].$sift(λ($v){$v.Postcode})', function () {
+        it('should return result object', function () {
+            var expr = jsonata('**[*].$sift(λ($v){$v.Postcode})');
+            var result = expr.evaluate(testdata4);
+            // follows this pattern - "2017-05-09T10:10:16.918Z"
+            var expected = [
+                {
+                    "Address": {
+                        "Street": "Hursley Park",
+                        "City": "Winchester",
+                        "Postcode": "SO21 2JN"
+                    }
+                },
+                {
+                    "Alternative.Address": {
+                        "Street": "Brick Lane",
+                        "City": "London",
+                        "Postcode": "E1 6RF"
+                    }
+                }
+            ];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$sift(λ($v, $k){$k ~> /^A/})', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$sift(λ($v, $k){$k ~> /^A/})');
+            var result = expr.evaluate(testdata4);
+            // follows this pattern - "2017-05-09T10:10:16.918Z"
+            var expected = {
+                "Age": 28,
+                "Address": {
+                    "Street": "Hursley Park",
+                    "City": "Winchester",
+                    "Postcode": "SO21 2JN"
+                }
+            };
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+});
+
+describe('Evaluator - function: now', function () {
+
+    describe('$now() returns timestamp', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$now()');
+            var result = expr.evaluate(testdata2);
+            // follows this pattern - "2017-05-09T10:10:16.918Z"
+            var expected = /^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d.\d\d\dZ$/.test(result);
+            expect(expected).to.deep.equal(true);
+        });
+    });
+
+    describe('$now() always returns same value within an expression', function () {
+        it('should return result object', function () {
+            var expr = jsonata('{"now": $now(), "delay": $sum([1..10000]), "later": $now()}.(now = later)');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6009,9 +6683,151 @@ describe('Evaluator - null', function () {
         });
     });
 
-
 });
 
+describe('Evaluator - Order-by', function () {
+    describe('Account.Order.Product.Price^($)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.Product.Price^($)');
+            var result = expr.evaluate(testdata2);
+            var expected = [21.67, 34.45, 34.45, 107.99];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('Account.Order.Product.Price^(<$)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.Product.Price^(<$)');
+            var result = expr.evaluate(testdata2);
+            var expected = [21.67, 34.45, 34.45, 107.99];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('Account.Order.Product.Price^(>$)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.Product.Price^(>$)');
+            var result = expr.evaluate(testdata2);
+            var expected = [107.99, 34.45, 34.45, 21.67];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('Account.Order.Product^(Price).Description.Colour', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.Product^(Price).Description.Colour');
+            var result = expr.evaluate(testdata2);
+            var expected = ["Orange", "Purple", "Purple", "Black"];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('Account.Order.Product^(Price).SKU', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.Product^(Price).SKU');
+            var result = expr.evaluate(testdata2);
+            var expected = ["0406634348", "0406654608", "040657863", "0406654603"];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('Account.Order.Product^(Price * Quantity).Description.Colour', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.Product^(Price * Quantity).Description.Colour');
+            var result = expr.evaluate(testdata2);
+            var expected = ["Orange", "Purple", "Black", "Purple"];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('Account.Order.Product^(Quantity, Description.Colour).Description.Colour', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.Product^(Quantity, Description.Colour).Description.Colour');
+            var result = expr.evaluate(testdata2);
+            var expected = ["Black", "Orange", "Purple", "Purple"];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('Account.Order.Product^(Quantity, >Description.Colour).Description.Colour', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.Product^(Quantity, >Description.Colour).Description.Colour');
+            var result = expr.evaluate(testdata2);
+            var expected = ["Orange", "Black", "Purple", "Purple"];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('Order-by term that matches undefined should send it to the end', function () {
+        it('should return result object', function () {
+            var clone = JSON.parse(JSON.stringify(testdata2));
+            delete clone.Account.Order[0].Product[0].Price;
+            var expr = jsonata('Account.Order.Product^(Price).SKU');
+            var result = expr.evaluate(clone);
+            var expected = ["0406634348", "040657863", "0406654603", "0406654608"];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('Order-by term that matches undefined should send it to the end', function () {
+        it('should return result object', function () {
+            var clone = JSON.parse(JSON.stringify(testdata2));
+            delete clone.Account.Order[0].Product[1].Price;
+            var expr = jsonata('Account.Order.Product^(Price).SKU');
+            var result = expr.evaluate(clone);
+            var expected = ["0406654608", "040657863", "0406654603", "0406634348"];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('Order-by term that matches undefined should send it to the end', function () {
+        it('should return result object', function () {
+            var clone = JSON.parse(JSON.stringify(testdata2));
+            delete clone.Account.Order[0].Product[0].Price;
+            delete clone.Account.Order[0].Product[1].Price;
+            var expr = jsonata('Account.Order.Product^(Price).SKU');
+            var result = expr.evaluate(clone);
+            var expected = ["040657863", "0406654603", "0406654608", "0406634348"];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('type mis-match in order-by term', function () {
+        it('should return result object', function () {
+            var clone = JSON.parse(JSON.stringify(testdata2));
+            clone.Account.Order[0].Product[0].Price = "foo";
+            expect(function () {
+                var expr = jsonata('Account.Order.Product^(Price).SKU');
+                expr.evaluate(clone);
+            }).to.throw()
+              .to.deep.contain({position: 22, code: 'T2007', value: "foo", value2: 21.67});
+        });
+    });
+
+    describe('invalid types in order-by term', function () {
+        it('should return result object', function () {
+            var clone = JSON.parse(JSON.stringify(testdata2));
+            clone.Account.Order[0].Product[0].Price = true;
+            expect(function () {
+                var expr = jsonata('Account.Order.Product^(Price).SKU');
+                expr.evaluate(clone);
+            }).to.throw()
+              .to.deep.contain({position: 22, code: 'T2008', value: true});
+        });
+    });
+
+    describe('invalid types in order-by term', function () {
+        it('should return result object', function () {
+            var clone = JSON.parse(JSON.stringify(testdata2));
+            clone.Account.Order[0].Product[1].Price = null;
+            expect(function () {
+                var expr = jsonata('Account.Order.Product^(Price).SKU');
+                expr.evaluate(clone);
+            }).to.throw()
+              .to.deep.contain({position: 22, code: 'T2008', value: null});
+        });
+    });
+});
 
 describe('Evaluator - Conditional expressions', function () {
     describe('["Red"[$$="Bus"], "White"[$$="Police Car"]][0]', function () {
@@ -6103,6 +6919,24 @@ describe('Evaluator - Lambda functions', function () {
             var expr = jsonata('function($x){$x*$x}(5)');
             var result = expr.evaluate(null);
             var expected = 25;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('function($x){$x>5 ? "foo"}(6)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('function($x){$x>5 ? "foo"}(6)');
+            var result = expr.evaluate(null);
+            var expected = 'foo';
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('function($x){$x>5 ? "foo"}(3)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('function($x){$x>5 ? "foo"}(3)');
+            var result = expr.evaluate(null);
+            var expected = undefined;
             expect(result).to.deep.equal(expected);
         });
     });
@@ -6562,6 +7396,8 @@ describe('Evaluator - Partial function application', function () {
             expect(result).to.deep.equal(expected);
         });
     });
+
+
 });
 
 
@@ -6575,78 +7411,10 @@ describe('HOF - map', function () {
               '    "two": [5,4,3,2,1]' +
               '  };' +
               '  $add := function($x){$x*$x};' +
-              '  $map($add, $data.one) ' +
+              '  $map($data.one, $add) ' +
               ')  ');
             var result = expr.evaluate(null);
             var expected = [1, 4, 9, 16, 25];
-            expect(result).to.deep.equal(expected);
-        });
-    });
-
-    describe('map combining two arrays', function () {
-        it('should return result object', function () {
-            var expr = jsonata(
-              '(' +
-              '  $data := {' +
-              '    "one": [1,2,3,4,5],' +
-              '    "two": [5,4,3,2,1]' +
-              '  };' +
-              '  $add := function($x, $y){$x+$y};' +
-              '  $map($add, $data.one, $data.two) ' +
-              ') ');
-            var result = expr.evaluate(null);
-            var expected = [6, 6, 6, 6, 6];
-            expect(result).to.deep.equal(expected);
-        });
-    });
-
-    describe('map combining two arrays', function () {
-        it('should return result object', function () {
-            var expr = jsonata(
-              '(' +
-              '  $data := {' +
-              '    "one": [1,2,3,4,5],' +
-              '    "two": [5,4,3,2,1]' +
-              '  };' +
-              '  $add := function($x, $y){$x+$y};' +
-              '  $data.$map($add, $.one, $.two) ' +
-              ') ');
-            var result = expr.evaluate(null);
-            var expected = [6, 6, 6, 6, 6];
-            expect(result).to.deep.equal(expected);
-        });
-    });
-
-    describe('map combining two arrays', function () {
-        it('should return result object', function () {
-            var expr = jsonata(
-              '(' +
-              '  $data := {' +
-              '    "one": [1],' +
-              '    "two": [5]' +
-              '  };' +
-              '  $add := function($x, $y){$x+$y};' +
-              '  $data.$map($add, $.one, $.two) ' +
-              ') ');
-            var result = expr.evaluate(null);
-            var expected = 6;
-            expect(result).to.deep.equal(expected);
-        });
-    });
-
-    describe('map combining two arrays', function () {
-        it('should return result object', function () {
-            var expr = jsonata(
-              '(' +
-              '  $data := {' +
-              '    "one": 1,' +
-              '    "two": 5' +
-              '  };' +
-              '  $add := function($x, $y){$x+$y};' +
-              '  $data.$map($add, $.one, $.two) ' +
-              ') ');
-            var result = expr.evaluate(null);
-            var expected = 6;
             expect(result).to.deep.equal(expected);
         });
     });
@@ -6671,17 +7439,45 @@ describe('HOF - map', function () {
 
     describe('map string function', function () {
         it('should return result object', function () {
-            var expr = jsonata('$map($string, [1,2,3])');
+            var expr = jsonata('$map([1,2,3], $string)');
             var result = expr.evaluate(null);
             var expected = ['1','2','3'];
             expect(result).to.deep.equal(expected);
         });
     });
 
+    describe('map a function with index parameter', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.Product ~> $map(λ($prod, $index) { $index+1 & ": " & $prod."Product Name" })');
+            var result = expr.evaluate(testdata2);
+            var expected = [
+                "1: Bowler Hat",
+                "2: Trilby hat",
+                "3: Bowler Hat",
+                "4: Cloak"
+            ];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('map a function with index and array parameters', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.Product ~> $map(λ($prod, $index, $arr) { $index+1 & "/" & $count($arr) & ": " & $prod."Product Name" })');
+            var result = expr.evaluate(testdata2);
+            var expected = [
+                "1/4: Bowler Hat",
+                "2/4: Trilby hat",
+                "3/4: Bowler Hat",
+                "4/4: Cloak"
+            ];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
     describe('map a user-defined Javascript function', function () {
         it('should return result object', function () {
-            var expr = jsonata('$map($sqrt, [1,4,9,16])');
-            expr.assign('sqrt', function(num) {
+            var expr = jsonata('$map([1,4,9,16], $squareroot)');
+            expr.assign('squareroot', function(num) {
                 return Math.sqrt(num);
             });
             var result = expr.evaluate(testdata2);
@@ -6692,8 +7488,8 @@ describe('HOF - map', function () {
 
     describe('map a user-defined Javascript function with signature', function () {
         it('should return result object', function () {
-            var expr = jsonata('$map($sqrt, [1,4,9,16])');
-            expr.registerFunction('sqrt', function(num) {
+            var expr = jsonata('$map([1,4,9,16], $squareroot)');
+            expr.registerFunction('squareroot', function(num) {
                 return Math.sqrt(num);
             }, '<n:n>');
             var result = expr.evaluate(testdata2);
@@ -6703,8 +7499,8 @@ describe('HOF - map', function () {
     });
     describe('map a user-defined Javascript function with undefined signature', function () {
         it('should return result object', function () {
-            var expr = jsonata('$map($sqrt, [1,4,9,16])');
-            expr.registerFunction('sqrt', function(num) {
+            var expr = jsonata('$map([1,4,9,16], $squareroot)');
+            expr.registerFunction('squareroot', function(num) {
                 return Math.sqrt(num);
             });
             var result = expr.evaluate(testdata2);
@@ -6712,6 +7508,131 @@ describe('HOF - map', function () {
             expect(result).to.deep.equal(expected);
         });
     });
+
+    describe('map function with predicate - remove undefined', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$map(Phone, function($v, $i) {$i[$v.type="office"]})');
+            var result = expr.evaluate(testdata4);
+            var expected = [1,2];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('map function with condition - remove undefined', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$map(Phone, function($v, $i) {$v.type="office" ? $i})');
+            var result = expr.evaluate(testdata4);
+            var expected = [1,2];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('map function with condition', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$map(Phone, function($v, $i) {$v.type="office" ? $i: null})');
+            var result = expr.evaluate(testdata4);
+            var expected = [null, 1, 2, null];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('map function with undefined input', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$map(Phone, function($v, $i) {$v.type="office" ? $i: null})');
+            var result = expr.evaluate(testdata2);
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+});
+
+describe('HOF - filter', function () {
+    describe('find most expensive book', function () {
+        it('should return result object', function () {
+            var expr = jsonata('(library.books~>$filter(λ($v, $i, $a) {$v.price = $max($a.price)})).isbn');
+            var result = expr.evaluate(testdata5);
+            var expected = "9780262510875";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('filter nothing', function () {
+        it('should return result object', function () {
+            var expr = jsonata('nothing~>$filter(λ($v, $i, $a) {$v.price = $max($a.price)})');
+            var result = expr.evaluate(testdata5);
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+});
+
+describe('HOF - zip/map', function () {
+    describe('zip combining two arrays', function () {
+        it('should return result object', function () {
+            var expr = jsonata(
+              '(' +
+              '  $data := {' +
+              '    "one": [1,2,3,4,5],' +
+              '    "two": [5,4,3,2,1]' +
+              '  };' +
+              '  $map($zip($data.one, $data.two), $sum)' +
+              ') ');
+            var result = expr.evaluate(null);
+            var expected = [6, 6, 6, 6, 6];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('zip combining two arrays', function () {
+        it('should return result object', function () {
+            var expr = jsonata(
+              '(' +
+              '  $data := {' +
+              '    "one": [1,2,3,4,5],' +
+              '    "two": [5,4,3,2,1]' +
+              '  };' +
+              '  $data.$zip(one, two) ~> $map($sum)' +
+              ') ');
+            var result = expr.evaluate(null);
+            var expected = [6, 6, 6, 6, 6];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('zip combining two arrays', function () {
+        it('should return result object', function () {
+            var expr = jsonata(
+              '(' +
+              '  $data := {' +
+              '    "one": [1],' +
+              '    "two": [5]' +
+              '  };' +
+              '  $data[].$zip(one, two) ~> $map($sum)' +
+              ') ');
+            var result = expr.evaluate(null);
+            var expected = [6];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('zip combining two arrays', function () {
+        it('should return result object', function () {
+            var expr = jsonata(
+              '(' +
+              '  $data := {' +
+              '    "one": 1,' +
+              '    "two": 5' +
+              '  };' +
+              '  $data[].$zip(one, two) ~> $map($sum)' +
+              ') ');
+            var result = expr.evaluate(null);
+            var expected = [6];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
 });
 
 describe('HOF - reduce', function () {
@@ -6720,7 +7641,7 @@ describe('HOF - reduce', function () {
             var expr = jsonata(
               '(' +
               '  $seq := [1,2,3,4,5];' +
-              '  $reduce(function($x, $y){$x+$y}, $seq)' +
+              '  $reduce($seq, function($x, $y){$x+$y})' +
               ') ');
             var result = expr.evaluate(null);
             var expected = 15;
@@ -6734,7 +7655,7 @@ describe('HOF - reduce', function () {
               "(" +
               "  $concat := function($s){function($a, $b){$string($a) & $s & $string($b)}};" +
               "  $comma_join := $concat(' ... ');" +
-              "  $reduce($comma_join, [1,2,3,4,5])" +
+              "  $reduce([1,2,3,4,5], $comma_join)" +
               ")" +
               "      ");
             var result = expr.evaluate(null);
@@ -6748,7 +7669,7 @@ describe('HOF - reduce', function () {
             var expr = jsonata(
               '(' +
               '  $seq := [1,2,3,4,5];' +
-              '  $reduce(function($x, $y){$x+$y}, $seq, 2)' +
+              '  $reduce($seq, function($x, $y){$x+$y}, 2)' +
               ')' );
             var result = expr.evaluate(null);
             var expected = 17;
@@ -6761,7 +7682,7 @@ describe('HOF - reduce', function () {
             var expr = jsonata(
               '(' +
               '  $seq := 1;' +
-              '  $reduce(function($x, $y){$x+$y}, $seq)' +
+              '  $reduce($seq, function($x, $y){$x+$y})' +
               ')' );
             var result = expr.evaluate(null);
             var expected = 1;
@@ -6774,7 +7695,7 @@ describe('HOF - reduce', function () {
             var expr = jsonata(
               '(' +
               '  $seq := 1;' +
-              '  $reduce(function($x, $y){$x+$y}, $seq)' +
+              '  $reduce($seq, function($x, $y){$x+$y})' +
               ')' );
             var result = expr.evaluate(null);
             var expected = 1;
@@ -6784,9 +7705,30 @@ describe('HOF - reduce', function () {
 
     describe('reduce with built-in function', function () {
         it('should return result object', function () {
-            var expr = jsonata('$reduce($append, Account.Order.Product.Quantity)');
+            var expr = jsonata('$reduce(Account.Order.Product.Quantity, $append)');
             var result = expr.evaluate(testdata2);
             var expected = [2, 1, 4, 1];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('reduce with undefined input', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$reduce(Account.Order.Product.Quantity, $append)');
+            var result = expr.evaluate(testdata4);
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('power function using reduce', function () {
+        it('should return result object', function () {
+            var expr = jsonata('($product := function($a, $b) { $a * $b };' +
+              '$power := function($x, $n) { $n = 0 ? 1 : $reduce([1..$n].($x), $product) };' +
+              '[0..5].$power(2, $)' +
+              ')');
+            var result = expr.evaluate();
+            var expected = [1, 2, 4, 8, 16, 32];
             expect(result).to.deep.equal(expected);
         });
     });
@@ -6796,7 +7738,7 @@ describe('HOF - reduce', function () {
             var expr = jsonata(
               '(' +
               '  $seq := 1;' +
-              '  $reduce(function($x){$x}, $seq)' +
+              '  $reduce($seq, function($x){$x})' +
               ')' );
             expect(function () {
                 expr.evaluate();
@@ -7474,18 +8416,18 @@ describe('Evaluator - function application operator', function () {
         });
     });
 
-    describe('( $square := function($x){$x*$x}; [1..5] ~> $map($square, ?) ) ', function () {
+    describe('( $square := function($x){$x*$x}; [1..5] ~> $map($square) ) ', function () {
         it('should return result object', function () {
-            var expr = jsonata('( $square := function($x){$x*$x}; [1..5] ~> $map($square, ?) ) ');
+            var expr = jsonata('( $square := function($x){$x*$x}; [1..5] ~> $map($square) ) ');
             var result = expr.evaluate();
             var expected = [1, 4, 9, 16, 25];
             expect(result).to.deep.equal(expected);
         });
     });
 
-    describe('( $square := function($x){$x*$x}; [1..5] ~> $map($square, ?) ~> $sum() ) ', function () {
+    describe('( $square := function($x){$x*$x}; [1..5] ~> $map($square) ~> $sum() ) ', function () {
         it('should return result object', function () {
-            var expr = jsonata('( $square := function($x){$x*$x}; [1..5] ~> $map($square, ?) ~> $sum() ) ');
+            var expr = jsonata('( $square := function($x){$x*$x}; [1..5] ~> $map($square) ~> $sum() ) ');
             var result = expr.evaluate();
             var expected = 55;
             expect(result).to.deep.equal(expected);
@@ -7510,7 +8452,7 @@ describe('Evaluator - function application operator', function () {
               '$square := function($x){$x*$x};' +
               '$chain := λ($f, $g){λ($x){$g($f($x))}};' +
               '$instructions := [$sum, $square];' +
-              '$sumsq := $instructions ~> $reduce($chain, ?);' +
+              '$sumsq := $instructions ~> $reduce($chain);' +
               '[1..5] ~> $sumsq()' +
               ') ');
             var result = expr.evaluate();
@@ -7525,7 +8467,7 @@ describe('Evaluator - function application operator', function () {
               '$square := function($x){$x*$x};' +
               '$chain := λ($f, $g){λ($x){ $x ~> $f ~> $g }};' +
               '$instructions := [$sum, $square, $string];' +
-              '$sumsq := $instructions ~> $reduce($chain, ?);' +
+              '$sumsq := $instructions ~> $reduce($chain);' +
               '[1..5] ~> $sumsq()' +
               ') ');
             var result = expr.evaluate();
@@ -7551,7 +8493,7 @@ describe('Evaluator - function application operator', function () {
         it('should return result object', function () {
             var expr = jsonata('(' +
               '$square := function($x){$x*$x};' +
-              '$sum_of_squares := $map($square, ?) ~> $sum;' +
+              '$sum_of_squares := $map(?, $square) ~> $sum;' +
               '[1..5] ~> $sum_of_squares()' +
               ')  ');
             var result = expr.evaluate();
@@ -7564,9 +8506,9 @@ describe('Evaluator - function application operator', function () {
         it('should return result object', function () {
             var expr = jsonata('(' +
               '$times := λ($x, $y) { $x * $y };' +
-              '$product := $reduce($times, ?);' +
+              '$product := $reduce(?, $times);' +
               '$square := function($x){$x*$x};' +
-              '$product_of_squares := $map($square, ?) ~> $product;' +
+              '$product_of_squares := $map(?, $square) ~> $product;' +
               '[1..5] ~> $product_of_squares()' +
               ')');
             var result = expr.evaluate();
@@ -7579,7 +8521,7 @@ describe('Evaluator - function application operator', function () {
         it('should return result object', function () {
             var expr = jsonata('(' +
               '$square := function($x){$x*$x};' +
-              '[1..5] ~> $map($square, ?) ~> $reduce(λ($x, $y) { $x * $y }, ?);' +
+              '[1..5] ~> $map($square) ~> $reduce(λ($x, $y) { $x * $y });' +
               ')');
             var result = expr.evaluate();
             var expected = 14400;
@@ -7592,8 +8534,8 @@ describe('Evaluator - function application operator', function () {
             var expr = jsonata('(' +
               '$prices := Account.Order.Product.Price;' +
               '$quantities := Account.Order.Product.Quantity;' +
-              '$product := λ($x, $y) { $x * $y };' +
-              '$map($product, $prices, $quantities) ~> $sum()' +
+              '$product := λ($arr) { $arr[0] * $arr[1] };' +
+              '$zip($prices, $quantities) ~> $map($product) ~> $sum()' +
               ')');
             var result = expr.evaluate(testdata2);
             var expected = 336.36;

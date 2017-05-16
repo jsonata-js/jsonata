@@ -1,5 +1,9 @@
 # JSONata
 
+<div>
+  <a href="https://nodei.co/npm/jsonata/"><img src="https://nodei.co/npm/jsonata.png?downloads=true&downloadRank=true"></a>
+</div>
+
 [![Build Status](https://travis-ci.org/jsonata-js/jsonata.svg)](https://travis-ci.org/jsonata-js/jsonata)
 [![Coverage Status](https://coveralls.io/repos/github/jsonata-js/jsonata/badge.svg?branch=master)](https://coveralls.io/github/jsonata-js/jsonata?branch=master)
 
@@ -79,12 +83,20 @@ If you want to run the latest code from git, here's how to get started:
 ## Errors
 
 If an expression throws an error, e.g. syntax error or a runtime error (type error), then the object thrown
-has a consistent structure containing the column number of the error, the token that caused the error,
+has a consistent structure containing the error code, column number of the error, the token that caused the error,
 and any other relevant information, including a meaningful message string.
 
 For example:
 
-`{ "position": 16, "token": "}", "value": "]", "message": "Syntax error: expected ']' got '}'" }`
+```
+{
+  "code": "S0202",
+  "position": 16,
+  "token": "}",
+  "value": "]",
+  "message": "Syntax error: expected ']' got '}'"
+}
+```
 
 ## More Information
 - JSONata [Documentation](http://docs.jsonata.org/)

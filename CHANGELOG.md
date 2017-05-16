@@ -1,3 +1,29 @@
+#### 1.2.0 Milestone Release
+
+- New syntax to specify order of query results
+- Support for asynchronous extension functions - callbacks and promises
+- New functions
+    - $floor - numeric rounding down
+    - $ceil - numeric rounding up
+    - $round - numeric round half to even
+    - $abs - numeric absolute value
+    - $power - numeric power function
+    - $sqrt - square root
+    - $random - generate random number
+    - $now - current timestamp
+    - $filter - filter array with predicate function
+    - $sort - sort array with comparator function
+    - $reverse - reverse contents of array
+    - $shuffle - shuffle contents of array into random order
+    - $zip - convolves (zips) multiple arrays into an array of tuples (nested arrays)
+    - $each - generate array from object by applying function to key/value pairs
+    - $sift - sift contents of object with predicate function
+- The following (previously undocumented) functions have been modified to align them with other functions
+    - $map - apply a function to all values in an array
+    - $reduce - apply a function to aggregate (fold) all values in an array
+   
+
+
 #### 1.1.1 Maintenance Release
 
 - fix chaining operator for falsy inputs
