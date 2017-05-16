@@ -3509,35 +3509,25 @@ var jsonata = (function() {
     }
 
     /**
-     * Create a map from an array of arguments
-     * @param {Function} func - function to apply
-     * @param {Array} [arr] - array to map over
-     * @returns {Array} Map array
+     * Convolves (zips) each value from a set of arrays
+     * @param {Array} [args] - arrays to zip
+     * @returns {Array} Zipped array
      */
-    function* functionZip(func, arr) {
-        // this can take a variable number of arguments - each one should be mapped to the equivalent arg of func
-        // assert that func is a function
-        var varargs = arguments;
+    function functionZip() {
+        // this can take a variable number of arguments
         var result = [];
-
-        // each subsequent arg must be an array - coerce if not
-        var args = arr;
-        args = [];
-        for (var ii = 1; ii < varargs.length; ii++) {
-            args.push(varargs[ii]);
-        }
-        // do the map - iterate over the arrays, and invoke func
-        for (var i = 0; i < args[0].length; i++) {
-            var func_args = [];
-            var length = typeof func === 'function' ? func.length :
-              func._jsonata_function === true ? func.implementation.length : func.arguments.length;
-            for (var j = 0; j < length; j++) {
-                func_args.push(args[j][i]);
+        var args = Array.prototype.slice.call(arguments);
+        // length of the shortest array
+        var length = Math.min.apply(Math, args.map(function(arg) {
+            if(Array.isArray(arg)) {
+                return arg.length;
             }
-            // invoke func
-            result.push(yield * apply(func, func_args, null));
+            return 0;
+        }));
+        for(var i = 0; i < length; i++) {
+            var tuple = args.map((arg) => {return arg[i];});
+            result.push(tuple);
         }
-
         return result;
     }
 
@@ -3720,7 +3710,7 @@ var jsonata = (function() {
         var result = [];
 
         for(var key in obj) {
-            var func_args = [key, obj[key]];
+            var func_args = [obj[key], key];
             // invoke func
             result.push(yield * apply(func, func_args, null));
         }
@@ -3930,7 +3920,7 @@ var jsonata = (function() {
     staticFrame.bind('boolean', defineFunction(functionBoolean, '<x-:b>'));
     staticFrame.bind('not', defineFunction(functionNot, '<x-:b>'));
     staticFrame.bind('map', defineFunction(functionMap, '<af>'));
-    staticFrame.bind('zip', defineFunction(functionZip, '<fa+>'));
+    staticFrame.bind('zip', defineFunction(functionZip, '<a+>'));
     staticFrame.bind('filter', defineFunction(functionFilter, '<af>'));
     staticFrame.bind('reduce', defineFunction(functionFoldLeft, '<afj?:j>')); // TODO <f<jj:j>a<j>j?:j>
     staticFrame.bind('sift', defineFunction(functionSift, '<o-f?:o>'));

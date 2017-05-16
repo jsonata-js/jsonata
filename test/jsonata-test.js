@@ -5245,9 +5245,9 @@ describe('Evaluator - functions: append', function () {
 
 describe('Evaluator - function: each', function () {
 
-    describe('$each(Address, λ($k, $v) {$k & ": " & $v})', function () {
+    describe('$each(Address, λ($v, $k) {$k & ": " & $v})', function () {
         it('should return result object', function () {
-            var expr = jsonata('$each(Address, λ($k, $v) {$k & ": " & $v})');
+            var expr = jsonata('$each(Address, λ($v, $k) {$k & ": " & $v})');
             var result = expr.evaluate(testdata4);
             var expected = [
                 "Street: Hursley Park",
@@ -5294,6 +5294,64 @@ describe('Evaluator - function: reverse', function () {
             var expr = jsonata('$reverse([1])');
             var result = expr.evaluate(testdata4);
             var expected = [1];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+});
+
+describe('Evaluator - function: zip', function () {
+
+    describe('zip two arrays', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$zip([1,2,3],[4,5,6])');
+            var result = expr.evaluate();
+            var expected = [[1,4],[2,5],[3,6]];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('zip three arrays', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$zip([1,2,3],[4,5,6],[7,8,9])');
+            var result = expr.evaluate();
+            var expected = [[1,4,7],[2,5,8],[3,6,9]];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('zip three arrays - unequal length', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$zip([1,2,3],[4,5],[7,8,9])');
+            var result = expr.evaluate();
+            var expected = [[1,4,7],[2,5,8]];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('zip single array', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$zip([1,2,3])');
+            var result = expr.evaluate();
+            var expected = [[1],[2],[3]];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('zip non-array values', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$zip(1,2,3)');
+            var result = expr.evaluate();
+            var expected = [[1,2,3]];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('zip non-array values', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$zip([1,2,3], [4,5,6], nothing)');
+            var result = expr.evaluate();
+            var expected = [];
             expect(result).to.deep.equal(expected);
         });
     });
@@ -7510,7 +7568,7 @@ describe('HOF - filter', function () {
 
 });
 
-describe('HOF - zip', function () {
+describe('HOF - zip/map', function () {
     describe('zip combining two arrays', function () {
         it('should return result object', function () {
             var expr = jsonata(
@@ -7519,8 +7577,7 @@ describe('HOF - zip', function () {
               '    "one": [1,2,3,4,5],' +
               '    "two": [5,4,3,2,1]' +
               '  };' +
-              '  $add := function($x, $y){$x+$y};' +
-              '  $zip($add, $data.one, $data.two) ' +
+              '  $map($zip($data.one, $data.two), $sum)' +
               ') ');
             var result = expr.evaluate(null);
             var expected = [6, 6, 6, 6, 6];
@@ -7536,8 +7593,7 @@ describe('HOF - zip', function () {
               '    "one": [1,2,3,4,5],' +
               '    "two": [5,4,3,2,1]' +
               '  };' +
-              '  $add := function($x, $y){$x+$y};' +
-              '  $data.$zip($add, $.one, $.two) ' +
+              '  $data.$zip(one, two) ~> $map($sum)' +
               ') ');
             var result = expr.evaluate(null);
             var expected = [6, 6, 6, 6, 6];
@@ -7553,11 +7609,10 @@ describe('HOF - zip', function () {
               '    "one": [1],' +
               '    "two": [5]' +
               '  };' +
-              '  $add := function($x, $y){$x+$y};' +
-              '  $data.$zip($add, $.one, $.two) ' +
+              '  $data[].$zip(one, two) ~> $map($sum)' +
               ') ');
             var result = expr.evaluate(null);
-            var expected = 6;
+            var expected = [6];
             expect(result).to.deep.equal(expected);
         });
     });
@@ -7570,68 +7625,10 @@ describe('HOF - zip', function () {
               '    "one": 1,' +
               '    "two": 5' +
               '  };' +
-              '  $add := function($x, $y){$x+$y};' +
-              '  $data.$zip($add, $.one, $.two) ' +
+              '  $data[].$zip(one, two) ~> $map($sum)' +
               ') ');
             var result = expr.evaluate(null);
-            var expected = 6;
-            expect(result).to.deep.equal(expected);
-        });
-    });
-
-    describe('zip two arrays with javascript function', function () {
-        it('should return result object', function () {
-            var expr = jsonata(
-              '(' +
-              '  $data := {' +
-              '    "one": 1,' +
-              '    "two": 5' +
-              '  };' +
-              '  $data.$zip($add, $.one, $.two) ' +
-              ') ');
-            expr.assign('add', function(a, b) {
-                return a + b;
-            });
-            var result = expr.evaluate(null);
-            var expected = 6;
-            expect(result).to.deep.equal(expected);
-        });
-    });
-
-    describe('zip two arrays with javascript function + signature', function () {
-        it('should return result object', function () {
-            var expr = jsonata(
-              '(' +
-              '  $data := {' +
-              '    "one": 1,' +
-              '    "two": 5' +
-              '  };' +
-              '  $data.$zip($add, $.one, $.two) ' +
-              ') ');
-            expr.registerFunction('add', function(a, b) {
-                return a + b;
-            }, '<nn:n>');
-            var result = expr.evaluate(null);
-            var expected = 6;
-            expect(result).to.deep.equal(expected);
-        });
-    });
-
-    describe('zip two arrays with javascript function + undefined signature', function () {
-        it('should return result object', function () {
-            var expr = jsonata(
-              '(' +
-              '  $data := {' +
-              '    "one": 1,' +
-              '    "two": 5' +
-              '  };' +
-              '  $data.$zip($add, $.one, $.two) ' +
-              ') ');
-            expr.registerFunction('add', function(a, b) {
-                return a + b;
-            });
-            var result = expr.evaluate(null);
-            var expected = 6;
+            var expected = [6];
             expect(result).to.deep.equal(expected);
         });
     });
@@ -8537,8 +8534,8 @@ describe('Evaluator - function application operator', function () {
             var expr = jsonata('(' +
               '$prices := Account.Order.Product.Price;' +
               '$quantities := Account.Order.Product.Quantity;' +
-              '$product := λ($x, $y) { $x * $y };' +
-              '$zip($product, $prices, $quantities) ~> $sum()' +
+              '$product := λ($arr) { $arr[0] * $arr[1] };' +
+              '$zip($prices, $quantities) ~> $map($product) ~> $sum()' +
               ')');
             var result = expr.evaluate(testdata2);
             var expected = 336.36;
