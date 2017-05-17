@@ -8323,6 +8323,45 @@ describe('Regex', function () {
         });
 
     });
+
+    describe('Functions - $base64encode', function () {
+        describe('$base64encode("hello:world")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$base64encode("hello:world")');
+                var result = expr.evaluate();
+                var expected = "aGVsbG86d29ybGQ=";
+                expect(result).to.deep.equal(expected);
+            });
+        });
+        describe('$base64encode(undefined)', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$base64encode()');
+                var result = expr.evaluate();
+                var expected = undefined;
+                expect(result).to.deep.equal(expected);
+            });
+        });
+    });
+
+    describe('Functions - $base64decode', function () {
+        describe('$base64decode("aGVsbG86d29ybGQ=")', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$base64decode("aGVsbG86d29ybGQ=")');
+                var result = expr.evaluate();
+                var expected = "hello:world";
+                expect(result).to.deep.equal(expected);
+            });
+        });
+        describe('$base64decode(undefined)', function () {
+            it('should return result object', function () {
+                var expr = jsonata('$base64decode()');
+                var result = expr.evaluate();
+                var expected = undefined;
+                expect(result).to.deep.equal(expected);
+            });
+        });
+    });
+
 });
 
 describe('Evaluator - function application operator', function () {
@@ -9684,4 +9723,3 @@ describe('end to end scenarios', function () {
         expect(pe.evaluate(data2)).to.deep.equal('boo');
     });
 });
-

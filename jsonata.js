@@ -3120,6 +3120,41 @@ var jsonata = (function() {
         return result;
     }
 
+    /**
+     * Base64 encode a string
+     * @param {String} str - string
+     * @returns {String} Base 64 encoding of the binary data
+     */
+    function functionBase64encode(str) {
+        // undefined inputs always return undefined
+        if(typeof str === 'undefined') {
+            return undefined;
+        }
+        // Use btoa in a browser, or Buffer in Node.js
+        // eslint-disable-next-line
+        var btoa = btoa || function(str) {
+            return new Buffer(str, 'binary').toString('base64');
+        };
+        return btoa(str);
+    }
+
+    /**
+     * Base64 decode a string
+     * @param {String} str - string
+     * @returns {String} Base 64 encoding of the binary data
+     */
+    function functionBase64decode(str) {
+        // undefined inputs always return undefined
+        if(typeof str === 'undefined') {
+            return undefined;
+        }
+        // Use btoa in a browser, or Buffer in Node.js
+        // eslint-disable-next-line
+        var atob = atob || function(str) {
+            return new Buffer(str, 'base64').toString('binary');
+        };
+        return atob(str);
+    }
 
     /**
      * Split a string into an array of substrings
@@ -3933,6 +3968,8 @@ var jsonata = (function() {
     staticFrame.bind('each', defineFunction(functionEach, '<o-f:a>'));
     staticFrame.bind('sort', defineFunction(functionSort, '<af?:a>'));
     staticFrame.bind('shuffle', defineFunction(functionShuffle, '<a:a>'));
+    staticFrame.bind('base64encode', defineFunction(functionBase64encode, '<s-:s>'));
+    staticFrame.bind('base64decode', defineFunction(functionBase64decode, '<s-:s>'));
 
     /**
      * Error codes
@@ -4105,4 +4142,3 @@ var jsonata = (function() {
 if(typeof module !== 'undefined') {
     module.exports = jsonata;
 }
-
