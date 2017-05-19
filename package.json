@@ -20,7 +20,7 @@
     "cover": "istanbul cover _mocha",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
     "babel": "node ./node_modules/babel-cli/bin/babel.js --out-file jsonata-es5.js jsonata.js",
-    "browserify": "node ./node_modules/browserify/bin/cmd.js jsonata-es5.js --external buffer --outfile jsonata-es5.js --standalone jsonata",
+    "browserify": "node ./node_modules/browserify/bin/cmd.js jsonata-es5.js --outfile jsonata-es5.js --standalone jsonata",
     "minify-es5": "uglifyjs jsonata-es5.js -o jsonata-es5.min.js --compress --mangle"
   },
   "license": "MIT",

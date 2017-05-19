@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Example</title>
+        <script src="jsonata-es5.js"></script>
+    </head>
+    <body>
+        <script>
+            var data = { "example": [ {"value": 4}, {"value": 7}, {"value": 13}] };
+            var expression = jsonata("$sum(example.value)");
+            var result = expression.evaluate({ "example": [ {"value": 4}, {"value": 7}, {"value": 13}] });
+            document.body.appendChild(document.createTextNode(result));
+        </script>
+    </body>
+</html>
