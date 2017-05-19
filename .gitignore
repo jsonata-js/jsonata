@@ -1,5 +1,8 @@
 coverage/
 doc/
 jsonata.min.js
+jsonata-es5.js
+jsonata-es5.min.js
 node_modules/
 npm-debug.log
+.idea/
