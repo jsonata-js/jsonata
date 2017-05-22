@@ -1,3 +1,10 @@
+#### 1.2.1 Maintenance Release
+
+- Generate ES5 compatible version of jsonata.js (jsonata-es5.js & jsonata-es5.min.js) using Babel
+    - use the -es5 version if you need to support older browsers or phantom.js
+- New functions $base64encode & base64decode
+- Fix formatting of inserts in error messages
+
 #### 1.2.0 Milestone Release
 
 - New syntax to specify order of query results
