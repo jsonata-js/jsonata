@@ -4017,9 +4017,9 @@ var jsonata = (function() {
         "T2008": "The expressions within an order-by clause must evaluate to numeric or string values",
         "T2009": "The values {{value}} and {{value2}} either side of operator {{token}} must be of the same data type",
         "T2010": "The expressions either side of operator {{token}} must evaluate to numeric or string values",
-        "T1005": "Attempted to invoke a non-function. Did you mean ${{token}}?",
+        "T1005": "Attempted to invoke a non-function. Did you mean ${{{token}}}?",
         "T1006": "Attempted to invoke a non-function",
-        "T1007": "Attempted to partially apply a non-function. Did you mean ${{token}}?",
+        "T1007": "Attempted to partially apply a non-function. Did you mean ${{{token}}}?",
         "T1008": "Attempted to partially apply a non-function",
         "D3001": "Attempting to invoke string function on Infinity or NaN",
         "D3010": "Second argument of replace function cannot be an empty string",
@@ -4047,7 +4047,12 @@ var jsonata = (function() {
         var template = errorCodes[err.code];
         if(typeof template !== 'undefined') {
             // if there are any handlebars, replace them with the field references
-            message = template.replace(/\{\{([^}]+)}}/g, function() {
+            // triple braces - replace with value
+            // double braces - replace with json stringified value
+            message = template.replace(/\{\{\{([^}]+)}}}/g, function() {
+                return err[arguments[1]];
+            });
+            message = message.replace(/\{\{([^}]+)}}/g, function() {
                 return JSON.stringify(err[arguments[1]]);
             });
         }
