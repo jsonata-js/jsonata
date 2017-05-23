@@ -207,15 +207,13 @@ Parametrised types:
 
 - `a<s>` - array of strings
 - `a<x>` - array of values of any type
-- `f<ss:b>` - function which accepts two strings and returns a Boolean
-- `f<:x>` - function which accepts no arguments and returns a value of any type
 
 Some examples of signatures of built-in JSONata functions:
 
 - `$count` has signature `<a:n>`; it accepts an array and returns a number.
 - `$append` has signature `<aa:a>`; it accepts two arrays and returns an array.
-- `$sum`, `$max`, `$min` and `$average` all have signature `<a<n>:n>`; they accept an array of numbers and return a number.
-- `$reduce` has signature `<f<jj:j>a<j>:j>`; it accepts an `f<jj:j>` (a function which "reduces" two JSON objects to one) and an `a<j>` (array of JSON objects) and returns a JSON object.
+- `$sum` has signature `<a<n>:n>`; it accepts an array of numbers and returns a number.
+- `$reduce` has signature `<fa<j>:j>`; it accepts a reducer function `f` and an `a<j>` (array of JSON objects) and returns a JSON object.
 
 Each type symbol may also have *options* applied.
 
@@ -223,20 +221,8 @@ Each type symbol may also have *options* applied.
   - E.g. `$zip` has signature `<a+>`; it accepts one array, or two arrays, or three arrays, or...
 - `?` - optional argument
   - E.g. `$join` has signature `<a<s>s?:s>`; it accepts an array of strings and an optional joiner string which defaults to the empty string. It returns a string.
-- `!` - if this argument is missing, rather than raising a run-time exception, the function returns `undefined`
 - `-` - if this argument is missing, use the context value ("focus").
   - E.g. `$length` has signature `<s-:n>`; it can be called as `$length(OrderID)` (one argument) but equivalently as `OrderID.$length()`.
-
-Questions
-
-- Is it okay to omit the return type *a la* `<fa+>`?
-- Is there a way to declare a function which accepts 0 or more arguments?
-- Does `*` do anything?
-- Is this thing whitelisted or can the user force all kinds of silly regex behaviour out of it?
-- Does `!` actually do anything?
-- `"string".$length()` doesn't work
-- What if more than one type symbol uses `-`?
-- Can an inner function use `-`?
 
 ## More information
 - JSONata [language documentation](http://docs.jsonata.org/)
