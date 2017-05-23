@@ -58,7 +58,7 @@ In a browser:
 </html>
 ```
 
-`jsonata` uses ES2015 features such as [generators](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Statements/function*). For browsers lacking these features, try `lib/jsonata-es5.js`.
+`jsonata` uses ES2015 features such as [generators](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Statements/function*). For browsers lacking these features, `lib/jsonata-es5.js` is provided.
 
 ## API
 
@@ -95,10 +95,10 @@ var result = expression.evaluate({example: [{value: 4}, {value: 7}, {value: 13}]
 
 `input` should be a JavaScript value such as would be returned from `JSON.parse()`. If `input` could not have been parsed from a JSON string (is circular, contains functions, ...), `evaluate`'s behaviour is not defined. `result` is a new JavaScript value suitable for `JSON.stringify()`ing.
 
-`bindings` allows variables to be registered, e.g.:
+`bindings`, if present, contains variable names and values (including functions) to be bound:
 
 ```javascript
-jsonata("$a + $b").evaluate({}, {a: 4, b: 78});
+jsonata("$a + $b()").evaluate({}, {a: 4, b: () => 78});
 // returns 82
 ```
 
@@ -124,7 +124,11 @@ The `Error` contains information about the nature of the run-time error, for exa
 If `callback(err, value)` is supplied, `expression.evaluate()` returns `undefined`, the expression is run asynchronously and the `Error` or result is passed to `callback`.
 
 ```javascript
-jsonata("7 + 12").evaluate({}, {}, function(error, result) {
+jsonata("7 + 12").evaluate({}, {}, (error, result) => {
+  if(error) {
+    console.error(error);
+    return;
+  }
   console.log("Finished with", result);
 });
 console.log("Started");
@@ -134,11 +138,105 @@ console.log("Started");
 
 #### expression.assign(name, value)
 
-#### expression.registerFunction(name, implementation, signature)
+Permanently binds a value to a name in the expression, similar to how `bindings` worked above. Modifies `expression` in place and returns `undefined`. Useful in a JSONata expression factory.
 
-### jsonata.parser(str)
+```javascript
+var expression = jsonata("$a + $b()");
+expression.assign("a", 4);
+expression.assign("b", () => 1);
 
-Parse a string `str` as a JSONata expression and return the abstract syntax tree (AST).
+expression.evaluate({}); // 5
+```
+
+Note that the `bindings` argument in the `expression.evaluate()` call clobbers these values:
+
+```javascript
+expression.evaluate({}, {a: 109}); // 110
+```
+
+#### expression.registerFunction(name, implementation[, signature])
+
+Permanently binds a function to a name in the expression.
+
+```javascript
+var expression = jsonata("$greet()");
+expression.registerFunction("greet", () => "Hello world");
+
+expression.evaluate({}); // "Hello world"
+```
+
+You can do this using `expression.assign` or `bindings` in `expression.evaluate`, but `expression.registerFunction` allows you to specify a function `signature`. This is a terse string which tells JSONata the expected input argument types and return value type of the function. JSONata raises a run-time error if the actual input argument types do not match (the return value type is not checked yet).
+
+```javascript
+var expression = jsonata("$add(61, 10005)");
+expression.registerFunction("add", (a, b) => a + b, "<nn:n>");
+
+expression.evaluate({}); // 10066
+```
+
+Function signatures are specified like so:
+
+##### Function signature syntax
+
+A function signature is a string of the form `<params:return>`. `params` is a sequence of type symbols, each one representing an input argument's type. `return` is a single type symbol representing the return value type.
+
+Type symbols work as follows:
+
+Simple types:
+
+- `b` - Boolean
+- `n` - number
+- `s` - string
+- `l` - `null`
+
+Complex types:
+
+- `a` - array
+- `o` - object
+- `f` - function
+
+Union types:
+
+- `(sao)` - string, array or object
+- `(o)` - same as `o`
+- `u` - equivalent to `(bnsl)` i.e. Boolean, number, string or `null`
+- `j` - any JSON type. Equivalent to `(bnsloa)` i.e. Boolean, number, string, `null`, object or array, but not function
+- `x` - any type. Equivalent to `(bnsloaf)`
+
+Parametrised types:
+
+- `a<s>` - array of strings
+- `a<x>` - array of values of any type
+- `f<ss:b>` - function which accepts two strings and returns a Boolean
+- `f<:x>` - function which accepts no arguments and returns a value of any type
+
+Some examples of signatures of built-in JSONata functions:
+
+- `$count` has signature `<a:n>`; it accepts an array and returns a number.
+- `$append` has signature `<aa:a>`; it accepts two arrays and returns an array.
+- `$sum`, `$max`, `$min` and `$average` all have signature `<a<n>:n>`; they accept an array of numbers and return a number.
+- `$reduce` has signature `<f<jj:j>a<j>:j>`; it accepts an `f<jj:j>` (a function which "reduces" two JSON objects to one) and an `a<j>` (array of JSON objects) and returns a JSON object.
+
+Each type symbol may also have *options* applied.
+
+- `+` - one or more arguments of this type
+  - E.g. `$zip` has signature `<a+>`; it accepts one array, or two arrays, or three arrays, or...
+- `?` - optional argument
+  - E.g. `$join` has signature `<a<s>s?:s>`; it accepts an array of strings and an optional joiner string which defaults to the empty string. It returns a string.
+- `!` - if this argument is missing, rather than raising a run-time exception, the function returns `undefined`
+- `-` - if this argument is missing, use the context value ("focus").
+  - E.g. `$length` has signature `<s-:n>`; it can be called as `$length(OrderID)` (one argument) but equivalently as `OrderID.$length()`.
+
+Questions
+
+- Is it okay to omit the return type *a la* `<fa+>`?
+- Is there a way to declare a function which accepts 0 or more arguments?
+- Does `*` do anything?
+- Is this thing whitelisted or can the user force all kinds of silly regex behaviour out of it?
+- Does `!` actually do anything?
+- `"string".$length()` doesn't work
+- What if more than one type symbol uses `-`?
+- Can an inner function use `-`?
 
 ## More information
 - JSONata [language documentation](http://docs.jsonata.org/)
