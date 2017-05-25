@@ -83,3 +83,25 @@ describe('Invoke JSONata with callback - errors', function() {
     });
 });
 
+describe('Invoke JSONata with callback - return values', function() {
+    it('should handle an undefined value', function() {
+        var data = { value: undefined };
+        var expr = jsonata('value');
+        return expect(jsonataPromise(expr, data)).to.eventually.equal(undefined);
+    });
+    it('should handle a null value', function() {
+        var data = { value: null };
+        var expr = jsonata('value');
+        return expect(jsonataPromise(expr, data)).to.eventually.equal(null);
+    });
+    it('should handle a value', function() {
+        var data = { value: 'hello' };
+        var expr = jsonata('value');
+        return expect(jsonataPromise(expr, data)).to.eventually.equal('hello');
+    });
+    it('should handle a promise', function() {
+        var data = { value: Promise.resolve('hello') };
+        var expr = jsonata('value');
+        return expect(jsonataPromise(expr, data)).to.eventually.equal('hello');
+    });
+});
