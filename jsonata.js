@@ -1374,7 +1374,7 @@ var jsonata = (function() {
         }
 
         if(environment.lookup('__jsonata_async') &&
-          (typeof result === 'undefined' || typeof result.then !== 'function')) {
+          (typeof result === 'undefined' || result === null || typeof result.then !== 'function')) {
             result = Promise.resolve(result);
         }
         result = yield result;
