@@ -1,3 +1,8 @@
+#### 1.2.2 Maintenance Release
+
+- Update readme.md with API documentation
+- Correctly handle null values when executed with a callback (#53)
+
 #### 1.2.1 Maintenance Release
 
 - Generate ES5 compatible version of jsonata.js (jsonata-es5.js & jsonata-es5.min.js) using Babel

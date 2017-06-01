@@ -1,6 +1,6 @@
 {
   "name": "jsonata",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "JSON query and transformation language",
   "main": "jsonata.js",
   "homepage": "http://jsonata.org/",
