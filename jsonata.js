@@ -2366,12 +2366,13 @@ var jsonata = (function() {
     }
 
     /**
-     *
+     * This method works both before and after the Babel step, as per
+     * <https://github.com/babel/babel/issues/2577>
      * @param {Object} arg - expression to test
      * @returns {boolean} - true if it is a generator function (function*)
      */
     function isGenerator(arg) {
-        return arg.constructor.name === 'GeneratorFunction';
+        return Object.prototype.toString.call(arg) === "[object GeneratorFunction]";
     }
 
     /**
