@@ -584,15 +584,44 @@ var jsonata = (function() {
     // and builds on the Javascript framework described by Douglas Crockford at http://javascript.crockford.com/tdop/tdop.html
     // and in 'Beautiful Code', edited by Andy Oram and Greg Wilson, Copyright 2007 O'Reilly Media, Inc. 798-0-596-51004-6
 
-    var parser = function (source) {
+    var parser = function (source, recover) {
         var node;
         var lexer;
 
         var symbol_table = {};
+        var errors = [];
+
+        var remainingTokens = function() {
+            var remaining = [];
+            if(node.id !== '(end)') {
+                remaining.push(node);
+            }
+            var nxt = lexer();
+            while(nxt !== null) {
+                remaining.push(nxt);
+                nxt = lexer();
+            }
+            return remaining;
+        };
 
         var base_symbol = {
             nud: function () {
-                return this;
+                // error - symbol has been invoked as a unary operator
+                var err = {
+                    code: 'S0211',
+                    token: this.value,
+                    position: this.position
+                };
+
+                if(recover) {
+                    err.remaining = remainingTokens();
+                    err.type = 'error';
+                    errors.push(err);
+                    return err;
+                } else {
+                    err.stack = (new Error()).stack;
+                    throw err;
+                }
             }
         };
 
@@ -612,6 +641,22 @@ var jsonata = (function() {
             return s;
         };
 
+        var handleError = function(err) {
+            if(recover) {
+                // tokenize the rest of the buffer and add it to an error token
+                err.remaining = remainingTokens();
+                errors.push(err);
+                var symbol = symbol_table["(error)"];
+                node = Object.create(symbol);
+                node.error = err;
+                node.type = "(error)";
+                return node;
+            } else {
+                err.stack = (new Error()).stack;
+                throw err;
+            }
+        };
+
         var advance = function (id, infix) {
             if (id && node.id !== id) {
                 var code;
@@ -621,13 +666,13 @@ var jsonata = (function() {
                 } else {
                     code = "S0202";
                 }
-                throw {
+                var err = {
                     code: code,
-                    stack: (new Error()).stack,
                     position: node.position,
                     token: node.id,
                     value: id
                 };
+                return handleError(err);
             }
             var next_token = lexer(infix);
             if (next_token === null) {
@@ -646,12 +691,12 @@ var jsonata = (function() {
                 case 'operator':
                     symbol = symbol_table[value];
                     if (!symbol) {
-                        throw {
+                        return handleError( {
                             code: "S0204",
                             stack: (new Error()).stack,
                             position: next_token.position,
                             token: value
-                        };
+                        });
                     }
                     break;
                 case 'string':
@@ -666,12 +711,12 @@ var jsonata = (function() {
                     break;
               /* istanbul ignore next */
                 default:
-                    throw {
+                    return handleError( {
                         code: "S0205",
                         stack: (new Error()).stack,
                         position: next_token.position,
                         token: value
-                    };
+                    });
             }
 
             node = Object.create(symbol);
@@ -693,6 +738,13 @@ var jsonata = (function() {
                 left = t.led(left);
             }
             return left;
+        };
+
+        var terminal = function(id) {
+            var s = symbol(id, 0);
+            s.nud = function() {
+                return this;
+            };
         };
 
         // match infix operators
@@ -737,10 +789,10 @@ var jsonata = (function() {
             return s;
         };
 
-        symbol("(end)");
-        symbol("(name)");
-        symbol("(literal)");
-        symbol("(regex)");
+        terminal("(end)");
+        terminal("(name)");
+        terminal("(literal)");
+        terminal("(regex)");
         symbol(":");
         symbol(";");
         symbol(",");
@@ -764,9 +816,21 @@ var jsonata = (function() {
         infix("and"); // Boolean AND
         infix("or"); // Boolean OR
         infix("in"); // is member of array
+        terminal("and"); // the 'keywords' can also be used as terminals (field names)
+        terminal("or"); //
+        terminal("in"); //
         infixr(":="); // bind variable
         prefix("-"); // unary numeric negation
         infix("~>"); // function application
+
+        infixr("(error)", 10, function(left) {
+            this.lhs = left;
+
+            this.error = node.error;
+            this.remaining = remainingTokens();
+            this.type = 'error';
+            return this;
+        });
 
         // field wildcard (single level)
         prefix('*', function () {
@@ -806,13 +870,13 @@ var jsonata = (function() {
                 // all of the args must be VARIABLE tokens
                 this.arguments.forEach(function (arg, index) {
                     if (arg.type !== 'variable') {
-                        throw {
+                        return handleError( {
                             code: "S0208",
                             stack: (new Error()).stack,
                             position: arg.position,
                             token: arg.value,
                             value: index + 1
-                        };
+                        });
                     }
                 });
                 this.type = 'lambda';
@@ -836,7 +900,7 @@ var jsonata = (function() {
                     } catch(err) {
                         // insert the position into this error
                         err.position = sigPos + err.offset;
-                        throw err;
+                        return handleError( err );
                     }
                 }
                 // parse the function body
@@ -884,7 +948,7 @@ var jsonata = (function() {
                 }
             }
             advance("]", true);
-            this.lhs = a;
+            this.expressions = a;
             this.type = "unary";
             return this;
         });
@@ -1130,7 +1194,7 @@ var jsonata = (function() {
                     result = {type: expr.type, value: expr.value, position: expr.position};
                     if (expr.value === '[') {
                         // array constructor - process each item
-                        result.lhs = expr.lhs.map(function (item) {
+                        result.expressions = expr.expressions.map(function (item) {
                             return ast_optimize(item);
                         });
                     } else if (expr.value === '{') {
@@ -1197,7 +1261,7 @@ var jsonata = (function() {
                     if (expr.value === 'and' || expr.value === 'or' || expr.value === 'in') {
                         expr.type = 'name';
                         result = ast_optimize(expr);
-                    } else if (expr.value === '?') {
+                    } else /* istanbul ignore else */ if (expr.value === '?') {
                         // partial application
                         result = expr;
                     } else {
@@ -1209,18 +1273,30 @@ var jsonata = (function() {
                         };
                     }
                     break;
+                case 'error':
+                    result = expr;
+                    if(expr.lhs) {
+                        result = ast_optimize(expr.lhs);
+                    }
+                    break;
                 default:
                     var code = "S0206";
                     /* istanbul ignore else */
                     if (expr.id === '(end)') {
                         code = "S0207";
                     }
-                    throw {
+                    var err = {
                         code: code,
-                        stack: (new Error()).stack,
                         position: expr.position,
                         token: expr.value
                     };
+                    if(recover) {
+                        errors.push(err);
+                        return {type: 'error', error: err};
+                    } else {
+                        err.stack = (new Error()).stack;
+                        throw err;
+                    }
             }
             return result;
         };
@@ -1231,14 +1307,23 @@ var jsonata = (function() {
         // parse the tokens
         var expr = expression(0);
         if (node.id !== '(end)') {
-            throw {
+            var err = {
                 code: "S0201",
-                stack: (new Error()).stack,
                 position: node.position,
                 token: node.value
             };
+            if(recover) {
+                errors.push(err);
+            } else {
+                err.stack = (new Error()).stack;
+                throw err;
+            }
         }
         expr = ast_optimize(expr);
+
+        if(errors.length > 0) {
+            expr.errors = errors;
+        }
 
         return expr;
     };
@@ -1646,8 +1731,8 @@ var jsonata = (function() {
             case '[':
                 // array constructor - evaluate each item
                 result = [];
-                for(var ii = 0; ii < expr.lhs.length; ii++) {
-                    var item = expr.lhs[ii];
+                for(var ii = 0; ii < expr.expressions.length; ii++) {
+                    var item = expr.expressions[ii];
                     var value = yield * evaluate(item, input, environment);
                     if (typeof value !== 'undefined') {
                         if(item.value === '[') {
@@ -3986,16 +4071,17 @@ var jsonata = (function() {
         "S0102": "Number out of range: {{token}}",
         "S0103": "Unsupported escape sequence: \\{{token}}",
         "S0104": "The escape sequence \\u must be followed by 4 hex digits",
-        "S0203": "Expected {{value}} before end of expression",
+        "S0201": "Syntax error: {{token}}",
         "S0202": "Expected {{value}}, got {{token}}",
+        "S0203": "Expected {{value}} before end of expression",
         "S0204": "Unknown operator: {{token}}",
         "S0205": "Unexpected token: {{token}}",
+        "S0206": "Unknown expression type: {{token}}",
+        "S0207": "Unexpected end of expression",
         "S0208": "Parameter {{value}} of function definition must be a variable name (start with $)",
         "S0209": "A predicate cannot follow a grouping expression in a step",
         "S0210": "Each step can only have one grouping expression",
-        "S0201": "Syntax error: {{token}}",
-        "S0206": "Unknown expression type: {{token}}",
-        "S0207": "Unexpected end of expression",
+        "S0211": "The symbol {{token}} cannot be used as a unary operator",
         "S0301": "Empty regular expressions are not allowed",
         "S0302": "No terminating / in regular expression",
         "S0402": "Choice groups containing parameterized types are not supported",
@@ -4062,12 +4148,16 @@ var jsonata = (function() {
     /**
      * JSONata
      * @param {Object} expr - JSONata expression
+     * @param {boolean} recover - robust parser - attempt to recover on parse error
      * @returns {{evaluate: evaluate, assign: assign}} Evaluated expression
      */
-    function jsonata(expr) {
+    function jsonata(expr, recover) {
         var ast;
+        var errors;
         try {
-            ast = parser(expr);
+            ast = parser(expr, recover);
+            errors = ast.errors;
+            delete ast.errors;
         } catch(err) {
             // insert error message into structure
             err.message = lookupMessage(err);
@@ -4101,7 +4191,6 @@ var jsonata = (function() {
                 if(typeof callback === 'function') {
                     exec_env.bind('__jsonata_async', true);
                     var thenHandler = function (response) {
-//                    console.log('THEN: ', response);
                         result = it.next(response);
                         if (result.done) {
                             callback(null, result.value);
@@ -4138,6 +4227,12 @@ var jsonata = (function() {
             registerFunction: function(name, implementation, signature) {
                 var func = defineFunction(implementation, signature);
                 environment.bind(name, func);
+            },
+            ast: function() {
+                return ast;
+            },
+            errors: function() {
+                return errors;
             }
         };
     }

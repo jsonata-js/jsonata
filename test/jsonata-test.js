@@ -5803,7 +5803,7 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('55=>5');
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 5, code: 'S0201', token: 5});
+                .to.deep.contain({position: 4, code: 'S0211', token: '>'});
         });
     });
 
@@ -5813,7 +5813,7 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('Ssum(:)');
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 6, code: 'S0201', token: ':'});
+                .to.deep.contain({position: 6, code: 'S0211', token: ':'});
         });
     });
 
@@ -5834,6 +5834,16 @@ describe('Evaluator - errors', function () {
                 expr.evaluate();
             }).to.throw()
                 .to.deep.contain({position: 18, code: 'S0210'});
+        });
+    });
+
+    describe('Account.Order[0].Product;', function () {
+        it('should throw error', function () {
+            expect(function () {
+                var expr = jsonata('Account.Order[0].Product;');
+                expr.evaluate();
+            }).to.throw()
+              .to.deep.contain({position: 25, code: 'S0201'});
         });
     });
 
