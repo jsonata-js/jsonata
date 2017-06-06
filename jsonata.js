@@ -2366,13 +2366,18 @@ var jsonata = (function() {
     }
 
     /**
-     * This method works both before and after the Babel step, as per
-     * <https://github.com/babel/babel/issues/2577>
      * @param {Object} arg - expression to test
-     * @returns {boolean} - true if it is a generator function (function*)
+     * @returns {boolean} - true if it is a generator i.e. the result from calling a
+     * generator function
      */
     function isGenerator(arg) {
-        return Object.prototype.toString.call(arg) === "[object GeneratorFunction]";
+        return (
+            typeof arg === 'object' &&
+            Symbol.iterator in arg &&
+            typeof arg[Symbol.iterator] === 'function' &&
+            'next' in arg &&
+            typeof arg.next === 'function'
+        );
     }
 
     /**
@@ -2465,8 +2470,9 @@ var jsonata = (function() {
             result = yield * applyProcedure(proc, validatedArgs);
         } else if (proc && proc._jsonata_function === true) {
             result = proc.implementation.apply(self, validatedArgs);
-            // this might be a function* generator - if so, yield
-            if(isGenerator(proc.implementation)) {
+            // `proc.implementation` might be a generator function
+            // and `result` might be a generator - if so, yield
+            if(isGenerator(result)) {
                 result = yield *result;
             }
         } else if (typeof proc === 'function') {
@@ -2653,7 +2659,7 @@ var jsonata = (function() {
         });
 
         var result = proc.apply(null, args);
-        if(isGenerator(proc)) {
+        if(isGenerator(result)) {
             result = yield * result;
         }
         return result;
