@@ -1,3 +1,7 @@
+#### 1.2.4 Maintenance Release
+
+- Fix an issue running in IE11 and phantom.js (#58)
+
 #### 1.2.3 Maintenance Release
 
 - Fix an issue for a few functions that were not working in ES5 transpiled version (#56)
