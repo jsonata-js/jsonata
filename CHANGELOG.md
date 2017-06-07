@@ -1,3 +1,7 @@
+#### 1.2.3 Maintenance Release
+
+- Fix an issue for a few functions that were not working in ES5 transpiled version (#56)
+
 #### 1.2.2 Maintenance Release
 
 - Update readme.md with API documentation
