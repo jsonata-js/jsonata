@@ -1096,7 +1096,7 @@ describe('Evaluator - numeric operators', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 5, code: 'T2001'});
+                .to.deep.contain({position: 5, code: 'T2001'});
         });
     });
 
@@ -1182,7 +1182,7 @@ describe('Evaluator - comparison operators', function () {
                 var expr = jsonata('"32" < 42');
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 6, code: 'T2009', value: "32", value2: 42});
+                .to.deep.contain({position: 6, code: 'T2009', value: "32", value2: 42});
         });
     });
 
@@ -1192,7 +1192,7 @@ describe('Evaluator - comparison operators', function () {
                 var expr = jsonata('null <= "world"');
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 7, code: 'T2010', value: null});
+                .to.deep.contain({position: 7, code: 'T2010', value: null});
         });
     });
 
@@ -1202,7 +1202,7 @@ describe('Evaluator - comparison operators', function () {
                 var expr = jsonata('3 >= true');
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 4, code: 'T2010', value: true});
+                .to.deep.contain({position: 4, code: 'T2010', value: true});
         });
     });
 
@@ -3644,7 +3644,7 @@ describe('Evaluator - functions: length', function () {
                 var expr = jsonata('$length()');
                 expr.evaluate(testdata2);
             }).to.throw()
-              .to.deep.contain({position: 8, code: 'T0411', index: 1, token: 'length'});
+                .to.deep.contain({position: 8, code: 'T0411', index: 1, token: 'length'});
         });
     });
 
@@ -3743,7 +3743,7 @@ describe('Evaluator - functions: contains', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 10, code: 'T0410', token: 'contains', index: 1});
+                .to.deep.contain({position: 10, code: 'T0410', token: 'contains', index: 1});
         });
     });
 
@@ -3753,7 +3753,7 @@ describe('Evaluator - functions: contains', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 10, code: 'T0410', token: 'contains', index: 2});
+                .to.deep.contain({position: 10, code: 'T0410', token: 'contains', index: 2});
         });
     });
 
@@ -3812,7 +3812,7 @@ describe('Evaluator - functions: replace', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 9, code: 'T0410', token: 'replace', index: 2});
+                .to.deep.contain({position: 9, code: 'T0410', token: 'replace', index: 2});
         });
     });
 
@@ -3822,7 +3822,7 @@ describe('Evaluator - functions: replace', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 9, code: 'T0410', token: 'replace', index: 4, value: null});
+                .to.deep.contain({position: 9, code: 'T0410', token: 'replace', index: 4, value: null});
         });
     });
 
@@ -3832,7 +3832,7 @@ describe('Evaluator - functions: replace', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 9, code: 'D3011', token: 'replace', index: 4, value: -2});
+                .to.deep.contain({position: 9, code: 'D3011', token: 'replace', index: 4, value: -2});
         });
     });
 
@@ -3842,7 +3842,7 @@ describe('Evaluator - functions: replace', function () {
             expect(function () {
                 expr.evaluate('hello');
             }).to.throw()
-              .to.deep.contain({position: 9, code: 'T0410', token: 'replace', index: 2, value: 1});
+                .to.deep.contain({position: 9, code: 'T0410', token: 'replace', index: 2, value: 1});
         });
     });
 
@@ -3852,7 +3852,7 @@ describe('Evaluator - functions: replace', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 9, code: 'D3010', index: 2, token: 'replace', value: ""});
+                .to.deep.contain({position: 9, code: 'D3010', index: 2, token: 'replace', value: ""});
         });
     });
 
@@ -3862,7 +3862,7 @@ describe('Evaluator - functions: replace', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 9, code: 'T0410', token: 'replace', index: 2, value: 2});
+                .to.deep.contain({position: 9, code: 'T0410', token: 'replace', index: 2, value: 2});
         });
     });
 
@@ -3872,7 +3872,7 @@ describe('Evaluator - functions: replace', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 9,  code: 'T0410', token: 'replace', index: 1, value: 123});
+                .to.deep.contain({position: 9,  code: 'T0410', token: 'replace', index: 1, value: 123});
         });
     });
 
@@ -4005,7 +4005,7 @@ describe('Evaluator - functions: split', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 7, code: 'D3020', token: 'split', index: 3, value: -5});
+                .to.deep.contain({position: 7, code: 'D3020', token: 'split', index: 3, value: -5});
         });
     });
 
@@ -4763,7 +4763,7 @@ describe('Evaluator - functions: sqrt', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 6, code: 'D3060', token: 'sqrt', index: 1, value: -2});
+                .to.deep.contain({position: 6, code: 'D3060', token: 'sqrt', index: 1, value: -2});
         });
     });
 
@@ -4822,7 +4822,7 @@ describe('Evaluator - functions: power', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 7, code: 'D3061', token: 'power', index: 1, value: -2, exp: 1/3});
+                .to.deep.contain({position: 7, code: 'D3061', token: 'power', index: 1, value: -2, exp: 1/3});
         });
     });
 
@@ -4832,7 +4832,7 @@ describe('Evaluator - functions: power', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 7, code: 'D3061', token: 'power', index: 1, value: 100, exp: 1000});
+                .to.deep.contain({position: 7, code: 'D3061', token: 'power', index: 1, value: 100, exp: 1000});
         });
     });
 
@@ -5473,7 +5473,7 @@ describe('Evaluator - function: sort', function () {
             expect(function () {
                 expr.evaluate(testdata2);
             }).to.throw()
-              .to.deep.contain({position: 6, code: 'D3070', token: 'sort', index: 1});
+                .to.deep.contain({position: 6, code: 'D3070', token: 'sort', index: 1});
         });
     });
 
@@ -5745,7 +5745,7 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('3(?)');
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position:2, code: 'T1008', token: 3});
+                .to.deep.contain({position:2, code: 'T1008', token: 3});
         });
     });
 
@@ -5754,7 +5754,7 @@ describe('Evaluator - errors', function () {
             expect(function () {
                 jsonata('1=');
             }).to.throw()
-              .to.deep.contain({position: 2, code: 'S0207'});
+                .to.deep.contain({position: 2, code: 'S0207'});
         });
     });
 
@@ -5783,7 +5783,7 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('2:=1');
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 3, code: 'D2005', token: ':=', value: 2});
+                .to.deep.contain({position: 3, code: 'D2005', token: ':=', value: 2});
         });
     });
 
@@ -6800,7 +6800,7 @@ describe('Evaluator - Order-by', function () {
                 var expr = jsonata('Account.Order.Product^(Price).SKU');
                 expr.evaluate(clone);
             }).to.throw()
-              .to.deep.contain({position: 22, code: 'T2007', value: "foo", value2: 21.67});
+                .to.deep.contain({position: 22, code: 'T2007', value: "foo", value2: 21.67});
         });
     });
 
@@ -6812,7 +6812,7 @@ describe('Evaluator - Order-by', function () {
                 var expr = jsonata('Account.Order.Product^(Price).SKU');
                 expr.evaluate(clone);
             }).to.throw()
-              .to.deep.contain({position: 22, code: 'T2008', value: true});
+                .to.deep.contain({position: 22, code: 'T2008', value: true});
         });
     });
 
@@ -6824,7 +6824,7 @@ describe('Evaluator - Order-by', function () {
                 var expr = jsonata('Account.Order.Product^(Price).SKU');
                 expr.evaluate(clone);
             }).to.throw()
-              .to.deep.contain({position: 22, code: 'T2008', value: null});
+                .to.deep.contain({position: 22, code: 'T2008', value: null});
         });
     });
 });
@@ -6971,7 +6971,7 @@ describe('Evaluator - Lambda functions', function () {
     describe('mutually recursive - odd/even', function () {
         it('should return result object', function () {
             var expr = jsonata(
-              '            (' +
+                '            (' +
               '              $even := function($n) { $n = 0 ? true : $odd($n-1) };' +
               '              $odd := function($n) { $n = 0 ? false : $even($n-1) };' +
               '              $even(82)' +
@@ -6985,7 +6985,7 @@ describe('Evaluator - Lambda functions', function () {
     describe('mutually recursive - odd/even', function () {
         it('should return result object', function () {
             var expr = jsonata(
-              '            (' +
+                '            (' +
               '              $even := function($n) { $n = 0 ? true : $odd($n-1) }; ' +
               '              $odd := function($n) { $n = 0 ? false : $even($n-1) }; ' +
               '              $even(65) )');
@@ -7012,7 +7012,7 @@ describe('Evaluator - Lambda functions', function () {
     describe('recursive - gcd', function () {
         it('should return result object', function () {
             var expr = jsonata(
-              '(' +
+                '(' +
               '  $gcd := λ($a, $b){$b = 0 ? $a : $gcd($b, $a%$b) };' +
               '  [$gcd(8,12), $gcd(9,12)]' +
               ')' );
@@ -7064,7 +7064,7 @@ describe('Evaluator - Tail recursion', function () {
     describe('empty function body', function () {
         it('should return result object', function () {
             var expr = jsonata(
-              '            (' +
+                '            (' +
               '              $f := function($n){()};' +
               '              $f(1)' +
               '            ) ' );
@@ -7077,7 +7077,7 @@ describe('Evaluator - Tail recursion', function () {
     describe('factorial non-tail call', function () {
         it('should return result object', function () {
             var expr = jsonata(
-              '(' +
+                '(' +
               '  $factorial := function($n){$n = 0 ? 1 : $n * $factorial($n - 1)};' +
               '  $factorial(99)' +
               ')             ');
@@ -7092,7 +7092,7 @@ describe('Evaluator - Tail recursion', function () {
         it('should return result object', function () {
             expect(function () {
                 var expr = jsonata(
-                  '(' +
+                    '(' +
                   '  $factorial := function($n){$n = 0 ? 1 : $n * $factorial($n - 1)};' +
                   '  $factorial(100)' +
                   ')             ');
@@ -7106,7 +7106,7 @@ describe('Evaluator - Tail recursion', function () {
     describe('factorial tail recursive', function () {
         it('should return result object', function () {
             var expr = jsonata(
-              '(' +
+                '(' +
               '  $factorial := function($n){(' +
               '    $iter := function($n, $acc) {' +
               '      $n = 0 ? $acc : $iter($n - 1, $n * $acc)' +
@@ -7125,7 +7125,7 @@ describe('Evaluator - Tail recursion', function () {
     describe('factorial tail recursive', function () {
         it('should return result object', function () {
             var expr = jsonata(
-              '(' +
+                '(' +
               '  $factorial := function($n){(' +
               '    $iter := function($n, $acc) {' +
               '      $n = 0 ? $acc : $iter($n - 1, $n * $acc)' +
@@ -7145,7 +7145,7 @@ describe('Evaluator - Tail recursion', function () {
         it('should throw error', function () {
             expect(function () {
                 var expr = jsonata(
-                  '(' +
+                    '(' +
                   '  $inf := function($n){$n+$inf($n-1)};' +
                   '  $inf(5)' +
                   ')' );
@@ -7161,14 +7161,14 @@ describe('Evaluator - Tail recursion', function () {
         it('should throw error', function () {
             expect(function () {
                 var expr = jsonata(
-                  '(' +
+                    '(' +
                   '  $inf := function(){$inf()};' +
                   '  $inf()' +
                   ')' );
                 timeboxExpression(expr, 1000, 500);
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 37, code: 'U1001'});
+                .to.deep.contain({position: 37, code: 'U1001'});
         });
     });
 
@@ -7260,7 +7260,7 @@ describe('Evaluator - Block expressions', function () {
     describe('Function returning object', function () {
         it('should return result object', function () {
             var expr = jsonata(
-              '(' +
+                '(' +
               '  $func := function($arg) {$arg.Account.Order[0].OrderID};' +
               '  $func($)' +
               ')');
@@ -7273,7 +7273,7 @@ describe('Evaluator - Block expressions', function () {
     describe('Function returning object', function () {
         it('should return result object', function () {
             var expr = jsonata(
-              '(' +
+                '(' +
               '  $func := function($arg) {$arg.Account.Order[0]};' +
               '  $func($).OrderID' +
               ')' );
@@ -7382,7 +7382,7 @@ describe('Evaluator - Partial function application', function () {
     describe('Partially apply user-defined Javascript function', function () {
         it('should return result object', function () {
             var expr = jsonata(
-              '(' +
+                '(' +
               '  $firstn := $substr(?, 0, ?);' +
               '  $first5 := $firstn(?, 5);' +
               '  $first5("Hello World")' +
@@ -7405,7 +7405,7 @@ describe('HOF - map', function () {
     describe('square all numbers in an array', function () {
         it('should return result object', function () {
             var expr = jsonata(
-              '(' +
+                '(' +
               '  $data := {' +
               '    "one": [1,2,3,4,5],' +
               '    "two": [5,4,3,2,1]' +
@@ -7422,7 +7422,7 @@ describe('HOF - map', function () {
     describe('map with only function arg', function () {
         it('should return result object', function () {
             var expr = jsonata(
-              '(' +
+                '(' +
               '  $data := {' +
               '    "one": [1,2,3,4,5],' +
               '    "two": [5,4,3,2,1]' +
@@ -7433,7 +7433,7 @@ describe('HOF - map', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 99, code: 'T0410', token: 'map', index: 2});
+                .to.deep.contain({position: 99, code: 'T0410', token: 'map', index: 2});
         });
     });
 
@@ -7572,7 +7572,7 @@ describe('HOF - zip/map', function () {
     describe('zip combining two arrays', function () {
         it('should return result object', function () {
             var expr = jsonata(
-              '(' +
+                '(' +
               '  $data := {' +
               '    "one": [1,2,3,4,5],' +
               '    "two": [5,4,3,2,1]' +
@@ -7588,7 +7588,7 @@ describe('HOF - zip/map', function () {
     describe('zip combining two arrays', function () {
         it('should return result object', function () {
             var expr = jsonata(
-              '(' +
+                '(' +
               '  $data := {' +
               '    "one": [1,2,3,4,5],' +
               '    "two": [5,4,3,2,1]' +
@@ -7604,7 +7604,7 @@ describe('HOF - zip/map', function () {
     describe('zip combining two arrays', function () {
         it('should return result object', function () {
             var expr = jsonata(
-              '(' +
+                '(' +
               '  $data := {' +
               '    "one": [1],' +
               '    "two": [5]' +
@@ -7620,7 +7620,7 @@ describe('HOF - zip/map', function () {
     describe('zip combining two arrays', function () {
         it('should return result object', function () {
             var expr = jsonata(
-              '(' +
+                '(' +
               '  $data := {' +
               '    "one": 1,' +
               '    "two": 5' +
@@ -7639,7 +7639,7 @@ describe('HOF - reduce', function () {
     describe('sum numbers in an array', function () {
         it('should return result object', function () {
             var expr = jsonata(
-              '(' +
+                '(' +
               '  $seq := [1,2,3,4,5];' +
               '  $reduce($seq, function($x, $y){$x+$y})' +
               ') ');
@@ -7667,7 +7667,7 @@ describe('HOF - reduce', function () {
     describe('sum numbers in an array, with init', function () {
         it('should return result object', function () {
             var expr = jsonata(
-              '(' +
+                '(' +
               '  $seq := [1,2,3,4,5];' +
               '  $reduce($seq, function($x, $y){$x+$y}, 2)' +
               ')' );
@@ -7680,7 +7680,7 @@ describe('HOF - reduce', function () {
     describe('sum numbers in an array, with init', function () {
         it('should return result object', function () {
             var expr = jsonata(
-              '(' +
+                '(' +
               '  $seq := 1;' +
               '  $reduce($seq, function($x, $y){$x+$y})' +
               ')' );
@@ -7693,7 +7693,7 @@ describe('HOF - reduce', function () {
     describe('sum numbers in an array - singleton', function () {
         it('should return result object', function () {
             var expr = jsonata(
-              '(' +
+                '(' +
               '  $seq := 1;' +
               '  $reduce($seq, function($x, $y){$x+$y})' +
               ')' );
@@ -7736,7 +7736,7 @@ describe('HOF - reduce', function () {
     describe('reduce function with one argument', function () {
         it('should throw error', function () {
             var expr = jsonata(
-              '(' +
+                '(' +
               '  $seq := 1;' +
               '  $reduce($seq, function($x){$x})' +
               ')' );
@@ -7829,7 +7829,7 @@ describe('Regex', function () {
                     var expr = jsonata('//');
                     expr.evaluate();
                 }).to.throw()
-                  .to.deep.contain({position: 1, code: 'S0301'});
+                    .to.deep.contain({position: 1, code: 'S0301'});
             });
         });
 
@@ -7839,7 +7839,7 @@ describe('Regex', function () {
                     var expr = jsonata('/');
                     expr.evaluate();
                 }).to.throw()
-                  .to.deep.contain({position: 1, code: 'S0302'});
+                    .to.deep.contain({position: 1, code: 'S0302'});
             });
         });
 
@@ -7914,7 +7914,7 @@ describe('Regex', function () {
                 expect(function () {
                     expr.evaluate();
                 }).to.throw()
-                  .to.deep.contain({position: 7, code: 'D3040', token: 'match', index: 3, value: -3});
+                    .to.deep.contain({position: 7, code: 'D3040', token: 'match', index: 3, value: -3});
             });
         });
 
@@ -7924,7 +7924,7 @@ describe('Regex', function () {
                 expect(function () {
                     expr.evaluate();
                 }).to.throw()
-                  .to.deep.contain({position: 7, code: 'T0410', token: 'match', index: 3, value: null});
+                    .to.deep.contain({position: 7, code: 'T0410', token: 'match', index: 3, value: null});
             });
         });
 
@@ -7934,7 +7934,7 @@ describe('Regex', function () {
                 expect(function () {
                     expr.evaluate();
                 }).to.throw()
-                  .to.deep.contain({position: 7, code: 'T0410', token: 'match', index: 3, value: "2"});
+                    .to.deep.contain({position: 7, code: 'T0410', token: 'match', index: 3, value: "2"});
             });
         });
 
@@ -7944,7 +7944,7 @@ describe('Regex', function () {
                 expect(function () {
                     expr.evaluate();
                 }).to.throw()
-                  .to.deep.contain({position: 7, code: 'T0410', token: 'match', index: 2, value: "ab"});
+                    .to.deep.contain({position: 7, code: 'T0410', token: 'match', index: 2, value: "ab"});
             });
         });
 
@@ -7954,7 +7954,7 @@ describe('Regex', function () {
                 expect(function () {
                     expr.evaluate();
                 }).to.throw()
-                  .to.deep.contain({position: 7, code: 'T0410', token: 'match', index: 2, value: true});
+                    .to.deep.contain({position: 7, code: 'T0410', token: 'match', index: 2, value: true});
             });
         });
 
@@ -7964,7 +7964,7 @@ describe('Regex', function () {
                 expect(function () {
                     expr.evaluate();
                 }).to.throw()
-                  .to.deep.contain({position: 7, code: 'T0410', token: 'match', index: 1, value: 12345});
+                    .to.deep.contain({position: 7, code: 'T0410', token: 'match', index: 1, value: 12345});
             });
         });
 
@@ -7974,7 +7974,7 @@ describe('Regex', function () {
                 expect(function () {
                     expr.evaluate();
                 }).to.throw()
-                  .to.deep.contain({position: 7, code: 'T0410', token: 'match', index: 1 });
+                    .to.deep.contain({position: 7, code: 'T0410', token: 'match', index: 1 });
             });
         });
     });
@@ -8190,7 +8190,7 @@ describe('Regex', function () {
                 expect(function () {
                     expr.evaluate();
                 }).to.throw()
-                  .to.deep.contain({position: 9, code: 'D1004', token: "replace", value: ".*?"});
+                    .to.deep.contain({position: 9, code: 'D1004', token: "replace", value: ".*?"});
             });
         });
 
@@ -8308,7 +8308,7 @@ describe('Regex', function () {
                 expect(function () {
                     expr.evaluate(testdata2);
                 }).to.throw()
-                  .to.deep.contain({position: 31, code: 'D3012', token: "replace", value: true});
+                    .to.deep.contain({position: 31, code: 'D3012', token: "replace", value: true});
             });
         });
 
@@ -8318,7 +8318,7 @@ describe('Regex', function () {
                 expect(function () {
                     expr.evaluate(testdata2);
                 }).to.throw()
-                  .to.deep.contain({position: 31, code: 'D3012', token: "replace", value: 42});
+                    .to.deep.contain({position: 31, code: 'D3012', token: "replace", value: 42});
             });
         });
 
@@ -8588,7 +8588,7 @@ describe('Evaluator - function application operator', function () {
             expect(function () {
                 expr.evaluate(testdata2);
             }).to.throw()
-              .to.deep.contain({position: 5, code: 'T2006', value: "hello"});
+                .to.deep.contain({position: 5, code: 'T2006', value: "hello"});
         });
     });
 });
@@ -8856,7 +8856,7 @@ describe('Function signatures', function () {
                 var expr = jsonata('λ($arg)<n<n>>{$arg}(5)');
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 10, code: 'S0401', value: "n"});
+                .to.deep.contain({position: 10, code: 'S0401', value: "n"});
         });
     });
 
@@ -8869,7 +8869,7 @@ describe('Function signature violations', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 38, code: 'T0410', index: 2, value: "2"});
+                .to.deep.contain({position: 38, code: 'T0410', index: 2, value: "2"});
         });
     });
 
@@ -8879,7 +8879,7 @@ describe('Function signature violations', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 38, code: 'T0410', index: 3, value: "2"});
+                .to.deep.contain({position: 38, code: 'T0410', index: 3, value: "2"});
         });
     });
 
@@ -8889,7 +8889,7 @@ describe('Function signature violations', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 39, code: 'T0410', index: 4, value: "g"});
+                .to.deep.contain({position: 39, code: 'T0410', index: 4, value: "g"});
         });
     });
 
@@ -8899,7 +8899,7 @@ describe('Function signature violations', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 20, code: 'T0412', index: 1, type: 'n'});
+                .to.deep.contain({position: 20, code: 'T0412', index: 1, type: 'n'});
         });
     });
 
@@ -8909,7 +8909,7 @@ describe('Function signature violations', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 20, code: 'T0412', index: 1, type: 'n'});
+                .to.deep.contain({position: 20, code: 'T0412', index: 1, type: 'n'});
         });
     });
 
@@ -8919,7 +8919,7 @@ describe('Function signature violations', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 20, code: 'T0412', index: 1, type: 'n', value: "f"});
+                .to.deep.contain({position: 20, code: 'T0412', index: 1, type: 'n', value: "f"});
         });
     });
 
@@ -8932,7 +8932,7 @@ describe('Function signature violations', function () {
             expect(function () {
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 34, code: 'T0412', index: 1, type: 'n', value: "f", token: "fun"});
+                .to.deep.contain({position: 34, code: 'T0412', index: 1, type: 'n', value: "f", token: "fun"});
         });
     });
 
@@ -8942,7 +8942,7 @@ describe('Function signature violations', function () {
                 var expr = jsonata('λ($arr)<(sa<n>)>>{$arr}([[1]])');
                 expr.evaluate();
             }).to.throw()
-              .to.deep.contain({position: 9, code: 'S0402'});
+                .to.deep.contain({position: 9, code: 'S0402'});
         });
     });
 });
@@ -9227,7 +9227,7 @@ describe('#evaluate', function () {
             var expr = 'Employment.Name & " is pleased to employ " & Salutation & " " & Surname';
 
             var p = jsonata(expr);
-//            expect(p._tree).to.deep.equal([{"path": ["Employment", "Name"]}, "\" is pleased to employ \"", "Salutation", "\" \"", "Surname"]);
+            //            expect(p._tree).to.deep.equal([{"path": ["Employment", "Name"]}, "\" is pleased to employ \"", "Salutation", "\" \"", "Surname"]);
 
             var e = p.evaluate(person);
             expect(e).to.equal("IBM UK is pleased to employ Mr Smith");

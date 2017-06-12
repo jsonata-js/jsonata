@@ -664,7 +664,7 @@ var jsonata = (function() {
                     type = "regex";
                     symbol = symbol_table["(regex)"];
                     break;
-              /* istanbul ignore next */
+                    /* istanbul ignore next */
                 default:
                     throw {
                         code: "S0205",
@@ -1180,7 +1180,7 @@ var jsonata = (function() {
                     break;
                 case 'name':
                     result = {type: 'path', steps: [expr]};
-//                    result.type = 'path';
+                    //                    result.type = 'path';
                     if(expr.keepArray) {
                         result.keepSingletonArray = true;
                     }
@@ -1243,7 +1243,7 @@ var jsonata = (function() {
         return expr;
     };
 
-// Start of Evaluator code
+    // Start of Evaluator code
 
     var staticFrame = createFrame(null);
 
@@ -1566,7 +1566,7 @@ var jsonata = (function() {
         return results;
     }
 
-        /**
+    /**
      * Evaluate binary expression against input data
      * @param {Object} expr - JSONata expression
      * @param {Object} input - Input data to evaluate against
@@ -2672,7 +2672,7 @@ var jsonata = (function() {
      */
     function getNativeFunctionArguments(func) {
         var signature = func.toString();
-        var sigParens = /\(([^\)]*)\)/.exec(signature)[1]; // the contents of the parens
+        var sigParens = /\(([^)]*)\)/.exec(signature)[1]; // the contents of the parens
         var sigArgs = sigParens.split(',');
         return sigArgs;
     }
@@ -2796,7 +2796,7 @@ var jsonata = (function() {
         } else
             str = JSON.stringify(arg, function (key, val) {
                 return (typeof val !== 'undefined' && val !== null && val.toPrecision && isNumeric(val)) ? Number(val.toPrecision(13)) :
-                  (val && isFunction(val)) ? '' : val;
+                    (val && isFunction(val)) ? '' : val;
             });
         return str;
     }
@@ -2877,7 +2877,7 @@ var jsonata = (function() {
      * @returns {string} Uppercase string
      */
     function functionUppercase(str) {
-         // undefined inputs always return undefined
+        // undefined inputs always return undefined
         if(typeof str === 'undefined') {
             return undefined;
         }
@@ -2930,7 +2930,7 @@ var jsonata = (function() {
      * @returns {Boolean} - true if str contains token
      */
     function functionContains(str, token) {
-         // undefined inputs always return undefined
+        // undefined inputs always return undefined
         if(typeof str === 'undefined') {
             return undefined;
         }
@@ -3358,7 +3358,7 @@ var jsonata = (function() {
             /* istanbul ignore next */
             result = +(value[0] + 'e' + (value[1] ? (+value[1] - precision) : -precision));
         }
-        if(result === -0) {
+        if(Object.is(result, -0)) { // ESLint rule 'no-compare-neg-zero' suggests this way
             // JSON doesn't do -0
             result = 0;
         }
@@ -3505,7 +3505,7 @@ var jsonata = (function() {
             var func_args = [arr[i]]; // the first arg (value) is required
             // the other two are optional - only supply it if the function can take it
             var length = typeof func === 'function' ? func.length :
-              func._jsonata_function === true ? func.implementation.length : func.arguments.length;
+                func._jsonata_function === true ? func.implementation.length : func.arguments.length;
             if(length >= 2) {
                 func_args.push(i);
             }
@@ -3522,13 +3522,15 @@ var jsonata = (function() {
         return result;
     }
 
+    // This generator function does not have a yield(), presumably to make it
+    // consistent with other similar functions.
     /**
      * Create a map from an array of arguments
      * @param {Array} [arr] - array to filter
      * @param {Function} func - predicate function
      * @returns {Array} Map array
      */
-    function* functionFilter(arr, func) {
+    function* functionFilter(arr, func) { // eslint-disable-line require-yield
         // undefined inputs always return undefined
         if(typeof arr === 'undefined') {
             return undefined;
@@ -4108,16 +4110,16 @@ var jsonata = (function() {
                 if(typeof callback === 'function') {
                     exec_env.bind('__jsonata_async', true);
                     var thenHandler = function (response) {
-//                    console.log('THEN: ', response);
+                        //                    console.log('THEN: ', response);
                         result = it.next(response);
                         if (result.done) {
                             callback(null, result.value);
                         } else {
                             result.value.then(thenHandler)
-                              .catch(function (err) {
-                                  err.message = lookupMessage(err);
-                                  callback(err, null);
-                              });
+                                .catch(function (err) {
+                                    err.message = lookupMessage(err);
+                                    callback(err, null);
+                                });
                         }
                     };
                     it = evaluate(ast, input, exec_env);
