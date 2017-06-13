@@ -7173,7 +7173,7 @@ describe('Evaluator - Tail recursion', function () {
     });
 
     describe('mutually recursive - odd/even, tail calls', function () {
-        this.timeout(5000);
+        this.timeout(10000);
         it('should return result object', function () {
             var expr = jsonata(
                 '        (' +
@@ -7181,7 +7181,7 @@ describe('Evaluator - Tail recursion', function () {
                 '          $odd := function($n) { $n = 0 ? false : $even($n-1) }; ' +
                 '          $odd(6555) ' +
                 '        )' );
-            timeboxExpression(expr, 4000, 500);
+            timeboxExpression(expr, 9000, 500);
             var result = expr.evaluate();
             var expected = true;
             expect(result).to.deep.equal(expected);
