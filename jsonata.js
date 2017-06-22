@@ -1312,12 +1312,7 @@ var jsonata = (function() {
                 position: node.position,
                 token: node.value
             };
-            if(recover) {
-                errors.push(err);
-            } else {
-                err.stack = (new Error()).stack;
-                throw err;
-            }
+            handleError(err);
         }
         expr = ast_optimize(expr);
 

@@ -266,6 +266,13 @@ describe('Invoke parser with incomplete expression', function() {
                 {
                     "code": "S0201",
                     "position": 25,
+                    "remaining": [
+                        {
+                            "position": 25,
+                            "type": "operator",
+                            "value": ";"
+                        }
+                    ],
                     "token": ";"
                 }
             ];
