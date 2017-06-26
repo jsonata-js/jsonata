@@ -1,3 +1,7 @@
+#### 1.2.5 Maintenance Release
+
+- Fix $base64encode and $base64decode functions in the browser
+
 #### 1.2.4 Maintenance Release
 
 - Fix an issue running in IE11 and phantom.js (#58)
