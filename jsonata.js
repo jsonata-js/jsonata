@@ -3139,7 +3139,7 @@ var jsonata = (function() {
         }
         // Use btoa in a browser, or Buffer in Node.js
         // eslint-disable-next-line
-        var btoa = global.btoa || function(str) {
+        var btoa = typeof window !== 'undefined' ? /* istanbul ignore next */ window.btoa : function(str) {
             // Simply doing `new Buffer` at this point causes Browserify to pull
             // in the entire Buffer browser library, which is large and unnecessary.
             // Using `global.Buffer` defeats this.
@@ -3160,7 +3160,7 @@ var jsonata = (function() {
         }
         // Use btoa in a browser, or Buffer in Node.js
         // eslint-disable-next-line
-        var atob = global.atob || function(str) {
+        var atob = typeof window !== 'undefined' ? /* istanbul ignore next */ window.atob : function(str) {
             // Simply doing `new Buffer` at this point causes Browserify to pull
             // in the entire Buffer browser library, which is large and unnecessary.
             // Using `global.Buffer` defeats this.
