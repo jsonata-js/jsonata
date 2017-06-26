@@ -3138,13 +3138,15 @@ var jsonata = (function() {
             return undefined;
         }
         // Use btoa in a browser, or Buffer in Node.js
-        // eslint-disable-next-line
-        var btoa = typeof window !== 'undefined' ? /* istanbul ignore next */ window.btoa : function(str) {
-            // Simply doing `new Buffer` at this point causes Browserify to pull
-            // in the entire Buffer browser library, which is large and unnecessary.
-            // Using `global.Buffer` defeats this.
-            return new global.Buffer(str, 'binary').toString('base64');
-        };
+
+        var btoa = typeof window !== 'undefined' ?
+            /* istanbul ignore next */ window.btoa :
+            function(str) {
+                // Simply doing `new Buffer` at this point causes Browserify to pull
+                // in the entire Buffer browser library, which is large and unnecessary.
+                // Using `global.Buffer` defeats this.
+                return new global.Buffer(str, 'binary').toString('base64');
+            };
         return btoa(str);
     }
 
@@ -3159,13 +3161,14 @@ var jsonata = (function() {
             return undefined;
         }
         // Use btoa in a browser, or Buffer in Node.js
-        // eslint-disable-next-line
-        var atob = typeof window !== 'undefined' ? /* istanbul ignore next */ window.atob : function(str) {
-            // Simply doing `new Buffer` at this point causes Browserify to pull
-            // in the entire Buffer browser library, which is large and unnecessary.
-            // Using `global.Buffer` defeats this.
-            return new global.Buffer(str, 'base64').toString('binary');
-        };
+        var atob = typeof window !== 'undefined' ?
+            /* istanbul ignore next */ window.atob :
+            function(str) {
+                // Simply doing `new Buffer` at this point causes Browserify to pull
+                // in the entire Buffer browser library, which is large and unnecessary.
+                // Using `global.Buffer` defeats this.
+                return new global.Buffer(str, 'base64').toString('binary');
+            };
         return atob(str);
     }
 
