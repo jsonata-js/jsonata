@@ -10,6 +10,10 @@
     "browser": true
   },
 
+  "parserOptions": {
+    "sourceType": "module"
+  },
+
   // Extra plugins required
   "plugins": [
     "ideal" // for tabs in file
