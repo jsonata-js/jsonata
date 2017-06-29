@@ -1,3 +1,7 @@
+#### 1.2.6 Maintenance Release
+
+- fix evaluator when array constructor is the first step in a path expression (issue #63)
+
 #### 1.2.5 Maintenance Release
 
 - Fix $base64encode and $base64decode functions in the browser
