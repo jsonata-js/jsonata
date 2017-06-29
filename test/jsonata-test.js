@@ -5980,6 +5980,15 @@ describe('Evaluator - array constructor', function () {
         });
     });
 
+    describe('[Address, Other."Alternative.Address"].City', function () {
+        it('should return result object', function () {
+            var expr = jsonata('[Address, Other."Alternative.Address"].City');
+            var result = expr.evaluate(testdata4);
+            var expected = ["Winchester", "London"];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
     describe('[0,1,2,3,4,5,6,7,8,9][$ % 2 = 0]', function () {
         it('should return result object', function () {
             var expr = jsonata('[0,1,2,3,4,5,6,7,8,9][$ % 2 = 0]');

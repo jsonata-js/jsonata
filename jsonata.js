@@ -1410,9 +1410,6 @@ var jsonata = (function() {
         //   then the path is absolute rather than relative
         if (expr[0].type === 'variable') {
             inputSequence = [input]; // dummy singleton sequence for first (absolute) step
-        } else if(expr[0].consarray) {
-            // array constructor - not relative to the input
-            inputSequence = [null];// dummy singleton sequence for first step
         } else if (Array.isArray(input)) {
             inputSequence = input;
         } else {
@@ -1426,7 +1423,12 @@ var jsonata = (function() {
         for(var ii = 0; ii < expr.length; ii++) {
             var step = expr[ii];
 
-            resultSequence = yield * evaluateStep(step, inputSequence, environment);
+            // if the first step is an explicit array constructor, then just evaluate that (i.e. don't iterate over a context array)
+            if(ii === 0 && step.consarray) {
+                resultSequence = yield * evaluate(step, inputSequence, environment);
+            } else {
+                resultSequence = yield * evaluateStep(step, inputSequence, environment);
+            }
 
             if(typeof resultSequence === 'undefined' || resultSequence.length === 0) {
                 break;
