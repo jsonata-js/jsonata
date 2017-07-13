@@ -427,6 +427,15 @@ describe('Evaluator - string literals, escape sequences', function () {
         });
     });
 
+    describe('"C:\\\\Test\\\\test.txt"', function () {
+        it('should return result object', function () {
+            var expr = jsonata('"C:\\\\Test\\\\test.txt"');
+            var result = expr.evaluate(testdata1);
+            var expected = 'C:\\Test\\test.txt';
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
     describe('"\\u03BB-calculus rocks"', function () {
         it('should return result object', function () {
             var expr = jsonata('"\\u03BB-calculus rocks"');
