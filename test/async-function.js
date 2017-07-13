@@ -68,7 +68,7 @@ describe('Invoke JSONata with callback - errors', function() {
             var expr = jsonata('5 + $httpget("htttttps://api.npmjs.org/downloads/range/2016-09-01:2017-03-31/jsonata")');
             expr.assign('httpget', httpget);
             return expect(jsonataPromise(expr)).to.be.rejected;
-//              .to.deep.contain({position: 7, code: 'T0410', token: 'count', index: 2});;
+            //              .to.deep.contain({position: 7, code: 'T0410', token: 'count', index: 2});;
         });
 
     });
@@ -78,7 +78,7 @@ describe('Invoke JSONata with callback - errors', function() {
             var expr = jsonata('$httpget("htttttps://api.npmjs.org/downloads/range/2016-09-01:2017-03-31/jsonata").downloads{ $substring(day, 0, 7): $sum(downloads) }');
             expr.assign('httpget', httpget);
             return expect(jsonataPromise(expr)).to.be.rejected;
-//              .to.deep.contain({position: 7, code: 'T0410', token: 'count', index: 2});;
+            //              .to.deep.contain({position: 7, code: 'T0410', token: 'count', index: 2});;
         });
     });
 });

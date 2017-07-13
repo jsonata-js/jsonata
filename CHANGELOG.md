@@ -1,3 +1,24 @@
+#### 1.2.6 Maintenance Release
+
+- fix evaluator when array constructor is the first step in a path expression (issue #63)
+
+#### 1.2.5 Maintenance Release
+
+- Fix $base64encode and $base64decode functions in the browser
+
+#### 1.2.4 Maintenance Release
+
+- Fix an issue running in IE11 and phantom.js (#58)
+
+#### 1.2.3 Maintenance Release
+
+- Fix an issue for a few functions that were not working in ES5 transpiled version (#56)
+
+#### 1.2.2 Maintenance Release
+
+- Update readme.md with API documentation
+- Correctly handle null values when executed with a callback (#53)
+
 #### 1.2.1 Maintenance Release
 
 - Generate ES5 compatible version of jsonata.js (jsonata-es5.js & jsonata-es5.min.js) using Babel

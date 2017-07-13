@@ -709,7 +709,7 @@ var jsonata = (function() {
                     type = "regex";
                     symbol = symbol_table["(regex)"];
                     break;
-              /* istanbul ignore next */
+                    /* istanbul ignore next */
                 default:
                     return handleError( {
                         code: "S0205",
@@ -1244,7 +1244,7 @@ var jsonata = (function() {
                     break;
                 case 'name':
                     result = {type: 'path', steps: [expr]};
-//                    result.type = 'path';
+                    //                    result.type = 'path';
                     if(expr.keepArray) {
                         result.keepSingletonArray = true;
                     }
@@ -1323,7 +1323,7 @@ var jsonata = (function() {
         return expr;
     };
 
-// Start of Evaluator code
+    // Start of Evaluator code
 
     var staticFrame = createFrame(null);
 
@@ -1490,9 +1490,6 @@ var jsonata = (function() {
         //   then the path is absolute rather than relative
         if (expr[0].type === 'variable') {
             inputSequence = [input]; // dummy singleton sequence for first (absolute) step
-        } else if(expr[0].consarray) {
-            // array constructor - not relative to the input
-            inputSequence = [null];// dummy singleton sequence for first step
         } else if (Array.isArray(input)) {
             inputSequence = input;
         } else {
@@ -1506,7 +1503,12 @@ var jsonata = (function() {
         for(var ii = 0; ii < expr.length; ii++) {
             var step = expr[ii];
 
-            resultSequence = yield * evaluateStep(step, inputSequence, environment);
+            // if the first step is an explicit array constructor, then just evaluate that (i.e. don't iterate over a context array)
+            if(ii === 0 && step.consarray) {
+                resultSequence = yield * evaluate(step, inputSequence, environment);
+            } else {
+                resultSequence = yield * evaluateStep(step, inputSequence, environment);
+            }
 
             if(typeof resultSequence === 'undefined' || resultSequence.length === 0) {
                 break;
@@ -1646,7 +1648,7 @@ var jsonata = (function() {
         return results;
     }
 
-        /**
+    /**
      * Evaluate binary expression against input data
      * @param {Object} expr - JSONata expression
      * @param {Object} input - Input data to evaluate against
@@ -2446,12 +2448,18 @@ var jsonata = (function() {
     }
 
     /**
-     *
      * @param {Object} arg - expression to test
-     * @returns {boolean} - true if it is a generator function (function*)
+     * @returns {boolean} - true if it is a generator i.e. the result from calling a
+     * generator function
      */
     function isGenerator(arg) {
-        return arg.constructor.name === 'GeneratorFunction';
+        return (
+            typeof arg === 'object' &&
+            Symbol.iterator in arg &&
+            typeof arg[Symbol.iterator] === 'function' &&
+            'next' in arg &&
+            typeof arg.next === 'function'
+        );
     }
 
     /**
@@ -2544,8 +2552,9 @@ var jsonata = (function() {
             result = yield * applyProcedure(proc, validatedArgs);
         } else if (proc && proc._jsonata_function === true) {
             result = proc.implementation.apply(self, validatedArgs);
-            // this might be a function* generator - if so, yield
-            if(isGenerator(proc.implementation)) {
+            // `proc.implementation` might be a generator function
+            // and `result` might be a generator - if so, yield
+            if(isGenerator(result)) {
                 result = yield *result;
             }
         } else if (typeof proc === 'function') {
@@ -2732,7 +2741,7 @@ var jsonata = (function() {
         });
 
         var result = proc.apply(null, args);
-        if(isGenerator(proc)) {
+        if(isGenerator(result)) {
             result = yield * result;
         }
         return result;
@@ -2745,7 +2754,7 @@ var jsonata = (function() {
      */
     function getNativeFunctionArguments(func) {
         var signature = func.toString();
-        var sigParens = /\(([^\)]*)\)/.exec(signature)[1]; // the contents of the parens
+        var sigParens = /\(([^)]*)\)/.exec(signature)[1]; // the contents of the parens
         var sigArgs = sigParens.split(',');
         return sigArgs;
     }
@@ -2869,7 +2878,7 @@ var jsonata = (function() {
         } else
             str = JSON.stringify(arg, function (key, val) {
                 return (typeof val !== 'undefined' && val !== null && val.toPrecision && isNumeric(val)) ? Number(val.toPrecision(13)) :
-                  (val && isFunction(val)) ? '' : val;
+                    (val && isFunction(val)) ? '' : val;
             });
         return str;
     }
@@ -2950,7 +2959,7 @@ var jsonata = (function() {
      * @returns {string} Uppercase string
      */
     function functionUppercase(str) {
-         // undefined inputs always return undefined
+        // undefined inputs always return undefined
         if(typeof str === 'undefined') {
             return undefined;
         }
@@ -3003,7 +3012,7 @@ var jsonata = (function() {
      * @returns {Boolean} - true if str contains token
      */
     function functionContains(str, token) {
-         // undefined inputs always return undefined
+        // undefined inputs always return undefined
         if(typeof str === 'undefined') {
             return undefined;
         }
@@ -3211,13 +3220,15 @@ var jsonata = (function() {
             return undefined;
         }
         // Use btoa in a browser, or Buffer in Node.js
-        // eslint-disable-next-line
-        var btoa = btoa || function(str) {
-            // Simply doing `new Buffer` at this point causes Browserify to pull
-            // in the entire Buffer browser library, which is large and unnecessary.
-            // Using `global.Buffer` defeats this.
-            return new global.Buffer(str, 'binary').toString('base64');
-        };
+
+        var btoa = typeof window !== 'undefined' ?
+            /* istanbul ignore next */ window.btoa :
+            function(str) {
+                // Simply doing `new Buffer` at this point causes Browserify to pull
+                // in the entire Buffer browser library, which is large and unnecessary.
+                // Using `global.Buffer` defeats this.
+                return new global.Buffer(str, 'binary').toString('base64');
+            };
         return btoa(str);
     }
 
@@ -3232,13 +3243,14 @@ var jsonata = (function() {
             return undefined;
         }
         // Use btoa in a browser, or Buffer in Node.js
-        // eslint-disable-next-line
-        var atob = atob || function(str) {
-            // Simply doing `new Buffer` at this point causes Browserify to pull
-            // in the entire Buffer browser library, which is large and unnecessary.
-            // Using `global.Buffer` defeats this.
-            return new global.Buffer(str, 'base64').toString('binary');
-        };
+        var atob = typeof window !== 'undefined' ?
+            /* istanbul ignore next */ window.atob :
+            function(str) {
+                // Simply doing `new Buffer` at this point causes Browserify to pull
+                // in the entire Buffer browser library, which is large and unnecessary.
+                // Using `global.Buffer` defeats this.
+                return new global.Buffer(str, 'base64').toString('binary');
+            };
         return atob(str);
     }
 
@@ -3431,7 +3443,7 @@ var jsonata = (function() {
             /* istanbul ignore next */
             result = +(value[0] + 'e' + (value[1] ? (+value[1] - precision) : -precision));
         }
-        if(result === -0) {
+        if(Object.is(result, -0)) { // ESLint rule 'no-compare-neg-zero' suggests this way
             // JSON doesn't do -0
             result = 0;
         }
@@ -3578,7 +3590,7 @@ var jsonata = (function() {
             var func_args = [arr[i]]; // the first arg (value) is required
             // the other two are optional - only supply it if the function can take it
             var length = typeof func === 'function' ? func.length :
-              func._jsonata_function === true ? func.implementation.length : func.arguments.length;
+                func._jsonata_function === true ? func.implementation.length : func.arguments.length;
             if(length >= 2) {
                 func_args.push(i);
             }
@@ -3595,13 +3607,15 @@ var jsonata = (function() {
         return result;
     }
 
+    // This generator function does not have a yield(), presumably to make it
+    // consistent with other similar functions.
     /**
      * Create a map from an array of arguments
      * @param {Array} [arr] - array to filter
      * @param {Function} func - predicate function
      * @returns {Array} Map array
      */
-    function* functionFilter(arr, func) {
+    function* functionFilter(arr, func) { // eslint-disable-line require-yield
         // undefined inputs always return undefined
         if(typeof arr === 'undefined') {
             return undefined;
@@ -4191,10 +4205,10 @@ var jsonata = (function() {
                             callback(null, result.value);
                         } else {
                             result.value.then(thenHandler)
-                              .catch(function (err) {
-                                  err.message = lookupMessage(err);
-                                  callback(err, null);
-                              });
+                                .catch(function (err) {
+                                    err.message = lookupMessage(err);
+                                    callback(err, null);
+                                });
                         }
                     };
                     it = evaluate(ast, input, exec_env);
