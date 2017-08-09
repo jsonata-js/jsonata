@@ -5407,6 +5407,46 @@ describe('Evaluator - function: shuffle', function () {
 
 });
 
+describe('Evaluator - function: merge', function () {
+
+    describe('$merge(nothing)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$merge(nothing)');
+            var result = expr.evaluate(testdata2);
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$merge([{"a":1}, {"b":2}])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$merge([{"a":1}, {"b":2}])');
+            var result = expr.evaluate(testdata2);
+            var expected = {"a": 1, "b": 2};
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$merge([{"a": 1}, {"b": 2, "c": 3}])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$merge([{"a": 1}, {"b": 2, "c": 3}])');
+            var result = expr.evaluate(testdata2);
+            var expected = {"a": 1, "b": 2, "c": 3};
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$merge([{"a": 1}, {"b": 2, "a": 3}])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$merge([{"a": 1}, {"b": 2, "a": 3}])');
+            var result = expr.evaluate(testdata2);
+            var expected = {"a": 3, "b": 2};
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+});
+
 describe('Evaluator - function: sort', function () {
 
     describe('$sort(nothing)', function () {
@@ -5621,6 +5661,29 @@ describe('Evaluator - function: now', function () {
     describe('$now() always returns same value within an expression', function () {
         it('should return result object', function () {
             var expr = jsonata('{"now": $now(), "delay": $sum([1..10000]), "later": $now()}.(now = later)');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+});
+
+describe('Evaluator - function: millis', function () {
+
+    describe('$millis() returns milliseconds since the epoch', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$millis()');
+            var result = expr.evaluate(testdata2);
+            // number between 1502264152715 and 2000000000000 (18 May 2033)
+            var expected = result > 1502264152715 && result < 2000000000000;
+            expect(expected).to.deep.equal(true);
+        });
+    });
+
+    describe('$millis() always returns same value within an expression', function () {
+        it('should return result object', function () {
+            var expr = jsonata('{"now": $millis(), "delay": $sum([1..10000]), "later": $millis()}.(now = later)');
             var result = expr.evaluate(testdata2);
             var expected = true;
             expect(result).to.deep.equal(expected);

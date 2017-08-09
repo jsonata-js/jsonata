@@ -3812,6 +3812,28 @@ var jsonata = (function() {
     }
 
     /**
+     * Merges an array of objects into a single object.  Duplicate properties are
+     * overridden by entries later in the array
+     * @param {*} arg - the objects to merge
+     * @returns {*} - the object
+     */
+    function functionMerge(arg) {
+        // undefined inputs always return undefined
+        if(typeof arg === 'undefined') {
+            return undefined;
+        }
+
+        var result = {};
+
+        arg.forEach(function(obj) {
+            for(var prop in obj) {
+                result[prop] = obj[prop];
+            }
+        });
+        return result;
+    }
+
+    /**
      * Reverses the order of items in an array
      * @param {Array} arr - the array to reverse
      * @returns {Array} - the reversed array
@@ -4064,6 +4086,7 @@ var jsonata = (function() {
     staticFrame.bind('append', defineFunction(functionAppend, '<xx:a>'));
     staticFrame.bind('exists', defineFunction(functionExists, '<x:b>'));
     staticFrame.bind('spread', defineFunction(functionSpread, '<x-:a<o>>'));
+    staticFrame.bind('merge', defineFunction(functionMerge, '<a<o>:o>'));
     staticFrame.bind('reverse', defineFunction(functionReverse, '<a:a>'));
     staticFrame.bind('each', defineFunction(functionEach, '<o-f:a>'));
     staticFrame.bind('sort', defineFunction(functionSort, '<af?:a>'));
@@ -4190,10 +4213,15 @@ var jsonata = (function() {
 
                 // capture the timestamp and put it in the execution environment
                 // the $now() function will return this value - whenever it is called
-                var timestamp = (new Date()).toJSON();
+                var date = new Date();
+                var timestamp = date.toJSON();
+                var millis = date.getTime();
                 exec_env.bind('now', defineFunction(function() {
                     return timestamp;
                 }, '<:s>'));
+                exec_env.bind('millis', defineFunction(function() {
+                    return millis;
+                }, '<:n>'));
 
                 var result, it;
                 // if a callback function is supplied, then drive the generator in a promise chain
