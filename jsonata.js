@@ -41,7 +41,6 @@ var jsonata = (function() {
         '=': 40,
         '<': 40,
         '>': 40,
-        '`': 80,
         '^': 40,
         '**': 60,
         '..': 20,
@@ -247,10 +246,27 @@ var jsonata = (function() {
                     };
                 }
             }
+            // test for quoted names (backticks)
+            var name;
+            if(currentChar === '`') {
+                // scan for closing quote
+                position++;
+                var end = path.indexOf('`', position);
+                if(end !== -1) {
+                    name = path.substring(position, end);
+                    position = end + 1;
+                    return create('name', name);
+                }
+                position = length;
+                throw {
+                    code: "S0105",
+                    stack: (new Error()).stack,
+                    position: position
+                };
+            }
             // test for names
             var i = position;
             var ch;
-            var name;
             for (;;) {
                 ch = path.charAt(i);
                 if (i === length || ' \t\n\r\v'.indexOf(ch) > -1 || operators.hasOwnProperty(ch)) {
@@ -4103,6 +4119,7 @@ var jsonata = (function() {
         "S0102": "Number out of range: {{token}}",
         "S0103": "Unsupported escape sequence: \\{{token}}",
         "S0104": "The escape sequence \\u must be followed by 4 hex digits",
+        "S0105": "Quoted property name must be terminated with a backquote (`)",
         "S0201": "Syntax error: {{token}}",
         "S0202": "Expected {{value}}, got {{token}}",
         "S0203": "Expected {{value}} before end of expression",
