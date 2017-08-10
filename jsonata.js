@@ -594,7 +594,7 @@ var jsonata = (function() {
         var remainingTokens = function() {
             var remaining = [];
             if(node.id !== '(end)') {
-                remaining.push(node);
+                remaining.push({type: node.type, value: node.value, position: node.position});
             }
             var nxt = lexer();
             while(nxt !== null) {

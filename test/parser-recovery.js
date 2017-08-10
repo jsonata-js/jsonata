@@ -281,5 +281,154 @@ describe('Invoke parser with incomplete expression', function() {
         });
     });
 
+    describe('$equals3lucy[0].UnstructuredAnswers^()[0].Text', function() {
+        it('should return ast', function() {
+            var expr = jsonata('$equals3lucy[0].UnstructuredAnswers^()[0].Text', true);
+            var ast = expr.ast();
+            var expected_ast = {
+                "type": "sort",
+                "value": "^",
+                "position": 36,
+                "lhs": {
+                    "type": "path",
+                    "steps": [
+                        {
+                            "value": "equals3lucy",
+                            "type": "variable",
+                            "position": 12,
+                            "predicate": [
+                                {
+                                    "value": 0,
+                                    "type": "literal",
+                                    "position": 14
+                                }
+                            ]
+                        },
+                        {
+                            "value": "UnstructuredAnswers",
+                            "type": "name",
+                            "position": 35
+                        }
+                    ]
+                },
+                "rhs": [
+                    {
+                        "descending": false,
+                        "expression": {
+                            "code": "S0211",
+                            "token": ")",
+                            "position": 38,
+                            "remaining": [
+                                {
+                                    "type": "operator",
+                                    "value": "[",
+                                    "position": 39
+                                },
+                                {
+                                    "type": "number",
+                                    "value": 0,
+                                    "position": 40
+                                },
+                                {
+                                    "type": "operator",
+                                    "value": "]",
+                                    "position": 41
+                                },
+                                {
+                                    "type": "operator",
+                                    "value": ".",
+                                    "position": 42
+                                },
+                                {
+                                    "type": "name",
+                                    "value": "Text",
+                                    "position": 46
+                                }
+                            ],
+                            "type": "error",
+                            "predicate": [
+                                {
+                                    "type": "error",
+                                    "error": {
+                                        "code": "S0207",
+                                        "position": 46,
+                                        "token": "(end)"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            };
+            var errors = expr.errors();
+            var expected_errors = [
+                {
+                    "code": "S0211",
+                    "position": 38,
+                    "predicate": [
+                        {
+                            "error": {
+                                "code": "S0207",
+                                "position": 46,
+                                "token": "(end)"
+                            },
+                            "type": "error"
+                        }
+                    ],
+                    "remaining": [
+                        {
+                            "position": 39,
+                            "type": "operator",
+                            "value": "["
+                        },
+                        {
+                            "position": 40,
+                            "type": "number",
+                            "value": 0
+                        },
+                        {
+                            "position": 41,
+                            "type": "operator",
+                            "value": "]"
+                        },
+                        {
+                            "position": 42,
+                            "type": "operator",
+                            "value": "."
+                        },
+                        {
+                            "position": 46,
+                            "type": "name",
+                            "value": "Text"
+                        }
+                    ],
+                    "token": ")",
+                    "type": "error"
+                },
+                {
+                    "code": "S0203",
+                    "position": 46,
+                    "remaining": [],
+                    "token": "(end)",
+                    "value": "]"
+                },
+                {
+                    "code": "S0203",
+                    "position": 46,
+                    "remaining": [],
+                    "token": "(end)",
+                    "value": ")"
+                },
+                {
+                    "code": "S0207",
+                    "position": 46,
+                    "token": "(end)"
+                }
+            ];
+            assert.deepEqual(ast, expected_ast);
+            assert.deepEqual(errors, expected_errors);
+        });
+    });
+
 });
 

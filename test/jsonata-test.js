@@ -5418,6 +5418,15 @@ describe('Evaluator - function: merge', function () {
         });
     });
 
+    describe('$merge({"a":1})', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$merge({"a":1})');
+            var result = expr.evaluate(testdata2);
+            var expected = {"a": 1};
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
     describe('$merge([{"a":1}, {"b":2}])', function () {
         it('should return result object', function () {
             var expr = jsonata('$merge([{"a":1}, {"b":2}])');
