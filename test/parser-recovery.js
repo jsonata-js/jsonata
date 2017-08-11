@@ -2,6 +2,8 @@
 
 var jsonata = require('../jsonata');
 var assert = require('assert');
+var chai = require("chai");
+var expect = chai.expect;
 
 describe('Invoke parser with valid expression', function() {
     describe('Account.Order[0]', function() {
@@ -427,6 +429,18 @@ describe('Invoke parser with incomplete expression', function() {
             ];
             assert.deepEqual(ast, expected_ast);
             assert.deepEqual(errors, expected_errors);
+        });
+    });
+
+    describe('An expression with syntax error should not be executable', function() {
+        describe('Account.', function() {
+            it('should return ast', function() {
+                var expr = jsonata('Account.', true);
+                expect(function () {
+                    expr.evaluate({});
+                }).to.throw()
+                    .to.deep.contain({position: 0, code: 'S0500'});
+            });
         });
     });
 

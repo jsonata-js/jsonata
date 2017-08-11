@@ -4135,6 +4135,7 @@ var jsonata = (function() {
         "S0302": "No terminating / in regular expression",
         "S0402": "Choice groups containing parameterized types are not supported",
         "S0401": "Type parameters can only be applied to functions and arrays",
+        "S0500": "Attempted to evaluate an expression containing syntax error(s)",
         "T0410": "Argument {{index}} of function {{token}} does not match function signature",
         "T0411": "Context value is not a compatible type with argument {{index}} of function {{token}}",
         "T0412": "Argument {{index}} of function {{token}} must be an array of {{type}}",
@@ -4215,6 +4216,16 @@ var jsonata = (function() {
         var environment = createFrame(staticFrame);
         return {
             evaluate: function (input, bindings, callback) {
+                // throw if the expression compiled with syntax errors
+                if(typeof errors !== 'undefined') {
+                    var err = {
+                        code: 'S0500',
+                        position: 0
+                    };
+                    err.message = lookupMessage(err);
+                    throw err;
+                }
+
                 if (typeof bindings !== 'undefined') {
                     var exec_env;
                     // the variable bindings have been passed in - create a frame to hold these
@@ -4291,7 +4302,7 @@ var jsonata = (function() {
         };
     }
 
-    jsonata.parser = parser;
+    jsonata.parser = parser; // TODO remove this in a future release - use ast() instead
 
     return jsonata;
 
