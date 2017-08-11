@@ -8,7 +8,7 @@ var expect = chai.expect;
 describe('Invoke parser with valid expression', function() {
     describe('Account.Order[0]', function() {
         it('should return ast', function() {
-            var expr = jsonata('Account.Order[0]', true);
+            var expr = jsonata('Account.Order[0]', { recover: true });
             var ast = expr.ast();
             var expected_ast = {
                 "type": "path",
@@ -43,7 +43,7 @@ describe('Invoke parser with valid expression', function() {
 describe('Invoke parser with incomplete expression', function() {
     describe('Account.', function() {
         it('should return ast', function() {
-            var expr = jsonata('Account.', true);
+            var expr = jsonata('Account.', { recover: true });
             var ast = expr.ast();
             var expected_ast = {
                 "type": "path",
@@ -78,7 +78,7 @@ describe('Invoke parser with incomplete expression', function() {
 
     describe('Account[', function() {
         it('should return ast', function() {
-            var expr = jsonata('Account[', true);
+            var expr = jsonata('Account[', { recover: true });
             var ast = expr.ast();
             var expected_ast = {
                 "type": "path",
@@ -122,7 +122,7 @@ describe('Invoke parser with incomplete expression', function() {
 
     describe('Account.Order[;0].Product', function() {
         it('should return ast', function() {
-            var expr = jsonata('Account.Order[;0].Product', true);
+            var expr = jsonata('Account.Order[;0].Product', { recover: true });
             var ast = expr.ast();
             var expected_ast = {
                 "type": "path",
@@ -188,7 +188,7 @@ describe('Invoke parser with incomplete expression', function() {
 
     describe('Account.Order[0;].Product', function() {
         it('should return ast', function() {
-            var expr = jsonata('Account.Order[0;].Product', true);
+            var expr = jsonata('Account.Order[0;].Product', { recover: true });
             var ast = expr.ast();
             var expected_ast = {
                 "type": "path",
@@ -234,7 +234,7 @@ describe('Invoke parser with incomplete expression', function() {
 
     describe('Account.Order[0].Product;', function() {
         it('should return ast', function() {
-            var expr = jsonata('Account.Order[0].Product;', true);
+            var expr = jsonata('Account.Order[0].Product;', { recover: true });
             var ast = expr.ast();
             var expected_ast = {
                 "type": "path",
@@ -285,7 +285,7 @@ describe('Invoke parser with incomplete expression', function() {
 
     describe('$equals3lucy[0].UnstructuredAnswers^()[0].Text', function() {
         it('should return ast', function() {
-            var expr = jsonata('$equals3lucy[0].UnstructuredAnswers^()[0].Text', true);
+            var expr = jsonata('$equals3lucy[0].UnstructuredAnswers^()[0].Text', { recover: true });
             var ast = expr.ast();
             var expected_ast = {
                 "type": "sort",
@@ -435,7 +435,7 @@ describe('Invoke parser with incomplete expression', function() {
     describe('An expression with syntax error should not be executable', function() {
         describe('Account.', function() {
             it('should return ast', function() {
-                var expr = jsonata('Account.', true);
+                var expr = jsonata('Account.', { recover: true });
                 expect(function () {
                     expr.evaluate({});
                 }).to.throw()

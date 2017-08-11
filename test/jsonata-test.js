@@ -5728,6 +5728,26 @@ describe('Evaluator - function: now', function () {
         });
     });
 
+    describe('$now() returns different timestamp for subsequent evaluate() calls', function () {
+        it('should return result object', function () {
+            var expr = jsonata('($sum([1..10000]); $now())');
+            var result = expr.evaluate(testdata2);
+            var result2 = expr.evaluate(testdata2);
+            expect(result).to.not.equal(result2);
+        });
+    });
+
+    describe('Override implementation of $now()', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$now()');
+            expr.registerFunction('now', function() {
+                return 'time for tea';
+            });
+            var result = expr.evaluate(testdata2);
+            expect(result).to.equal('time for tea');
+        });
+    });
+
 });
 
 describe('Evaluator - function: millis', function () {
@@ -5748,6 +5768,15 @@ describe('Evaluator - function: millis', function () {
             var result = expr.evaluate(testdata2);
             var expected = true;
             expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$millis() returns different timestamp for subsequent evaluate() calls', function () {
+        it('should return result object', function () {
+            var expr = jsonata('($sum([1..10000]); $millis())');
+            var result = expr.evaluate(testdata2);
+            var result2 = expr.evaluate(testdata2);
+            expect(result).to.not.equal(result2);
         });
     });
 

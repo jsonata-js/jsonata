@@ -4198,14 +4198,14 @@ var jsonata = (function() {
     /**
      * JSONata
      * @param {Object} expr - JSONata expression
-     * @param {boolean} recover - robust parser - attempt to recover on parse error
+     * @param {boolean} options - recover: attempt to recover on parse error
      * @returns {{evaluate: evaluate, assign: assign}} Evaluated expression
      */
-    function jsonata(expr, recover) {
+    function jsonata(expr, options) {
         var ast;
         var errors;
         try {
-            ast = parser(expr, recover);
+            ast = parser(expr, options && options.recover);
             errors = ast.errors;
             delete ast.errors;
         } catch(err) {
@@ -4214,6 +4214,15 @@ var jsonata = (function() {
             throw err;
         }
         var environment = createFrame(staticFrame);
+
+        var timestamp = new Date(); // will be overridden on each call to evalute()
+        environment.bind('now', defineFunction(function() {
+            return timestamp.toJSON();
+        }, '<:s>'));
+        environment.bind('millis', defineFunction(function() {
+            return timestamp.getTime();
+        }, '<:n>'));
+
         return {
             evaluate: function (input, bindings, callback) {
                 // throw if the expression compiled with syntax errors
@@ -4240,16 +4249,8 @@ var jsonata = (function() {
                 exec_env.bind('$', input);
 
                 // capture the timestamp and put it in the execution environment
-                // the $now() function will return this value - whenever it is called
-                var date = new Date();
-                var timestamp = date.toJSON();
-                var millis = date.getTime();
-                exec_env.bind('now', defineFunction(function() {
-                    return timestamp;
-                }, '<:s>'));
-                exec_env.bind('millis', defineFunction(function() {
-                    return millis;
-                }, '<:n>'));
+                // the $now() and $millis() functions will return this value - whenever it is called
+                timestamp = new Date();
 
                 var result, it;
                 // if a callback function is supplied, then drive the generator in a promise chain
