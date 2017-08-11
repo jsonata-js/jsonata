@@ -1,3 +1,11 @@
+#### 1.3.0 Milestone Release
+
+- Property names containing reserved tokens can now be quoted using backticks (`).  The current quoting mechanism using single or double quotes is deprecated and will probably be removed in a future major (e.g. v2.0.0) release.
+- The parser can be invoked in a *robust* mode whereby errors will be indicated by an error token in the parse tree rather than throwing an exception. This is the first step in creating a parser that can recover and report multiple errors.  The default mode remains to throw an exception on first syntax error.
+- New functions
+  - $merge - merge an array of objects into a single object
+  - $millis - current timestamp in milliseconds since the epoch
+
 #### 1.2.6 Maintenance Release
 
 - fix evaluator when array constructor is the first step in a path expression (issue #63)
