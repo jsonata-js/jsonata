@@ -5873,6 +5873,15 @@ describe('Evaluator - errors', function () {
         });
     });
 
+    describe('$replace("foo", "o, "rr")', function () {
+        it('should throw error', function () {
+            expect(function () {
+                jsonata('$replace("foo", "o, "rr")');
+            }).to.throw()
+                .to.deep.contain({position: 24, code: 'S0202', token: 'rr"', value: ')'});
+        });
+    });
+
     describe('[1!2]', function () {
         it('should throw error', function () {
             expect(function () {

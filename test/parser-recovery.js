@@ -170,7 +170,7 @@ describe('Invoke parser with incomplete expression', function() {
                 {
                     "code": "S0202",
                     "position": 16,
-                    "token": "(literal)",
+                    "token": "0",
                     "value": "]",
                     "remaining": [
                         {

@@ -685,7 +685,7 @@ var jsonata = (function() {
                 var err = {
                     code: code,
                     position: node.position,
-                    token: node.id,
+                    token: node.value,
                     value: id
                 };
                 return handleError(err);
