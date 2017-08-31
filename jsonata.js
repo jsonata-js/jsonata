@@ -1068,6 +1068,20 @@ var jsonata = (function() {
             return this;
         });
 
+        // object transformer
+        prefix("|", function () {
+            this.type = 'transform';
+            this.pattern = expression(0);
+            advance('|');
+            this.update = expression(0);
+            if(node.id === ',') {
+                advance(',');
+                this.delete = expression(0);
+            }
+            advance('|');
+            return this;
+        });
+
         // tail call optimization
         // this is invoked by the post parser to analyse lambda functions to see
         // if they make a tail call.  If so, it is replaced by a thunk which will
@@ -1249,6 +1263,14 @@ var jsonata = (function() {
                         result.else = ast_optimize(expr.else);
                     }
                     break;
+                case 'transform':
+                    result = {type: expr.type, position: expr.position};
+                    result.pattern = ast_optimize(expr.pattern);
+                    result.update = ast_optimize(expr.update);
+                    if(typeof expr.delete !== 'undefined') {
+                        result.delete = ast_optimize(expr.delete);
+                    }
+                    break;
                 case 'block':
                     result = {type: expr.type, position: expr.position};
                     // array of expressions - process each one
@@ -1260,7 +1282,6 @@ var jsonata = (function() {
                     break;
                 case 'name':
                     result = {type: 'path', steps: [expr]};
-                    //                    result.type = 'path';
                     if(expr.keepArray) {
                         result.keepSingletonArray = true;
                     }
@@ -1466,6 +1487,9 @@ var jsonata = (function() {
                 break;
             case 'sort':
                 result = yield * evaluateSortExpression(expr, input, environment);
+                break;
+            case 'transform':
+                result = evaluateTransformExpression(expr, input, environment);
                 break;
         }
 
@@ -2129,7 +2153,9 @@ var jsonata = (function() {
         it = allPromises.entries();
         for (key in groups) {
             var value = it.next().value[1];
-            result[key] = value;
+            if(typeof value !== 'undefined') {
+                result[key] = value;
+            }
         }
 
         return result;
@@ -2386,6 +2412,81 @@ var jsonata = (function() {
     }
 
     /**
+     * create a transformer function
+     * @param {Object} expr - AST for operator
+     * @param {Object} input - Input data to evaluate against
+     * @param {Object} environment - Environment
+     * @returns {*} tranformer function
+     */
+    function evaluateTransformExpression(expr, input, environment) {
+        // create a function to implement the transform definition
+        var transformer = function*(obj) { // signature <a<o>-:o>
+            // undefined inputs always return undefined
+            if(typeof obj === 'undefined') {
+                return undefined;
+            }
+
+            // this function returns a copy of obj with changes specified by the pattern/operation
+            var result = JSON.parse(functionString(obj));
+            var matches = yield * evaluate(expr.pattern, result, environment);
+            if(typeof matches !== 'undefined') {
+                if(!Array.isArray(matches)) {
+                    matches = [matches];
+                }
+                for(var ii = 0; ii < matches.length; ii++) {
+                    var match = matches[ii];
+                    // evaluate the update value for each match
+                    var update = yield * evaluate(expr.update, match, environment);
+                    // update must be an object
+                    var updateType = typeof update;
+                    if(updateType !== 'undefined') {
+                        if(updateType !== 'object' || update === null) {
+                            // throw type error
+                            throw {
+                                code: "T2011",
+                                stack: (new Error()).stack,
+                                position: expr.update.position,
+                                value: update
+                            };
+                        }
+                        // merge the update
+                        for(var prop in update) {
+                            match[prop] = update[prop];
+                        }
+                    }
+
+                    // delete, if specified, must be an array of strings (or single string)
+                    if(typeof expr.delete !== 'undefined') {
+                        var deletions = yield * evaluate(expr.delete, match, environment);
+                        if(typeof deletions !== 'undefined') {
+                            var val = deletions;
+                            if (!Array.isArray(deletions)) {
+                                deletions = [deletions];
+                            }
+                            if (!isArrayOfStrings(deletions)) {
+                                // throw type error
+                                throw {
+                                    code: "T2012",
+                                    stack: (new Error()).stack,
+                                    position: expr.delete.position,
+                                    value: val
+                                };
+                            }
+                            for (var jj = 0; jj < deletions.length; jj++) {
+                                delete match[deletions[jj]];
+                            }
+                        }
+                    }
+                }
+            }
+
+            return result;
+        };
+
+        return defineFunction(transformer, '<o-:o>');
+    }
+
+    /**
      * Evaluate an expression by driving the generator to completion
      * Used when it's not possible to yield
      * @param {Object} expr - AST
@@ -2575,6 +2676,10 @@ var jsonata = (function() {
             }
         } else if (typeof proc === 'function') {
             result = proc.apply(self, validatedArgs);
+            /* istanbul ignore next */
+            if(isGenerator(result)) {
+                result = yield *result;
+            }
         } else {
             throw {
                 code: "T1006",
@@ -4141,22 +4246,24 @@ var jsonata = (function() {
         "T0412": "Argument {{index}} of function {{token}} must be an array of {{type}}",
         "D1001": "Number out of range: {{value}}",
         "D1002": "Cannot negate a non-numeric value: {{value}}",
+        "T1003": "Key in object structure must evaluate to a string; got: {{value}}",
+        "D1004": "Regular expression matches zero length string",
+        "T1005": "Attempted to invoke a non-function. Did you mean ${{{token}}}?",
+        "T1006": "Attempted to invoke a non-function",
+        "T1007": "Attempted to partially apply a non-function. Did you mean ${{{token}}}?",
+        "T1008": "Attempted to partially apply a non-function",
         "T2001": "The left side of the {{token}} operator must evaluate to a number",
         "T2002": "The right side of the {{token}} operator must evaluate to a number",
-        "T1003": "Key in object structure must evaluate to a string; got: {{value}}",
         "T2003": "The left side of the range operator (..) must evaluate to an integer",
         "T2004": "The right side of the range operator (..) must evaluate to an integer",
         "D2005": "The left side of := must be a variable name (start with $)",
-        "D1004": "Regular expression matches zero length string",
         "T2006": "The right side of the function application operator ~> must be a function",
         "T2007": "Type mismatch when comparing values {{value}} and {{value2}} in order-by clause",
         "T2008": "The expressions within an order-by clause must evaluate to numeric or string values",
         "T2009": "The values {{value}} and {{value2}} either side of operator {{token}} must be of the same data type",
         "T2010": "The expressions either side of operator {{token}} must evaluate to numeric or string values",
-        "T1005": "Attempted to invoke a non-function. Did you mean ${{{token}}}?",
-        "T1006": "Attempted to invoke a non-function",
-        "T1007": "Attempted to partially apply a non-function. Did you mean ${{{token}}}?",
-        "T1008": "Attempted to partially apply a non-function",
+        "T2011": "The insert/update clause of the transform expression must evaluate to an object: {{value}}",
+        "T2012": "The delete clause of the transform expression must evaluate to a string or array of strings: {{value}}",
         "D3001": "Attempting to invoke string function on Infinity or NaN",
         "D3010": "Second argument of replace function cannot be an empty string",
         "D3011": "Fourth argument of replace function must evaluate to a positive number",
