@@ -2483,7 +2483,7 @@ var jsonata = (function() {
             return result;
         };
 
-        return defineFunction(transformer, '<o-:o>');
+        return defineFunction(transformer, '<(oa):o>');
     }
 
     /**
