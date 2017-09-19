@@ -1,3 +1,8 @@
+#### 1.3.1 Maintenance Release
+
+- Fix S0202 error insert to report token value, not token type (PR #74)
+- Remove use of array iterators because they were failing to transpile to ES5 correctly (issue #78)
+
 #### 1.3.0 Milestone Release
 
 - Property names containing reserved tokens can now be quoted using backticks (`).  The current quoting mechanism using single or double quotes is deprecated and will probably be removed in a future major (e.g. v2.0.0) release.
