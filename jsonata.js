@@ -685,7 +685,7 @@ var jsonata = (function() {
                 var err = {
                     code: code,
                     position: node.position,
-                    token: node.id,
+                    token: node.value,
                     value: id
                 };
                 return handleError(err);
@@ -2113,17 +2113,11 @@ var jsonata = (function() {
         if (!Array.isArray(input)) {
             input = [input];
         }
-        var allPromises = [];
         for(var itemIndex = 0; itemIndex < input.length; itemIndex++) {
+            var item = input[itemIndex];
             for(var pairIndex = 0; pairIndex < expr.lhs.length; pairIndex++) {
-                allPromises.push(yield * evaluate(expr.lhs[pairIndex][0], input[itemIndex], environment));
-            }
-        }
-
-        var it = allPromises.entries();
-        input.forEach(function (item) {
-            expr.lhs.forEach(function (pair) {
-                var key = it.next().value[1];
+                var pair = expr.lhs[pairIndex];
+                var key = yield * evaluate(pair[0], item, environment);
                 // key has to be a string
                 if (typeof  key !== 'string') {
                     throw {
@@ -2141,18 +2135,13 @@ var jsonata = (function() {
                 } else {
                     groups[key] = entry;
                 }
-            });
-        });
-        // iterate over the groups to evaluate the 'value' expression
-        allPromises = [];
-        var key;
-        for (key in groups) {
-            var entry = groups[key];
-            allPromises.push(yield * evaluate(entry.expr, entry.data, environment));
+            }
         }
-        it = allPromises.entries();
+
+        // iterate over the groups to evaluate the 'value' expression
         for (key in groups) {
-            var value = it.next().value[1];
+            entry = groups[key];
+            var value = yield * evaluate(entry.expr, entry.data, environment);
             if(typeof value !== 'undefined') {
                 result[key] = value;
             }
