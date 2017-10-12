@@ -4229,6 +4229,281 @@ describe('Evaluator - functions: join', function () {
 
 });
 
+describe('Evaluator - functions: formatNumber', function () {
+
+    describe('$formatNumber(12345.6, "#,###.00")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(12345.6, "#,###.00")');
+            var result = expr.evaluate();
+            var expected = "12,345.60";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(12345678.9, "9,999.99")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(12345678.9, "9,999.99")');
+            var result = expr.evaluate();
+            var expected = "12,345,678.90";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(123412345678.9, "9,999.99")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(123412345678.9, "9,9,99.99")');
+            var result = expr.evaluate();
+            var expected = "123412345,6,78.90";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(1234.56789, "9,999.999,99")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(1234.56789, "9,999.999,999")');
+            var result = expr.evaluate();
+            var expected = "1,234.567,890";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(123.9, "9999")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(123.9, "9999")');
+            var result = expr.evaluate();
+            var expected = "0124";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(0.14, "01%")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(0.14, "01%")');
+            var result = expr.evaluate();
+            var expected = "14%";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(0.4857,"###.###‰")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(0.4857,"###.###‰")');
+            var result = expr.evaluate();
+            var expected = "485.7‰";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(0.14, "001pm", {"per-mille": "pm"})', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(0.14, "###pm", {"per-mille": "pm"})');
+            var result = expr.evaluate();
+            var expected = "140pm";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(-6, "000")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(-6, "000")');
+            var result = expr.evaluate();
+            var expected = "-006";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(1234.5678, "00.000e0")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(1234.5678, "00.000e0")');
+            var result = expr.evaluate();
+            var expected = "12.346e2";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(1234.5678, "00.000e000")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(1234.5678, "00.000e000")');
+            var result = expr.evaluate();
+            var expected = "12.346e002";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(1234.5678, "①①.①①①e①")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(1234.5678, "①①.①①①e①", {"zero-digit": "\u245f"})');
+            var result = expr.evaluate();
+            var expected = "①②.③④⑥e②";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(0.234, "0.0e0")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(0.234, "0.0e0")');
+            var result = expr.evaluate();
+            var expected = "2.3e-1";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(0.234, "#.00e0")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(0.234, "#.00e0")');
+            var result = expr.evaluate();
+            var expected = "0.23e0";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(0.123, "#.e9")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(0.123, "#.e9")');
+            var result = expr.evaluate();
+            var expected = "0.1e0";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(0.234, ".00e0")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(0.234, ".00e0")');
+            var result = expr.evaluate();
+            var expected = ".23e0";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(2392.14*(-36.58), "000,000.000###;###,###.000###")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(2392.14*(-36.58), "000,000.000###;###,###.000###")');
+            var result = expr.evaluate();
+            var expected = "87,504.4812";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(2.14*86.58,"PREFIX##00.000###SUFFIX")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(2.14*86.58,"PREFIX##00.000###SUFFIX")');
+            var result = expr.evaluate();
+            var expected = "PREFIX185.2812SUFFIX";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(1E20,"#,######")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(1E20,"#,######")');
+            var result = expr.evaluate();
+            var expected = "100,000000,000000,000000";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('Picture format errors', function () {
+        it('D3080', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"#;#;#")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3080'});
+        });
+
+        it('D3081', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"#.0.0")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3081'});
+        });
+
+        it('D3082', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"#0%%")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3082'});
+        });
+
+        it('D3083', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"#0‰‰")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3083'});
+        });
+
+        it('D3084', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"#0%‰")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3084'});
+        });
+
+        it('D3085', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,".e0")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3085'});
+        });
+
+        it('D3086', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"0+.e0")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3086'});
+        });
+
+        it('D3087', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"0,.e0")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3087'});
+        });
+
+        it('D3088', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"0,")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3088'});
+        });
+
+        it('D3089', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"0,,0")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3089'});
+        });
+
+        it('D3090', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"0#.e0")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3090'});
+        });
+
+        it('D3091', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"#0.#0e0")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3091'});
+        });
+
+        it('D3092', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"#0.0e0%")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3092'});
+        });
+
+        it('D3093', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"#0.0e0,0")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3093'});
+        });
+
+    });
+});
+
 describe('Evaluator - functions: number', function () {
 
     describe('$number(0)', function () {
