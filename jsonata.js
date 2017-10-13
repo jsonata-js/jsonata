@@ -3154,6 +3154,41 @@ var jsonata = (function() {
     }
 
     /**
+     * Pad a string to a minimum width by adding characters to the start or end
+     * @param {string} str - string to be padded
+     * @param {number} width - the minimum width; +ve pads to the right, -ve pads to the left
+     * @param {string} [char] - the pad character(s); defaults to ' '
+     * @returns {string} - padded string
+     */
+    function functionPad(str, width, char) {
+        // undefined inputs always return undefined
+        if(typeof str === 'undefined') {
+            return undefined;
+        }
+
+        if(typeof char === 'undefined' || char.length === 0) {
+            char = ' ';
+        }
+
+        var result;
+        var padLength = Math.abs(width) - str.length;
+        if(padLength > 0) {
+            var padding = (new Array(padLength + 1)).join(char);
+            if(char.length > 1) {
+                padding = padding.substring(0, padLength);
+            }
+            if(width > 0) {
+                result = str + padding;
+            } else {
+                result = padding + str;
+            }
+        } else {
+            result = str;
+        }
+        return result;
+    }
+
+    /**
      * Tests if the str contains the token
      * @param {String} str - string to test
      * @param {String} token - substring or regex to find
@@ -3842,6 +3877,40 @@ var jsonata = (function() {
         // bullet 14:
         stringValue = pic.prefix + stringValue + pic.suffix;
         return stringValue;
+    }
+
+    /**
+     * Converts a number to a string using a specified number base
+     * @param {string} value - the number to convert
+     * @param {number} [radix] - the number base; must be between 2 and 36. Defaults to 10
+     * @returns {string} - the converted string
+     */
+    function functionFormatBase(value, radix) {
+        // undefined inputs always return undefined
+        if(typeof value === 'undefined') {
+            return undefined;
+        }
+
+        value = functionRound(value);
+
+        if(typeof radix === 'undefined') {
+            radix = 10;
+        } else {
+            radix = functionRound(radix);
+        }
+
+        if(radix < 2 || radix > 36) {
+            throw {
+                code: 'D3100',
+                stack: (new Error()).stack,
+                value: radix
+            };
+
+        }
+
+        var result = value.toString(radix);
+
+        return result;
     }
 
     /**
@@ -4649,12 +4718,14 @@ var jsonata = (function() {
     staticFrame.bind('uppercase', defineFunction(functionUppercase, '<s-:s>'));
     staticFrame.bind('length', defineFunction(functionLength, '<s-:n>'));
     staticFrame.bind('trim', defineFunction(functionTrim, '<s-:s>'));
+    staticFrame.bind('pad', defineFunction(functionPad, '<s-ns?:s>'));
     staticFrame.bind('match', defineFunction(functionMatch, '<s-f<s:o>n?:a<o>>'));
     staticFrame.bind('contains', defineFunction(functionContains, '<s-(sf):b>')); // TODO <s-(sf<s:o>):b>
     staticFrame.bind('replace', defineFunction(functionReplace, '<s-(sf)(sf)n?:s>')); // TODO <s-(sf<s:o>)(sf<o:s>)n?:s>
     staticFrame.bind('split', defineFunction(functionSplit, '<s-(sf)n?:a<s>>')); // TODO <s-(sf<s:o>)n?:a<s>>
     staticFrame.bind('join', defineFunction(functionJoin, '<a<s>s?:s>'));
     staticFrame.bind('formatNumber', defineFunction(functionFormatNumber, '<n-so?:s>'));
+    staticFrame.bind('formatBase', defineFunction(functionFormatBase, '<n-n?:s>'));
     staticFrame.bind('number', defineFunction(functionNumber, '<(ns)-:n>'));
     staticFrame.bind('floor', defineFunction(functionFloor, '<n-:n>'));
     staticFrame.bind('ceil', defineFunction(functionCeil, '<n-:n>'));
@@ -4756,7 +4827,8 @@ var jsonata = (function() {
         "D3090": "The integer part of the sub-picture must not contain a member of the 'decimal digit family' that is followed by an instance of the 'optional digit character'",
         "D3091": "The fractional part of the sub-picture must not contain an instance of the 'optional digit character' that is followed by a member of the 'decimal digit family'",
         "D3092": "A sub-picture that contains a 'percent' or 'per-mille' character must not contain a character treated as an 'exponent-separator'",
-        "D3093": "The exponent part of the sub-picture must comprise only of one or more characters that are members of the 'decimal digit family'"
+        "D3093": "The exponent part of the sub-picture must comprise only of one or more characters that are members of the 'decimal digit family'",
+        "D3100": "The radix of the formatBase function must be between 2 and 36.  It was given {{value}}"
     };
 
     /**

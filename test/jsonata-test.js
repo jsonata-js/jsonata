@@ -3751,6 +3751,66 @@ describe('Evaluator - functions: trim', function () {
     });
 });
 
+describe('Evaluator - functions: pad', function () {
+
+    describe('$pad("foo", 5)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$pad("foo", 5)');
+            var result = expr.evaluate();
+            expect(result).to.deep.equal('foo  ');
+        });
+    });
+
+    describe('$pad("foo", -5)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$pad("foo", -5)');
+            var result = expr.evaluate();
+            expect(result).to.deep.equal('  foo');
+        });
+    });
+
+    describe('$pad("foo", -5, "#")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$pad("foo", -5, "#")');
+            var result = expr.evaluate();
+            expect(result).to.deep.equal('##foo');
+        });
+    });
+
+    describe('$pad("foo", 5, "")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$pad("foo", 5, "")');
+            var result = expr.evaluate();
+            expect(result).to.deep.equal('foo  ');
+        });
+    });
+
+    describe('$pad("foo", 1)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$pad("foo", 1)');
+            var result = expr.evaluate();
+            expect(result).to.deep.equal('foo');
+        });
+    });
+
+    describe('$pad("foo", 8, "-+")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$pad("foo", 8, "-+")');
+            var result = expr.evaluate();
+            expect(result).to.deep.equal('foo-+-+-');
+        });
+    });
+
+    describe('$pad(nothing, 1)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$pad(nothing, 1)');
+            var result = expr.evaluate();
+            expect(result).to.deep.equal(undefined);
+        });
+    });
+
+});
+
 describe('Evaluator - functions: contains', function () {
 
     describe('$contains("Hello World", "lo")', function () {
@@ -4502,6 +4562,84 @@ describe('Evaluator - functions: formatNumber', function () {
         });
 
     });
+});
+
+describe('Evaluator - functions: formatBase', function () {
+
+    describe('$formatBase(100)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatBase(100)');
+            var result = expr.evaluate();
+            var expected = '100';
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatBase(nothing)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatBase(nothing)');
+            var result = expr.evaluate();
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatBase(100, 2)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatBase(100, 2)');
+            var result = expr.evaluate();
+            var expected = '1100100';
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatBase(-100, 2)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatBase(-100, 2)');
+            var result = expr.evaluate();
+            var expected = '-1100100';
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatBase(100, 36)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatBase(100, 36)');
+            var result = expr.evaluate();
+            var expected = '2s';
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatBase(99.5, 2.5)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatBase(99.5, 2.5)');
+            var result = expr.evaluate();
+            var expected = '1100100';
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatBase(100, 1)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatBase(100, 1)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 12, code: 'D3100'});
+        });
+    });
+
+    describe('$formatBase(100, 37)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatBase(100, 37)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 12, code: 'D3100'});
+        });
+    });
+
 });
 
 describe('Evaluator - functions: number', function () {
@@ -10048,6 +10186,59 @@ describe('Transform', function () {
         });
     });
 
+});
+
+describe('Event processing', function () {
+    var input = {
+        "state": {
+            "tempReadings": [
+                27.2,
+                28.9,
+                28,
+                28.2,
+                28.4
+            ],
+            "readingsCount": 5,
+            "sumTemperatures": 140.7,
+            "avgTemperature": 28.14,
+            "maxTemperature": 28.9,
+            "minTemperature": 27.2
+        },
+        "event": {
+            "t": 28.4
+        }
+    };
+
+    it('consume event and output aggregated sliding window', function () {
+        var expression = `
+        (
+          $tempReadings := $count(state.tempReadings) = 5 ?
+              [state.tempReadings[[1..4]], event.t] :
+              [state.tempReadings, event.t];
+        
+          {
+            "tempReadings": $tempReadings,
+            "sumTemperatures": $sum($tempReadings),
+            "avgTemperature": $average($tempReadings) ~> $round(2),
+            "maxTemperature": $max($tempReadings),
+            "minTemperature": $min($tempReadings)
+          }
+        )`;
+        var expectedResult = {
+            "tempReadings": [
+                28.9,
+                28,
+                28.2,
+                28.4,
+                28.4
+            ],
+            "sumTemperatures": 141.9,
+            "avgTemperature": 28.38,
+            "maxTemperature": 28.9,
+            "minTemperature": 28
+        };
+        expect(jsonata(expression).evaluate(input)).to.deep.equal(expectedResult);
+    });
 });
 
 describe('#evaluate', function () {
