@@ -1,3 +1,7 @@
+#### 1.3.2 Maintenance Release
+
+- Support extension functions that mix sync/async behaviours (issue #77)
+
 #### 1.3.1 Maintenance Release
 
 - Fix S0202 error insert to report token value, not token type (PR #74)
