@@ -435,6 +435,51 @@ describe('Evaluator - Lazy functions: transform', function () {
         });
     });
 
+    describe('$transform($, Account.Order.Product, {"Price": Price  ~> $formatNumber("£#0.00"), "Tax": Price * 0.2 ~> $round(2)}, ["Description", "Product Name", "ProductID", "SKU"])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$transform($, Account.Order.Product, {"Price": Price  ~> $formatNumber("£#0.00"), "Tax": Price * 0.2 ~> $round(2)}, ["Description", "Product Name", "ProductID", "SKU"])');
+            var result = expr.evaluate(testdata2);
+            var expected = {
+                "Account": {
+                    "Account Name": "Firefly",
+                    "Order": [
+                        {
+                            "OrderID": "order103",
+                            "Product": [
+                                {
+                                    "Price": "£34.45",
+                                    "Quantity": 2,
+                                    "Tax": 6.89
+                                },
+                                {
+                                    "Price": "£21.67",
+                                    "Quantity": 1,
+                                    "Tax": 4.33
+                                }
+                            ]
+                        },
+                        {
+                            "OrderID": "order104",
+                            "Product": [
+                                {
+                                    "Price": "£34.45",
+                                    "Quantity": 4,
+                                    "Tax": 6.89
+                                },
+                                {
+                                    "Price": "£107.99",
+                                    "Quantity": 1,
+                                    "Tax": 21.6
+                                }
+                            ]
+                        }
+                    ]
+                }
+            };
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
     describe('foo ~> $transform(foo.bar, {"Description":"blah"})', function () {
         it('should return result object', function () {
             var expr = jsonata('foo ~> $transform(foo.bar, {"Description":"blah"})');

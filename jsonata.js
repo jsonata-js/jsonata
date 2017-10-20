@@ -2510,6 +2510,7 @@ var jsonata = (function() {
             // this is a function _invocation_; invoke it with lhs expression as the first argument
             expr.rhs.arguments.unshift(expr.lhs);
             result = yield * evaluateFunction(expr.rhs, input, environment);
+            expr.rhs.arguments.shift();
         } else {
             var lhs = yield * evaluate(expr.lhs, input, environment);
             var func = yield * evaluate(expr.rhs, input, environment);
@@ -2613,6 +2614,15 @@ var jsonata = (function() {
         }
         // apply the procedure
         try {
+            if(input instanceof Object) {
+                Object.defineProperty(input, '__env__', {
+                    enumerable: false,
+                    configurable: true,
+                    get: function () {
+                        return environment;
+                    }
+                });
+            }
             //result = yield * apply(proc, evaluatedArgs, {focus: input, environment: environment});
             result = yield * apply(proc, evaluatedArgs, input);
         } catch (err) {
