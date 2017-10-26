@@ -6,7 +6,7 @@
   "homepage": "http://jsonata.org/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jsonata-js/jsonata.git"
+    "url": "https://github.com/Allam76/jsonata.git"
   },
   "scripts": {
     "pretest": "npm run lint",
