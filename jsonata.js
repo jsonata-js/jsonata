@@ -4236,7 +4236,11 @@ var jsonata = (function() {
         }, '<:n>'));
 
         return {
+<<<<<<< HEAD
             evaluate: function (input, bindings, callback, mixins) {
+=======
+            evaluate: function (input, bindings, callback) {
+>>>>>>> c279c71b67a6097122ab804f14ca785be2d5a830
                 // throw if the expression compiled with syntax errors
                 if(typeof errors !== 'undefined') {
                     var err = {

@@ -922,7 +922,7 @@ describe('Evaluator - multiple array selectors', function () {
 
 });
 
-describe('Evaluator - quoted object selectors', function () {
+describe('Evaluator - quoted object selectors - deprecate', function () {
     describe('foo."blah"', function () {
         it('should return result object', function () {
             var expr = jsonata('foo."blah"');
@@ -955,6 +955,46 @@ describe('Evaluator - quoted object selectors', function () {
     describe('foo."blah.baz"', function () {
         it('should return result object', function () {
             var expr = jsonata('foo."blah.baz"');
+            var result = expr.evaluate(testdata1);
+            var expected = 'here';
+            expect(result).to.deep.equal(expected);
+        });
+    });
+});
+
+describe('Evaluator - quoted object selectors - backticks', function () {
+    describe('foo.`blah`', function () {
+        it('should return result object', function () {
+            var expr = jsonata('foo.`blah`');
+            var result = expr.evaluate(testdata1);
+            var expected = [{baz: {fud: 'hello'}},
+                {baz: {fud: 'world'}},
+                {bazz: 'gotcha'}];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('foo.`blah`.baz.\'fud\'', function () {
+        it('should return result object', function () {
+            var expr = jsonata('foo.`blah`.baz.\'fud\'');
+            var result = expr.evaluate(testdata1);
+            var expected = ['hello', 'world'];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('`foo`.`blah`.`baz`.`fud`', function () {
+        it('should return result object', function () {
+            var expr = jsonata('`foo`.`blah`.`baz`.`fud`');
+            var result = expr.evaluate(testdata1);
+            var expected = ['hello', 'world'];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('foo.`blah.baz`', function () {
+        it('should return result object', function () {
+            var expr = jsonata('foo.`blah.baz`');
             var result = expr.evaluate(testdata1);
             var expected = 'here';
             expect(result).to.deep.equal(expected);
@@ -1561,6 +1601,18 @@ describe('Evaluator - wildcards', function () {
     describe('Account[$$.Account."Account Name" = "Firefly"].*[OrderID="order104"].Product.Price', function () {
         it('should return result object', function () {
             var expr = jsonata('Account[$$.Account."Account Name" = "Firefly"].*[OrderID="order104"].Product.Price');
+            var result = expr.evaluate(testdata2);
+            var expected = [
+                34.45,
+                107.99
+            ];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('Account[$$.Account.`Account Name` = "Firefly"].*[OrderID="order104"].Product.Price', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account[$$.Account.`Account Name` = "Firefly"].*[OrderID="order104"].Product.Price');
             var result = expr.evaluate(testdata2);
             var expected = [
                 34.45,
@@ -5407,6 +5459,55 @@ describe('Evaluator - function: shuffle', function () {
 
 });
 
+describe('Evaluator - function: merge', function () {
+
+    describe('$merge(nothing)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$merge(nothing)');
+            var result = expr.evaluate(testdata2);
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$merge({"a":1})', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$merge({"a":1})');
+            var result = expr.evaluate(testdata2);
+            var expected = {"a": 1};
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$merge([{"a":1}, {"b":2}])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$merge([{"a":1}, {"b":2}])');
+            var result = expr.evaluate(testdata2);
+            var expected = {"a": 1, "b": 2};
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$merge([{"a": 1}, {"b": 2, "c": 3}])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$merge([{"a": 1}, {"b": 2, "c": 3}])');
+            var result = expr.evaluate(testdata2);
+            var expected = {"a": 1, "b": 2, "c": 3};
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$merge([{"a": 1}, {"b": 2, "a": 3}])', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$merge([{"a": 1}, {"b": 2, "a": 3}])');
+            var result = expr.evaluate(testdata2);
+            var expected = {"a": 3, "b": 2};
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+});
+
 describe('Evaluator - function: sort', function () {
 
     describe('$sort(nothing)', function () {
@@ -5627,6 +5728,58 @@ describe('Evaluator - function: now', function () {
         });
     });
 
+    describe('$now() returns different timestamp for subsequent evaluate() calls', function () {
+        it('should return result object', function () {
+            var expr = jsonata('($sum([1..10000]); $now())');
+            var result = expr.evaluate(testdata2);
+            var result2 = expr.evaluate(testdata2);
+            expect(result).to.not.equal(result2);
+        });
+    });
+
+    describe('Override implementation of $now()', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$now()');
+            expr.registerFunction('now', function() {
+                return 'time for tea';
+            });
+            var result = expr.evaluate(testdata2);
+            expect(result).to.equal('time for tea');
+        });
+    });
+
+});
+
+describe('Evaluator - function: millis', function () {
+
+    describe('$millis() returns milliseconds since the epoch', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$millis()');
+            var result = expr.evaluate(testdata2);
+            // number between 1502264152715 and 2000000000000 (18 May 2033)
+            var expected = result > 1502264152715 && result < 2000000000000;
+            expect(expected).to.deep.equal(true);
+        });
+    });
+
+    describe('$millis() always returns same value within an expression', function () {
+        it('should return result object', function () {
+            var expr = jsonata('{"now": $millis(), "delay": $sum([1..10000]), "later": $millis()}.(now = later)');
+            var result = expr.evaluate(testdata2);
+            var expected = true;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$millis() returns different timestamp for subsequent evaluate() calls', function () {
+        it('should return result object', function () {
+            var expr = jsonata('($sum([1..10000]); $millis())');
+            var result = expr.evaluate(testdata2);
+            var result2 = expr.evaluate(testdata2);
+            expect(result).to.not.equal(result2);
+        });
+    });
+
 });
 
 describe('Evaluator - errors', function () {
@@ -5659,6 +5812,16 @@ describe('Evaluator - errors', function () {
                 expr.evaluate(testdata2);
             }).to.throw()
                 .to.deep.contain({position: 17, code: 'S0101'});
+        });
+    });
+
+    describe('`no closing backtick', function () {
+        it('should throw error', function () {
+            expect(function () {
+                var expr = jsonata('`no closing backtick');
+                expr.evaluate(testdata2);
+            }).to.throw()
+                .to.deep.contain({position: 20, code: 'S0105'});
         });
     });
 
@@ -5707,6 +5870,15 @@ describe('Evaluator - errors', function () {
                 jsonata('[1:2]');
             }).to.throw()
                 .to.deep.contain({position: 3, code: 'S0202', token: ':', value: ']'});
+        });
+    });
+
+    describe('$replace("foo", "o, "rr")', function () {
+        it('should throw error', function () {
+            expect(function () {
+                jsonata('$replace("foo", "o, "rr")');
+            }).to.throw()
+                .to.deep.contain({position: 24, code: 'S0202', token: 'rr"', value: ')'});
         });
     });
 
@@ -5812,7 +5984,7 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('55=>5');
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 5, code: 'S0201', token: 5});
+                .to.deep.contain({position: 4, code: 'S0211', token: '>'});
         });
     });
 
@@ -5822,7 +5994,7 @@ describe('Evaluator - errors', function () {
                 var expr = jsonata('Ssum(:)');
                 expr.evaluate();
             }).to.throw()
-                .to.deep.contain({position: 6, code: 'S0201', token: ':'});
+                .to.deep.contain({position: 6, code: 'S0211', token: ':'});
         });
     });
 
@@ -5843,6 +6015,16 @@ describe('Evaluator - errors', function () {
                 expr.evaluate();
             }).to.throw()
                 .to.deep.contain({position: 18, code: 'S0210'});
+        });
+    });
+
+    describe('Account.Order[0].Product;', function () {
+        it('should throw error', function () {
+            expect(function () {
+                var expr = jsonata('Account.Order[0].Product;');
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 25, code: 'S0201'});
         });
     });
 
@@ -5992,6 +6174,15 @@ describe('Evaluator - array constructor', function () {
     describe('[Address, Other."Alternative.Address"].City', function () {
         it('should return result object', function () {
             var expr = jsonata('[Address, Other."Alternative.Address"].City');
+            var result = expr.evaluate(testdata4);
+            var expected = ["Winchester", "London"];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('[Address, Other.`Alternative.Address`].City', function () {
+        it('should return result object', function () {
+            var expr = jsonata('[Address, Other.`Alternative.Address`].City');
             var result = expr.evaluate(testdata4);
             var expected = ["Winchester", "London"];
             expect(result).to.deep.equal(expected);
@@ -6311,6 +6502,30 @@ describe('Evaluator - object constructor', function () {
         });
     });
 
+    describe('Account.Order.Product{`Product Name`: Price, `Product Name`: Price}', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order.Product{`Product Name`: Price, `Product Name`: Price}');
+            var result = expr.evaluate(testdata2);
+            var expected = {
+                "Bowler Hat": [
+                    34.45,
+                    34.45,
+                    34.45,
+                    34.45
+                ],
+                "Trilby hat": [
+                    21.67,
+                    21.67
+                ],
+                "Cloak": [
+                    107.99,
+                    107.99
+                ]
+            };
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
     describe('Object & array transform', function () {
         it('should return result object', function () {
             var expr = jsonata('Account.Order{' +
@@ -6347,6 +6562,75 @@ describe('Evaluator - object constructor', function () {
               '      "ID": OrderID,' +
               '      "Product": Product.{' +
               '          "Name": $."Product Name",' +
+              '          "SKU": ProductID,' +
+              '          "Details": {' +
+              '            "Weight": Description.Weight,' +
+              '            "Dimensions": Description.(Width & " x " & Height & " x " & Depth)' +
+              '          }' +
+              '        },' +
+              '      "Total Price": $sum(Product.(Price * Quantity))' +
+              '    }' +
+              '}');
+            var result = expr.evaluate(testdata2);
+            var expected = {
+                "Order": [
+                    {
+                        "ID": "order103",
+                        "Product": [
+                            {
+                                "Name": "Bowler Hat",
+                                "SKU": 858383,
+                                "Details": {
+                                    "Weight": 0.75,
+                                    "Dimensions": "300 x 200 x 210"
+                                }
+                            },
+                            {
+                                "Name": "Trilby hat",
+                                "SKU": 858236,
+                                "Details": {
+                                    "Weight": 0.6,
+                                    "Dimensions": "300 x 200 x 210"
+                                }
+                            }
+                        ],
+                        "Total Price": 90.57000000000001
+                    },
+                    {
+                        "ID": "order104",
+                        "Product": [
+                            {
+                                "Name": "Bowler Hat",
+                                "SKU": 858383,
+                                "Details": {
+                                    "Weight": 0.75,
+                                    "Dimensions": "300 x 200 x 210"
+                                }
+                            },
+                            {
+                                "Name": "Cloak",
+                                "SKU": 345664,
+                                "Details": {
+                                    "Weight": 2,
+                                    "Dimensions": "30 x 20 x 210"
+                                }
+                            }
+                        ],
+                        "Total Price": 245.79000000000002
+                    }
+                ]
+            };
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('Invoice transformation - backticks', function () {
+        it('should return result object', function () {
+            var expr = jsonata('{' +
+              '  "Order": Account.Order.{' +
+              '      "ID": OrderID,' +
+              '      "Product": Product.{' +
+              '          "Name": `Product Name`,' +
               '          "SKU": ProductID,' +
               '          "Details": {' +
               '            "Weight": Description.Weight,' +
@@ -7307,12 +7591,33 @@ describe('Evaluator - Closures', function () {
     describe('Close input data', function () {
         it('should return result object', function () {
             var expr = jsonata(
-
                 'Account.(' +
                 '  $AccName := function() { $."Account Name" };' +
                 '  Order[OrderID = "order104"].Product{' +
                 '    "Account": $AccName(),' +
                 '    "SKU-" & $string(ProductID): $."Product Name"' +
+                '  } ' +
+                ')' +
+                ''
+            );
+            var result = expr.evaluate(testdata2);
+            var expected = {
+                "Account": "Firefly",
+                "SKU-858383": "Bowler Hat",
+                "SKU-345664": "Cloak"
+            };
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('Close input data - backticks', function () {
+        it('should return result object', function () {
+            var expr = jsonata(
+                'Account.(' +
+                '  $AccName := function() { `Account Name` };' +
+                '  Order[OrderID = "order104"].Product{' +
+                '    "Account": $AccName(),' +
+                '    "SKU-" & $string(ProductID): `Product Name`' +
                 '  } ' +
                 ')' +
                 ''
