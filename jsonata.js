@@ -4305,6 +4305,10 @@ var jsonata = (function() {
             }
         };
     }
+    function isClass(func) {
+        return typeof func === 'function' 
+            && /^class\s/.test(Function.prototype.toString.call(func));
+    }
 
     jsonata.parser = parser; // TODO remove this in a future release - use ast() instead
 
