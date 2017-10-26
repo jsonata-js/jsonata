@@ -9741,3 +9741,19 @@ describe('end to end scenarios', function () {
         expect(pe.evaluate(data2)).to.deep.equal('boo');
     });
 });
+
+describe('mixin test', function () {
+    it('mixin is used', function () {
+        var expr = jsonata('foo.mixin');
+        var mixins = {
+            test: function(expr,input,environment){
+                if(expr.value === "mixin"){
+                    input.mixin = "This is mixin";
+                }
+            }
+        }
+        var result = expr.evaluate(testdata1,{},null,mixins);
+        var expected = "This is mixin";
+        expect(result).to.deep.equal(expected);
+    });
+});
