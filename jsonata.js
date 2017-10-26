@@ -1797,7 +1797,7 @@ var jsonata = (function() {
                     result.push(res);
                 }
             }
-        } else if (input !== null && typeof input === 'object') {
+        } else if (input !== null && ( typeof input === 'object' || isClass(input))) {
             result = input[expr.value];
         }
         result = normalizeSequence(result);
