@@ -1,3 +1,7 @@
+#### 1.3.3 Maintenance Release
+
+- $lookup() function throws an error when the property has a null value (issue #85)
+
 #### 1.3.2 Maintenance Release
 
 - Support extension functions that mix sync/async behaviours (issue #77)

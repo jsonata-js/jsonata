@@ -2474,6 +2474,7 @@ var jsonata = (function() {
     function isGenerator(arg) {
         return (
             typeof arg === 'object' &&
+            arg !== null &&
             Symbol.iterator in arg &&
             typeof arg[Symbol.iterator] === 'function' &&
             'next' in arg &&

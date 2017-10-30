@@ -5253,6 +5253,21 @@ describe('Evaluator - functions: lookup', function () {
         });
     });
 
+    describe('lookup a null value', function () {
+        it('should return null', function () {
+            var data = {
+                "temp": 22.7,
+                "wind": 7,
+                "gust": null,
+                "timestamp": 1508971317377
+            };
+            var expr = jsonata('$lookup($$, "gust")');
+            var result = expr.evaluate(data);
+            var expected = null;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
 });
 
 describe('Evaluator - functions: append', function () {
