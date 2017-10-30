@@ -10061,3 +10061,14 @@ describe('end to end scenarios', function () {
         expect(pe.evaluate(data2)).to.deep.equal('boo');
     });
 });
+describe('class in path', function () {
+    it('use class in path', function () {
+        class TestClass {
+            static get testValue(){
+                return "testValue";
+            }
+        }
+        var expected = 'testValue';
+        expect(jsonata('class.testValue').evaluate({class:TestClass})).to.deep.equal(expected);
+    });
+});

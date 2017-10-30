@@ -1797,7 +1797,7 @@ var jsonata = (function() {
                     result.push(res);
                 }
             }
-        } else if (input !== null && typeof input === 'object') {
+        } else if (input !== null && ( typeof input === 'object' || isClass(input))) {
             result = input[expr.value];
         }
         result = normalizeSequence(result);
@@ -4305,6 +4305,10 @@ var jsonata = (function() {
                 return errors;
             }
         };
+    }
+    function isClass(func) {
+        return typeof func === 'function' 
+            && /^class\s/.test(Function.prototype.toString.call(func));
     }
 
     jsonata.parser = parser; // TODO remove this in a future release - use ast() instead
