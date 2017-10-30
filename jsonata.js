@@ -4044,6 +4044,46 @@ var jsonata = (function() {
         return result;
     }
 
+    // Regular expression to match an ISO 8601 formatted timestamp
+    var iso8601regex = new RegExp('^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d\\.\\d+([+-][0-2]\\d:[0-5]\\d|Z)$');
+
+    /**
+     * Converts an ISO 8601 timestamp to milliseconds since the epoch
+     *
+     * @param {string} timestamp - the ISO 8601 timestamp to be converted
+     * @returns {Number} - milliseconds since the epoch
+     */
+    function functionToMillis(timestamp) {
+        // undefined inputs always return undefined
+        if(typeof timestamp === 'undefined') {
+            return undefined;
+        }
+
+        if(!iso8601regex.test(timestamp)) {
+            throw {
+                stack: (new Error()).stack,
+                code: "D3110",
+                value: timestamp
+            };
+        }
+
+        return Date.parse(timestamp);
+    }
+
+    /**
+     * Converts milliseconds since the epoch to an ISO 8601 timestamp
+     * @param {Number} millis - milliseconds since the epoch to be converted
+     * @returns {String} - an ISO 8601 formatted timestamp
+     */
+    function functionToDateTime(millis) {
+        // undefined inputs always return undefined
+        if(typeof millis === 'undefined') {
+            return undefined;
+        }
+
+        return new Date(millis).toISOString();
+    }
+
     /**
      * Create frame
      * @param {Object} enclosingEnvironment - Enclosing environment
@@ -4113,6 +4153,8 @@ var jsonata = (function() {
     staticFrame.bind('shuffle', defineFunction(functionShuffle, '<a:a>'));
     staticFrame.bind('base64encode', defineFunction(functionBase64encode, '<s-:s>'));
     staticFrame.bind('base64decode', defineFunction(functionBase64decode, '<s-:s>'));
+    staticFrame.bind('toMillis', defineFunction(functionToMillis, '<s-:n>'));
+    staticFrame.bind('toDateTime', defineFunction(functionToDateTime, '<n-:s>'));
 
     /**
      * Error codes
@@ -4171,7 +4213,8 @@ var jsonata = (function() {
         "D3050": "First argument of reduce function must be a function with two arguments",
         "D3060": "The sqrt function cannot be applied to a negative number: {{value}}",
         "D3061": "The power function has resulted in a value that cannot be represented as a JSON number: base={{value}}, exponent={{exp}}",
-        "D3070": "The single argument form of the sort function can only be applied to an array of strings or an array of numbers.  Use the second argument to specify a comparison function"
+        "D3070": "The single argument form of the sort function can only be applied to an array of strings or an array of numbers.  Use the second argument to specify a comparison function",
+        "D3110": "The argument of the toMillis function must be an ISO 8601 formatted timestamp. Given {{value}}"
     };
 
     /**
