@@ -1789,6 +1789,13 @@ var jsonata = (function() {
     function evaluateName(expr, input, environment) {
         // lookup the 'name' item in the input
         var result;
+        var mixins = environment.lookup('mixins');
+
+        if(mixins){
+            Object.keys(mixins).map((name)=>{
+                mixins[name](expr,input,environment);
+            })
+        }
         if (Array.isArray(input)) {
             result = [];
             for(var ii = 0; ii < input.length; ii++) {
@@ -1797,8 +1804,10 @@ var jsonata = (function() {
                     result.push(res);
                 }
             }
-        } else if (input !== null && typeof input === 'object') {
+        } else if (input !== null && ( typeof input === 'object' || isClass(input))) {
             result = input[expr.value];
+        } else {
+            console.log(typeof input);
         }
         result = normalizeSequence(result);
         return result;
@@ -4228,7 +4237,11 @@ var jsonata = (function() {
         }, '<:n>'));
 
         return {
+<<<<<<< HEAD
+            evaluate: function (input, bindings, callback, mixins) {
+=======
             evaluate: function (input, bindings, callback) {
+>>>>>>> c279c71b67a6097122ab804f14ca785be2d5a830
                 // throw if the expression compiled with syntax errors
                 if(typeof errors !== 'undefined') {
                     var err = {
@@ -4248,6 +4261,9 @@ var jsonata = (function() {
                     }
                 } else {
                     exec_env = environment;
+                }
+                if(typeof mixins !== 'undefined'){
+                    exec_env.bind('mixins', mixins);
                 }
                 // put the input document into the environment as the root object
                 exec_env.bind('$', input);
@@ -4306,6 +4322,11 @@ var jsonata = (function() {
             }
         };
     }
+    function isClass(func) {
+        return typeof func === 'function' 
+            && /^class\s/.test(Function.prototype.toString.call(func));
+    }
+
 
     jsonata.parser = parser; // TODO remove this in a future release - use ast() instead
 
