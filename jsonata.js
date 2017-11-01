@@ -2416,7 +2416,16 @@ var jsonata = (function() {
             }
 
             // this function returns a copy of obj with changes specified by the pattern/operation
-            var result = JSON.parse(functionString(obj));
+            var cloneFunction = environment.lookup('clone');
+            if(!isFunction(cloneFunction)) {
+                // throw type error
+                throw {
+                    code: "T2013",
+                    stack: (new Error()).stack,
+                    position: expr.position
+                };
+            }
+            var result = yield * apply(cloneFunction, [obj], environment);
             var matches = yield * evaluate(expr.pattern, result, environment);
             if(typeof matches !== 'undefined') {
                 if(!Array.isArray(matches)) {
@@ -2614,16 +2623,15 @@ var jsonata = (function() {
         }
         // apply the procedure
         try {
-            if(input instanceof Object) {
-                Object.defineProperty(input, '__env__', {
-                    enumerable: false,
-                    configurable: true,
-                    get: function () {
-                        return environment;
-                    }
-                });
-            }
-            //result = yield * apply(proc, evaluatedArgs, {focus: input, environment: environment});
+            // if(input instanceof Object) {
+            //     Object.defineProperty(input, '__env__', {
+            //         enumerable: false,
+            //         configurable: true,
+            //         get: function () {
+            //             return environment;
+            //         }
+            //     });
+            // }
             result = yield * apply(proc, evaluatedArgs, input);
         } catch (err) {
             // add the position field to the error
@@ -4622,6 +4630,20 @@ var jsonata = (function() {
         return result;
     }
 
+    /**
+     * Clones an object
+     * @param {Object} arg - object to clone (deep copy)
+     * @returns {*} - the cloned object
+     */
+    function functionClone(arg) {
+        // undefined inputs always return undefined
+        if(typeof arg === 'undefined') {
+            return undefined;
+        }
+
+        return JSON.parse(functionString(arg));
+    }
+
     // EXPERIMENTAL: lazy evaluation of function arguments...
 
     var functionTransform = function(fhead, flocation, fupdate, fdelete) {
@@ -4763,6 +4785,7 @@ var jsonata = (function() {
     staticFrame.bind('shuffle', defineFunction(functionShuffle, '<a:a>'));
     staticFrame.bind('base64encode', defineFunction(functionBase64encode, '<s-:s>'));
     staticFrame.bind('base64decode', defineFunction(functionBase64decode, '<s-:s>'));
+    staticFrame.bind('clone', defineFunction(functionClone, '<o-:o>'));
 
     /**
      * Error codes
@@ -4813,6 +4836,7 @@ var jsonata = (function() {
         "T2010": "The expressions either side of operator {{token}} must evaluate to numeric or string values",
         "T2011": "The insert/update clause of the transform expression must evaluate to an object: {{value}}",
         "T2012": "The delete clause of the transform expression must evaluate to a string or array of strings: {{value}}",
+        "T2013": "The transform expression clones the input object using the $clone() function.  This has been overridden in the current scope by a non-function.",
         "D3001": "Attempting to invoke string function on Infinity or NaN",
         "D3010": "Second argument of replace function cannot be an empty string",
         "D3011": "Fourth argument of replace function must evaluate to a positive number",

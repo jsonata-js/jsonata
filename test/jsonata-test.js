@@ -6195,6 +6195,37 @@ describe('Evaluator - function: millis', function () {
 
 });
 
+describe('Evaluator - functions: clone', function () {
+
+    describe('clone undefined', function () {
+        it('should return undefined', function () {
+            var expr = jsonata('$clone(foo)');
+            var result = expr.evaluate(testdata2);
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('clone empty object', function () {
+        it('should return empty object', function () {
+            var expr = jsonata('$clone({})');
+            var result = expr.evaluate(testdata2);
+            var expected = {};
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('clone object', function () {
+        it('should return same object', function () {
+            var expr = jsonata('$clone({"a": 1})');
+            var result = expr.evaluate(testdata2);
+            var expected = {"a": 1};
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+});
+
 describe('Evaluator - errors', function () {
 
     describe('"s" - 1', function () {
@@ -7929,6 +7960,42 @@ describe('Evaluator - Transform expressions', function () {
                 expr.evaluate(testdata2);
             }).to.throw()
                 .to.deep.contain({position: 22, code: 'T2012', value: 5});
+        });
+    });
+
+    describe('transform expression with overridden $clone function', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account ~> |Order|{"Product":"blah"},nomatch|');
+            var count = 0;
+            expr.registerFunction('clone', function(arg) {
+                count++;
+                return JSON.parse(JSON.stringify(arg));
+            });
+            var result = expr.evaluate(testdata2);
+            var expected = {
+                "Account Name": "Firefly",
+                "Order": [
+                    {
+                        "OrderID": "order103",
+                        "Product": "blah"
+                    },
+                    {
+                        "OrderID": "order104",
+                        "Product": "blah"
+                    }
+                ]
+            };
+            expect(result).to.deep.equal(expected);
+            expect(count).to.equal(1);
+        });
+    });
+    describe('transform expression with overridden $clone value', function () {
+        it('should throw error', function () {
+            var expr = jsonata('( $clone := 5; $ ~> |Account.Order.Product|{"blah":"foo"}| )');
+            expect(function () {
+                expr.evaluate(testdata2);
+            }).to.throw()
+                .to.deep.contain({position: 21, code: 'T2013'});
         });
     });
 
