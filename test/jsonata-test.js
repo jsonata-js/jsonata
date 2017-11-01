@@ -6210,6 +6210,77 @@ describe('Evaluator - function: millis', function () {
 
 });
 
+describe('Evaluator - function: toMillis', function () {
+
+    describe('toMillis() returns 1 millisecond since the epoch when provided with an ISO 8601 timestamp', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$toMillis("1970-01-01T00:00:00.001Z")');
+            var result = expr.evaluate(testdata2);
+            var expected = 1;
+            expect(expected).to.deep.equal(result);
+        });
+    });
+
+    describe('toMillis() returns many milliseconds since the epoch when provided with an ISO 8601 timestamp', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$toMillis("2017-10-30T16:25:32.935Z")');
+            var result = expr.evaluate(testdata2);
+            var expected = 1509380732935;
+            expect(expected).to.deep.equal(result);
+        });
+    });
+
+    describe('toMillis() returns undefined when given undefined', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$toMillis(foo)');
+            var result = expr.evaluate(testdata2);
+            var expected = undefined;
+            expect(expected).to.deep.equal(result);
+        });
+    });
+
+    describe('when toMillis() is not given an ISO 8601 timestamp', function () {
+        it('should return an error', function () {
+            var expr = jsonata('$toMillis("foo")');
+            expect(function () {
+                expr.evaluate(testdata2);
+            }).to.throw()
+                .to.deep.contain({position: 10, code: 'D3110', value: 'foo'});
+        });
+    });
+
+});
+
+describe('Evaluator - function: fromMillis', function () {
+
+    describe('fromMillis() returns an ISO 8601 timestamp when given 1 millisecond since the epoch', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$fromMillis(1)');
+            var result = expr.evaluate(testdata2);
+            var expected = '1970-01-01T00:00:00.001Z';
+            expect(expected).to.deep.equal(result);
+        });
+    });
+
+    describe('fromMillis() returns an ISO 8601 timestamp when given many milliseconds since the epoch ', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$fromMillis(1509380732935)');
+            var result = expr.evaluate(testdata2);
+            var expected = "2017-10-30T16:25:32.935Z";
+            expect(expected).to.deep.equal(result);
+        });
+    });
+
+    describe('fromMillis() returns undefined when given undefined', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$fromMillis(foo)');
+            var result = expr.evaluate(testdata2);
+            var expected = undefined;
+            expect(expected).to.deep.equal(result);
+        });
+    });
+});
+
 describe('Evaluator - functions: clone', function () {
 
     describe('clone undefined', function () {
@@ -6238,7 +6309,6 @@ describe('Evaluator - functions: clone', function () {
             expect(result).to.deep.equal(expected);
         });
     });
-
 });
 
 describe('Evaluator - errors', function () {

@@ -4645,6 +4645,46 @@ var jsonata = (function() {
         return result;
     }
 
+    // Regular expression to match an ISO 8601 formatted timestamp
+    var iso8601regex = new RegExp('^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d\\.\\d+([+-][0-2]\\d:[0-5]\\d|Z)$');
+
+    /**
+     * Converts an ISO 8601 timestamp to milliseconds since the epoch
+     *
+     * @param {string} timestamp - the ISO 8601 timestamp to be converted
+     * @returns {Number} - milliseconds since the epoch
+     */
+    function functionToMillis(timestamp) {
+        // undefined inputs always return undefined
+        if(typeof timestamp === 'undefined') {
+            return undefined;
+        }
+
+        if(!iso8601regex.test(timestamp)) {
+            throw {
+                stack: (new Error()).stack,
+                code: "D3110",
+                value: timestamp
+            };
+        }
+
+        return Date.parse(timestamp);
+    }
+
+    /**
+     * Converts milliseconds since the epoch to an ISO 8601 timestamp
+     * @param {Number} millis - milliseconds since the epoch to be converted
+     * @returns {String} - an ISO 8601 formatted timestamp
+     */
+    function functionFromMillis(millis) {
+        // undefined inputs always return undefined
+        if(typeof millis === 'undefined') {
+            return undefined;
+        }
+
+        return new Date(millis).toISOString();
+    }
+
     /**
      * Clones an object
      * @param {Object} arg - object to clone (deep copy)
@@ -4800,6 +4840,8 @@ var jsonata = (function() {
     staticFrame.bind('shuffle', defineFunction(functionShuffle, '<a:a>'));
     staticFrame.bind('base64encode', defineFunction(functionBase64encode, '<s-:s>'));
     staticFrame.bind('base64decode', defineFunction(functionBase64decode, '<s-:s>'));
+    staticFrame.bind('toMillis', defineFunction(functionToMillis, '<s-:n>'));
+    staticFrame.bind('fromMillis', defineFunction(functionFromMillis, '<n-:s>'));
     staticFrame.bind('clone', defineFunction(functionClone, '<o-:o>'));
 
     /**
@@ -4877,7 +4919,8 @@ var jsonata = (function() {
         "D3091": "The fractional part of the sub-picture must not contain an instance of the 'optional digit character' that is followed by a member of the 'decimal digit family'",
         "D3092": "A sub-picture that contains a 'percent' or 'per-mille' character must not contain a character treated as an 'exponent-separator'",
         "D3093": "The exponent part of the sub-picture must comprise only of one or more characters that are members of the 'decimal digit family'",
-        "D3100": "The radix of the formatBase function must be between 2 and 36.  It was given {{value}}"
+        "D3100": "The radix of the formatBase function must be between 2 and 36.  It was given {{value}}",
+        "D3110": "The argument of the toMillis function must be an ISO 8601 formatted timestamp. Given {{value}}"
     };
 
     /**
