@@ -4075,7 +4075,7 @@ var jsonata = (function() {
      * @param {Number} millis - milliseconds since the epoch to be converted
      * @returns {String} - an ISO 8601 formatted timestamp
      */
-    function functionToDateTime(millis) {
+    function functionFromMillis(millis) {
         // undefined inputs always return undefined
         if(typeof millis === 'undefined') {
             return undefined;
@@ -4154,7 +4154,7 @@ var jsonata = (function() {
     staticFrame.bind('base64encode', defineFunction(functionBase64encode, '<s-:s>'));
     staticFrame.bind('base64decode', defineFunction(functionBase64decode, '<s-:s>'));
     staticFrame.bind('toMillis', defineFunction(functionToMillis, '<s-:n>'));
-    staticFrame.bind('toDateTime', defineFunction(functionToDateTime, '<n-:s>'));
+    staticFrame.bind('fromMillis', defineFunction(functionFromMillis, '<n-:s>'));
 
     /**
      * Error codes

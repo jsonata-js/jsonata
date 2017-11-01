@@ -5838,29 +5838,29 @@ describe('Evaluator - function: toMillis', function () {
 
 });
 
-describe('Evaluator - function: toDateTime', function () {
+describe('Evaluator - function: fromMillis', function () {
 
-    describe('toDateTime() returns an ISO 8601 timestamp when given 1 millisecond since the epoch', function () {
+    describe('fromMillis() returns an ISO 8601 timestamp when given 1 millisecond since the epoch', function () {
         it('should return result object', function () {
-            var expr = jsonata('$toDateTime(1)');
+            var expr = jsonata('$fromMillis(1)');
             var result = expr.evaluate(testdata2);
             var expected = '1970-01-01T00:00:00.001Z';
             expect(expected).to.deep.equal(result);
         });
     });
 
-    describe('toDateTime() returns an ISO 8601 timestamp when given many milliseconds since the epoch ', function () {
+    describe('fromMillis() returns an ISO 8601 timestamp when given many milliseconds since the epoch ', function () {
         it('should return result object', function () {
-            var expr = jsonata('$toDateTime(1509380732935)');
+            var expr = jsonata('$fromMillis(1509380732935)');
             var result = expr.evaluate(testdata2);
             var expected = "2017-10-30T16:25:32.935Z";
             expect(expected).to.deep.equal(result);
         });
     });
 
-    describe('toDateTime() returns undefined when given undefined', function () {
+    describe('fromMillis() returns undefined when given undefined', function () {
         it('should return result object', function () {
-            var expr = jsonata('$toDateTime(foo)');
+            var expr = jsonata('$fromMillis(foo)');
             var result = expr.evaluate(testdata2);
             var expected = undefined;
             expect(expected).to.deep.equal(result);
