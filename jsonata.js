@@ -1131,6 +1131,14 @@ var jsonata = (function() {
                                 result.steps = [lstep];
                             }
                             var rest = ast_optimize(expr.rhs);
+                            if(rest.type === 'function' &&
+                              rest.procedure.type === 'path' &&
+                              rest.procedure.steps.length === 1 &&
+                              rest.procedure.steps[0].type === 'name' &&
+                              result.steps[result.steps.length-1].type === 'function') {
+                                // next function in chain of functions - will override a thenable
+                                result.steps[result.steps.length-1].nextFunction = rest.procedure.steps[0].value;
+                            }
                             if(rest.type !== 'path') {
                                 rest = {type: 'path', steps: [rest]};
                             }
@@ -1497,7 +1505,13 @@ var jsonata = (function() {
           (typeof result === 'undefined' || result === null || typeof result.then !== 'function')) {
             result = Promise.resolve(result);
         }
-        result = yield result;
+        if(environment.lookup('__jsonata_async') && typeof result.then === 'function' && expr.nextFunction && typeof result[expr.nextFunction] === 'function') {
+            // although this is a 'thenable', it is chaining a different function
+            // so don't yield since yielding will trigger the .then()
+        } else {
+            result = yield result;
+        }
+
 
         if (expr.hasOwnProperty('predicate')) {
             result = yield * applyPredicates(expr.predicate, result, environment);
@@ -2572,6 +2586,7 @@ var jsonata = (function() {
     function isGenerator(arg) {
         return (
             typeof arg === 'object' &&
+            arg !== null &&
             Symbol.iterator in arg &&
             typeof arg[Symbol.iterator] === 'function' &&
             'next' in arg &&
