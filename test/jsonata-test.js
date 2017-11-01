@@ -6310,8 +6310,7 @@ describe('Evaluator - functions: clone', function () {
         });
     });
 });
-          
-          
+
 describe('Evaluator - errors', function () {
 
     describe('"s" - 1', function () {

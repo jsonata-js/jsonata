@@ -4919,7 +4919,7 @@ var jsonata = (function() {
         "D3091": "The fractional part of the sub-picture must not contain an instance of the 'optional digit character' that is followed by a member of the 'decimal digit family'",
         "D3092": "A sub-picture that contains a 'percent' or 'per-mille' character must not contain a character treated as an 'exponent-separator'",
         "D3093": "The exponent part of the sub-picture must comprise only of one or more characters that are members of the 'decimal digit family'",
-        "D3100": "The radix of the formatBase function must be between 2 and 36.  It was given {{value}}"
+        "D3100": "The radix of the formatBase function must be between 2 and 36.  It was given {{value}}",
         "D3110": "The argument of the toMillis function must be an ISO 8601 formatted timestamp. Given {{value}}"
     };
 
