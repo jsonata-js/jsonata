@@ -2622,19 +2622,10 @@ var jsonata = (function() {
         }
 
         var evaluatedArgs = [];
-        if(proc && proc.lazy) {
-            // lazy evaluation - wrap the arguments in closures
-            for (var ii = 0; ii < expr.arguments.length; ii++) {
-                // only evaluate 'eager' arguments at this stage; wrap the 'lazy' ones in a closure
-                var closure = lazyArgument(expr.arguments[ii], input, environment);
-                evaluatedArgs.push(closure);
-            }
-        } else {
-            // eager evaluation - evaluate the arguments
-            for (var jj = 0; jj < expr.arguments.length; jj++) {
-                // only evaluate 'eager' arguments at this stage; wrap the 'lazy' ones in a closure
-                evaluatedArgs.push(yield* evaluate(expr.arguments[jj], input, environment));
-            }
+        // eager evaluation - evaluate the arguments
+        for (var jj = 0; jj < expr.arguments.length; jj++) {
+            // only evaluate 'eager' arguments at this stage; wrap the 'lazy' ones in a closure
+            evaluatedArgs.push(yield* evaluate(expr.arguments[jj], input, environment));
         }
         // apply the procedure
         try {
@@ -2656,35 +2647,6 @@ var jsonata = (function() {
             throw err;
         }
         return result;
-    }
-
-    /**
-     *
-     * @param {Object} expr - AST
-     * @param {Object} input - focus
-     * @param {Object} environment - Environment
-     * @returns {Function} - evaluated arg
-     */
-    function lazyArgument(expr, input, environment) {
-        return function(focus) {
-            var async = false;
-            if(environment.lookup('__jsonata_async') === true) {
-                async = true;
-                // temporarily turn off async mode to evaluate the argument
-                environment.bind('__jsonata_async', false);
-            }
-            var context = focus;
-            if(arguments.length === 0) {
-                // no focus specified, default to input
-                context = input;
-            }
-            var result = driveGenerator(expr, context, environment);
-            if(async) {
-                result = Promise.resolve(result);
-                environment.bind('__jsonata_async', true);
-            }
-            return result;
-        };
     }
 
     /**
@@ -4699,75 +4661,6 @@ var jsonata = (function() {
         return JSON.parse(functionString(arg));
     }
 
-    // EXPERIMENTAL: lazy evaluation of function arguments...
-
-    var functionTransform = function(fhead, flocation, fupdate, fdelete) {
-        var head = fhead();
-        if(typeof head === 'undefined') {
-            return undefined;
-        }
-        var result = JSON.parse(functionString(head));
-        var matches = flocation(result);
-        if(typeof matches !== 'undefined') {
-            if(!Array.isArray(matches)) {
-                matches = [matches];
-            }
-            for(var ii = 0; ii < matches.length; ii++) {
-                var match = matches[ii];
-                // evaluate the update value for each match
-                var update = fupdate(match);
-                // update must be an object
-                var updateType = typeof update;
-                if(updateType !== 'undefined') {
-                    if(updateType !== 'object' || update === null) {
-                        // throw type error
-                        throw {
-                            code: "T2011",
-                            stack: (new Error()).stack,
-                            value: update
-                        };
-                    }
-                    // merge the update
-                    for(var prop in update) {
-                        match[prop] = update[prop];
-                    }
-                }
-
-                // delete, if specified, must be an array of strings (or single string)
-                if(typeof fdelete !== 'undefined') {
-                    var deletions = fdelete(match);
-                    if(typeof deletions !== 'undefined') {
-                        var val = deletions;
-                        if (!Array.isArray(deletions)) {
-                            deletions = [deletions];
-                        }
-                        if (!isArrayOfStrings(deletions)) {
-                            // throw type error
-                            throw {
-                                code: "T2012",
-                                stack: (new Error()).stack,
-                                value: val
-                            };
-                        }
-                        for (var jj = 0; jj < deletions.length; jj++) {
-                            delete match[deletions[jj]];
-                        }
-                    }
-                }
-            }
-        }
-
-        return result;
-    };
-
-    var defineLazyFunction = function(func) {
-        var lazy = defineFunction(func);
-        lazy.lazy = true;
-        return lazy;
-    };
-
-    staticFrame.bind('transform', defineLazyFunction(functionTransform));
-
     /**
      * Create frame
      * @param {Object} enclosingEnvironment - Enclosing environment
@@ -5045,10 +4938,6 @@ var jsonata = (function() {
             },
             registerFunction: function(name, implementation, signature) {
                 var func = defineFunction(implementation, signature);
-                environment.bind(name, func);
-            },
-            registerLazyFunction: function(name, implementation) {
-                var func = defineLazyFunction(implementation);
                 environment.bind(name, func);
             },
             ast: function() {
