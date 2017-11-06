@@ -2685,7 +2685,7 @@ var jsonata = (function() {
         var result;
         var validatedArgs = args;
         if(proc) {
-            validatedArgs = validateArguments(proc.signature, args, self /* && self.focus */ );
+            validatedArgs = validateArguments(proc.signature, args, self);
         }
         if (isLambda(proc)) {
             result = yield * applyProcedure(proc, validatedArgs);

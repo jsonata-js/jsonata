@@ -1,3 +1,14 @@
+#### 1.4.0 Milestone Release
+
+- New object transformation syntax `~> |...|...|`
+- New functions
+  - $formatNumber - formats a decimal number to a string using a picture specification defined in XPath F&O spec
+  - $formatBase - converts a number to a string in a specified radix
+  - $pad - pads a string to a minimum width with leading or trailing padding characters
+  - $toMillis - converts an ISO 8601 formatted date/time string to number of milliseconds since the epoch
+  - $fromMillis - converts the number of milliseconds since the epoch to an ISO 8601 formatted date/time string
+  - $clone - returns a deep copy of an object - used internally by the object transform syntax; overridable by custom implementation
+
 #### 1.3.3 Maintenance Release
 
 - $lookup() function throws an error when the property has a null value (issue #85)
