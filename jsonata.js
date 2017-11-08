@@ -1068,6 +1068,20 @@ var jsonata = (function() {
             return this;
         });
 
+        // object transformer
+        prefix("|", function () {
+            this.type = 'transform';
+            this.pattern = expression(0);
+            advance('|');
+            this.update = expression(0);
+            if(node.id === ',') {
+                advance(',');
+                this.delete = expression(0);
+            }
+            advance('|');
+            return this;
+        });
+
         // tail call optimization
         // this is invoked by the post parser to analyse lambda functions to see
         // if they make a tail call.  If so, it is replaced by a thunk which will
@@ -1257,6 +1271,14 @@ var jsonata = (function() {
                         result.else = ast_optimize(expr.else);
                     }
                     break;
+                case 'transform':
+                    result = {type: expr.type, position: expr.position};
+                    result.pattern = ast_optimize(expr.pattern);
+                    result.update = ast_optimize(expr.update);
+                    if(typeof expr.delete !== 'undefined') {
+                        result.delete = ast_optimize(expr.delete);
+                    }
+                    break;
                 case 'block':
                     result = {type: expr.type, position: expr.position};
                     // array of expressions - process each one
@@ -1268,7 +1290,6 @@ var jsonata = (function() {
                     break;
                 case 'name':
                     result = {type: 'path', steps: [expr]};
-                    //                    result.type = 'path';
                     if(expr.keepArray) {
                         result.keepSingletonArray = true;
                     }
@@ -1474,6 +1495,9 @@ var jsonata = (function() {
                 break;
             case 'sort':
                 result = yield * evaluateSortExpression(expr, input, environment);
+                break;
+            case 'transform':
+                result = evaluateTransformExpression(expr, input, environment);
                 break;
         }
 
@@ -2132,7 +2156,9 @@ var jsonata = (function() {
         for (key in groups) {
             entry = groups[key];
             var value = yield * evaluate(entry.expr, entry.data, environment);
-            result[key] = value;
+            if(typeof value !== 'undefined') {
+                result[key] = value;
+            }
         }
 
         return result;
@@ -2389,6 +2415,90 @@ var jsonata = (function() {
     }
 
     /**
+     * create a transformer function
+     * @param {Object} expr - AST for operator
+     * @param {Object} input - Input data to evaluate against
+     * @param {Object} environment - Environment
+     * @returns {*} tranformer function
+     */
+    function evaluateTransformExpression(expr, input, environment) {
+        // create a function to implement the transform definition
+        var transformer = function*(obj) { // signature <a<o>-:o>
+            // undefined inputs always return undefined
+            if(typeof obj === 'undefined') {
+                return undefined;
+            }
+
+            // this function returns a copy of obj with changes specified by the pattern/operation
+            var cloneFunction = environment.lookup('clone');
+            if(!isFunction(cloneFunction)) {
+                // throw type error
+                throw {
+                    code: "T2013",
+                    stack: (new Error()).stack,
+                    position: expr.position
+                };
+            }
+            var result = yield * apply(cloneFunction, [obj], environment);
+            var matches = yield * evaluate(expr.pattern, result, environment);
+            if(typeof matches !== 'undefined') {
+                if(!Array.isArray(matches)) {
+                    matches = [matches];
+                }
+                for(var ii = 0; ii < matches.length; ii++) {
+                    var match = matches[ii];
+                    // evaluate the update value for each match
+                    var update = yield * evaluate(expr.update, match, environment);
+                    // update must be an object
+                    var updateType = typeof update;
+                    if(updateType !== 'undefined') {
+                        if(updateType !== 'object' || update === null) {
+                            // throw type error
+                            throw {
+                                code: "T2011",
+                                stack: (new Error()).stack,
+                                position: expr.update.position,
+                                value: update
+                            };
+                        }
+                        // merge the update
+                        for(var prop in update) {
+                            match[prop] = update[prop];
+                        }
+                    }
+
+                    // delete, if specified, must be an array of strings (or single string)
+                    if(typeof expr.delete !== 'undefined') {
+                        var deletions = yield * evaluate(expr.delete, match, environment);
+                        if(typeof deletions !== 'undefined') {
+                            var val = deletions;
+                            if (!Array.isArray(deletions)) {
+                                deletions = [deletions];
+                            }
+                            if (!isArrayOfStrings(deletions)) {
+                                // throw type error
+                                throw {
+                                    code: "T2012",
+                                    stack: (new Error()).stack,
+                                    position: expr.delete.position,
+                                    value: val
+                                };
+                            }
+                            for (var jj = 0; jj < deletions.length; jj++) {
+                                delete match[deletions[jj]];
+                            }
+                        }
+                    }
+                }
+            }
+
+            return result;
+        };
+
+        return defineFunction(transformer, '<(oa):o>');
+    }
+
+    /**
      * Evaluate an expression by driving the generator to completion
      * Used when it's not possible to yield
      * @param {Object} expr - AST
@@ -2418,12 +2528,14 @@ var jsonata = (function() {
     function* evaluateApplyExpression(expr, input, environment) {
         var result;
 
-        var arg1 = yield * evaluate(expr.lhs, input, environment);
 
         if(expr.rhs.type === 'function') {
-            // this is a function _invocation_; invoke it with arg1 at the start
-            result = yield * evaluateFunction(expr.rhs, input, environment, {context: arg1});
+            // this is a function _invocation_; invoke it with lhs expression as the first argument
+            expr.rhs.arguments.unshift(expr.lhs);
+            result = yield * evaluateFunction(expr.rhs, input, environment);
+            expr.rhs.arguments.shift();
         } else {
+            var lhs = yield * evaluate(expr.lhs, input, environment);
             var func = yield * evaluate(expr.rhs, input, environment);
 
             if(!isFunction(func)) {
@@ -2435,12 +2547,12 @@ var jsonata = (function() {
                 };
             }
 
-            if(isFunction(arg1)) {
+            if(isFunction(lhs)) {
                 // this is function chaining (func1 ~> func2)
                 // λ($f, $g) { λ($x){ $g($f($x)) } }
-                result = yield * apply(chain, [arg1, func], environment, null);
+                result = yield * apply(chain, [lhs, func], environment, null);
             } else {
-                result = yield * apply(func, [arg1], environment, null);
+                result = yield * apply(func, [lhs], environment, null);
             }
 
         }
@@ -2490,18 +2602,9 @@ var jsonata = (function() {
      * @param {Object} [applyto] - LHS of ~> operator
      * @returns {*} Evaluated input data
      */
-    function* evaluateFunction(expr, input, environment, applyto) {
+    function* evaluateFunction(expr, input, environment) {
         var result;
-        // evaluate the arguments
-        var evaluatedArgs = [];
-        for(var ii = 0; ii < expr.arguments.length; ii++) {
-            evaluatedArgs.push(yield * evaluate(expr.arguments[ii], input, environment));
-        }
-        if(applyto) {
-            // insert the first argument from the LHS of ~>
-            evaluatedArgs.unshift(applyto.context);
-        }
-        // lambda function on lhs
+
         // create the procedure
         // can't assume that expr.procedure is a lambda type directly
         // could be an expression that evaluates to a function (e.g. variable reference, parens expr etc.
@@ -2517,8 +2620,24 @@ var jsonata = (function() {
                 token: expr.procedure.steps[0].value
             };
         }
+
+        var evaluatedArgs = [];
+        // eager evaluation - evaluate the arguments
+        for (var jj = 0; jj < expr.arguments.length; jj++) {
+            // only evaluate 'eager' arguments at this stage; wrap the 'lazy' ones in a closure
+            evaluatedArgs.push(yield* evaluate(expr.arguments[jj], input, environment));
+        }
         // apply the procedure
         try {
+            // if(input instanceof Object) {
+            //     Object.defineProperty(input, '__env__', {
+            //         enumerable: false,
+            //         configurable: true,
+            //         get: function () {
+            //             return environment;
+            //         }
+            //     });
+            // }
             result = yield * apply(proc, evaluatedArgs, input);
         } catch (err) {
             // add the position field to the error
@@ -2579,6 +2698,10 @@ var jsonata = (function() {
             }
         } else if (typeof proc === 'function') {
             result = proc.apply(self, validatedArgs);
+            /* istanbul ignore next */
+            if(isGenerator(result)) {
+                result = yield *result;
+            }
         } else {
             throw {
                 code: "T1006",
@@ -3026,6 +3149,41 @@ var jsonata = (function() {
     }
 
     /**
+     * Pad a string to a minimum width by adding characters to the start or end
+     * @param {string} str - string to be padded
+     * @param {number} width - the minimum width; +ve pads to the right, -ve pads to the left
+     * @param {string} [char] - the pad character(s); defaults to ' '
+     * @returns {string} - padded string
+     */
+    function functionPad(str, width, char) {
+        // undefined inputs always return undefined
+        if(typeof str === 'undefined') {
+            return undefined;
+        }
+
+        if(typeof char === 'undefined' || char.length === 0) {
+            char = ' ';
+        }
+
+        var result;
+        var padLength = Math.abs(width) - str.length;
+        if(padLength > 0) {
+            var padding = (new Array(padLength + 1)).join(char);
+            if(char.length > 1) {
+                padding = padding.substring(0, padLength);
+            }
+            if(width > 0) {
+                result = str + padding;
+            } else {
+                result = padding + str;
+            }
+        } else {
+            result = str;
+        }
+        return result;
+    }
+
+    /**
      * Tests if the str contains the token
      * @param {String} str - string to test
      * @param {String} token - substring or regex to find
@@ -3343,6 +3501,411 @@ var jsonata = (function() {
         }
 
         return strs.join(separator);
+    }
+
+    /**
+     * Formats a number into a decimal string representation using XPath 3.1 F&O fn:format-number spec
+     * @param {number} value - number to format
+     * @param {String} picture - picture string definition
+     * @param {Object} [options] - override locale defaults
+     * @returns {String} The formatted string
+     */
+    function functionFormatNumber(value, picture, options) {
+        var defaults = {
+            "decimal-separator": ".",
+            "grouping-separator": ",",
+            "exponent-separator": "e",
+            "infinity": "Infinity",
+            "minus-sign": "-",
+            "NaN": "NaN",
+            "percent": "%",
+            "per-mille": "\u2030",
+            "zero-digit": "0",
+            "digit": "#",
+            "pattern-separator": ";"
+        };
+
+        // if `options` is specified, then its entries override defaults
+        var properties = defaults;
+        if(typeof options !== 'undefined') {
+            Object.keys(options).forEach(function (key) {
+                properties[key] = options[key];
+            });
+        }
+
+        var decimalDigitFamily = [];
+        var zeroCharCode = properties['zero-digit'].charCodeAt(0);
+        for(var ii = zeroCharCode; ii < zeroCharCode + 10; ii++) {
+            decimalDigitFamily.push(String.fromCharCode(ii));
+        }
+
+        var activeChars = decimalDigitFamily.concat([properties['decimal-separator'], properties['exponent-separator'], properties['grouping-separator'], properties.digit, properties['pattern-separator']]);
+
+        var subPictures = picture.split(properties['pattern-separator']);
+
+        if(subPictures.length > 2) {
+            throw {
+                code: 'D3080',
+                stack: (new Error()).stack
+            };
+        }
+
+        var splitParts = function(subpicture) {
+            var prefix = (function() {
+                var ch;
+                for(var ii = 0; ii < subpicture.length; ii++) {
+                    ch = subpicture.charAt(ii);
+                    if(activeChars.indexOf(ch) !== -1 && ch !== properties['exponent-separator']) {
+                        return subpicture.substring(0, ii);
+                    }
+                }
+            })();
+            var suffix = (function() {
+                var ch;
+                for(var ii = subpicture.length - 1; ii >= 0; ii--) {
+                    ch = subpicture.charAt(ii);
+                    if(activeChars.indexOf(ch) !== -1 && ch !== properties['exponent-separator']) {
+                        return subpicture.substring(ii + 1);
+                    }
+                }
+            })();
+            var activePart = subpicture.substring(prefix.length, subpicture.length - suffix.length);
+            var mantissaPart, exponentPart, integerPart, fractionalPart;
+            var exponentPosition = subpicture.indexOf(properties['exponent-separator'], prefix.length);
+            if(exponentPosition === -1 || exponentPosition > subpicture.length - suffix.length) {
+                mantissaPart = activePart;
+                exponentPart = undefined;
+            } else {
+                mantissaPart = activePart.substring(0, exponentPosition);
+                exponentPart = activePart.substring(exponentPosition + 1);
+            }
+            var decimalPosition = mantissaPart.indexOf(properties['decimal-separator']);
+            if(decimalPosition === -1) {
+                integerPart = mantissaPart;
+                fractionalPart = suffix;
+            } else {
+                integerPart = mantissaPart.substring(0, decimalPosition);
+                fractionalPart = mantissaPart.substring(decimalPosition + 1);
+            }
+            return {
+                prefix: prefix,
+                suffix: suffix,
+                activePart: activePart,
+                mantissaPart: mantissaPart,
+                exponentPart: exponentPart,
+                integerPart: integerPart,
+                fractionalPart: fractionalPart,
+                subpicture: subpicture
+            };
+        };
+
+        // validate the picture string, F&O 4.7.3
+        var validate = function(parts) {
+            var error;
+            var ii;
+            var subpicture = parts.subpicture;
+            var decimalPos = subpicture.indexOf(properties['decimal-separator']);
+            if(decimalPos !== subpicture.lastIndexOf(properties['decimal-separator'])) {
+                error = 'D3081';
+            }
+            if(subpicture.indexOf(properties.percent) !== subpicture.lastIndexOf(properties.percent)) {
+                error = 'D3082';
+            }
+            if(subpicture.indexOf(properties['per-mille']) !== subpicture.lastIndexOf(properties['per-mille'])) {
+                error = 'D3083';
+            }
+            if(subpicture.indexOf(properties.percent) !== -1 && subpicture.indexOf(properties['per-mille']) !== -1) {
+                error = 'D3084';
+            }
+            var valid = false;
+            for(ii = 0; ii < parts.mantissaPart.length; ii++) {
+                var ch = parts.mantissaPart.charAt(ii);
+                if(decimalDigitFamily.indexOf(ch) !== -1 || ch === properties.digit) {
+                    valid = true;
+                    break;
+                }
+            }
+            if(!valid) {
+                error = 'D3085';
+            }
+            var charTypes = parts.activePart.split('').map(function(char) {
+                return activeChars.indexOf(char) === -1 ? 'p' : 'a';
+            }).join('');
+            if(charTypes.indexOf('p') !== -1) {
+                error = 'D3086';
+            }
+            if(decimalPos !== -1) {
+                if(subpicture.charAt(decimalPos - 1) === properties['grouping-separator'] || subpicture.charAt(decimalPos + 1) === properties['grouping-separator']) {
+                    error = 'D3087';
+                }
+            } else if(parts.integerPart.charAt(parts.integerPart.length - 1) === properties['grouping-separator']) {
+                error = 'D3088';
+            }
+            if(subpicture.indexOf(properties['grouping-separator'] + properties['grouping-separator']) !== -1) {
+                error = 'D3089';
+            }
+            var optionalDigitPos = parts.integerPart.indexOf(properties.digit);
+            if(optionalDigitPos !== -1 && parts.integerPart.substring(0, optionalDigitPos).split('').filter(function(char) {
+                return decimalDigitFamily.indexOf(char) > -1;
+            }).length > 0) {
+                error = 'D3090';
+            }
+            optionalDigitPos = parts.fractionalPart.lastIndexOf(properties.digit);
+            if(optionalDigitPos !== -1 && parts.fractionalPart.substring(optionalDigitPos).split('').filter(function(char) {
+                return decimalDigitFamily.indexOf(char) > -1;
+            }).length > 0) {
+                error = 'D3091';
+            }
+            var exponentExists = (typeof parts.exponentPart === 'string');
+            if(exponentExists && parts.exponentPart.length > 0 && (subpicture.indexOf(properties.percent) !== -1 || subpicture.indexOf(properties['per-mille']) !== -1)) {
+                error = 'D3092';
+            }
+            if(exponentExists && (parts.exponentPart.length === 0 || parts.exponentPart.split('').filter(function(char) {
+                return decimalDigitFamily.indexOf(char) === -1;
+            }).length > 0)) {
+                error = 'D3093';
+            }
+            if(error) {
+                throw {
+                    code: error,
+                    stack: (new Error()).stack
+                };
+            }
+        };
+
+        // analyse the picture string, F&O 4.7.4
+        var analyse = function(parts) {
+            var getGroupingPositions = function(part, toLeft) {
+                var positions = [];
+                var groupingPosition = part.indexOf(properties['grouping-separator']);
+                while(groupingPosition !== -1) {
+                    var charsToTheRight = (toLeft ? part.substring(0, groupingPosition) : part.substring(groupingPosition)).split('').filter(function(char) {
+                        return decimalDigitFamily.indexOf(char) !== -1 || char === properties.digit;
+                    }).length;
+                    positions.push(charsToTheRight);
+                    groupingPosition = parts.integerPart.indexOf(properties['grouping-separator'], groupingPosition + 1);
+                }
+                return positions;
+            };
+            var integerPartGroupingPositions = getGroupingPositions(parts.integerPart);
+            var regular = function(indexes) {
+                // are the grouping positions regular? i.e. same interval between each of them
+                if(indexes.length === 0) {
+                    return 0;
+                }
+                var gcd = function(a, b) {
+                    return b === 0 ? a : gcd(b, a % b);
+                };
+                // find the greatest common divisor of all the positions
+                var factor = indexes.reduce(gcd);
+                // is every position separated by this divisor? If so, it's regular
+                for(var index = 1; index <= indexes.length; index++) {
+                    if(indexes.indexOf(index * factor) === -1) {
+                        return 0;
+                    }
+                }
+                return factor;
+            };
+
+            var regularGrouping = regular(integerPartGroupingPositions);
+            var fractionalPartGroupingPositions = getGroupingPositions(parts.fractionalPart, true);
+
+            var minimumIntegerPartSize = parts.integerPart.split('').filter(function(char) { return decimalDigitFamily.indexOf(char) !== -1; }).length;
+            var scalingFactor = minimumIntegerPartSize;
+
+            var fractionalPartArray = parts.fractionalPart.split('');
+            var minimumFactionalPartSize = fractionalPartArray.filter(function(char) { return decimalDigitFamily.indexOf(char) !== -1; }).length;
+            var maximumFactionalPartSize = fractionalPartArray.filter(function(char) { return decimalDigitFamily.indexOf(char) !== -1 || char === properties.digit; }).length;
+            var exponentPresent = typeof parts.exponentPart === 'string';
+            if(minimumIntegerPartSize === 0 && maximumFactionalPartSize === 0) {
+                if(exponentPresent) {
+                    minimumFactionalPartSize = 1;
+                    maximumFactionalPartSize = 1;
+                } else {
+                    minimumIntegerPartSize = 1;
+                }
+            }
+            if(exponentPresent && minimumIntegerPartSize === 0 && parts.integerPart.indexOf(properties.digit) !== -1) {
+                minimumIntegerPartSize = 1;
+            }
+            if(minimumIntegerPartSize === 0 && minimumFactionalPartSize === 0) {
+                minimumFactionalPartSize = 1;
+            }
+            var minimumExponentSize = 0;
+            if(exponentPresent) {
+                minimumExponentSize = parts.exponentPart.split('').filter(function(char) { return decimalDigitFamily.indexOf(char) !== -1; }).length;
+            }
+
+            return {
+                integerPartGroupingPositions: integerPartGroupingPositions,
+                regularGrouping: regularGrouping,
+                minimumIntegerPartSize: minimumIntegerPartSize,
+                scalingFactor: scalingFactor,
+                prefix: parts.prefix,
+                fractionalPartGroupingPositions: fractionalPartGroupingPositions,
+                minimumFactionalPartSize: minimumFactionalPartSize,
+                maximumFactionalPartSize: maximumFactionalPartSize,
+                minimumExponentSize: minimumExponentSize,
+                suffix: parts.suffix,
+                picture: parts.subpicture
+            };
+        };
+
+        var parts = subPictures.map(splitParts);
+        parts.forEach(validate);
+
+        var variables = parts.map(analyse);
+
+        if(variables.length === 1) {
+            variables.push(JSON.parse(JSON.stringify(variables[0])));
+            variables[1].prefix = properties['minus-sign'] + variables[1].prefix;
+        }
+
+        // TODO cache the result of the analysis
+
+        // format the number
+        // bullet 1: TODO: NaN - not sure we'd ever get this in JSON
+        var pic;
+        // bullet 2:
+        if(value >= 0) {
+            pic = variables[0];
+        } else {
+            pic = variables[1];
+        }
+        var adjustedNumber;
+        // bullet 3:
+        if(pic.picture.indexOf(properties.percent) !== -1) {
+            adjustedNumber = value * 100;
+        } else if(pic.picture.indexOf(properties['per-mille']) !== -1) {
+            adjustedNumber = value * 1000;
+        } else {
+            adjustedNumber = value;
+        }
+        // bullet 4:
+        // TODO: infinity - not sure we'd ever get this in JSON
+        // bullet 5:
+        var mantissa, exponent;
+        if(pic.minimumExponentSize === 0) {
+            mantissa = adjustedNumber;
+        } else {
+            // mantissa * 10^exponent = adjustedNumber
+            var maxMantissa = Math.pow(10, pic.scalingFactor);
+            var minMantissa = Math.pow(10, pic.scalingFactor - 1);
+            mantissa = adjustedNumber;
+            exponent = 0;
+            while(mantissa < minMantissa) {
+                mantissa *= 10;
+                exponent -= 1;
+            }
+            while(mantissa > maxMantissa) {
+                mantissa /= 10;
+                exponent += 1;
+            }
+        }
+        // bullet 6:
+        var roundedNumber = functionRound(mantissa, pic.maximumFactionalPartSize);
+        // bullet 7:
+        var makeString = function(value, dp) {
+            var str = Math.abs(value).toFixed(dp);
+            if (properties['zero-digit'] !== '0') {
+                str = str.split('').map(function (digit) {
+                    if(digit >= '0' && digit <='9') {
+                        return decimalDigitFamily[digit.charCodeAt(0) - 48];
+                    } else {
+                        return digit;
+                    }
+                }).join('');
+            }
+            return str;
+        };
+        var stringValue = makeString(roundedNumber, pic.maximumFactionalPartSize);
+        var decimalPos = stringValue.indexOf('.');
+        if(decimalPos === -1) {
+            stringValue = stringValue + properties['decimal-separator'];
+        } else {
+            stringValue = stringValue.replace('.', properties['decimal-separator']);
+        }
+        while(stringValue.charAt(0) === properties['zero-digit']) {
+            stringValue = stringValue.substring(1);
+        }
+        while(stringValue.charAt(stringValue.length - 1) === properties['zero-digit']) {
+            stringValue = stringValue.substring(0, stringValue.length - 1);
+        }
+        // bullets 8 & 9:
+        decimalPos = stringValue.indexOf(properties['decimal-separator']);
+        var padLeft = pic.minimumIntegerPartSize - decimalPos;
+        var padRight = pic.minimumFactionalPartSize - (stringValue.length - decimalPos - 1);
+        stringValue = (padLeft > 0 ? new Array(padLeft + 1).join('0') : '') + stringValue;
+        stringValue = stringValue + (padRight > 0 ? new Array(padRight + 1).join('0') : '');
+        decimalPos = stringValue.indexOf(properties['decimal-separator']);
+        // bullet 10:
+        if(pic.regularGrouping > 0) {
+            var groupCount = Math.floor((decimalPos - 1) / pic.regularGrouping);
+            for(var group = 1; group <= groupCount; group++) {
+                stringValue = [stringValue.slice(0, decimalPos - group * pic.regularGrouping), properties['grouping-separator'], stringValue.slice(decimalPos - group * pic.regularGrouping)].join('');
+            }
+        } else {
+            pic.integerPartGroupingPositions.forEach(function (pos) {
+                stringValue = [stringValue.slice(0, decimalPos - pos), properties['grouping-separator'], stringValue.slice(decimalPos - pos)].join('');
+                decimalPos++;
+            });
+        }
+        // bullet 11:
+        decimalPos = stringValue.indexOf(properties['decimal-separator']);
+        pic.fractionalPartGroupingPositions.forEach(function(pos) {
+            stringValue = [stringValue.slice(0, pos + decimalPos + 1), properties['grouping-separator'], stringValue.slice(pos + decimalPos + 1)].join('');
+        });
+        // bullet 12:
+        decimalPos = stringValue.indexOf(properties['decimal-separator']);
+        if(pic.picture.indexOf(properties['decimal-separator']) === -1 || decimalPos === stringValue.length - 1) {
+            stringValue = stringValue.substring(0, stringValue.length - 1);
+        }
+        // bullet 13:
+        if(typeof exponent !== 'undefined') {
+            var stringExponent = makeString(exponent, 0);
+            padLeft = pic.minimumExponentSize - stringExponent.length;
+            if(padLeft > 0) {
+                stringExponent = new Array(padLeft + 1).join('0') + stringExponent;
+            }
+            stringValue = stringValue + properties['exponent-separator'] + (exponent < 0 ? properties['minus-sign'] : '') + stringExponent;
+        }
+        // bullet 14:
+        stringValue = pic.prefix + stringValue + pic.suffix;
+        return stringValue;
+    }
+
+    /**
+     * Converts a number to a string using a specified number base
+     * @param {string} value - the number to convert
+     * @param {number} [radix] - the number base; must be between 2 and 36. Defaults to 10
+     * @returns {string} - the converted string
+     */
+    function functionFormatBase(value, radix) {
+        // undefined inputs always return undefined
+        if(typeof value === 'undefined') {
+            return undefined;
+        }
+
+        value = functionRound(value);
+
+        if(typeof radix === 'undefined') {
+            radix = 10;
+        } else {
+            radix = functionRound(radix);
+        }
+
+        if(radix < 2 || radix > 36) {
+            throw {
+                code: 'D3100',
+                stack: (new Error()).stack,
+                value: radix
+            };
+
+        }
+
+        var result = value.toString(radix);
+
+        return result;
     }
 
     /**
@@ -4044,6 +4607,60 @@ var jsonata = (function() {
         return result;
     }
 
+    // Regular expression to match an ISO 8601 formatted timestamp
+    var iso8601regex = new RegExp('^\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d\\.\\d+([+-][0-2]\\d:[0-5]\\d|Z)$');
+
+    /**
+     * Converts an ISO 8601 timestamp to milliseconds since the epoch
+     *
+     * @param {string} timestamp - the ISO 8601 timestamp to be converted
+     * @returns {Number} - milliseconds since the epoch
+     */
+    function functionToMillis(timestamp) {
+        // undefined inputs always return undefined
+        if(typeof timestamp === 'undefined') {
+            return undefined;
+        }
+
+        if(!iso8601regex.test(timestamp)) {
+            throw {
+                stack: (new Error()).stack,
+                code: "D3110",
+                value: timestamp
+            };
+        }
+
+        return Date.parse(timestamp);
+    }
+
+    /**
+     * Converts milliseconds since the epoch to an ISO 8601 timestamp
+     * @param {Number} millis - milliseconds since the epoch to be converted
+     * @returns {String} - an ISO 8601 formatted timestamp
+     */
+    function functionFromMillis(millis) {
+        // undefined inputs always return undefined
+        if(typeof millis === 'undefined') {
+            return undefined;
+        }
+
+        return new Date(millis).toISOString();
+    }
+
+    /**
+     * Clones an object
+     * @param {Object} arg - object to clone (deep copy)
+     * @returns {*} - the cloned object
+     */
+    function functionClone(arg) {
+        // undefined inputs always return undefined
+        if(typeof arg === 'undefined') {
+            return undefined;
+        }
+
+        return JSON.parse(functionString(arg));
+    }
+
     /**
      * Create frame
      * @param {Object} enclosingEnvironment - Enclosing environment
@@ -4081,11 +4698,14 @@ var jsonata = (function() {
     staticFrame.bind('uppercase', defineFunction(functionUppercase, '<s-:s>'));
     staticFrame.bind('length', defineFunction(functionLength, '<s-:n>'));
     staticFrame.bind('trim', defineFunction(functionTrim, '<s-:s>'));
+    staticFrame.bind('pad', defineFunction(functionPad, '<s-ns?:s>'));
     staticFrame.bind('match', defineFunction(functionMatch, '<s-f<s:o>n?:a<o>>'));
     staticFrame.bind('contains', defineFunction(functionContains, '<s-(sf):b>')); // TODO <s-(sf<s:o>):b>
     staticFrame.bind('replace', defineFunction(functionReplace, '<s-(sf)(sf)n?:s>')); // TODO <s-(sf<s:o>)(sf<o:s>)n?:s>
     staticFrame.bind('split', defineFunction(functionSplit, '<s-(sf)n?:a<s>>')); // TODO <s-(sf<s:o>)n?:a<s>>
     staticFrame.bind('join', defineFunction(functionJoin, '<a<s>s?:s>'));
+    staticFrame.bind('formatNumber', defineFunction(functionFormatNumber, '<n-so?:s>'));
+    staticFrame.bind('formatBase', defineFunction(functionFormatBase, '<n-n?:s>'));
     staticFrame.bind('number', defineFunction(functionNumber, '<(ns)-:n>'));
     staticFrame.bind('floor', defineFunction(functionFloor, '<n-:n>'));
     staticFrame.bind('ceil', defineFunction(functionCeil, '<n-:n>'));
@@ -4113,6 +4733,9 @@ var jsonata = (function() {
     staticFrame.bind('shuffle', defineFunction(functionShuffle, '<a:a>'));
     staticFrame.bind('base64encode', defineFunction(functionBase64encode, '<s-:s>'));
     staticFrame.bind('base64decode', defineFunction(functionBase64decode, '<s-:s>'));
+    staticFrame.bind('toMillis', defineFunction(functionToMillis, '<s-:n>'));
+    staticFrame.bind('fromMillis', defineFunction(functionFromMillis, '<n-:s>'));
+    staticFrame.bind('clone', defineFunction(functionClone, '<o-:o>'));
 
     /**
      * Error codes
@@ -4145,22 +4768,25 @@ var jsonata = (function() {
         "T0412": "Argument {{index}} of function {{token}} must be an array of {{type}}",
         "D1001": "Number out of range: {{value}}",
         "D1002": "Cannot negate a non-numeric value: {{value}}",
+        "T1003": "Key in object structure must evaluate to a string; got: {{value}}",
+        "D1004": "Regular expression matches zero length string",
+        "T1005": "Attempted to invoke a non-function. Did you mean ${{{token}}}?",
+        "T1006": "Attempted to invoke a non-function",
+        "T1007": "Attempted to partially apply a non-function. Did you mean ${{{token}}}?",
+        "T1008": "Attempted to partially apply a non-function",
         "T2001": "The left side of the {{token}} operator must evaluate to a number",
         "T2002": "The right side of the {{token}} operator must evaluate to a number",
-        "T1003": "Key in object structure must evaluate to a string; got: {{value}}",
         "T2003": "The left side of the range operator (..) must evaluate to an integer",
         "T2004": "The right side of the range operator (..) must evaluate to an integer",
         "D2005": "The left side of := must be a variable name (start with $)",
-        "D1004": "Regular expression matches zero length string",
         "T2006": "The right side of the function application operator ~> must be a function",
         "T2007": "Type mismatch when comparing values {{value}} and {{value2}} in order-by clause",
         "T2008": "The expressions within an order-by clause must evaluate to numeric or string values",
         "T2009": "The values {{value}} and {{value2}} either side of operator {{token}} must be of the same data type",
         "T2010": "The expressions either side of operator {{token}} must evaluate to numeric or string values",
-        "T1005": "Attempted to invoke a non-function. Did you mean ${{{token}}}?",
-        "T1006": "Attempted to invoke a non-function",
-        "T1007": "Attempted to partially apply a non-function. Did you mean ${{{token}}}?",
-        "T1008": "Attempted to partially apply a non-function",
+        "T2011": "The insert/update clause of the transform expression must evaluate to an object: {{value}}",
+        "T2012": "The delete clause of the transform expression must evaluate to a string or array of strings: {{value}}",
+        "T2013": "The transform expression clones the input object using the $clone() function.  This has been overridden in the current scope by a non-function.",
         "D3001": "Attempting to invoke string function on Infinity or NaN",
         "D3010": "Second argument of replace function cannot be an empty string",
         "D3011": "Fourth argument of replace function must evaluate to a positive number",
@@ -4171,7 +4797,23 @@ var jsonata = (function() {
         "D3050": "First argument of reduce function must be a function with two arguments",
         "D3060": "The sqrt function cannot be applied to a negative number: {{value}}",
         "D3061": "The power function has resulted in a value that cannot be represented as a JSON number: base={{value}}, exponent={{exp}}",
-        "D3070": "The single argument form of the sort function can only be applied to an array of strings or an array of numbers.  Use the second argument to specify a comparison function"
+        "D3070": "The single argument form of the sort function can only be applied to an array of strings or an array of numbers.  Use the second argument to specify a comparison function",
+        "D3080": "The picture string must only contain a maximum of two sub-pictures",
+        "D3081": "The sub-picture must not contain more than one instance of the 'decimal-separator' character",
+        "D3082": "The sub-picture must not contain more than one instance of the 'percent' character",
+        "D3083": "The sub-picture must not contain more than one instance of the 'per-mille' character",
+        "D3084": "The sub-picture must not contain both a 'percent' and a 'per-mille' character",
+        "D3085": "The mantissa part of a sub-picture must contain at least one character that is either an 'optional digit character' or a member of the 'decimal digit family'",
+        "D3086": "The sub-picture must not contain a passive character that is preceded by an active character and that is followed by another active character",
+        "D3087": "The sub-picture must not contain a 'grouping-separator' character that appears adjacent to a 'decimal-separator' character",
+        "D3088": "The sub-picture must not contain a 'grouping-separator' at the end of the integer part",
+        "D3089": "The sub-picture must not contain two adjacent instances of the 'grouping-separator' character",
+        "D3090": "The integer part of the sub-picture must not contain a member of the 'decimal digit family' that is followed by an instance of the 'optional digit character'",
+        "D3091": "The fractional part of the sub-picture must not contain an instance of the 'optional digit character' that is followed by a member of the 'decimal digit family'",
+        "D3092": "A sub-picture that contains a 'percent' or 'per-mille' character must not contain a character treated as an 'exponent-separator'",
+        "D3093": "The exponent part of the sub-picture must comprise only of one or more characters that are members of the 'decimal digit family'",
+        "D3100": "The radix of the formatBase function must be between 2 and 36.  It was given {{value}}",
+        "D3110": "The argument of the toMillis function must be an ISO 8601 formatted timestamp. Given {{value}}"
     };
 
     /**

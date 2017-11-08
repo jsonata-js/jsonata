@@ -3751,6 +3751,66 @@ describe('Evaluator - functions: trim', function () {
     });
 });
 
+describe('Evaluator - functions: pad', function () {
+
+    describe('$pad("foo", 5)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$pad("foo", 5)');
+            var result = expr.evaluate();
+            expect(result).to.deep.equal('foo  ');
+        });
+    });
+
+    describe('$pad("foo", -5)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$pad("foo", -5)');
+            var result = expr.evaluate();
+            expect(result).to.deep.equal('  foo');
+        });
+    });
+
+    describe('$pad("foo", -5, "#")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$pad("foo", -5, "#")');
+            var result = expr.evaluate();
+            expect(result).to.deep.equal('##foo');
+        });
+    });
+
+    describe('$pad("foo", 5, "")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$pad("foo", 5, "")');
+            var result = expr.evaluate();
+            expect(result).to.deep.equal('foo  ');
+        });
+    });
+
+    describe('$pad("foo", 1)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$pad("foo", 1)');
+            var result = expr.evaluate();
+            expect(result).to.deep.equal('foo');
+        });
+    });
+
+    describe('$pad("foo", 8, "-+")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$pad("foo", 8, "-+")');
+            var result = expr.evaluate();
+            expect(result).to.deep.equal('foo-+-+-');
+        });
+    });
+
+    describe('$pad(nothing, 1)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$pad(nothing, 1)');
+            var result = expr.evaluate();
+            expect(result).to.deep.equal(undefined);
+        });
+    });
+
+});
+
 describe('Evaluator - functions: contains', function () {
 
     describe('$contains("Hello World", "lo")', function () {
@@ -4224,6 +4284,359 @@ describe('Evaluator - functions: join', function () {
                 expr.evaluate();
             }).to.throw()
                 .to.deep.contain({position: 6, code: 'T0410', token: 'join', index: 1});
+        });
+    });
+
+});
+
+describe('Evaluator - functions: formatNumber', function () {
+
+    describe('$formatNumber(12345.6, "#,###.00")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(12345.6, "#,###.00")');
+            var result = expr.evaluate();
+            var expected = "12,345.60";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(12345678.9, "9,999.99")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(12345678.9, "9,999.99")');
+            var result = expr.evaluate();
+            var expected = "12,345,678.90";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(123412345678.9, "9,999.99")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(123412345678.9, "9,9,99.99")');
+            var result = expr.evaluate();
+            var expected = "123412345,6,78.90";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(1234.56789, "9,999.999,99")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(1234.56789, "9,999.999,999")');
+            var result = expr.evaluate();
+            var expected = "1,234.567,890";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(123.9, "9999")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(123.9, "9999")');
+            var result = expr.evaluate();
+            var expected = "0124";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(0.14, "01%")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(0.14, "01%")');
+            var result = expr.evaluate();
+            var expected = "14%";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(0.4857,"###.###‰")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(0.4857,"###.###‰")');
+            var result = expr.evaluate();
+            var expected = "485.7‰";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(0.14, "001pm", {"per-mille": "pm"})', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(0.14, "###pm", {"per-mille": "pm"})');
+            var result = expr.evaluate();
+            var expected = "140pm";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(-6, "000")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(-6, "000")');
+            var result = expr.evaluate();
+            var expected = "-006";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(1234.5678, "00.000e0")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(1234.5678, "00.000e0")');
+            var result = expr.evaluate();
+            var expected = "12.346e2";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(1234.5678, "00.000e000")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(1234.5678, "00.000e000")');
+            var result = expr.evaluate();
+            var expected = "12.346e002";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(1234.5678, "①①.①①①e①")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(1234.5678, "①①.①①①e①", {"zero-digit": "\u245f"})');
+            var result = expr.evaluate();
+            var expected = "①②.③④⑥e②";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(0.234, "0.0e0")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(0.234, "0.0e0")');
+            var result = expr.evaluate();
+            var expected = "2.3e-1";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(0.234, "#.00e0")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(0.234, "#.00e0")');
+            var result = expr.evaluate();
+            var expected = "0.23e0";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(0.123, "#.e9")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(0.123, "#.e9")');
+            var result = expr.evaluate();
+            var expected = "0.1e0";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(0.234, ".00e0")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(0.234, ".00e0")');
+            var result = expr.evaluate();
+            var expected = ".23e0";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(2392.14*(-36.58), "000,000.000###;###,###.000###")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(2392.14*(-36.58), "000,000.000###;###,###.000###")');
+            var result = expr.evaluate();
+            var expected = "87,504.4812";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(2.14*86.58,"PREFIX##00.000###SUFFIX")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(2.14*86.58,"PREFIX##00.000###SUFFIX")');
+            var result = expr.evaluate();
+            var expected = "PREFIX185.2812SUFFIX";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatNumber(1E20,"#,######")', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatNumber(1E20,"#,######")');
+            var result = expr.evaluate();
+            var expected = "100,000000,000000,000000";
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('Picture format errors', function () {
+        it('D3080', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"#;#;#")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3080'});
+        });
+
+        it('D3081', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"#.0.0")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3081'});
+        });
+
+        it('D3082', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"#0%%")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3082'});
+        });
+
+        it('D3083', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"#0‰‰")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3083'});
+        });
+
+        it('D3084', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"#0%‰")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3084'});
+        });
+
+        it('D3085', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,".e0")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3085'});
+        });
+
+        it('D3086', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"0+.e0")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3086'});
+        });
+
+        it('D3087', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"0,.e0")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3087'});
+        });
+
+        it('D3088', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"0,")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3088'});
+        });
+
+        it('D3089', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"0,,0")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3089'});
+        });
+
+        it('D3090', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"0#.e0")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3090'});
+        });
+
+        it('D3091', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"#0.#0e0")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3091'});
+        });
+
+        it('D3092', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"#0.0e0%")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3092'});
+        });
+
+        it('D3093', function () {
+            expect(function () {
+                jsonata('$formatNumber(20,"#0.0e0,0")').evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 14, code: 'D3093'});
+        });
+
+    });
+});
+
+describe('Evaluator - functions: formatBase', function () {
+
+    describe('$formatBase(100)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatBase(100)');
+            var result = expr.evaluate();
+            var expected = '100';
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatBase(nothing)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatBase(nothing)');
+            var result = expr.evaluate();
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatBase(100, 2)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatBase(100, 2)');
+            var result = expr.evaluate();
+            var expected = '1100100';
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatBase(-100, 2)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatBase(-100, 2)');
+            var result = expr.evaluate();
+            var expected = '-1100100';
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatBase(100, 36)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatBase(100, 36)');
+            var result = expr.evaluate();
+            var expected = '2s';
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatBase(99.5, 2.5)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatBase(99.5, 2.5)');
+            var result = expr.evaluate();
+            var expected = '1100100';
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$formatBase(100, 1)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatBase(100, 1)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 12, code: 'D3100'});
+        });
+    });
+
+    describe('$formatBase(100, 37)', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$formatBase(100, 37)');
+            expect(function () {
+                expr.evaluate();
+            }).to.throw()
+                .to.deep.contain({position: 12, code: 'D3100'});
         });
     });
 
@@ -5797,6 +6210,107 @@ describe('Evaluator - function: millis', function () {
 
 });
 
+describe('Evaluator - function: toMillis', function () {
+
+    describe('toMillis() returns 1 millisecond since the epoch when provided with an ISO 8601 timestamp', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$toMillis("1970-01-01T00:00:00.001Z")');
+            var result = expr.evaluate(testdata2);
+            var expected = 1;
+            expect(expected).to.deep.equal(result);
+        });
+    });
+
+    describe('toMillis() returns many milliseconds since the epoch when provided with an ISO 8601 timestamp', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$toMillis("2017-10-30T16:25:32.935Z")');
+            var result = expr.evaluate(testdata2);
+            var expected = 1509380732935;
+            expect(expected).to.deep.equal(result);
+        });
+    });
+
+    describe('toMillis() returns undefined when given undefined', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$toMillis(foo)');
+            var result = expr.evaluate(testdata2);
+            var expected = undefined;
+            expect(expected).to.deep.equal(result);
+        });
+    });
+
+    describe('when toMillis() is not given an ISO 8601 timestamp', function () {
+        it('should return an error', function () {
+            var expr = jsonata('$toMillis("foo")');
+            expect(function () {
+                expr.evaluate(testdata2);
+            }).to.throw()
+                .to.deep.contain({position: 10, code: 'D3110', value: 'foo'});
+        });
+    });
+
+});
+
+describe('Evaluator - function: fromMillis', function () {
+
+    describe('fromMillis() returns an ISO 8601 timestamp when given 1 millisecond since the epoch', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$fromMillis(1)');
+            var result = expr.evaluate(testdata2);
+            var expected = '1970-01-01T00:00:00.001Z';
+            expect(expected).to.deep.equal(result);
+        });
+    });
+
+    describe('fromMillis() returns an ISO 8601 timestamp when given many milliseconds since the epoch ', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$fromMillis(1509380732935)');
+            var result = expr.evaluate(testdata2);
+            var expected = "2017-10-30T16:25:32.935Z";
+            expect(expected).to.deep.equal(result);
+        });
+    });
+
+    describe('fromMillis() returns undefined when given undefined', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$fromMillis(foo)');
+            var result = expr.evaluate(testdata2);
+            var expected = undefined;
+            expect(expected).to.deep.equal(result);
+        });
+    });
+});
+
+describe('Evaluator - functions: clone', function () {
+
+    describe('clone undefined', function () {
+        it('should return undefined', function () {
+            var expr = jsonata('$clone(foo)');
+            var result = expr.evaluate(testdata2);
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('clone empty object', function () {
+        it('should return empty object', function () {
+            var expr = jsonata('$clone({})');
+            var result = expr.evaluate(testdata2);
+            var expected = {};
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('clone object', function () {
+        it('should return same object', function () {
+            var expr = jsonata('$clone({"a": 1})');
+            var result = expr.evaluate(testdata2);
+            var expected = {"a": 1};
+            expect(result).to.deep.equal(expected);
+        });
+    });
+});
+
 describe('Evaluator - errors', function () {
 
     describe('"s" - 1', function () {
@@ -6397,6 +6911,15 @@ describe('Evaluator - object constructor', function () {
             var expr = jsonata('{"one": 1, "two": [3, "four"]}');
             var result = expr.evaluate(testdata1);
             var expected = {"one": 1, "two": [3, "four"]};
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('{"test": ()}', function () {
+        it('should return result object', function () {
+            var expr = jsonata('{"test": ()}');
+            var result = expr.evaluate(null);
+            var expected = {};
             expect(result).to.deep.equal(expected);
         });
     });
@@ -7146,6 +7669,423 @@ describe('Evaluator - Order-by', function () {
     });
 });
 
+describe('Evaluator - Transform expressions', function () {
+    describe('$ ~> |Account.Order.Product|{"Total":Price*Quantity},["Description", "SKU"]|', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$ ~> |Account.Order.Product|{"Total":Price*Quantity},["Description", "SKU"]|');
+            var result = expr.evaluate(testdata2);
+            var expected = {
+                "Account": {
+                    "Account Name": "Firefly",
+                    "Order": [
+                        {
+                            "OrderID": "order103",
+                            "Product": [
+                                {
+                                    "Product Name": "Bowler Hat",
+                                    "ProductID": 858383,
+                                    "Price": 34.45,
+                                    "Quantity": 2,
+                                    "Total": 68.9
+                                },
+                                {
+                                    "Product Name": "Trilby hat",
+                                    "ProductID": 858236,
+                                    "Price": 21.67,
+                                    "Quantity": 1,
+                                    "Total": 21.67
+                                }
+                            ]
+                        },
+                        {
+                            "OrderID": "order104",
+                            "Product": [
+                                {
+                                    "Product Name": "Bowler Hat",
+                                    "ProductID": 858383,
+                                    "Price": 34.45,
+                                    "Quantity": 4,
+                                    "Total": 137.8
+                                },
+                                {
+                                    "ProductID": 345664,
+                                    "Product Name": "Cloak",
+                                    "Price": 107.99,
+                                    "Quantity": 1,
+                                    "Total": 107.99
+                                }
+                            ]
+                        }
+                    ]
+                }
+            };
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$ ~> |Account.Order.Product|{"Total":Price*Quantity, "Price": Price * 1.2}|', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$ ~> |Account.Order.Product|{"Total":Price*Quantity, "Price": Price * 1.2}|');
+            var result = expr.evaluate(testdata2);
+            var expected = {
+                "Account": {
+                    "Account Name": "Firefly",
+                    "Order": [
+                        {
+                            "OrderID": "order103",
+                            "Product": [
+                                {
+                                    "Product Name": "Bowler Hat",
+                                    "ProductID": 858383,
+                                    "SKU": "0406654608",
+                                    "Description": {
+                                        "Colour": "Purple",
+                                        "Width": 300,
+                                        "Height": 200,
+                                        "Depth": 210,
+                                        "Weight": 0.75
+                                    },
+                                    "Price": 41.34,
+                                    "Quantity": 2,
+                                    "Total": 68.9
+                                },
+                                {
+                                    "Product Name": "Trilby hat",
+                                    "ProductID": 858236,
+                                    "SKU": "0406634348",
+                                    "Description": {
+                                        "Colour": "Orange",
+                                        "Width": 300,
+                                        "Height": 200,
+                                        "Depth": 210,
+                                        "Weight": 0.6
+                                    },
+                                    "Price": 26.004,
+                                    "Quantity": 1,
+                                    "Total": 21.67
+                                }
+                            ]
+                        },
+                        {
+                            "OrderID": "order104",
+                            "Product": [
+                                {
+                                    "Product Name": "Bowler Hat",
+                                    "ProductID": 858383,
+                                    "SKU": "040657863",
+                                    "Description": {
+                                        "Colour": "Purple",
+                                        "Width": 300,
+                                        "Height": 200,
+                                        "Depth": 210,
+                                        "Weight": 0.75
+                                    },
+                                    "Price": 41.34,
+                                    "Quantity": 4,
+                                    "Total": 137.8
+                                },
+                                {
+                                    "ProductID": 345664,
+                                    "SKU": "0406654603",
+                                    "Product Name": "Cloak",
+                                    "Description": {
+                                        "Colour": "Black",
+                                        "Width": 30,
+                                        "Height": 20,
+                                        "Depth": 210,
+                                        "Weight": 2
+                                    },
+                                    "Price": 129.588,
+                                    "Quantity": 1,
+                                    "Total": 107.99
+                                }
+                            ]
+                        }
+                    ]
+                }
+            };
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$ ~> |Account.Order.Product|{},"Description"|', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$ ~> |Account.Order.Product|{},"Description"|');
+            var result = expr.evaluate(testdata2);
+            var expected = {
+                "Account": {
+                    "Account Name": "Firefly",
+                    "Order": [
+                        {
+                            "OrderID": "order103",
+                            "Product": [
+                                {
+                                    "Product Name": "Bowler Hat",
+                                    "ProductID": 858383,
+                                    "SKU": "0406654608",
+                                    "Price": 34.45,
+                                    "Quantity": 2
+                                },
+                                {
+                                    "Product Name": "Trilby hat",
+                                    "ProductID": 858236,
+                                    "SKU": "0406634348",
+                                    "Price": 21.67,
+                                    "Quantity": 1
+                                }
+                            ]
+                        },
+                        {
+                            "OrderID": "order104",
+                            "Product": [
+                                {
+                                    "Product Name": "Bowler Hat",
+                                    "ProductID": 858383,
+                                    "SKU": "040657863",
+                                    "Price": 34.45,
+                                    "Quantity": 4
+                                },
+                                {
+                                    "ProductID": 345664,
+                                    "SKU": "0406654603",
+                                    "Product Name": "Cloak",
+                                    "Price": 107.99,
+                                    "Quantity": 1
+                                }
+                            ]
+                        }
+                    ]
+                }
+            };
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$ ~> |Account.Order.Product|nomatch,"Description"|', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$ ~> |Account.Order.Product|nomatch,"Description"|');
+            var result = expr.evaluate(testdata2);
+            var expected = {
+                "Account": {
+                    "Account Name": "Firefly",
+                    "Order": [
+                        {
+                            "OrderID": "order103",
+                            "Product": [
+                                {
+                                    "Product Name": "Bowler Hat",
+                                    "ProductID": 858383,
+                                    "SKU": "0406654608",
+                                    "Price": 34.45,
+                                    "Quantity": 2
+                                },
+                                {
+                                    "Product Name": "Trilby hat",
+                                    "ProductID": 858236,
+                                    "SKU": "0406634348",
+                                    "Price": 21.67,
+                                    "Quantity": 1
+                                }
+                            ]
+                        },
+                        {
+                            "OrderID": "order104",
+                            "Product": [
+                                {
+                                    "Product Name": "Bowler Hat",
+                                    "ProductID": 858383,
+                                    "SKU": "040657863",
+                                    "Price": 34.45,
+                                    "Quantity": 4
+                                },
+                                {
+                                    "ProductID": 345664,
+                                    "SKU": "0406654603",
+                                    "Product Name": "Cloak",
+                                    "Price": 107.99,
+                                    "Quantity": 1
+                                }
+                            ]
+                        }
+                    ]
+                }
+            };
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$ ~> |(Account.Order.Product)[0]|{"Description":"blah"}|', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$ ~> |(Account.Order.Product)[0]|{"Description":"blah"}|');
+            var result = expr.evaluate(testdata2);
+            var expected = {
+                "Account": {
+                    "Account Name": "Firefly",
+                    "Order": [
+                        {
+                            "OrderID": "order103",
+                            "Product": [
+                                {
+                                    "Product Name": "Bowler Hat",
+                                    "ProductID": 858383,
+                                    "SKU": "0406654608",
+                                    "Description": "blah",
+                                    "Price": 34.45,
+                                    "Quantity": 2
+                                },
+                                {
+                                    "Product Name": "Trilby hat",
+                                    "ProductID": 858236,
+                                    "SKU": "0406634348",
+                                    "Description": {
+                                        "Colour": "Orange",
+                                        "Width": 300,
+                                        "Height": 200,
+                                        "Depth": 210,
+                                        "Weight": 0.6
+                                    },
+                                    "Price": 21.67,
+                                    "Quantity": 1
+                                }
+                            ]
+                        },
+                        {
+                            "OrderID": "order104",
+                            "Product": [
+                                {
+                                    "Product Name": "Bowler Hat",
+                                    "ProductID": 858383,
+                                    "SKU": "040657863",
+                                    "Description": {
+                                        "Colour": "Purple",
+                                        "Width": 300,
+                                        "Height": 200,
+                                        "Depth": 210,
+                                        "Weight": 0.75
+                                    },
+                                    "Price": 34.45,
+                                    "Quantity": 4
+                                },
+                                {
+                                    "ProductID": 345664,
+                                    "SKU": "0406654603",
+                                    "Product Name": "Cloak",
+                                    "Description": {
+                                        "Colour": "Black",
+                                        "Width": 30,
+                                        "Height": 20,
+                                        "Depth": 210,
+                                        "Weight": 2
+                                    },
+                                    "Price": 107.99,
+                                    "Quantity": 1
+                                }
+                            ]
+                        }
+                    ]
+                }
+            };
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('$ ~> |foo.bar|{"Description":"blah"}|', function () {
+        it('should return result object', function () {
+            var expr = jsonata('$ ~> |foo.bar|{"Description":"blah"}|');
+            var result = expr.evaluate(testdata2);
+            var expected = testdata2;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('Account ~> |Order|{"Product":"blah"},nomatch|', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account ~> |Order|{"Product":"blah"},nomatch|');
+            var result = expr.evaluate(testdata2);
+            var expected = {
+                "Account Name": "Firefly",
+                "Order": [
+                    {
+                        "OrderID": "order103",
+                        "Product": "blah"
+                    },
+                    {
+                        "OrderID": "order104",
+                        "Product": "blah"
+                    }
+                ]
+            };
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('foo ~> |foo.bar|{"Description":"blah"}|', function () {
+        it('should return result object', function () {
+            var expr = jsonata('foo ~> |foo.bar|{"Description":"blah"}|');
+            var result = expr.evaluate(testdata2);
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('transform expression with wrong insert/update type', function () {
+        it('should throw error', function () {
+            var expr = jsonata('Account ~> |Order|5|');
+            expect(function () {
+                expr.evaluate(testdata2);
+            }).to.throw()
+                .to.deep.contain({position: 19, code: 'T2011', value: 5});
+        });
+    });
+
+    describe('transform expression with wrong delete type', function () {
+        it('should throw error', function () {
+            var expr = jsonata('Account ~> |Order|{},5|');
+            expect(function () {
+                expr.evaluate(testdata2);
+            }).to.throw()
+                .to.deep.contain({position: 22, code: 'T2012', value: 5});
+        });
+    });
+
+    describe('transform expression with overridden $clone function', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account ~> |Order|{"Product":"blah"},nomatch|');
+            var count = 0;
+            expr.registerFunction('clone', function(arg) {
+                count++;
+                return JSON.parse(JSON.stringify(arg));
+            });
+            var result = expr.evaluate(testdata2);
+            var expected = {
+                "Account Name": "Firefly",
+                "Order": [
+                    {
+                        "OrderID": "order103",
+                        "Product": "blah"
+                    },
+                    {
+                        "OrderID": "order104",
+                        "Product": "blah"
+                    }
+                ]
+            };
+            expect(result).to.deep.equal(expected);
+            expect(count).to.equal(1);
+        });
+    });
+    describe('transform expression with overridden $clone value', function () {
+        it('should throw error', function () {
+            var expr = jsonata('( $clone := 5; $ ~> |Account.Order.Product|{"blah":"foo"}| )');
+            expect(function () {
+                expr.evaluate(testdata2);
+            }).to.throw()
+                .to.deep.contain({position: 21, code: 'T2013'});
+        });
+    });
+
+});
+
 describe('Evaluator - Conditional expressions', function () {
     describe('["Red"[$$="Bus"], "White"[$$="Police Car"]][0]', function () {
         it('should return result object', function () {
@@ -7538,6 +8478,15 @@ describe('Evaluator - Higher order functions', function () {
 });
 
 describe('Evaluator - Block expressions', function () {
+    describe('()', function () {
+        it('should return result object', function () {
+            var expr = jsonata('()');
+            var result = expr.evaluate(null);
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
     describe('(1; 2; 3)', function () {
         it('should return result object', function () {
             var expr = jsonata('(1; 2; 3)');
@@ -9389,6 +10338,59 @@ describe('Transform', function () {
         });
     });
 
+});
+
+describe('Event processing', function () {
+    var input = {
+        "state": {
+            "tempReadings": [
+                27.2,
+                28.9,
+                28,
+                28.2,
+                28.4
+            ],
+            "readingsCount": 5,
+            "sumTemperatures": 140.7,
+            "avgTemperature": 28.14,
+            "maxTemperature": 28.9,
+            "minTemperature": 27.2
+        },
+        "event": {
+            "t": 28.4
+        }
+    };
+
+    it('consume event and output aggregated sliding window', function () {
+        var expression = `
+        (
+          $tempReadings := $count(state.tempReadings) = 5 ?
+              [state.tempReadings[[1..4]], event.t] :
+              [state.tempReadings, event.t];
+        
+          {
+            "tempReadings": $tempReadings,
+            "sumTemperatures": $sum($tempReadings),
+            "avgTemperature": $average($tempReadings) ~> $round(2),
+            "maxTemperature": $max($tempReadings),
+            "minTemperature": $min($tempReadings)
+          }
+        )`;
+        var expectedResult = {
+            "tempReadings": [
+                28.9,
+                28,
+                28.2,
+                28.4,
+                28.4
+            ],
+            "sumTemperatures": 141.9,
+            "avgTemperature": 28.38,
+            "maxTemperature": 28.9,
+            "minTemperature": 28
+        };
+        expect(jsonata(expression).evaluate(input)).to.deep.equal(expectedResult);
+    });
 });
 
 describe('#evaluate', function () {
