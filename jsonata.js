@@ -2423,7 +2423,7 @@ var jsonata = (function() {
      */
     function evaluateTransformExpression(expr, input, environment) {
         // create a function to implement the transform definition
-        var transformer = function*(obj) { // signature <a<o>-:o>
+        var transformer = function*(obj) { // signature <(oa):o>
             // undefined inputs always return undefined
             if(typeof obj === 'undefined') {
                 return undefined;
@@ -4735,7 +4735,7 @@ var jsonata = (function() {
     staticFrame.bind('base64decode', defineFunction(functionBase64decode, '<s-:s>'));
     staticFrame.bind('toMillis', defineFunction(functionToMillis, '<s-:n>'));
     staticFrame.bind('fromMillis', defineFunction(functionFromMillis, '<n-:s>'));
-    staticFrame.bind('clone', defineFunction(functionClone, '<o-:o>'));
+    staticFrame.bind('clone', defineFunction(functionClone, '<(oa)-:o>'));
 
     /**
      * Error codes
