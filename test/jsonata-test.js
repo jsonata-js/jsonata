@@ -7723,6 +7723,54 @@ describe('Evaluator - Transform expressions', function () {
         });
     });
 
+    describe('Account.Order ~> |Product|{"Total":Price*Quantity},["Description", "SKU"]|', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order ~> |Product|{"Total":Price*Quantity},["Description", "SKU"]|');
+            var result = expr.evaluate(testdata2);
+            var expected = [
+                {
+                    "OrderID": "order103",
+                    "Product": [
+                        {
+                            "Product Name": "Bowler Hat",
+                            "ProductID": 858383,
+                            "Price": 34.45,
+                            "Quantity": 2,
+                            "Total": 68.9
+                        },
+                        {
+                            "Product Name": "Trilby hat",
+                            "ProductID": 858236,
+                            "Price": 21.67,
+                            "Quantity": 1,
+                            "Total": 21.67
+                        }
+                    ]
+                },
+                {
+                    "OrderID": "order104",
+                    "Product": [
+                        {
+                            "Product Name": "Bowler Hat",
+                            "ProductID": 858383,
+                            "Price": 34.45,
+                            "Quantity": 4,
+                            "Total": 137.8
+                        },
+                        {
+                            "ProductID": 345664,
+                            "Product Name": "Cloak",
+                            "Price": 107.99,
+                            "Quantity": 1,
+                            "Total": 107.99
+                        }
+                    ]
+                }
+            ];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
     describe('$ ~> |Account.Order.Product|{"Total":Price*Quantity, "Price": Price * 1.2}|', function () {
         it('should return result object', function () {
             var expr = jsonata('$ ~> |Account.Order.Product|{"Total":Price*Quantity, "Price": Price * 1.2}|');
