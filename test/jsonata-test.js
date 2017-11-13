@@ -117,6 +117,14 @@ var testdata3b = [
     {"nest0": [{"nest1": [5]}, {"nest1": [6]}]}
 ];
 
+var testdata3c = {
+    "nest0": [
+        {"nest1": [{"nest2": [{"nest3": 1}, {"nest3": 2}]}, {"nest2": [{"nest3": 3}, {"nest3": 4}]}]},
+        {"nest1": [{"nest2": [{"nest3": 5}, {"nest3": 6}]}, {"nest2": [{"nest3": 7}, {"nest3": 8}]}]}
+    ]
+};
+
+
 var testdata4 = {
     "FirstName": "Fred",
     "Surname": "Smith",
@@ -1994,78 +2002,153 @@ describe('Evaluator - array flattening', function () {
         });
     });
 
-    describe('nest0.[nest1.[nest2.[nest3]]]', function () {
-        it('should return result object', function () {
-            var expr = jsonata('nest0.[nest1.[nest2.[nest3]]]'); // nest0.[nest1.[nest2.[nest3]]]
-            var result = expr.evaluate(testdata3);
-            var expected = [[[[1], [2]], [[3], [4]]], [[[5], [6]], [[7], [8]]]];
-            expect(result).to.deep.equal(expected);
+    describe('nested arrays of singleton arrays', function() {
+        describe('nest0.[nest1.[nest2.[nest3]]]', function () {
+            it('should return result object', function () {
+                var expr = jsonata('nest0.[nest1.[nest2.[nest3]]]'); // nest0.[nest1.[nest2.[nest3]]]
+                var result = expr.evaluate(testdata3);
+                var expected = [[[[1], [2]], [[3], [4]]], [[[5], [6]], [[7], [8]]]];
+                expect(result).to.deep.equal(expected);
+            });
+        });
+
+        describe('nest0.nest1.[nest2.[nest3]]', function () {
+            it('should return result object', function () {
+                var expr = jsonata('nest0.nest1.[nest2.[nest3]]'); // nest0.nest1.[nest2.[nest3]]
+                var result = expr.evaluate(testdata3);
+                var expected = [[[1], [2]], [[3], [4]], [[5], [6]], [[7], [8]]];
+                expect(result).to.deep.equal(expected);
+            });
+        });
+
+        describe('nest0.[nest1.nest2.[nest3]]', function () {
+            it('should return result object', function () {
+                var expr = jsonata('nest0.[nest1.nest2.[nest3]]'); // nest0.[nest1.nest2.[nest3]]
+                var result = expr.evaluate(testdata3);
+                var expected = [[[1], [2], [3], [4]], [[5], [6], [7], [8]]];
+                expect(result).to.deep.equal(expected);
+            });
+        });
+
+        describe('nest0.[nest1.[nest2.nest3]]', function () {
+            it('should return result object', function () {
+                var expr = jsonata('nest0.[nest1.[nest2.nest3]]'); // nest0.[nest1.[nest2.nest3]]
+                var result = expr.evaluate(testdata3);
+                var expected = [[[[1], [2]], [[3], [4]]], [[[5], [6]], [[7], [8]]]];
+                expect(result).to.deep.equal(expected);
+            });
+        });
+
+        describe('nest0.[nest1.nest2.nest3]', function () {
+            it('should return result object', function () {
+                var expr = jsonata('nest0.[nest1.nest2.nest3]'); // nest0.[nest1.nest2.nest3]
+                var result = expr.evaluate(testdata3);
+                var expected = [[[1], [2], [3], [4]], [[5], [6], [7], [8]]];
+                expect(result).to.deep.equal(expected);
+            });
+        });
+
+        describe('nest0.nest1.[nest2.nest3]', function () {
+            it('should return result object', function () {
+                var expr = jsonata('nest0.nest1.[nest2.nest3]'); // nest0.nest1.[nest2.nest3]
+                var result = expr.evaluate(testdata3);
+                var expected = [[[1], [2]], [[3], [4]], [[5], [6]], [[7], [8]]];
+                expect(result).to.deep.equal(expected);
+            });
+        });
+
+        describe('nest0.nest1.nest2.[nest3]', function () {
+            it('should return result object', function () {
+                var expr = jsonata('nest0.nest1.nest2.[nest3]'); // nest0.nest1.nest2.[nest3]
+                var result = expr.evaluate(testdata3);
+                var expected = [[1], [2], [3], [4], [5], [6], [7], [8]];
+                expect(result).to.deep.equal(expected);
+            });
+        });
+
+        describe('nest0.nest1.nest2.nest3', function () {
+            it('should return result object', function () {
+                var expr = jsonata('nest0.nest1.nest2.nest3');
+                var result = expr.evaluate(testdata3);
+                var expected = [[1], [2], [3], [4], [5], [6], [7], [8]];
+                expect(result).to.deep.equal(expected);
+            });
         });
     });
 
-    describe('nest0.nest1.[nest2.[nest3]]', function () {
-        it('should return result object', function () {
-            var expr = jsonata('nest0.nest1.[nest2.[nest3]]'); // nest0.nest1.[nest2.[nest3]]
-            var result = expr.evaluate(testdata3);
-            var expected = [[[1], [2]], [[3], [4]], [[5], [6]], [[7], [8]]];
-            expect(result).to.deep.equal(expected);
+    describe('nested arrays of non-arrays', function() {
+        describe('nest0.[nest1.[nest2.[nest3]]]', function () {
+            it('should return result object', function () {
+                var expr = jsonata('nest0.[nest1.[nest2.[nest3]]]'); // nest0.[nest1.[nest2.[nest3]]]
+                var result = expr.evaluate(testdata3c);
+                var expected = [[[[1], [2]], [[3], [4]]], [[[5], [6]], [[7], [8]]]];
+                expect(result).to.deep.equal(expected);
+            });
+        });
+
+        describe('nest0.nest1.[nest2.[nest3]]', function () {
+            it('should return result object', function () {
+                var expr = jsonata('nest0.nest1.[nest2.[nest3]]'); // nest0.nest1.[nest2.[nest3]]
+                var result = expr.evaluate(testdata3c);
+                var expected = [[[1], [2]], [[3], [4]], [[5], [6]], [[7], [8]]];
+                expect(result).to.deep.equal(expected);
+            });
+        });
+
+        describe('nest0.[nest1.nest2.[nest3]]', function () {
+            it('should return result object', function () {
+                var expr = jsonata('nest0.[nest1.nest2.[nest3]]'); // nest0.[nest1.nest2.[nest3]]
+                var result = expr.evaluate(testdata3c);
+                var expected = [[[1], [2], [3], [4]], [[5], [6], [7], [8]]];
+                expect(result).to.deep.equal(expected);
+            });
+        });
+
+        describe('nest0.[nest1.[nest2.nest3]]', function () {
+            it('should return result object', function () {
+                var expr = jsonata('nest0.[nest1.[nest2.nest3]]'); // nest0.[nest1.[nest2.nest3]]
+                var result = expr.evaluate(testdata3c);
+                var expected = [[[1, 2], [3, 4]], [[5, 6], [7, 8]]];
+                expect(result).to.deep.equal(expected);
+            });
+        });
+
+        describe('nest0.[nest1.nest2.nest3]', function () {
+            it('should return result object', function () {
+                var expr = jsonata('nest0.[nest1.nest2.nest3]'); // nest0.[nest1.nest2.nest3]
+                var result = expr.evaluate(testdata3c);
+                var expected = [[1, 2, 3, 4], [5, 6, 7, 8]];
+                expect(result).to.deep.equal(expected);
+            });
+        });
+
+        describe('nest0.nest1.[nest2.nest3]', function () {
+            it('should return result object', function () {
+                var expr = jsonata('nest0.nest1.[nest2.nest3]'); // nest0.nest1.[nest2.nest3]
+                var result = expr.evaluate(testdata3c);
+                var expected = [[1, 2], [3, 4], [5, 6], [7, 8]];
+                expect(result).to.deep.equal(expected);
+            });
+        });
+
+        describe('nest0.nest1.nest2.[nest3]', function () {
+            it('should return result object', function () {
+                var expr = jsonata('nest0.nest1.nest2.[nest3]'); // nest0.nest1.nest2.[nest3]
+                var result = expr.evaluate(testdata3c);
+                var expected = [[1], [2], [3], [4], [5], [6], [7], [8]];
+                expect(result).to.deep.equal(expected);
+            });
+        });
+
+        describe('nest0.nest1.nest2.nest3', function () {
+            it('should return result object', function () {
+                var expr = jsonata('nest0.nest1.nest2.nest3');
+                var result = expr.evaluate(testdata3c);
+                var expected = [1, 2, 3, 4, 5, 6, 7, 8];
+                expect(result).to.deep.equal(expected);
+            });
         });
     });
-
-    describe('nest0.[nest1.nest2.[nest3]]', function () {
-        it('should return result object', function () {
-            var expr = jsonata('nest0.[nest1.nest2.[nest3]]'); // nest0.[nest1.nest2.[nest3]]
-            var result = expr.evaluate(testdata3);
-            var expected = [[[1], [2], [3], [4]], [[5], [6], [7], [8]]];
-            expect(result).to.deep.equal(expected);
-        });
-    });
-
-    describe('nest0.[nest1.[nest2.nest3]]', function () {
-        it('should return result object', function () {
-            var expr = jsonata('nest0.[nest1.[nest2.nest3]]'); // nest0.[nest1.[nest2.nest3]]
-            var result = expr.evaluate(testdata3);
-            var expected = [[[1, 2], [3, 4]], [[5, 6], [7, 8]]];
-            expect(result).to.deep.equal(expected);
-        });
-    });
-
-    describe('nest0.[nest1.nest2.nest3]', function () {
-        it('should return result object', function () {
-            var expr = jsonata('nest0.[nest1.nest2.nest3]'); // nest0.[nest1.nest2.nest3]
-            var result = expr.evaluate(testdata3);
-            var expected = [[1, 2, 3, 4], [5, 6, 7, 8]];
-            expect(result).to.deep.equal(expected);
-        });
-    });
-
-    describe('nest0.nest1.[nest2.nest3]', function () {
-        it('should return result object', function () {
-            var expr = jsonata('nest0.nest1.[nest2.nest3]'); // nest0.nest1.[nest2.nest3]
-            var result = expr.evaluate(testdata3);
-            var expected = [[1, 2], [3, 4], [5, 6], [7, 8]];
-            expect(result).to.deep.equal(expected);
-        });
-    });
-
-    describe('nest0.nest1.nest2.[nest3]', function () {
-        it('should return result object', function () {
-            var expr = jsonata('nest0.nest1.nest2.[nest3]'); // nest0.nest1.nest2.[nest3]
-            var result = expr.evaluate(testdata3);
-            var expected = [[1], [2], [3], [4], [5], [6], [7], [8]];
-            expect(result).to.deep.equal(expected);
-        });
-    });
-
-    describe('nest0.nest1.nest2.nest3', function () {
-        it('should return result object', function () {
-            var expr = jsonata('nest0.nest1.nest2.nest3');
-            var result = expr.evaluate(testdata3);
-            var expected = [1, 2, 3, 4, 5, 6, 7, 8];
-            expect(result).to.deep.equal(expected);
-        });
-    });
-
 });
 
 describe('Evaluator - keep singleton arrays', function () {
@@ -2237,7 +2320,7 @@ describe('Evaluator - variables', function () {
     describe('[1,2,3].$v', function () {
         it('should return result object', function () {
             var expr = jsonata('[1,2,3].$v');
-            expr.assign('v', [undefined]);
+            expr.assign('v', undefined);
             var result = expr.evaluate();
             var expected = undefined;
             expect(result).to.deep.equal(expected);

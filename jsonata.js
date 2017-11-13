@@ -1532,6 +1532,22 @@ var jsonata = (function() {
     }
 
     /**
+     * Create an empty sequence to contain query results
+     * @returns {Array} - empty sequence
+     */
+    function createSequence() {
+        var sequence = [];
+        Object.defineProperty(sequence, 'sequence', {
+            enumerable: false,
+            configurable: false,
+            get: function () {
+                return true;
+            }
+        });
+        return sequence;
+    }
+
+    /**
      * Evaluate path expression against input data
      * @param {Object} expr - JSONata expression
      * @param {Object} input - Input data to evaluate against
@@ -1587,7 +1603,7 @@ var jsonata = (function() {
         } else if(!Array.isArray(sequence)) {
             result = sequence;
         } else if (sequence.length === 1) {
-            if(keepSingleton) {
+            if(keepSingleton || sequence.keepSingleton || !sequence.sequence) {
                 result = sequence;
             } else {
                 result = sequence[0];
@@ -1606,20 +1622,29 @@ var jsonata = (function() {
      * @returns {*} Evaluated input data
      */
     function* evaluateStep(expr, input, environment) {
-        var result = [];
+        var result = createSequence();
 
 
         for(var ii = 0; ii < input.length; ii++) {
             var res = yield * evaluate(expr, input[ii], environment);
-            if (!(Array.isArray(res) && (expr.value !== '[' )) && !expr.consarray) {
-                res = [res];
-            }
-            // is res an array - if so, flatten it into the parent array
-            res.forEach(function (innerRes) {
-                if (typeof innerRes !== 'undefined') {
-                    result.push(innerRes);
+            if(typeof res !== 'undefined') {
+                if (!Array.isArray(res)) {
+                    // it's not an array - just push into the result sequence
+                    result.push(res);
+                } else if (res.keepSingleton || (!res.sequence && res.length === 1)) {
+                    // it is an array, but we want to preserve the array structure
+                    //                    if(!(res.sequence && res.length === 0)) {  // not for empty sequences though
+                    result.push(res);
+                    //                    }
+                } else {
+                    // res is an array - if so, flatten it into the parent array
+                    res.forEach(function (innerRes) {
+                        //if (typeof innerRes !== 'undefined') {
+                        result.push(innerRes);
+                        //}
+                    });
                 }
-            });
+            }
         }
         return result;
     }
@@ -1638,7 +1663,7 @@ var jsonata = (function() {
         // truthy when applied to the predicate.
         // if the predicate evaluates to an integer, then select that index
 
-        var results = [];
+        var results = createSequence();
         for(var ii = 0; ii < predicates.length; ii++) {
             var predicate = predicates[ii];
             // if it's not an array, turn it into one
@@ -1647,7 +1672,7 @@ var jsonata = (function() {
             if (!Array.isArray(inputSequence)) {
                 inputSequence = [inputSequence];
             }
-            results = [];
+            results = createSequence();
             if (predicate.type === 'literal' && isNumeric(predicate.value)) {
                 var index = predicate.value;
                 if (!Number.isInteger(index)) {
@@ -1675,7 +1700,7 @@ var jsonata = (function() {
      * @returns {*} Result after applying predicates
      */
     function* evaluateFilter(predicate, input, environment) {
-        var results = [];
+        var results = createSequence();
         for(var index = 0; index < input.length; index++) {
             var item = input[index];
             var res = yield * evaluate(predicate, item, environment);
@@ -1794,6 +1819,13 @@ var jsonata = (function() {
                         }
                     }
                 }
+                Object.defineProperty(result, 'keepSingleton', {
+                    enumerable: false,
+                    configurable: false,
+                    get: function () {
+                        return true;
+                    }
+                });
                 break;
             case '{':
                 // object constructor - apply grouping
@@ -1815,7 +1847,7 @@ var jsonata = (function() {
         // lookup the 'name' item in the input
         var result;
         if (Array.isArray(input)) {
-            result = [];
+            result = createSequence();
             for(var ii = 0; ii < input.length; ii++) {
                 var res =  evaluateName(expr, input[ii], environment);
                 if (typeof res !== 'undefined') {
@@ -1846,7 +1878,7 @@ var jsonata = (function() {
      */
     function evaluateWildcard(expr, input) {
         var result;
-        var results = [];
+        var results = createSequence();
         if (input !== null && typeof input === 'object') {
             Object.keys(input).forEach(function (key) {
                 var value = input[key];
@@ -1891,7 +1923,7 @@ var jsonata = (function() {
      */
     function evaluateDescendants(expr, input) {
         var result;
-        var resultSequence = [];
+        var resultSequence = createSequence();
         if (typeof input !== 'undefined') {
             // traverse all descendants of this object/array
             recurseDescendants(input, resultSequence);
@@ -3231,7 +3263,7 @@ var jsonata = (function() {
             };
         }
 
-        var result = [];
+        var result = createSequence();
 
         if(typeof limit === 'undefined' || limit > 0) {
             var count = 0;
@@ -3456,7 +3488,7 @@ var jsonata = (function() {
             };
         }
 
-        var result = [];
+        var result = createSequence();
 
         if(typeof limit === 'undefined' || limit > 0) {
             if (typeof separator === 'string') {
@@ -4168,7 +4200,7 @@ var jsonata = (function() {
             return undefined;
         }
 
-        var result = [];
+        var result = createSequence();
         // do the map - iterate over the arrays, and invoke func
         for (var i = 0; i < arr.length; i++) {
             var func_args = [arr[i]]; // the first arg (value) is required
@@ -4205,7 +4237,7 @@ var jsonata = (function() {
             return undefined;
         }
 
-        var result = [];
+        var result = createSequence();
 
         var predicate = function (value, index, array) {
             var it = apply(func, [value, index, array], null);
@@ -4234,7 +4266,7 @@ var jsonata = (function() {
      */
     function functionZip() {
         // this can take a variable number of arguments
-        var result = [];
+        var result = createSequence();
         var args = Array.prototype.slice.call(arguments);
         // length of the shortest array
         var length = Math.min.apply(Math, args.map(function(arg) {
@@ -4296,7 +4328,7 @@ var jsonata = (function() {
      * @returns {Array} Array of keys
      */
     function functionKeys(arg) {
-        var result = [];
+        var result = createSequence();
 
         if(Array.isArray(arg)) {
             // merge the keys of all of the items in the array
@@ -4376,7 +4408,7 @@ var jsonata = (function() {
      * @returns {*} - the array
      */
     function functionSpread(arg) {
-        var result = [];
+        var result = createSequence();
 
         if(Array.isArray(arg)) {
             // spread all of the items in the array
@@ -4448,7 +4480,7 @@ var jsonata = (function() {
      * @returns {Array} - the resultant array
      */
     function* functionEach(obj, func) {
-        var result = [];
+        var result = createSequence();
 
         for(var key in obj) {
             var func_args = [obj[key], key];
