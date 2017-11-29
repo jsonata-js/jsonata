@@ -2034,7 +2034,7 @@ describe('Evaluator - array flattening', function () {
             it('should return result object', function () {
                 var expr = jsonata('nest0.[nest1.[nest2.nest3]]'); // nest0.[nest1.[nest2.nest3]]
                 var result = expr.evaluate(testdata3);
-                var expected = [[[[1], [2]], [[3], [4]]], [[[5], [6]], [[7], [8]]]];
+                var expected = [[[1, 2], [3, 4]], [[5, 6], [7, 8]]];
                 expect(result).to.deep.equal(expected);
             });
         });
@@ -2043,7 +2043,7 @@ describe('Evaluator - array flattening', function () {
             it('should return result object', function () {
                 var expr = jsonata('nest0.[nest1.nest2.nest3]'); // nest0.[nest1.nest2.nest3]
                 var result = expr.evaluate(testdata3);
-                var expected = [[[1], [2], [3], [4]], [[5], [6], [7], [8]]];
+                var expected = [[1, 2, 3, 4], [5, 6, 7, 8]];
                 expect(result).to.deep.equal(expected);
             });
         });
@@ -2052,7 +2052,7 @@ describe('Evaluator - array flattening', function () {
             it('should return result object', function () {
                 var expr = jsonata('nest0.nest1.[nest2.nest3]'); // nest0.nest1.[nest2.nest3]
                 var result = expr.evaluate(testdata3);
-                var expected = [[[1], [2]], [[3], [4]], [[5], [6]], [[7], [8]]];
+                var expected = [[1, 2], [3, 4], [5, 6], [7, 8]];
                 expect(result).to.deep.equal(expected);
             });
         });
@@ -2070,7 +2070,7 @@ describe('Evaluator - array flattening', function () {
             it('should return result object', function () {
                 var expr = jsonata('nest0.nest1.nest2.nest3');
                 var result = expr.evaluate(testdata3);
-                var expected = [[1], [2], [3], [4], [5], [6], [7], [8]];
+                var expected = [1, 2, 3, 4, 5, 6, 7, 8];
                 expect(result).to.deep.equal(expected);
             });
         });
@@ -2149,6 +2149,107 @@ describe('Evaluator - array flattening', function () {
             });
         });
     });
+});
+
+describe('Evaluator - sequence normalization', function () {
+
+    describe('{"a": 1 }.a', function () {
+        it('data in query', function () {
+            var expr = jsonata('{"a": 1 }.a');
+            var result = expr.evaluate();
+            var expected = 1;
+            expect(result).to.deep.equal(expected);
+        });
+
+        it('data in input', function () {
+            var expr = jsonata('a');
+            var result = expr.evaluate({"a": 1 });
+            var expected = 1;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('{"a": [1] }.a', function () {
+        it('data in query', function () {
+            var expr = jsonata('{"a": [1] }.a');
+            var result = expr.evaluate();
+            var expected = [1];
+            expect(result).to.deep.equal(expected);
+        });
+
+        it('data in input', function () {
+            var expr = jsonata('a');
+            var result = expr.evaluate({"a": [1] });
+            var expected = [1];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('{"a": [[1]] }.a', function () {
+        it('data in query', function () {
+            var expr = jsonata('{"a": [[1]] }.a');
+            var result = expr.evaluate();
+            var expected = [[1]];
+            expect(result).to.deep.equal(expected);
+        });
+
+        it('data in input', function () {
+            var expr = jsonata('a');
+            var result = expr.evaluate({"a": [[1]] });
+            var expected = [[1]];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('[{"a":[1,2]}, {"a":[3]}].a', function () {
+        it('data in query', function () {
+            var expr = jsonata('[{"a":[1,2]}, {"a":[3]}].a');
+            var result = expr.evaluate();
+            var expected = [1,2,3];
+            expect(result).to.deep.equal(expected);
+        });
+
+        it('data in input', function () {
+            var expr = jsonata('a');
+            var result = expr.evaluate([{"a":[1,2]}, {"a":[3]}]);
+            var expected = [1,2,3];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('[{"a":[{"b":[1]}, {"b":[2]}]}, {"a":[{"b":[3]}, {"b":[4]}]}].a[0].b', function () {
+        it('data in query', function () {
+            var expr = jsonata('[{"a":[{"b":[1]}, {"b":[2]}]}, {"a":[{"b":[3]}, {"b":[4]}]}].a[0].b');
+            var result = expr.evaluate();
+            var expected = [1,3];
+            expect(result).to.deep.equal(expected);
+        });
+
+        it('data in input', function () {
+            var expr = jsonata('a[0].b');
+            var result = expr.evaluate([{"a":[{"b":[1]}, {"b":[2]}]}, {"a":[{"b":[3]}, {"b":[4]}]}]);
+            var expected = [1,3];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('[{"a":[{"b":[1]}, {"b":[2]}]}, {"a":[{"b":[3]}, {"b":[4]}]}].a.b[0]', function () {
+        it('data in query', function () {
+            var expr = jsonata('[{"a":[{"b":[1]}, {"b":[2]}]}, {"a":[{"b":[3]}, {"b":[4]}]}].a.b[0]');
+            var result = expr.evaluate();
+            var expected = [1,2,3,4];
+            expect(result).to.deep.equal(expected);
+        });
+
+        it('data in input', function () {
+            var expr = jsonata('a.b[0]');
+            var result = expr.evaluate([{"a":[{"b":[1]}, {"b":[2]}]}, {"a":[{"b":[3]}, {"b":[4]}]}]);
+            var expected = [1,2,3,4];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+
 });
 
 describe('Evaluator - keep singleton arrays', function () {
@@ -8982,7 +9083,7 @@ describe('HOF - zip/map', function () {
               '  $data[].$zip(one, two) ~> $map($sum)' +
               ') ');
             var result = expr.evaluate(null);
-            var expected = [6];
+            var expected = 6;
             expect(result).to.deep.equal(expected);
         });
     });
@@ -8998,7 +9099,7 @@ describe('HOF - zip/map', function () {
               '  $data[].$zip(one, two) ~> $map($sum)' +
               ') ');
             var result = expr.evaluate(null);
-            var expected = [6];
+            var expected = 6;
             expect(result).to.deep.equal(expected);
         });
     });
@@ -9246,7 +9347,7 @@ describe('Regex', function () {
             it('should return result object', function () {
                 var expr = jsonata('$match("ababbabbcc",/a(b+)/, 1)');
                 var result = expr.evaluate();
-                var expected = [{"match": "ab", "index": 0, "groups": ["b"]}];
+                var expected = {"match": "ab", "index": 0, "groups": ["b"]};
                 expect(result).to.deep.equal(expected);
             });
         });
@@ -9255,7 +9356,7 @@ describe('Regex', function () {
             it('should return result object', function () {
                 var expr = jsonata('$match("ababbabbcc",/a(b+)/, 0)');
                 var result = expr.evaluate();
-                var expected = [];
+                var expected = undefined;
                 expect(result).to.deep.equal(expected);
             });
         });
@@ -9273,7 +9374,7 @@ describe('Regex', function () {
             it('should return result object', function () {
                 var expr = jsonata('$match("ababbabbcc",/a(xb+)/)');
                 var result = expr.evaluate();
-                var expected = [];
+                var expected = undefined;
                 expect(result).to.deep.equal(expected);
             });
         });
