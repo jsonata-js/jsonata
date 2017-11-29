@@ -1155,8 +1155,14 @@ var jsonata = (function() {
                                 result.keepSingletonArray = true;
                             }
                             // if first step is a path constructor, flag it for special handling
-                            if(result.steps[0].type === 'unary' && result.steps[0].value === '[') {
-                                result.steps[0].consarray = true;
+                            var firststep = result.steps[0];
+                            if(firststep.type === 'unary' && firststep.value === '[') {
+                                firststep.consarray = true;
+                            }
+                            // if the last step is an array constructor, flag it so it doesn't flatten
+                            var laststep = result.steps[result.steps.length - 1];
+                            if(laststep.type === 'unary' && laststep.value === '[') {
+                                laststep.consarray = true;
                             }
                             break;
                         case '[':
@@ -1446,8 +1452,8 @@ var jsonata = (function() {
 
         switch (expr.type) {
             case 'path':
-                result = yield * evaluatePath(expr.steps, input, environment);
-                result = normalizeSequence(result, expr.keepSingletonArray);
+                result = yield * evaluatePath(expr, input, environment);
+                // result = normalizeSequence(result, expr.keepSingletonArray);
                 break;
             case 'binary':
                 result = yield * evaluateBinary(expr, input, environment);
@@ -1516,7 +1522,7 @@ var jsonata = (function() {
 
         if (expr.hasOwnProperty('predicate')) {
             result = yield * applyPredicates(expr.predicate, result, environment);
-            result = normalizeSequence(result);
+            // result = normalizeSequence(result);
 
         }
         if (expr.hasOwnProperty('group')) {
@@ -1528,6 +1534,10 @@ var jsonata = (function() {
             exitCallback(expr, input, environment, result);
         }
 
+        if(result && result.sequence) {
+            result = result.value();
+        }
+
         return result;
     }
 
@@ -1536,16 +1546,54 @@ var jsonata = (function() {
      * @returns {Array} - empty sequence
      */
     function createSequence() {
-        var sequence = [];
-        Object.defineProperty(sequence, 'sequence', {
+        var sequence = toSequence([]);
+        if (arguments.length === 1) {
+            sequence.push(arguments[0]);
+        }
+        return sequence;
+    }
+
+    /**
+     * Converts an array to a result sequence (by adding special properties)
+     * @param {Array} arr - the array to convert
+     * @returns {*} - the sequence
+     */
+    function toSequence(arr) {
+        Object.defineProperty(arr, 'sequence', {
             enumerable: false,
             configurable: false,
             get: function () {
                 return true;
             }
         });
-        return sequence;
+        Object.defineProperty(arr, 'keepSingleton', {
+            enumerable: false,
+            configurable: false,
+            writable: true,
+            value: false
+        });
+        Object.defineProperty(arr, 'value', {
+            enumerable: false,
+            configurable: false,
+            get: function () {
+                return function() {
+                    switch (this.length) {
+                        case 0:
+                            return undefined;
+                        case 1:
+                            return this.keepSingleton ? this : this[0];
+                        default:
+                            return this;
+                    }
+                };
+            }
+        });
+        return arr;
     }
+
+    // Array.prototype.value = function() {
+    //     return this;
+    // };
 
     /**
      * Evaluate path expression against input data
@@ -1559,32 +1607,36 @@ var jsonata = (function() {
         // expr is an array of steps
         // if the first step is a variable reference ($...), including root reference ($$),
         //   then the path is absolute rather than relative
-        if (expr[0].type === 'variable') {
-            inputSequence = [input]; // dummy singleton sequence for first (absolute) step
+        if (expr.steps[0].type === 'variable') {
+            inputSequence = createSequence(input);  // dummy singleton sequence for first (absolute) step
         } else if (Array.isArray(input)) {
             inputSequence = input;
         } else {
             // if input is not an array, make it so
-            inputSequence = [input];
+            inputSequence = createSequence(input);
         }
 
         var resultSequence;
 
         // evaluate each step in turn
-        for(var ii = 0; ii < expr.length; ii++) {
-            var step = expr[ii];
+        for(var ii = 0; ii < expr.steps.length; ii++) {
+            var step = expr.steps[ii];
 
             // if the first step is an explicit array constructor, then just evaluate that (i.e. don't iterate over a context array)
             if(ii === 0 && step.consarray) {
                 resultSequence = yield * evaluate(step, inputSequence, environment);
             } else {
-                resultSequence = yield * evaluateStep(step, inputSequence, environment);
+                resultSequence = yield * evaluateStep(step, inputSequence, environment, ii === expr.steps.length - 1);
             }
 
             if(typeof resultSequence === 'undefined' || resultSequence.length === 0) {
                 break;
             }
             inputSequence = resultSequence;
+        }
+
+        if(expr.keepSingletonArray) {
+            resultSequence.keepSingleton = true;
         }
 
         return resultSequence;
@@ -1596,57 +1648,78 @@ var jsonata = (function() {
      * @param {Boolean} keepSingleton - keep singleton sequences as arrays
      * @returns {*} normalized sequence
      */
-    function normalizeSequence(sequence, keepSingleton) {
-        var result;
-        if(typeof sequence === 'undefined') {
-            result = undefined;
-        } else if(!Array.isArray(sequence)) {
-            result = sequence;
-        } else if (sequence.length === 1) {
-            if(keepSingleton || sequence.keepSingleton || !sequence.sequence) {
-                result = sequence;
-            } else {
-                result = sequence[0];
-            }
-        } else if (sequence.length > 1) {
-            result = sequence;
-        }
-        return result;
-    }
+    // function normalizeSequence(sequence, keepSingleton) {
+    //     var result;
+    //     if(typeof sequence === 'undefined') {
+    //         result = undefined;
+    //     } else if(!Array.isArray(sequence) || !sequence.sequence) {
+    //         result = sequence;
+    //     } else if (sequence.length === 1) {
+    //         if(keepSingleton || sequence.keepSingleton) {
+    //             result = sequence;
+    //         } else {
+    //             result = sequence[0];
+    //         }
+    //     } else if (sequence.length > 1) {
+    //         result = sequence;
+    //     }
+    //     return result;
+    // }
 
     /**
      * Evaluate a step within a path
      * @param {Object} expr - JSONata expression
      * @param {Object} input - Input data to evaluate against
      * @param {Object} environment - Environment
+     * @param {boolean} lastStep - flag the last step in a path
      * @returns {*} Evaluated input data
      */
-    function* evaluateStep(expr, input, environment) {
+    function* evaluateStep(expr, input, environment, lastStep) {
         var result = createSequence();
-
 
         for(var ii = 0; ii < input.length; ii++) {
             var res = yield * evaluate(expr, input[ii], environment);
             if(typeof res !== 'undefined') {
-                if (!Array.isArray(res)) {
-                    // it's not an array - just push into the result sequence
-                    result.push(res);
-                } else if (res.keepSingleton || (!res.sequence && res.length === 1)) {
-                    // it is an array, but we want to preserve the array structure
-                    //                    if(!(res.sequence && res.length === 0)) {  // not for empty sequences though
-                    result.push(res);
-                    //                    }
-                } else {
-                    // res is an array - if so, flatten it into the parent array
-                    res.forEach(function (innerRes) {
-                        //if (typeof innerRes !== 'undefined') {
-                        result.push(innerRes);
-                        //}
-                    });
-                }
+                // if (!Array.isArray(res) || res.cons || res.keepSingleton) {
+                // it's not an array - just push into the result sequence
+                result.push(res);
+                // } else if (res.keepSingleton) {
+                //     // it is an array, but we want to preserve the array structure
+                //     //                    if(!(res.sequence && res.length === 0)) {  // not for empty sequences though
+                //     result.push(res);
+                //     //                    }
+                // } else {
+                //     if(!res.sequence) {
+                //         console.log('ouch!');
+                //     }
+                // res is a sequence - flatten it into the parent sequence
+                // Array.prototype.push.apply(result, res);
+                // res.forEach(function (innerRes) {
+                //     //if (typeof innerRes !== 'undefined') {
+                //     result.push(innerRes);
+                //     //}
+                // });
+                // }
             }
         }
-        return result;
+
+        var resultSequence = createSequence();
+        if(lastStep && result.length === 1 && Array.isArray(result[0]) && !result[0].sequence) {
+            resultSequence = result[0];
+        } else {
+            // flatten the sequence
+            result.forEach(function(res) {
+                if (!Array.isArray(res) || res.cons || res.keepSingleton) {
+                    // it's not an array - just push into the result sequence
+                    resultSequence.push(res);
+                } else {
+                    // res is a sequence - flatten it into the parent sequence
+                    Array.prototype.push.apply(resultSequence, res);
+                }
+            });
+        }
+
+        return resultSequence;
     }
 
     /**
@@ -1670,7 +1743,7 @@ var jsonata = (function() {
             // since in XPath >= 2.0 an item is equivalent to a singleton sequence of that item
             // if input is not an array, make it so
             if (!Array.isArray(inputSequence)) {
-                inputSequence = [inputSequence];
+                inputSequence = createSequence(inputSequence);
             }
             results = createSequence();
             if (predicate.type === 'literal' && isNumeric(predicate.value)) {
@@ -1819,13 +1892,13 @@ var jsonata = (function() {
                         }
                     }
                 }
-                Object.defineProperty(result, 'keepSingleton', {
-                    enumerable: false,
-                    configurable: false,
-                    get: function () {
-                        return true;
-                    }
-                });
+                if(expr.consarray) {
+                    Object.defineProperty(result, 'cons', {
+                        enumerable: false,
+                        configurable: false,
+                        value: true
+                    });
+                }
                 break;
             case '{':
                 // object constructor - apply grouping
@@ -1857,7 +1930,7 @@ var jsonata = (function() {
         } else if (input !== null && typeof input === 'object') {
             result = input[expr.value];
         }
-        result = normalizeSequence(result);
+        //        result = normalizeSequence(result);
         return result;
     }
 
@@ -1877,7 +1950,6 @@ var jsonata = (function() {
      * @returns {*} Evaluated input data
      */
     function evaluateWildcard(expr, input) {
-        var result;
         var results = createSequence();
         if (input !== null && typeof input === 'object') {
             Object.keys(input).forEach(function (key) {
@@ -1891,8 +1963,8 @@ var jsonata = (function() {
             });
         }
 
-        result = normalizeSequence(results);
-        return result;
+        //        result = normalizeSequence(results);
+        return results;
     }
 
     /**
@@ -2158,7 +2230,7 @@ var jsonata = (function() {
         var groups = {};
         // group the input sequence by 'key' expression
         if (!Array.isArray(input)) {
-            input = [input];
+            input = createSequence(input);
         }
         for(var itemIndex = 0; itemIndex < input.length; itemIndex++) {
             var item = input[itemIndex];
@@ -2235,7 +2307,7 @@ var jsonata = (function() {
         for (var item = lhs, index = 0; item <= rhs; item++, index++) {
             result[index] = item;
         }
-        return result;
+        return toSequence(result);
     }
 
     /**
@@ -2657,7 +2729,6 @@ var jsonata = (function() {
         var evaluatedArgs = [];
         // eager evaluation - evaluate the arguments
         for (var jj = 0; jj < expr.arguments.length; jj++) {
-            // only evaluate 'eager' arguments at this stage; wrap the 'lazy' ones in a closure
             evaluatedArgs.push(yield* evaluate(expr.arguments[jj], input, environment));
         }
         // apply the procedure
@@ -3488,7 +3559,7 @@ var jsonata = (function() {
             };
         }
 
-        var result = createSequence();
+        var result = [];
 
         if(typeof limit === 'undefined' || limit > 0) {
             if (typeof separator === 'string') {
@@ -3508,7 +3579,7 @@ var jsonata = (function() {
                         result.push(str.substring(start));
                     }
                 } else {
-                    result = [str];
+                    result.push(str);
                 }
             }
         }
@@ -4266,7 +4337,7 @@ var jsonata = (function() {
      */
     function functionZip() {
         // this can take a variable number of arguments
-        var result = createSequence();
+        var result = [];
         var args = Array.prototype.slice.call(arguments);
         // length of the shortest array
         var length = Math.min.apply(Math, args.map(function(arg) {
@@ -4380,7 +4451,7 @@ var jsonata = (function() {
         }
         // if either argument is not an array, make it so
         if (!Array.isArray(arg1)) {
-            arg1 = [arg1];
+            arg1 = createSequence(arg1);
         }
         if (!Array.isArray(arg2)) {
             arg2 = [arg2];
