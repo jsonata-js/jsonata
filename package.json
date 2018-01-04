@@ -44,7 +44,7 @@
     "eslint-plugin-ideal": "^0.1.3",
     "istanbul": "^0.4.5",
     "jsdoc": "^3.4.0",
-    "mocha": "^3.4.2",
+    "mocha": "^4.1.0",
     "mocha-lcov-reporter": "^1.2.0",
     "request": "^2.81.0",
     "uglify-es": "^3.0.20"
