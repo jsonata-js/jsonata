@@ -1,0 +1,5 @@
+{
+    // To avoid different format settings from
+    // triggering cosmetic changes.
+    "editor.formatOnSave": false,
+}
