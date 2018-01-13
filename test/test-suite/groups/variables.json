@@ -1,0 +1,100 @@
+[
+    {
+        "expr": "$price.foo.bar",
+        "dataset": 7,
+        "result": 45,
+        "bindings": {
+            "price": {
+                "foo": {
+                    "bar": 45
+                }
+            }
+        }
+    },
+    {
+        "expr": "$price.foo.bar",
+        "dataset": 7,
+        "result": 45,
+        "bindings": {
+            "price": {
+                "foo": {
+                    "bar": 45
+                }
+            }
+        }
+    },
+    {
+        "expr": "$var[1]",
+        "dataset": 7,
+        "result": 2,
+        "bindings": {
+            "var": [
+                1,
+                2,
+                3
+            ]
+        }
+    },
+    {
+        "expr": "$.foo.bar",
+        "dataset": 0,
+        "result": 42,
+        "bindings": {
+            "price": {
+                "foo": {
+                    "bar": 45
+                }
+            }
+        }
+    },
+    {
+        "expr": "$a := 5",
+        "dataset": -1,
+        "result": 5,
+        "bindings": {}
+    },
+    {
+        "expr": "$a := $b := 5",
+        "dataset": -1,
+        "result": 5,
+        "bindings": {}
+    },
+    {
+        "expr": "($a := $b := 5; $a)",
+        "dataset": -1,
+        "result": 5,
+        "bindings": {}
+    },
+    {
+        "expr": "($a := $b := 5; $b)",
+        "dataset": -1,
+        "result": 5,
+        "bindings": {}
+    },
+    {
+        "expr": "( $a := 5; $a := $a + 2; $a )",
+        "dataset": -1,
+        "result": 7,
+        "bindings": {}
+    },
+    {
+        "expr": "[1,2,3].$v",
+        "dataset": -1,
+        "undefinedResult": true,
+        "bindings": {
+            "v": []
+        }
+    },
+    {
+        "expr": "( $foo := \"defined\"; ( $foo := nothing ); $foo )",
+        "dataset": -1,
+        "result": "defined",
+        "bindings": {}
+    },
+    {
+        "expr": "( $foo := \"defined\"; ( $foo := nothing; $foo ) )",
+        "dataset": -1,
+        "undefinedResult": true,
+        "bindings": {}
+    }
+]

@@ -1,0 +1,20 @@
+[
+    {
+        "expr": "($twice:=function($f){function($x){$f($f($x))}}; $add3:=function($y){$y+3}; $add6:=$twice($add3); $add6(7))",
+        "dataset": 20,
+        "result": 13,
+        "bindings": {}
+    },
+    {
+        "expr": "λ($f) { λ($x) { $x($x) }( λ($g) { $f( (λ($a) {$g($g)($a)}))})}(λ($f) { λ($n) { $n < 2 ? 1 : $n * $f($n - 1) } })(6)",
+        "dataset": 20,
+        "result": 720,
+        "bindings": {}
+    },
+    {
+        "expr": "λ($f) { λ($x) { $x($x) }( λ($g) { $f( (λ($a) {$g($g)($a)}))})}(λ($f) { λ($n) { $n <= 1 ? $n : $f($n-1) + $f($n-2) } })(6) ",
+        "dataset": 20,
+        "result": 8,
+        "bindings": {}
+    }
+]

@@ -1,0 +1,176 @@
+[
+    {
+        "expr": "$max(Account.Order.Product.(Price * Quantity))",
+        "dataset": 7,
+        "result": 137.8,
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.$max(Product.(Price * Quantity))",
+        "dataset": 7,
+        "result": [
+            68.9,
+            137.8
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.(OrderID & \": \" & $count(Product.(Price*Quantity)))",
+        "dataset": 7,
+        "result": [
+            "order103: 2",
+            "order104: 2"
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "$max([])",
+        "dataset": -1,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$max([1,2,3])",
+        "dataset": -1,
+        "result": 3,
+        "bindings": {}
+    },
+    {
+        "expr": "$max([\"1\",\"2\",\"3\"])",
+        "dataset": -1,
+        "code": "T0412",
+        "bindings": {}
+    },
+    {
+        "expr": "$max([\"1\",\"2\",3])",
+        "dataset": -1,
+        "code": "T0412",
+        "bindings": {}
+    },
+    {
+        "expr": "$max(1)",
+        "dataset": -1,
+        "result": 1,
+        "bindings": {}
+    },
+    {
+        "expr": "$max([-1,-5])",
+        "dataset": -1,
+        "result": -1,
+        "bindings": {}
+    },
+    {
+        "expr": "$max([],[])",
+        "dataset": -1,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$max([1,2,3],[])",
+        "dataset": -1,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$max([],[],[])",
+        "dataset": -1,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$max([1,2],[],[])",
+        "dataset": -1,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$max(undefined)",
+        "dataset": -1,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$min(Account.Order.Product.(Price * Quantity))",
+        "dataset": 7,
+        "result": 21.67,
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.$min(Product.(Price * Quantity))",
+        "dataset": 7,
+        "result": [
+            21.67,
+            107.99
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.(OrderID & \": \" & $min(Product.(Price*Quantity)))",
+        "dataset": 7,
+        "result": [
+            "order103: 21.67",
+            "order104: 107.99"
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "$min([])",
+        "dataset": -1,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$min([1,2,3])",
+        "dataset": -1,
+        "result": 1,
+        "bindings": {}
+    },
+    {
+        "expr": "$min([\"1\",\"2\",\"3\"])",
+        "dataset": -1,
+        "code": "T0412",
+        "bindings": {}
+    },
+    {
+        "expr": "$min([\"1\",\"2\",3])",
+        "dataset": -1,
+        "code": "T0412",
+        "bindings": {}
+    },
+    {
+        "expr": "$min(1)",
+        "dataset": -1,
+        "result": 1,
+        "bindings": {}
+    },
+    {
+        "expr": "$min([],[])",
+        "dataset": -1,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$min([1,2,3],[])",
+        "dataset": -1,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$min([],[],[])",
+        "dataset": -1,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$min([1,2],[],[])",
+        "dataset": -1,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$min(undefined)",
+        "dataset": -1,
+        "undefinedResult": true,
+        "bindings": {}
+    }
+]

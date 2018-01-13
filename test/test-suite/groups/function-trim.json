@@ -1,0 +1,20 @@
+[
+    {
+        "expr": "$trim(\"Hello World\")",
+        "dataset": -1,
+        "result": "Hello World",
+        "bindings": {}
+    },
+    {
+        "expr": "$trim(\"   Hello  \n  \t World  \t \")",
+        "dataset": -1,
+        "result": "Hello World",
+        "bindings": {}
+    },
+    {
+        "expr": "$trim()",
+        "dataset": -1,
+        "undefinedResult": true,
+        "bindings": {}
+    }
+]

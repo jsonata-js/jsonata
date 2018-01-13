@@ -1,0 +1,1069 @@
+[
+    {
+        "foo": {
+            "bar": 42,
+            "blah": [
+                {
+                    "baz": {
+                        "fud": "hello"
+                    }
+                },
+                {
+                    "baz": {
+                        "fud": "world"
+                    }
+                },
+                {
+                    "bazz": "gotcha"
+                }
+            ],
+            "blah.baz": "here"
+        },
+        "bar": 98
+    },
+    {},
+    {
+        "FirstName": "Fred",
+        "Surname": "Smith",
+        "Age": 28,
+        "Address": {
+            "Street": "Hursley Park",
+            "City": "Winchester",
+            "Postcode": "SO21 2JN"
+        },
+        "Phone": [
+            {
+                "type": "home",
+                "number": "0203 544 1234"
+            },
+            {
+                "type": "office",
+                "number": "01962 001234"
+            },
+            {
+                "type": "office",
+                "number": "01962 001235"
+            },
+            {
+                "type": "mobile",
+                "number": "077 7700 1234"
+            }
+        ],
+        "Email": [
+            {
+                "type": "work",
+                "address": [
+                    "fred.smith@my-work.com",
+                    "fsmith@my-work.com"
+                ]
+            },
+            {
+                "type": "home",
+                "address": [
+                    "freddy@my-social.com",
+                    "frederic.smith@very-serious.com"
+                ]
+            }
+        ],
+        "Other": {
+            "Over 18 ?": true,
+            "Misc": null,
+            "Alternative.Address": {
+                "Street": "Brick Lane",
+                "City": "London",
+                "Postcode": "E1 6RF"
+            }
+        }
+    },
+    [
+        [
+            {
+                "baz": {
+                    "fud": "hello"
+                }
+            },
+            {
+                "baz": {
+                    "fud": "world"
+                }
+            },
+            {
+                "bazz": "gotcha"
+            }
+        ]
+    ],
+    [
+        42,
+        [
+            {
+                "baz": {
+                    "fud": "hello"
+                }
+            },
+            {
+                "baz": {
+                    "fud": "world"
+                }
+            },
+            {
+                "bazz": "gotcha"
+            }
+        ],
+        "here",
+        {
+            "fud": "hello"
+        },
+        "hello",
+        {
+            "fud": "world"
+        },
+        "world",
+        "gotcha"
+    ],
+    [
+        {
+            "nest0": [
+                {
+                    "nest1": [
+                        1,
+                        2
+                    ]
+                },
+                {
+                    "nest1": [
+                        3,
+                        4
+                    ]
+                }
+            ]
+        },
+        {
+            "nest0": [
+                {
+                    "nest1": [
+                        5
+                    ]
+                },
+                {
+                    "nest1": [
+                        6
+                    ]
+                }
+            ]
+        }
+    ],
+    [
+        [
+            1,
+            2
+        ],
+        [
+            3,
+            4
+        ]
+    ],
+    {
+        "Account": {
+            "Account Name": "Firefly",
+            "Order": [
+                {
+                    "OrderID": "order103",
+                    "Product": [
+                        {
+                            "Product Name": "Bowler Hat",
+                            "ProductID": 858383,
+                            "SKU": "0406654608",
+                            "Description": {
+                                "Colour": "Purple",
+                                "Width": 300,
+                                "Height": 200,
+                                "Depth": 210,
+                                "Weight": 0.75
+                            },
+                            "Price": 34.45,
+                            "Quantity": 2
+                        },
+                        {
+                            "Product Name": "Trilby hat",
+                            "ProductID": 858236,
+                            "SKU": "0406634348",
+                            "Description": {
+                                "Colour": "Orange",
+                                "Width": 300,
+                                "Height": 200,
+                                "Depth": 210,
+                                "Weight": 0.6
+                            },
+                            "Price": 21.67,
+                            "Quantity": 1
+                        }
+                    ]
+                },
+                {
+                    "OrderID": "order104",
+                    "Product": [
+                        {
+                            "Product Name": "Bowler Hat",
+                            "ProductID": 858383,
+                            "SKU": "040657863",
+                            "Description": {
+                                "Colour": "Purple",
+                                "Width": 300,
+                                "Height": 200,
+                                "Depth": 210,
+                                "Weight": 0.75
+                            },
+                            "Price": 34.45,
+                            "Quantity": 4
+                        },
+                        {
+                            "ProductID": 345664,
+                            "SKU": "0406654603",
+                            "Product Name": "Cloak",
+                            "Description": {
+                                "Colour": "Black",
+                                "Width": 30,
+                                "Height": 20,
+                                "Depth": 210,
+                                "Weight": 2
+                            },
+                            "Price": 107.99,
+                            "Quantity": 1
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "library": {
+            "books": [
+                {
+                    "title": "Structure and Interpretation of Computer Programs",
+                    "authors": [
+                        "Abelson",
+                        "Sussman"
+                    ],
+                    "isbn": "9780262510875",
+                    "price": 38.9,
+                    "copies": 2
+                },
+                {
+                    "title": "The C Programming Language",
+                    "authors": [
+                        "Kernighan",
+                        "Richie"
+                    ],
+                    "isbn": "9780131103627",
+                    "price": 33.59,
+                    "copies": 3
+                },
+                {
+                    "title": "The AWK Programming Language",
+                    "authors": [
+                        "Aho",
+                        "Kernighan",
+                        "Weinberger"
+                    ],
+                    "isbn": "9780201079814",
+                    "copies": 1
+                },
+                {
+                    "title": "Compilers: Principles, Techniques, and Tools",
+                    "authors": [
+                        "Aho",
+                        "Lam",
+                        "Sethi",
+                        "Ullman"
+                    ],
+                    "isbn": "9780201100884",
+                    "price": 23.38,
+                    "copies": 1
+                }
+            ],
+            "loans": [
+                {
+                    "customer": "10001",
+                    "isbn": "9780262510875",
+                    "return": "2016-12-05"
+                },
+                {
+                    "customer": "10003",
+                    "isbn": "9780201100884",
+                    "return": "2016-10-22"
+                }
+            ],
+            "customers": [
+                {
+                    "id": "10001",
+                    "name": "Joe Doe",
+                    "address": {
+                        "street": "2 Long Road",
+                        "city": "Winchester",
+                        "postcode": "SO22 5PU"
+                    }
+                },
+                {
+                    "id": "10002",
+                    "name": "Fred Bloggs",
+                    "address": {
+                        "street": "56 Letsby Avenue",
+                        "city": "Winchester",
+                        "postcode": "SO22 4WD"
+                    }
+                },
+                {
+                    "id": "10003",
+                    "name": "Jason Arthur",
+                    "address": {
+                        "street": "1 Preddy Gate",
+                        "city": "Southampton",
+                        "postcode": "SO14 0MG"
+                    }
+                }
+            ]
+        }
+    },
+    [
+        {
+            "content": {
+                "integration": {
+                    "name": "fakeIntegrationName"
+                }
+            }
+        }
+    ],
+    {
+        "clues": [
+            {
+                "x": 6,
+                "y": 3,
+                "number": 7
+            }
+        ]
+    },
+    [
+        {
+            "x": 6,
+            "y": 2,
+            "number": 7
+        }
+    ],
+    [
+        {
+            "nest0": [
+                1,
+                2
+            ]
+        },
+        {
+            "nest0": [
+                3,
+                4
+            ]
+        }
+    ],
+    {
+        "nest0": [
+            {
+                "nest1": [
+                    {
+                        "nest2": [
+                            {
+                                "nest3": [
+                                    1
+                                ]
+                            },
+                            {
+                                "nest3": [
+                                    2
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "nest2": [
+                            {
+                                "nest3": [
+                                    3
+                                ]
+                            },
+                            {
+                                "nest3": [
+                                    4
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "nest1": [
+                    {
+                        "nest2": [
+                            {
+                                "nest3": [
+                                    5
+                                ]
+                            },
+                            {
+                                "nest3": [
+                                    6
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "nest2": [
+                            {
+                                "nest3": [
+                                    7
+                                ]
+                            },
+                            {
+                                "nest3": [
+                                    8
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    23,
+    "hello",
+    {
+        "temp": 22.7,
+        "wind": 7,
+        "gust": null,
+        "timestamp": 1508971317377
+    },
+    [
+        1,
+        2,
+        3
+    ],
+    [
+        1,
+        3,
+        2
+    ],
+    {
+        "foo": {
+            "bar": 42,
+            "blah": [
+                {
+                    "baz": {
+                        "fud": "hello"
+                    }
+                },
+                {
+                    "buz": {
+                        "fud": "world"
+                    }
+                },
+                {
+                    "bazz": "gotcha"
+                }
+            ],
+            "blah.baz": "here"
+        },
+        "bar": 98
+    },
+    null,
+    [],
+    [
+        4,
+        5,
+        6
+    ],
+    {
+        "and": 1,
+        "or": 2
+    },
+    [
+        {
+            "content": {
+                "origin": {
+                    "name": "fakeIntegrationName"
+                }
+            }
+        }
+    ],
+    {
+        "Account": {
+            "Account Name": "Firefly",
+            "Order": [
+                {
+                    "OrderID": "order103",
+                    "Product": [
+                        {
+                            "Product Name": "Bowler Hat",
+                            "ProductID": 858383,
+                            "SKU": "0406654608",
+                            "Description": {
+                                "Colour": "Purple",
+                                "Width": 300,
+                                "Height": 200,
+                                "Depth": 210,
+                                "Weight": 0.75
+                            },
+                            "Quantity": 2
+                        },
+                        {
+                            "Product Name": "Trilby hat",
+                            "ProductID": 858236,
+                            "SKU": "0406634348",
+                            "Description": {
+                                "Colour": "Orange",
+                                "Width": 300,
+                                "Height": 200,
+                                "Depth": 210,
+                                "Weight": 0.6
+                            },
+                            "Price": 21.67,
+                            "Quantity": 1
+                        }
+                    ]
+                },
+                {
+                    "OrderID": "order104",
+                    "Product": [
+                        {
+                            "Product Name": "Bowler Hat",
+                            "ProductID": 858383,
+                            "SKU": "040657863",
+                            "Description": {
+                                "Colour": "Purple",
+                                "Width": 300,
+                                "Height": 200,
+                                "Depth": 210,
+                                "Weight": 0.75
+                            },
+                            "Price": 34.45,
+                            "Quantity": 4
+                        },
+                        {
+                            "ProductID": 345664,
+                            "SKU": "0406654603",
+                            "Product Name": "Cloak",
+                            "Description": {
+                                "Colour": "Black",
+                                "Width": 30,
+                                "Height": 20,
+                                "Depth": 210,
+                                "Weight": 2
+                            },
+                            "Price": 107.99,
+                            "Quantity": 1
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "Account": {
+            "Account Name": "Firefly",
+            "Order": [
+                {
+                    "OrderID": "order103",
+                    "Product": [
+                        {
+                            "Product Name": "Bowler Hat",
+                            "ProductID": 858383,
+                            "SKU": "0406654608",
+                            "Description": {
+                                "Colour": "Purple",
+                                "Width": 300,
+                                "Height": 200,
+                                "Depth": 210,
+                                "Weight": 0.75
+                            },
+                            "Price": 34.45,
+                            "Quantity": 2
+                        },
+                        {
+                            "Product Name": "Trilby hat",
+                            "ProductID": 858236,
+                            "SKU": "0406634348",
+                            "Description": {
+                                "Colour": "Orange",
+                                "Width": 300,
+                                "Height": 200,
+                                "Depth": 210,
+                                "Weight": 0.6
+                            },
+                            "Quantity": 1
+                        }
+                    ]
+                },
+                {
+                    "OrderID": "order104",
+                    "Product": [
+                        {
+                            "Product Name": "Bowler Hat",
+                            "ProductID": 858383,
+                            "SKU": "040657863",
+                            "Description": {
+                                "Colour": "Purple",
+                                "Width": 300,
+                                "Height": 200,
+                                "Depth": 210,
+                                "Weight": 0.75
+                            },
+                            "Price": 34.45,
+                            "Quantity": 4
+                        },
+                        {
+                            "ProductID": 345664,
+                            "SKU": "0406654603",
+                            "Product Name": "Cloak",
+                            "Description": {
+                                "Colour": "Black",
+                                "Width": 30,
+                                "Height": 20,
+                                "Depth": 210,
+                                "Weight": 2
+                            },
+                            "Price": 107.99,
+                            "Quantity": 1
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "Account": {
+            "Account Name": "Firefly",
+            "Order": [
+                {
+                    "OrderID": "order103",
+                    "Product": [
+                        {
+                            "Product Name": "Bowler Hat",
+                            "ProductID": 858383,
+                            "SKU": "0406654608",
+                            "Description": {
+                                "Colour": "Purple",
+                                "Width": 300,
+                                "Height": 200,
+                                "Depth": 210,
+                                "Weight": 0.75
+                            },
+                            "Quantity": 2
+                        },
+                        {
+                            "Product Name": "Trilby hat",
+                            "ProductID": 858236,
+                            "SKU": "0406634348",
+                            "Description": {
+                                "Colour": "Orange",
+                                "Width": 300,
+                                "Height": 200,
+                                "Depth": 210,
+                                "Weight": 0.6
+                            },
+                            "Quantity": 1
+                        }
+                    ]
+                },
+                {
+                    "OrderID": "order104",
+                    "Product": [
+                        {
+                            "Product Name": "Bowler Hat",
+                            "ProductID": 858383,
+                            "SKU": "040657863",
+                            "Description": {
+                                "Colour": "Purple",
+                                "Width": 300,
+                                "Height": 200,
+                                "Depth": 210,
+                                "Weight": 0.75
+                            },
+                            "Price": 34.45,
+                            "Quantity": 4
+                        },
+                        {
+                            "ProductID": 345664,
+                            "SKU": "0406654603",
+                            "Product Name": "Cloak",
+                            "Description": {
+                                "Colour": "Black",
+                                "Width": 30,
+                                "Height": 20,
+                                "Depth": 210,
+                                "Weight": 2
+                            },
+                            "Price": 107.99,
+                            "Quantity": 1
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "Account": {
+            "Account Name": "Firefly",
+            "Order": [
+                {
+                    "OrderID": "order103",
+                    "Product": [
+                        {
+                            "Product Name": "Bowler Hat",
+                            "ProductID": 858383,
+                            "SKU": "0406654608",
+                            "Description": {
+                                "Colour": "Purple",
+                                "Width": 300,
+                                "Height": 200,
+                                "Depth": 210,
+                                "Weight": 0.75
+                            },
+                            "Price": "foo",
+                            "Quantity": 2
+                        },
+                        {
+                            "Product Name": "Trilby hat",
+                            "ProductID": 858236,
+                            "SKU": "0406634348",
+                            "Description": {
+                                "Colour": "Orange",
+                                "Width": 300,
+                                "Height": 200,
+                                "Depth": 210,
+                                "Weight": 0.6
+                            },
+                            "Price": 21.67,
+                            "Quantity": 1
+                        }
+                    ]
+                },
+                {
+                    "OrderID": "order104",
+                    "Product": [
+                        {
+                            "Product Name": "Bowler Hat",
+                            "ProductID": 858383,
+                            "SKU": "040657863",
+                            "Description": {
+                                "Colour": "Purple",
+                                "Width": 300,
+                                "Height": 200,
+                                "Depth": 210,
+                                "Weight": 0.75
+                            },
+                            "Price": 34.45,
+                            "Quantity": 4
+                        },
+                        {
+                            "ProductID": 345664,
+                            "SKU": "0406654603",
+                            "Product Name": "Cloak",
+                            "Description": {
+                                "Colour": "Black",
+                                "Width": 30,
+                                "Height": 20,
+                                "Depth": 210,
+                                "Weight": 2
+                            },
+                            "Price": 107.99,
+                            "Quantity": 1
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "Account": {
+            "Account Name": "Firefly",
+            "Order": [
+                {
+                    "OrderID": "order103",
+                    "Product": [
+                        {
+                            "Product Name": "Bowler Hat",
+                            "ProductID": 858383,
+                            "SKU": "0406654608",
+                            "Description": {
+                                "Colour": "Purple",
+                                "Width": 300,
+                                "Height": 200,
+                                "Depth": 210,
+                                "Weight": 0.75
+                            },
+                            "Price": true,
+                            "Quantity": 2
+                        },
+                        {
+                            "Product Name": "Trilby hat",
+                            "ProductID": 858236,
+                            "SKU": "0406634348",
+                            "Description": {
+                                "Colour": "Orange",
+                                "Width": 300,
+                                "Height": 200,
+                                "Depth": 210,
+                                "Weight": 0.6
+                            },
+                            "Price": 21.67,
+                            "Quantity": 1
+                        }
+                    ]
+                },
+                {
+                    "OrderID": "order104",
+                    "Product": [
+                        {
+                            "Product Name": "Bowler Hat",
+                            "ProductID": 858383,
+                            "SKU": "040657863",
+                            "Description": {
+                                "Colour": "Purple",
+                                "Width": 300,
+                                "Height": 200,
+                                "Depth": 210,
+                                "Weight": 0.75
+                            },
+                            "Price": 34.45,
+                            "Quantity": 4
+                        },
+                        {
+                            "ProductID": 345664,
+                            "SKU": "0406654603",
+                            "Product Name": "Cloak",
+                            "Description": {
+                                "Colour": "Black",
+                                "Width": 30,
+                                "Height": 20,
+                                "Depth": 210,
+                                "Weight": 2
+                            },
+                            "Price": 107.99,
+                            "Quantity": 1
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "Account": {
+            "Account Name": "Firefly",
+            "Order": [
+                {
+                    "OrderID": "order103",
+                    "Product": [
+                        {
+                            "Product Name": "Bowler Hat",
+                            "ProductID": 858383,
+                            "SKU": "0406654608",
+                            "Description": {
+                                "Colour": "Purple",
+                                "Width": 300,
+                                "Height": 200,
+                                "Depth": 210,
+                                "Weight": 0.75
+                            },
+                            "Price": 34.45,
+                            "Quantity": 2
+                        },
+                        {
+                            "Product Name": "Trilby hat",
+                            "ProductID": 858236,
+                            "SKU": "0406634348",
+                            "Description": {
+                                "Colour": "Orange",
+                                "Width": 300,
+                                "Height": 200,
+                                "Depth": 210,
+                                "Weight": 0.6
+                            },
+                            "Price": null,
+                            "Quantity": 1
+                        }
+                    ]
+                },
+                {
+                    "OrderID": "order104",
+                    "Product": [
+                        {
+                            "Product Name": "Bowler Hat",
+                            "ProductID": 858383,
+                            "SKU": "040657863",
+                            "Description": {
+                                "Colour": "Purple",
+                                "Width": 300,
+                                "Height": 200,
+                                "Depth": 210,
+                                "Weight": 0.75
+                            },
+                            "Price": 34.45,
+                            "Quantity": 4
+                        },
+                        {
+                            "ProductID": 345664,
+                            "SKU": "0406654603",
+                            "Product Name": "Cloak",
+                            "Description": {
+                                "Colour": "Black",
+                                "Width": 30,
+                                "Height": 20,
+                                "Depth": 210,
+                                "Weight": 2
+                            },
+                            "Price": 107.99,
+                            "Quantity": 1
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "Bus",
+    "Police Car",
+    "Tuk tuk",
+    "test",
+    "5",
+    {
+        "state": {
+            "tempReadings": [
+                27.2,
+                28.9,
+                28,
+                28.2,
+                28.4
+            ],
+            "readingsCount": 5,
+            "sumTemperatures": 140.7,
+            "avgTemperature": 28.14,
+            "maxTemperature": 28.9,
+            "minTemperature": 27.2
+        },
+        "event": {
+            "t": 28.4
+        }
+    },
+    {
+        "output": {
+            "is": {
+                "same": {
+                    "as": "input"
+                }
+            }
+        }
+    },
+    {
+        "foo": {
+            "bar": 42
+        }
+    },
+    {
+        "foo": {
+            "bar": 42
+        },
+        "baz": {
+            "gar": 50
+        }
+    },
+    {
+        "foo": {
+            "lala": 42
+        },
+        "Foo": {
+            "mama": 45
+        }
+    },
+    {
+        "foo": {
+            "food": 2
+        },
+        "food": {
+            "wa": "hume"
+        }
+    },
+    {
+        "maz": {
+            "rar": 42
+        }
+    },
+    {
+        "moo": 4,
+        "jee": {
+            "par": {
+                "waa": {
+                    "bar": 87
+                }
+            }
+        }
+    },
+    {
+        "stuff": 4
+    },
+    "foo",
+    {
+        "bar": "foo"
+    },
+    6754322,
+    0,
+    -24,
+    {
+        "bar": 6.54
+    },
+    true,
+    {
+        "bar": false
+    },
+    {
+        "bar": null
+    },
+    {
+        "bar": "\"Hello\""
+    },
+    "\"Hello\"",
+    {
+        "bar": "'Hello'"
+    },
+    "'Hello'",
+    {
+        "Salutation": "Mr",
+        "Name": "Alexander",
+        "MiddleName": "John",
+        "Surname": "Smith",
+        "Cars": 3,
+        "Employment": {
+            "Name": "IBM UK",
+            "ContractType": "permanent",
+            "Role": "Senior Physician",
+            "Years": 12,
+            "Executive.Compensation": 1400000
+        },
+        "Qualifications": [
+            "GP",
+            "Consultant Opthalmologist"
+        ],
+        "Salary": null,
+        "NI.Number": "NO10FURBZNESS",
+        "敷": "Steve",
+        "Español": "/ˈspænɪʃ/"
+    },
+    {
+        "doc": 23,
+        "detail": {
+            "contents": "stuff",
+            "meta": 5
+        }
+    },
+    {
+        "doc": 89,
+        "detail": {
+            "contents": "some more stuff",
+            "meta": "boo"
+        }
+    }
+]

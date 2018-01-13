@@ -1,0 +1,164 @@
+[
+    {
+        "expr": "3>-3",
+        "dataset": -1,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "3>3",
+        "dataset": -1,
+        "result": false,
+        "bindings": {}
+    },
+    {
+        "expr": "3=3",
+        "dataset": -1,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "\"3\"=\"3\"",
+        "dataset": -1,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "\"3\"=3",
+        "dataset": -1,
+        "result": false,
+        "bindings": {}
+    },
+    {
+        "expr": "\"hello\" = \"hello\"",
+        "dataset": -1,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "\"hello\" != \"world\"",
+        "dataset": -1,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "\"hello\" < \"world\"",
+        "dataset": -1,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "\"32\" < 42",
+        "dataset": -1,
+        "code": "T2009",
+        "bindings": {}
+    },
+    {
+        "expr": "null <= \"world\"",
+        "dataset": -1,
+        "code": "T2010",
+        "bindings": {}
+    },
+    {
+        "expr": "3 >= true",
+        "dataset": -1,
+        "code": "T2010",
+        "bindings": {}
+    },
+    {
+        "expr": "foo.bar > bar",
+        "dataset": 0,
+        "result": false,
+        "bindings": {}
+    },
+    {
+        "expr": "foo.bar >= bar",
+        "dataset": 0,
+        "result": false,
+        "bindings": {}
+    },
+    {
+        "expr": "foo.bar<bar",
+        "dataset": 0,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "foo.bar<=bar",
+        "dataset": 0,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "bar>foo.bar",
+        "dataset": 0,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "bar < foo.bar",
+        "dataset": 0,
+        "result": false,
+        "bindings": {}
+    },
+    {
+        "expr": "foo.bar = bar",
+        "dataset": 0,
+        "result": false,
+        "bindings": {}
+    },
+    {
+        "expr": "foo.bar!= bar",
+        "dataset": 0,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "bar = foo.bar + 56",
+        "dataset": 0,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "bar !=foo.bar + 56",
+        "dataset": 0,
+        "result": false,
+        "bindings": {}
+    },
+    {
+        "expr": "foo.blah.baz[fud = \"hello\"]",
+        "dataset": 0,
+        "result": {
+            "fud": "hello"
+        },
+        "bindings": {}
+    },
+    {
+        "expr": "foo.blah.baz[fud != \"world\"]",
+        "dataset": 0,
+        "result": {
+            "fud": "hello"
+        },
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.Product[Price > 30].Price",
+        "dataset": 7,
+        "result": [
+            34.45,
+            34.45,
+            107.99
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.Product.Price[$<=35]",
+        "dataset": 7,
+        "result": [
+            34.45,
+            21.67,
+            34.45
+        ],
+        "bindings": {}
+    }
+]

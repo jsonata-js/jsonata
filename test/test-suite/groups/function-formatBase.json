@@ -1,0 +1,50 @@
+[
+    {
+        "expr": "$formatBase(100)",
+        "dataset": -1,
+        "result": "100",
+        "bindings": {}
+    },
+    {
+        "expr": "$formatBase(nothing)",
+        "dataset": -1,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$formatBase(100, 2)",
+        "dataset": -1,
+        "result": "1100100",
+        "bindings": {}
+    },
+    {
+        "expr": "$formatBase(-100, 2)",
+        "dataset": -1,
+        "result": "-1100100",
+        "bindings": {}
+    },
+    {
+        "expr": "$formatBase(100, 36)",
+        "dataset": -1,
+        "result": "2s",
+        "bindings": {}
+    },
+    {
+        "expr": "$formatBase(99.5, 2.5)",
+        "dataset": -1,
+        "result": "1100100",
+        "bindings": {}
+    },
+    {
+        "expr": "$formatBase(100, 1)",
+        "dataset": -1,
+        "code": "D3100",
+        "bindings": {}
+    },
+    {
+        "expr": "$formatBase(100, 37)",
+        "dataset": -1,
+        "code": "D3100",
+        "bindings": {}
+    }
+]

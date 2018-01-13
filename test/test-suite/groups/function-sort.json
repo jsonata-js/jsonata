@@ -1,0 +1,120 @@
+[
+    {
+        "expr": "$sort(nothing)",
+        "dataset": 7,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$sort(1)",
+        "dataset": 7,
+        "result": [
+            1
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "$sort([1,3,2])",
+        "dataset": 7,
+        "result": [
+            1,
+            2,
+            3
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "$sort([1,3,22,11])",
+        "dataset": 7,
+        "result": [
+            1,
+            3,
+            11,
+            22
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "[[$], [$sort($)], [$]]",
+        "dataset": 18,
+        "result": [
+            [
+                1,
+                3,
+                2
+            ],
+            [
+                1,
+                2,
+                3
+            ],
+            [
+                1,
+                3,
+                2
+            ]
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "$sort(Account.Order.Product.Price)",
+        "dataset": 7,
+        "result": [
+            21.67,
+            34.45,
+            34.45,
+            107.99
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "$sort(Account.Order.Product.\"Product Name\")",
+        "dataset": 7,
+        "result": [
+            "Bowler Hat",
+            "Bowler Hat",
+            "Cloak",
+            "Trilby hat"
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "$sort(Account.Order.Product)",
+        "dataset": 7,
+        "code": "D3070",
+        "bindings": {}
+    },
+    {
+        "expr": "$sort(Account.Order.Product, function($a, $b) { $a.(Price * Quantity) > $b.(Price * Quantity) }).(Price & \" x \" & Quantity)",
+        "dataset": 7,
+        "result": [
+            "21.67 x 1",
+            "34.45 x 2",
+            "107.99 x 1",
+            "34.45 x 4"
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "$sort(Account.Order.Product, function($a, $b) { $a.Price > $b.Price }).SKU",
+        "dataset": 7,
+        "result": [
+            "0406634348",
+            "0406654608",
+            "040657863",
+            "0406654603"
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "\n                (Account.Order.Product\n                  ~> $sort(λ($a,$b){$a.Quantity < $b.Quantity})\n                  ~> $sort(λ($a,$b){$a.Price > $b.Price})\n                ).SKU\n            ",
+        "dataset": 7,
+        "result": [
+            "0406634348",
+            "040657863",
+            "0406654608",
+            "0406654603"
+        ],
+        "bindings": {}
+    }
+]

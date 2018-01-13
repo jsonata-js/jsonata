@@ -1,0 +1,143 @@
+[
+    {
+        "expr": "$string(5)",
+        "dataset": 7,
+        "result": "5",
+        "bindings": {}
+    },
+    {
+        "expr": "$string(22/7)",
+        "dataset": 7,
+        "result": "3.142857142857",
+        "bindings": {}
+    },
+    {
+        "expr": "$string(1e100)",
+        "dataset": 7,
+        "result": "1e+100",
+        "bindings": {}
+    },
+    {
+        "expr": "$string(1e-100)",
+        "dataset": -1,
+        "result": "1e-100",
+        "bindings": {}
+    },
+    {
+        "expr": "$string(1e-6)",
+        "dataset": -1,
+        "result": "0.000001",
+        "bindings": {}
+    },
+    {
+        "expr": "$string(1e-7)",
+        "dataset": -1,
+        "result": "1e-7",
+        "bindings": {}
+    },
+    {
+        "expr": "$string(1e20)",
+        "dataset": -1,
+        "result": "100000000000000000000",
+        "bindings": {}
+    },
+    {
+        "expr": "$string(1e21)",
+        "dataset": -1,
+        "result": "1e+21",
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.$string($sum(Product.(Price* Quantity)))",
+        "dataset": 7,
+        "result": [
+            "90.57",
+            "245.79"
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "$string(true)",
+        "dataset": 7,
+        "result": "true",
+        "bindings": {}
+    },
+    {
+        "expr": "$string(false)",
+        "dataset": 7,
+        "result": "false",
+        "bindings": {}
+    },
+    {
+        "expr": "$string(null)",
+        "dataset": 7,
+        "result": "null",
+        "bindings": {}
+    },
+    {
+        "expr": "$string(blah)",
+        "dataset": 7,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$string($string)",
+        "dataset": 7,
+        "result": "",
+        "bindings": {}
+    },
+    {
+        "expr": "$string(function(){true})",
+        "dataset": 7,
+        "result": "",
+        "bindings": {}
+    },
+    {
+        "expr": "$string(function(){1})",
+        "dataset": 7,
+        "result": "",
+        "bindings": {}
+    },
+    {
+        "expr": "$string({\"string\": \"hello\"})",
+        "dataset": -1,
+        "result": "{\"string\":\"hello\"}",
+        "bindings": {}
+    },
+    {
+        "expr": "$string([\"string\", 5])",
+        "dataset": -1,
+        "result": "[\"string\",5]",
+        "bindings": {}
+    },
+    {
+        "expr": "$string({  \"string\": \"hello\",  \"number\": 78.8 / 2,  \"null\":null,  \"boolean\": false,  \"function\": $sum,  \"lambda\": function(){true},  \"object\": {    \"str\": \"another\",    \"lambda2\": function($n){$n}  },  \"array\": []})",
+        "dataset": -1,
+        "result": "{\"string\":\"hello\",\"number\":39.4,\"null\":null,\"boolean\":false,\"function\":\"\",\"lambda\":\"\",\"object\":{\"str\":\"another\",\"lambda2\":\"\"},\"array\":[]}",
+        "bindings": {}
+    },
+    {
+        "expr": "$string(1/0)",
+        "dataset": -1,
+        "code": "D3001",
+        "bindings": {}
+    },
+    {
+        "expr": "$string({\"inf\": 1/0})",
+        "dataset": -1,
+        "code": "D1001",
+        "bindings": {}
+    },
+    {
+        "expr": "$string(2,3)",
+        "dataset": -1,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$string()",
+        "dataset": -1,
+        "undefinedResult": true,
+        "bindings": {}
+    }
+]

@@ -1,0 +1,110 @@
+[
+    {
+        "expr": "\"hello\"",
+        "dataset": 0,
+        "result": "hello",
+        "bindings": {}
+    },
+    {
+        "expr": "'hello'",
+        "dataset": 0,
+        "result": "hello",
+        "bindings": {}
+    },
+    {
+        "expr": "\"Wayne's World\"",
+        "dataset": 0,
+        "result": "Wayne's World",
+        "bindings": {}
+    },
+    {
+        "expr": "42",
+        "dataset": 0,
+        "result": 42,
+        "bindings": {}
+    },
+    {
+        "expr": "-42",
+        "dataset": 0,
+        "result": -42,
+        "bindings": {}
+    },
+    {
+        "expr": "3.14159",
+        "dataset": 0,
+        "result": 3.14159,
+        "bindings": {}
+    },
+    {
+        "expr": "6.022e23",
+        "dataset": 0,
+        "result": 6.022e+23,
+        "bindings": {}
+    },
+    {
+        "expr": "1.602E-19",
+        "dataset": 0,
+        "result": 1.602e-19,
+        "bindings": {}
+    },
+    {
+        "expr": "10e1000",
+        "dataset": 1,
+        "code": "S0102",
+        "bindings": {}
+    },
+    {
+        "expr": "\"hello\\tworld\"",
+        "dataset": 0,
+        "result": "hello\tworld",
+        "bindings": {}
+    },
+    {
+        "expr": "\"hello\\nworld\"",
+        "dataset": 0,
+        "result": "hello\nworld",
+        "bindings": {}
+    },
+    {
+        "expr": "\"hello \\\"world\\\"\"",
+        "dataset": 0,
+        "result": "hello \"world\"",
+        "bindings": {}
+    },
+    {
+        "expr": "\"C:\\\\Test\\\\test.txt\"",
+        "dataset": 0,
+        "result": "C:\\Test\\test.txt",
+        "bindings": {}
+    },
+    {
+        "expr": "\"\\u03BB-calculus rocks\"",
+        "dataset": 0,
+        "result": "λ-calculus rocks",
+        "bindings": {}
+    },
+    {
+        "expr": "\"𝄞\"",
+        "dataset": 0,
+        "result": "𝄞",
+        "bindings": {}
+    },
+    {
+        "expr": "\"\\y\"",
+        "dataset": 1,
+        "code": "S0103",
+        "bindings": {}
+    },
+    {
+        "expr": "\"\\u\"",
+        "dataset": 1,
+        "code": "S0104",
+        "bindings": {}
+    },
+    {
+        "expr": "\"\\u123t\"",
+        "dataset": 1,
+        "code": "S0104",
+        "bindings": {}
+    }
+]

@@ -1,0 +1,20 @@
+[
+    {
+        "expr": "$fromMillis(1)",
+        "dataset": 7,
+        "result": "1970-01-01T00:00:00.001Z",
+        "bindings": {}
+    },
+    {
+        "expr": "$fromMillis(1509380732935)",
+        "dataset": 7,
+        "result": "2017-10-30T16:25:32.935Z",
+        "bindings": {}
+    },
+    {
+        "expr": "$fromMillis(foo)",
+        "dataset": 7,
+        "undefinedResult": true,
+        "bindings": {}
+    }
+]

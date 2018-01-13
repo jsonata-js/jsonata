@@ -1,0 +1,32 @@
+[
+    {
+        "expr": "$substringBefore(\"Hello World\", \" \")",
+        "dataset": 7,
+        "result": "Hello",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringBefore(\"Hello World\", \"l\")",
+        "dataset": 7,
+        "result": "He",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringBefore(\"Hello World\", \"f\")",
+        "dataset": 7,
+        "result": "Hello World",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringBefore(\"Hello World\", \"He\")",
+        "dataset": 7,
+        "result": "",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringBefore(blah, \"He\")",
+        "dataset": 7,
+        "undefinedResult": true,
+        "bindings": {}
+    }
+]

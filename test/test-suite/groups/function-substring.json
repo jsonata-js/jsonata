@@ -1,0 +1,26 @@
+[
+    {
+        "expr": "$substring(\"hello world\", 0, 5)",
+        "dataset": 7,
+        "result": "hello",
+        "bindings": {}
+    },
+    {
+        "expr": "$substring(\"hello world\", -5, 5)",
+        "dataset": 7,
+        "result": "world",
+        "bindings": {}
+    },
+    {
+        "expr": "$substring(\"hello world\", 6)",
+        "dataset": 7,
+        "result": "world",
+        "bindings": {}
+    },
+    {
+        "expr": "$substring(blah, 6)",
+        "dataset": 7,
+        "undefinedResult": true,
+        "bindings": {}
+    }
+]

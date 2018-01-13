@@ -1,0 +1,26 @@
+[
+    {
+        "expr": "$floor(3.7)",
+        "dataset": -1,
+        "result": 3,
+        "bindings": {}
+    },
+    {
+        "expr": "$floor(-3.7)",
+        "dataset": -1,
+        "result": -4,
+        "bindings": {}
+    },
+    {
+        "expr": "$floor(0)",
+        "dataset": -1,
+        "result": 0,
+        "bindings": {}
+    },
+    {
+        "expr": "$floor(nothing)",
+        "dataset": -1,
+        "undefinedResult": true,
+        "bindings": {}
+    }
+]

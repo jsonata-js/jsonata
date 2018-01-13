@@ -1,0 +1,44 @@
+[
+    {
+        "expr": "$pad(\"foo\", 5)",
+        "dataset": -1,
+        "result": "foo  ",
+        "bindings": {}
+    },
+    {
+        "expr": "$pad(\"foo\", -5)",
+        "dataset": -1,
+        "result": "  foo",
+        "bindings": {}
+    },
+    {
+        "expr": "$pad(\"foo\", -5, \"#\")",
+        "dataset": -1,
+        "result": "##foo",
+        "bindings": {}
+    },
+    {
+        "expr": "$pad(\"foo\", 5, \"\")",
+        "dataset": -1,
+        "result": "foo  ",
+        "bindings": {}
+    },
+    {
+        "expr": "$pad(\"foo\", 1)",
+        "dataset": -1,
+        "result": "foo",
+        "bindings": {}
+    },
+    {
+        "expr": "$pad(\"foo\", 8, \"-+\")",
+        "dataset": -1,
+        "result": "foo-+-+-",
+        "bindings": {}
+    },
+    {
+        "expr": "$pad(nothing, 1)",
+        "dataset": -1,
+        "undefinedResult": true,
+        "bindings": {}
+    }
+]

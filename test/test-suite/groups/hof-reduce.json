@@ -1,0 +1,68 @@
+[
+    {
+        "expr": "(  $seq := [1,2,3,4,5];  $reduce($seq, function($x, $y){$x+$y})) ",
+        "dataset": 20,
+        "result": 15,
+        "bindings": {}
+    },
+    {
+        "expr": "(  $concat := function($s){function($a, $b){$string($a) & $s & $string($b)}};  $comma_join := $concat(' ... ');  $reduce([1,2,3,4,5], $comma_join))      ",
+        "dataset": 20,
+        "result": "1 ... 2 ... 3 ... 4 ... 5",
+        "bindings": {}
+    },
+    {
+        "expr": "(  $seq := [1,2,3,4,5];  $reduce($seq, function($x, $y){$x+$y}, 2))",
+        "dataset": 20,
+        "result": 17,
+        "bindings": {}
+    },
+    {
+        "expr": "(  $seq := 1;  $reduce($seq, function($x, $y){$x+$y}))",
+        "dataset": 20,
+        "result": 1,
+        "bindings": {}
+    },
+    {
+        "expr": "(  $seq := 1;  $reduce($seq, function($x, $y){$x+$y}))",
+        "dataset": 20,
+        "result": 1,
+        "bindings": {}
+    },
+    {
+        "expr": "$reduce(Account.Order.Product.Quantity, $append)",
+        "dataset": 7,
+        "result": [
+            2,
+            1,
+            4,
+            1
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "$reduce(Account.Order.Product.Quantity, $append)",
+        "dataset": 2,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "($product := function($a, $b) { $a * $b };$power := function($x, $n) { $n = 0 ? 1 : $reduce([1..$n].($x), $product) };[0..5].$power(2, $))",
+        "dataset": -1,
+        "result": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "(  $seq := 1;  $reduce($seq, function($x){$x}))",
+        "dataset": -1,
+        "code": "D3050",
+        "bindings": {}
+    }
+]

@@ -1,0 +1,60 @@
+[
+    {
+        "expr": "            (              $f := function($n){()};              $f(1)            ) ",
+        "dataset": -1,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "(  $factorial := function($n){$n = 0 ? 1 : $n * $factorial($n - 1)};  $factorial(99))             ",
+        "dataset": -1,
+        "result": 9.33262154439441e+155,
+        "timelimit": 1000,
+        "depth": 302,
+        "bindings": {}
+    },
+    {
+        "expr": "(  $factorial := function($n){$n = 0 ? 1 : $n * $factorial($n - 1)};  $factorial(100))             ",
+        "dataset": -1,
+        "timelimit": 1000,
+        "depth": 302,
+        "code": "U1001",
+        "bindings": {}
+    },
+    {
+        "expr": "(  $factorial := function($n){(    $iter := function($n, $acc) {      $n = 0 ? $acc : $iter($n - 1, $n * $acc)    };    $iter($n, 1)  )};  $factorial(5)) ",
+        "dataset": -1,
+        "result": 120,
+        "bindings": {}
+    },
+    {
+        "expr": "(  $factorial := function($n){(    $iter := function($n, $acc) {      $n = 0 ? $acc : $iter($n - 1, $n * $acc)    };    $iter($n, 1)  )};  $factorial(150)) ",
+        "dataset": -1,
+        "result": 5.7133839564458575e+262,
+        "bindings": {}
+    },
+    {
+        "expr": "(  $inf := function($n){$n+$inf($n-1)};  $inf(5))",
+        "dataset": -1,
+        "timelimit": 1000,
+        "depth": 300,
+        "code": "U1001",
+        "bindings": {}
+    },
+    {
+        "expr": "(  $inf := function(){$inf()};  $inf())",
+        "dataset": -1,
+        "timelimit": 1000,
+        "depth": 500,
+        "code": "U1001",
+        "bindings": {}
+    },
+    {
+        "expr": "        (          $even := function($n) { $n = 0 ? true : $odd($n-1) };           $odd := function($n) { $n = 0 ? false : $even($n-1) };           $odd(6555)         )",
+        "dataset": -1,
+        "result": true,
+        "timelimit": 9000,
+        "depth": 500,
+        "bindings": {}
+    }
+]

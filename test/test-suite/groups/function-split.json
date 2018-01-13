@@ -1,0 +1,141 @@
+[
+    {
+        "expr": "$split(\"Hello World\", \" \")",
+        "dataset": -1,
+        "result": [
+            "Hello",
+            "World"
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "$split(\"Hello\", \" \")",
+        "dataset": -1,
+        "result": [
+            "Hello"
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "$split(\"Hello  World\", \" \")",
+        "dataset": -1,
+        "result": [
+            "Hello",
+            "",
+            "World"
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "$split(\"Hello\", \"\")",
+        "dataset": -1,
+        "result": [
+            "H",
+            "e",
+            "l",
+            "l",
+            "o"
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "$sum($split(\"12345\", \"\").$number($))",
+        "dataset": -1,
+        "result": 15,
+        "bindings": {}
+    },
+    {
+        "expr": "$split(\"a, b, c, d\", \", \")",
+        "dataset": -1,
+        "result": [
+            "a",
+            "b",
+            "c",
+            "d"
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "$split(\"a, b, c, d\", \", \", 2)",
+        "dataset": -1,
+        "result": [
+            "a",
+            "b"
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "$split(\"a, b, c, d\", \", \", 2.5)",
+        "dataset": -1,
+        "result": [
+            "a",
+            "b"
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "$split(\"a, b, c, d\", \", \", 10)",
+        "dataset": -1,
+        "result": [
+            "a",
+            "b",
+            "c",
+            "d"
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "$split(\"a, b, c, d\", \", \", 0)",
+        "dataset": -1,
+        "result": [],
+        "bindings": {}
+    },
+    {
+        "expr": "$split(nothing, \" \")",
+        "dataset": -1,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$split(\"a, b, c, d\", \", \", -3)",
+        "dataset": -1,
+        "code": "D3020",
+        "bindings": {}
+    },
+    {
+        "expr": "$split(\"a, b, c, d\", \", \", null)",
+        "dataset": -1,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$split(\"a, b, c, d\", \", \", -5)",
+        "dataset": -1,
+        "code": "D3020",
+        "bindings": {}
+    },
+    {
+        "expr": "$split(\"a, b, c, d\", \", \", \"2\")",
+        "dataset": -1,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$split(\"a, b, c, d\", true)",
+        "dataset": -1,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$split(12345, 3)",
+        "dataset": -1,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$split(12345)",
+        "dataset": -1,
+        "code": "T0410",
+        "bindings": {}
+    }
+]

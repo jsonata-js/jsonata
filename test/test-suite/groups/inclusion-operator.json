@@ -1,0 +1,59 @@
+[
+    {
+        "expr": "1 in [1,2]",
+        "dataset": -1,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "3 in [1,2]",
+        "dataset": -1,
+        "result": false,
+        "bindings": {}
+    },
+    {
+        "expr": "\"hello\" in [1,2]",
+        "dataset": -1,
+        "result": false,
+        "bindings": {}
+    },
+    {
+        "expr": "\"world\" in [\"hello\", \"world\"]",
+        "dataset": -1,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "in in [\"hello\", \"world\"]",
+        "dataset": -1,
+        "result": false,
+        "bindings": {}
+    },
+    {
+        "expr": "\"world\" in in",
+        "dataset": -1,
+        "result": false,
+        "bindings": {}
+    },
+    {
+        "expr": "\"hello\" in \"hello\"",
+        "dataset": -1,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "library.books[\"Aho\" in authors].title",
+        "dataset": 8,
+        "result": [
+            "The AWK Programming Language",
+            "Compilers: Principles, Techniques, and Tools"
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "content.integration.$lowercase(name)",
+        "dataset": 9,
+        "result": "fakeintegrationname",
+        "bindings": {}
+    }
+]

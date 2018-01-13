@@ -1,0 +1,14 @@
+[
+    {
+        "expr": "(library.books~>$filter(λ($v, $i, $a) {$v.price = $max($a.price)})).isbn",
+        "dataset": 8,
+        "result": "9780262510875",
+        "bindings": {}
+    },
+    {
+        "expr": "nothing~>$filter(λ($v, $i, $a) {$v.price = $max($a.price)})",
+        "dataset": 8,
+        "undefinedResult": true,
+        "bindings": {}
+    }
+]

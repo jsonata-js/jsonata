@@ -1,0 +1,14 @@
+[
+    {
+        "expr": "$lowercase(\"Hello World\")",
+        "dataset": 7,
+        "result": "hello world",
+        "bindings": {}
+    },
+    {
+        "expr": "$lowercase(blah)",
+        "dataset": 7,
+        "undefinedResult": true,
+        "bindings": {}
+    }
+]

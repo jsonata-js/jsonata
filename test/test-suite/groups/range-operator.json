@@ -1,0 +1,114 @@
+[
+    {
+        "expr": "[0..9]",
+        "dataset": 0,
+        "result": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "[0..9][$ % 2 = 0]",
+        "dataset": 0,
+        "result": [
+            0,
+            2,
+            4,
+            6,
+            8
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "[0, 4..9, 20, 22]",
+        "dataset": 0,
+        "result": [
+            0,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            20,
+            22
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "[5..2]",
+        "dataset": 0,
+        "result": [],
+        "bindings": {}
+    },
+    {
+        "expr": "[5..2, 2..5]",
+        "dataset": 0,
+        "result": [
+            2,
+            3,
+            4,
+            5
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "[-2..2]",
+        "dataset": 0,
+        "result": [
+            -2,
+            -1,
+            0,
+            1,
+            2
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "[-2..2].($*$)",
+        "dataset": 0,
+        "result": [
+            4,
+            1,
+            0,
+            1,
+            4
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "[-2..blah]",
+        "dataset": -1,
+        "result": [],
+        "bindings": {}
+    },
+    {
+        "expr": "[blah..5, 3, -2..blah]",
+        "dataset": -1,
+        "result": [
+            3
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "[1.1 .. 5]",
+        "dataset": -1,
+        "code": "T2003",
+        "bindings": {}
+    },
+    {
+        "expr": "[1 .. 5.5]",
+        "dataset": -1,
+        "code": "T2004",
+        "bindings": {}
+    }
+]

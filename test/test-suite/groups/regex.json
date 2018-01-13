@@ -1,0 +1,248 @@
+[
+    {
+        "expr": "$split(\"ababbxabbcc\",/b+/)",
+        "dataset": -1,
+        "result": [
+            "a",
+            "a",
+            "xa",
+            "cc"
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "$split(\"ababbxabbcc\",/b+/, 2)",
+        "dataset": -1,
+        "result": [
+            "a",
+            "a"
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "$split(\"ababbxabbcc\",/d+/)",
+        "dataset": -1,
+        "result": [
+            "ababbxabbcc"
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "$contains(\"ababbxabbcc\",/ab+/)",
+        "dataset": -1,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$contains(\"ababbxabbcc\",/ax+/)",
+        "dataset": -1,
+        "result": false,
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.Product[$contains($.\"Product Name\", /hat/)].ProductID",
+        "dataset": 7,
+        "result": 858236,
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.Product[$contains($.\"Product Name\", /hat/i)].ProductID",
+        "dataset": 7,
+        "result": [
+            858383,
+            858236,
+            858383
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"ababbxabbcc\",/b+/, \"yy\")",
+        "dataset": -1,
+        "result": "ayyayyxayycc",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"ababbxabbcc\",/b+/, \"yy\", 2)",
+        "dataset": -1,
+        "result": "ayyayyxabbcc",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"ababbxabbcc\",/b+/, \"yy\", 0)",
+        "dataset": -1,
+        "result": "ababbxabbcc",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"ababbxabbcc\",/d+/, \"yy\")",
+        "dataset": -1,
+        "result": "ababbxabbcc",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"John Smith\", /(\\w+)\\s(\\w+)/, \"$2, $1\")",
+        "dataset": -1,
+        "result": "Smith, John",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"265USD\", /([0-9]+)USD/, \"$$$1\")",
+        "dataset": -1,
+        "result": "$265",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"265USD\", /([0-9]+)USD/, \"$w\")",
+        "dataset": -1,
+        "result": "$w",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"265USD\", /([0-9]+)USD/, \"$0 -> $$$1\")",
+        "dataset": -1,
+        "result": "265USD -> $265",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"265USD\", /([0-9]+)USD/, \"$0$1$2\")",
+        "dataset": -1,
+        "result": "265USD265",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"abcd\", /(ab)|(a)/, \"[1=$1][2=$2]\")",
+        "dataset": -1,
+        "result": "[1=ab][2=]cd",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"abracadabra\", /bra/, \"*\")",
+        "dataset": -1,
+        "result": "a*cada*",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"abracadabra\", /a.*a/, \"*\")",
+        "dataset": -1,
+        "result": "*",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"abracadabra\", /a.*?a/, \"*\")",
+        "dataset": -1,
+        "result": "*c*bra",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"abracadabra\", /a/, \"\")",
+        "dataset": -1,
+        "result": "brcdbr",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"abracadabra\", /a(.)/, \"a$1$1\")",
+        "dataset": -1,
+        "result": "abbraccaddabbra",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"abracadabra\", /.*?/, \"$1\")",
+        "dataset": -1,
+        "code": "D1004",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"AAAA\", /A+/, \"b\")",
+        "dataset": -1,
+        "result": "b",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"AAAA\", /A+?/, \"b\")",
+        "dataset": -1,
+        "result": "bbbb",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"darted\", /^(.*?)d(.*)$/, \"$1c$2\")",
+        "dataset": -1,
+        "result": "carted",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"abcdefghijklmno\", /(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)(l)(m)/, \"$8$5$12$12$18$123\")",
+        "dataset": -1,
+        "result": "hella8l3no",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"abcdefghijklmno\", /xyz/, \"$8$5$12$12$18$123\")",
+        "dataset": -1,
+        "result": "abcdefghijklmno",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"abcdefghijklmno\", /ijk/, \"$8$5$12$12$18$123\")",
+        "dataset": -1,
+        "result": "abcdefgh22823lmno",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"abcdefghijklmno\", /(ijk)/, \"$8$5$12$12$18$123\")",
+        "dataset": -1,
+        "result": "abcdefghijk2ijk2ijk8ijk23lmno",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"abcdefghijklmno\", /ijk/, \"$x\")",
+        "dataset": -1,
+        "result": "abcdefgh$xlmno",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"abcdefghijklmno\", /(ijk)/, \"$x$\")",
+        "dataset": -1,
+        "result": "abcdefgh$x$lmno",
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.Product.$replace($.\"Product Name\", /hat/i, function($match) { \"foo\" })",
+        "dataset": 7,
+        "result": [
+            "Bowler foo",
+            "Trilby foo",
+            "Bowler foo",
+            "Cloak"
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.Product.$replace($.\"Product Name\", /(h)(at)/i, function($match) { $uppercase($match.match) })",
+        "dataset": 7,
+        "result": [
+            "Bowler HAT",
+            "Trilby HAT",
+            "Bowler HAT",
+            "Cloak"
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"temperature = 68F today\", /(-?\\d+(?:\\.\\d*)?)F\\b/, function($m) { ($number($m.groups[0]) - 32) * 5/9 & \"C\" })",
+        "dataset": -1,
+        "result": "temperature = 20C today",
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.Product.$replace($.\"Product Name\", /hat/i, function($match) { true })",
+        "dataset": 7,
+        "code": "D3012",
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.Product.$replace($.\"Product Name\", /hat/i, function($match) { 42 })",
+        "dataset": 7,
+        "code": "D3012",
+        "bindings": {}
+    }
+]
