@@ -6142,8 +6142,8 @@ describe('Evaluator - function: now', function () {
             var expr = jsonata('$now()');
             var result = expr.evaluate(testdata2);
             // follows this pattern - "2017-05-09T10:10:16.918Z"
-            var expected = /^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d.\d\d\dZ$/.test(result);
-            expect(expected).to.deep.equal(true);
+            var match = /^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d.\d\d\dZ$/.test(result);
+            expect(match).to.deep.equal(true);
         });
     });
 
@@ -6185,8 +6185,8 @@ describe('Evaluator - function: millis', function () {
             var expr = jsonata('$millis()');
             var result = expr.evaluate(testdata2);
             // number between 1502264152715 and 2000000000000 (18 May 2033)
-            var expected = result > 1502264152715 && result < 2000000000000;
-            expect(expected).to.deep.equal(true);
+            var bounded = result > 1502264152715 && result < 2000000000000;
+            expect(bounded).to.deep.equal(true);
         });
     });
 
@@ -6217,7 +6217,7 @@ describe('Evaluator - function: toMillis', function () {
             var expr = jsonata('$toMillis("1970-01-01T00:00:00.001Z")');
             var result = expr.evaluate(testdata2);
             var expected = 1;
-            expect(expected).to.deep.equal(result);
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6226,7 +6226,7 @@ describe('Evaluator - function: toMillis', function () {
             var expr = jsonata('$toMillis("2017-10-30T16:25:32.935Z")');
             var result = expr.evaluate(testdata2);
             var expected = 1509380732935;
-            expect(expected).to.deep.equal(result);
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6235,7 +6235,7 @@ describe('Evaluator - function: toMillis', function () {
             var expr = jsonata('$toMillis(foo)');
             var result = expr.evaluate(testdata2);
             var expected = undefined;
-            expect(expected).to.deep.equal(result);
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6258,7 +6258,7 @@ describe('Evaluator - function: fromMillis', function () {
             var expr = jsonata('$fromMillis(1)');
             var result = expr.evaluate(testdata2);
             var expected = '1970-01-01T00:00:00.001Z';
-            expect(expected).to.deep.equal(result);
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6267,7 +6267,7 @@ describe('Evaluator - function: fromMillis', function () {
             var expr = jsonata('$fromMillis(1509380732935)');
             var result = expr.evaluate(testdata2);
             var expected = "2017-10-30T16:25:32.935Z";
-            expect(expected).to.deep.equal(result);
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6276,7 +6276,7 @@ describe('Evaluator - function: fromMillis', function () {
             var expr = jsonata('$fromMillis(foo)');
             var result = expr.evaluate(testdata2);
             var expected = undefined;
-            expect(expected).to.deep.equal(result);
+            expect(result).to.deep.equal(expected);
         });
     });
 });
