@@ -3,6 +3,7 @@
   "version": "1.4.1",
   "description": "JSON query and transformation language",
   "main": "jsonata.js",
+  "typings": "jsonata.d.ts",
   "homepage": "http://jsonata.org/",
   "repository": {
     "type": "git",
