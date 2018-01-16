@@ -2,7 +2,8 @@
   "name": "jsonata",
   "version": "1.4.1",
   "description": "JSON query and transformation language",
-  "main": "jsonata.js",
+  "module": "jsonata.js",
+  "main": "jsonata-es5.js",
   "typings": "jsonata.d.ts",
   "homepage": "http://jsonata.org/",
   "repository": {
