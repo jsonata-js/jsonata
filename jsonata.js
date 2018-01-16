@@ -465,6 +465,7 @@ var jsonata = (function() {
                         }
                         break;
                     case 'undefined':
+                    default:
                         // any value can be undefined, but should be allowed to match
                         symbol = 'm'; // m for missing
                 }
@@ -516,7 +517,7 @@ var jsonata = (function() {
                         var arg = args[argIndex];
                         var match = isValid[index + 1];
                         if(match === '') {
-                            if (param.context) {
+                            if (param.context && param.contextRegex) {
                                 // substitute context value for missing arg
                                 // first check that the context value is the right type
                                 var contextType = getSymbol(context);
