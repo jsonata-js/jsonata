@@ -6326,8 +6326,8 @@ describe('Evaluator - function: now', function () {
             var expr = jsonata('$now()');
             var result = expr.evaluate(testdata2);
             // follows this pattern - "2017-05-09T10:10:16.918Z"
-            var expected = /^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d.\d\d\dZ$/.test(result);
-            expect(expected).to.deep.equal(true);
+            var match = /^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d.\d\d\dZ$/.test(result);
+            expect(match).to.deep.equal(true);
         });
     });
 
@@ -6369,8 +6369,8 @@ describe('Evaluator - function: millis', function () {
             var expr = jsonata('$millis()');
             var result = expr.evaluate(testdata2);
             // number between 1502264152715 and 2000000000000 (18 May 2033)
-            var expected = result > 1502264152715 && result < 2000000000000;
-            expect(expected).to.deep.equal(true);
+            var bounded = result > 1502264152715 && result < 2000000000000;
+            expect(bounded).to.deep.equal(true);
         });
     });
 
@@ -6401,7 +6401,7 @@ describe('Evaluator - function: toMillis', function () {
             var expr = jsonata('$toMillis("1970-01-01T00:00:00.001Z")');
             var result = expr.evaluate(testdata2);
             var expected = 1;
-            expect(expected).to.deep.equal(result);
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6410,7 +6410,7 @@ describe('Evaluator - function: toMillis', function () {
             var expr = jsonata('$toMillis("2017-10-30T16:25:32.935Z")');
             var result = expr.evaluate(testdata2);
             var expected = 1509380732935;
-            expect(expected).to.deep.equal(result);
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6419,7 +6419,7 @@ describe('Evaluator - function: toMillis', function () {
             var expr = jsonata('$toMillis(foo)');
             var result = expr.evaluate(testdata2);
             var expected = undefined;
-            expect(expected).to.deep.equal(result);
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6442,7 +6442,7 @@ describe('Evaluator - function: fromMillis', function () {
             var expr = jsonata('$fromMillis(1)');
             var result = expr.evaluate(testdata2);
             var expected = '1970-01-01T00:00:00.001Z';
-            expect(expected).to.deep.equal(result);
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6451,7 +6451,7 @@ describe('Evaluator - function: fromMillis', function () {
             var expr = jsonata('$fromMillis(1509380732935)');
             var result = expr.evaluate(testdata2);
             var expected = "2017-10-30T16:25:32.935Z";
-            expect(expected).to.deep.equal(result);
+            expect(result).to.deep.equal(expected);
         });
     });
 
@@ -6460,7 +6460,7 @@ describe('Evaluator - function: fromMillis', function () {
             var expr = jsonata('$fromMillis(foo)');
             var result = expr.evaluate(testdata2);
             var expected = undefined;
-            expect(expected).to.deep.equal(result);
+            expect(result).to.deep.equal(expected);
         });
     });
 });
@@ -7903,6 +7903,54 @@ describe('Evaluator - Transform expressions', function () {
                     ]
                 }
             };
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('Account.Order ~> |Product|{"Total":Price*Quantity},["Description", "SKU"]|', function () {
+        it('should return result object', function () {
+            var expr = jsonata('Account.Order ~> |Product|{"Total":Price*Quantity},["Description", "SKU"]|');
+            var result = expr.evaluate(testdata2);
+            var expected = [
+                {
+                    "OrderID": "order103",
+                    "Product": [
+                        {
+                            "Product Name": "Bowler Hat",
+                            "ProductID": 858383,
+                            "Price": 34.45,
+                            "Quantity": 2,
+                            "Total": 68.9
+                        },
+                        {
+                            "Product Name": "Trilby hat",
+                            "ProductID": 858236,
+                            "Price": 21.67,
+                            "Quantity": 1,
+                            "Total": 21.67
+                        }
+                    ]
+                },
+                {
+                    "OrderID": "order104",
+                    "Product": [
+                        {
+                            "Product Name": "Bowler Hat",
+                            "ProductID": 858383,
+                            "Price": 34.45,
+                            "Quantity": 4,
+                            "Total": 137.8
+                        },
+                        {
+                            "ProductID": 345664,
+                            "Product Name": "Cloak",
+                            "Price": 107.99,
+                            "Quantity": 1,
+                            "Total": 107.99
+                        }
+                    ]
+                }
+            ];
             expect(result).to.deep.equal(expected);
         });
     });

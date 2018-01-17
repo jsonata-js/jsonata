@@ -1,3 +1,7 @@
+#### 1.4.1 Maintenance Release
+
+- Object transformation syntax should work with arrays of objects as well as objects (issue #94)
+
 #### 1.4.0 Milestone Release
 
 - New object transformation syntax `~> |...|...|` (issue #70)
