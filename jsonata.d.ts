@@ -4,10 +4,16 @@
 
 declare function jsonata(str: string): jsonata.Expression;
 declare namespace jsonata {
+  interface ExprNode {
+      type: string;
+      value: any;
+      position: number;
+  }
   interface Expression {
     evaluate(input: any, bindings?: { [name: string]: any }, callback?: (err: Error, resp: any) => void): any;
     assign(name: string, value: any): void;
     registerFunction(name: string, f: Function, signature?: string): void;
+    ast(): ExprNode;
   }
 }
 
