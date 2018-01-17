@@ -1,0 +1,6 @@
+{
+    "expr": "foo.bar<=bar",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": true
+}

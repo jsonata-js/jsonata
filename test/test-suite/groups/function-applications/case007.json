@@ -1,0 +1,6 @@
+{
+    "expr": "\"\" ~> $substringAfter(\"@\") ~> $substringBefore(\".\") ",
+    "data": "test",
+    "bindings": {},
+    "result": ""
+}

@@ -1,0 +1,6 @@
+{
+    "expr": "$replace(\"John Smith\", /(\\w+)\\s(\\w+)/, \"$2, $1\")",
+    "dataset": null,
+    "bindings": {},
+    "result": "Smith, John"
+}

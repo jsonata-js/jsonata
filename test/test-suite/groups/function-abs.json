@@ -1,0 +1,26 @@
+[
+    {
+        "expr": "$abs(3.7)",
+        "dataset": -1,
+        "result": 3.7,
+        "bindings": {}
+    },
+    {
+        "expr": "$abs(-3.7)",
+        "dataset": -1,
+        "result": 3.7,
+        "bindings": {}
+    },
+    {
+        "expr": "$abs(0)",
+        "dataset": -1,
+        "result": 0,
+        "bindings": {}
+    },
+    {
+        "expr": "$abs(nothing)",
+        "dataset": -1,
+        "undefinedResult": true,
+        "bindings": {}
+    }
+]

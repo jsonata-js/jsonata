@@ -1,0 +1,6 @@
+{
+    "expr": "$clone(foo)",
+    "dataset": "dataset5",
+    "bindings": {},
+    "undefinedResult": true
+}

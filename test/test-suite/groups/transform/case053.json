@@ -1,0 +1,6 @@
+{
+    "expr": "$uppercase(Salutation & \" \" & Surname & \" - has \" & Employment.Years & \" years of employment\")",
+    "dataset": "dataset21",
+    "bindings": {},
+    "result": "MR SMITH - HAS 12 YEARS OF EMPLOYMENT"
+}

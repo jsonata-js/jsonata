@@ -1,0 +1,6 @@
+{
+    "expr": "$count($shuffle([1..10]))",
+    "dataset": "dataset1",
+    "bindings": {},
+    "result": 10
+}

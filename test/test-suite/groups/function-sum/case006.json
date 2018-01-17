@@ -1,0 +1,6 @@
+{
+    "expr": "$sum(undefined)",
+    "dataset": null,
+    "bindings": {},
+    "undefinedResult": true
+}

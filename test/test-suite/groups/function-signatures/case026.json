@@ -1,0 +1,6 @@
+{
+    "expr": "λ($arg)<n<n>>{$arg}(5)",
+    "dataset": null,
+    "bindings": {},
+    "code": "S0401"
+}

@@ -1,0 +1,110 @@
+[
+    {
+        "expr": "$round(4)",
+        "dataset": -1,
+        "result": 4,
+        "bindings": {}
+    },
+    {
+        "expr": "$round(2.3)",
+        "dataset": -1,
+        "result": 2,
+        "bindings": {}
+    },
+    {
+        "expr": "$round(2.7)",
+        "dataset": -1,
+        "result": 3,
+        "bindings": {}
+    },
+    {
+        "expr": "$round(2.5)",
+        "dataset": -1,
+        "result": 2,
+        "bindings": {}
+    },
+    {
+        "expr": "$round(3.5)",
+        "dataset": -1,
+        "result": 4,
+        "bindings": {}
+    },
+    {
+        "expr": "$round(-0.5)",
+        "dataset": -1,
+        "result": 0,
+        "bindings": {}
+    },
+    {
+        "expr": "$round(-0.3)",
+        "dataset": -1,
+        "result": 0,
+        "bindings": {}
+    },
+    {
+        "expr": "$round(0.5)",
+        "dataset": -1,
+        "result": 0,
+        "bindings": {}
+    },
+    {
+        "expr": "$round(-7.5)",
+        "dataset": -1,
+        "result": -8,
+        "bindings": {}
+    },
+    {
+        "expr": "$round(-8.5)",
+        "dataset": -1,
+        "result": -8,
+        "bindings": {}
+    },
+    {
+        "expr": "$round(4.49, 1)",
+        "dataset": -1,
+        "result": 4.5,
+        "bindings": {}
+    },
+    {
+        "expr": "$round(4.525, 2)",
+        "dataset": -1,
+        "result": 4.52,
+        "bindings": {}
+    },
+    {
+        "expr": "$round(4.515, 2)",
+        "dataset": -1,
+        "result": 4.52,
+        "bindings": {}
+    },
+    {
+        "expr": "$round(12345, -2)",
+        "dataset": -1,
+        "result": 12300,
+        "bindings": {}
+    },
+    {
+        "expr": "$round(12450, -2)",
+        "dataset": -1,
+        "result": 12400,
+        "bindings": {}
+    },
+    {
+        "expr": "$round(12350, -2)",
+        "dataset": -1,
+        "result": 12400,
+        "bindings": {}
+    },
+    {
+        "expr": "$round(6.022e-23, 24)",
+        "dataset": -1,
+        "result": 6e-23,
+        "bindings": {}
+    },
+    {
+        "expr": "$round(unknown)",
+        "dataset": -1,
+        "undefinedResult": true,
+        "bindings": {}
+    }
+]

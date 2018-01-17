@@ -1,0 +1,10 @@
+{
+    "expr": "Account.Order.Product[$.\"Product Name\" ~> /hat/i].ProductID",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        858383,
+        858236,
+        858383
+    ]
+}

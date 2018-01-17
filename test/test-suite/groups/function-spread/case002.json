@@ -1,0 +1,6 @@
+{
+    "expr": "$spread(blah)",
+    "dataset": "dataset5",
+    "bindings": {},
+    "undefinedResult": true
+}

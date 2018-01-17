@@ -1,0 +1,6 @@
+{
+    "expr": "$join([\"hello\"], 3)",
+    "dataset": null,
+    "bindings": {},
+    "code": "T0410"
+}

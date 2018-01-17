@@ -1,0 +1,6 @@
+{
+    "expr": "$min(1)",
+    "dataset": null,
+    "bindings": {},
+    "result": 1
+}

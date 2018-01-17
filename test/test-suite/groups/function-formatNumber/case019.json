@@ -1,0 +1,6 @@
+{
+    "expr": "$formatNumber(20,\"#;#;#\")",
+    "dataset": null,
+    "bindings": {},
+    "code": "D3080"
+}

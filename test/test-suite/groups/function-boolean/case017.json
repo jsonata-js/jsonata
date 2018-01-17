@@ -1,0 +1,6 @@
+{
+    "expr": "$boolean({\"hello\":\"world\"})",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": true
+}

@@ -1,0 +1,6 @@
+{
+    "expr": "$substringBefore(\"Hola\", \"\")",
+    "dataset": "dataset21",
+    "bindings": {},
+    "result": ""
+}

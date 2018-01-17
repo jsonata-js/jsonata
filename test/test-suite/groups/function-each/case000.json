@@ -1,0 +1,10 @@
+{
+    "expr": "$each(Address, λ($v, $k) {$k & \": \" & $v})",
+    "dataset": "dataset1",
+    "bindings": {},
+    "result": [
+        "Street: Hursley Park",
+        "City: Winchester",
+        "Postcode: SO21 2JN"
+    ]
+}

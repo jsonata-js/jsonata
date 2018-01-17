@@ -1,0 +1,6 @@
+{
+    "expr": "$base64encode()",
+    "dataset": null,
+    "bindings": {},
+    "undefinedResult": true
+}

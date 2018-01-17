@@ -1,0 +1,6 @@
+{
+    "expr": "function($x){$x*$x}(5)",
+    "data": null,
+    "bindings": {},
+    "result": 25
+}

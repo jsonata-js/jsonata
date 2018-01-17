@@ -1,0 +1,6 @@
+{
+    "expr": "\"32\" < 42",
+    "dataset": null,
+    "bindings": {},
+    "code": "T2009"
+}

@@ -1,0 +1,6 @@
+{
+    "expr": "$replace(\"foo\", \"o, \"rr\")",
+    "data": {},
+    "bindings": {},
+    "code": "S0202"
+}

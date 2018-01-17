@@ -1,0 +1,11 @@
+{
+    "expr": "Account.Order.Product.$replace($.\"Product Name\", /(h)(at)/i, function($match) { $uppercase($match.match) })",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        "Bowler HAT",
+        "Trilby HAT",
+        "Bowler HAT",
+        "Cloak"
+    ]
+}

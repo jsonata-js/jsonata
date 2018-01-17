@@ -1,0 +1,21 @@
+{
+    "expr": "Account.Order{  OrderID: {    \"TotalPrice\":$sum(Product.(Price * Quantity)),    \"Items\": Product.\"Product Name\"  }}",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": {
+        "order103": {
+            "TotalPrice": 90.57000000000001,
+            "Items": [
+                "Bowler Hat",
+                "Trilby hat"
+            ]
+        },
+        "order104": {
+            "TotalPrice": 245.79000000000002,
+            "Items": [
+                "Bowler Hat",
+                "Cloak"
+            ]
+        }
+    }
+}

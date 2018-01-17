@@ -1,0 +1,15 @@
+{
+    "expr": "food",
+    "data": {
+        "foo": {
+            "food": 2
+        },
+        "food": {
+            "wa": "hume"
+        }
+    },
+    "bindings": {},
+    "result": {
+        "wa": "hume"
+    }
+}

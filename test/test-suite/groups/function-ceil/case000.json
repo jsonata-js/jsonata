@@ -1,0 +1,6 @@
+{
+    "expr": "$ceil(3.7)",
+    "dataset": null,
+    "bindings": {},
+    "result": 4
+}

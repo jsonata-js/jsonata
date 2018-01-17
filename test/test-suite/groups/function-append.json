@@ -1,0 +1,32 @@
+[
+    {
+        "expr": "$append([1,2], [3,4])",
+        "dataset": 7,
+        "result": [1, 2, 3, 4],
+        "bindings": {}
+    },
+    {
+        "expr": "$append(1, [3,4])",
+        "dataset": 7,
+        "result": [1, 3, 4],
+        "bindings": {}
+    },
+    {
+        "expr": "$append(1,2)",
+        "dataset": 7,
+        "result": [1, 2],
+        "bindings": {}
+    },
+    {
+        "expr": "$append(1,notexist)",
+        "dataset": 7,
+        "result": 1,
+        "bindings": {}
+    },
+    {
+        "expr": "$append(notexist, [2,3,4])",
+        "dataset": 7,
+        "result": [2, 3, 4],
+        "bindings": {}
+    }
+]

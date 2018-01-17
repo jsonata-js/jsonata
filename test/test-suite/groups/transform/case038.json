@@ -1,0 +1,6 @@
+{
+    "expr": "$uppercase(\"Hello \" & Salutation & \" \" & Surname)",
+    "dataset": "dataset21",
+    "bindings": {},
+    "result": "HELLO MR SMITH"
+}

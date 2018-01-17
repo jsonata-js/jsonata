@@ -1,0 +1,10 @@
+{
+    "expr": "{\"true\": true, \"false\":false, \"null\": null}",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": {
+        "true": true,
+        "false": false,
+        "null": null
+    }
+}

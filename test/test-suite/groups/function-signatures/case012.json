@@ -1,0 +1,6 @@
+{
+    "expr": "λ($arr, $sep)<a<s>s?:s>{$join($arr, $sep)}([\"a\"])",
+    "dataset": "dataset1",
+    "bindings": {},
+    "result": "a"
+}

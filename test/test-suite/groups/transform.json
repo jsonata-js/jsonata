@@ -1,0 +1,695 @@
+[
+    {
+        "expr":
+            "{'Order': Account.Order.{  'ID': OrderID,  'Product': Product.{    'SKU': ProductID,    'Details': {      'Weight': Description.Weight,      'Dimensions': Description.(Width & ' x ' & Height & ' x ' & Depth)    }  },  'Total Price': $sum(Product.(Price * Quantity))}}",
+        "dataset": 7,
+        "result": {
+            "Order": [
+                {
+                    "ID": "order103",
+                    "Product": [
+                        {
+                            "SKU": 858383,
+                            "Details": {
+                                "Weight": 0.75,
+                                "Dimensions": "300 x 200 x 210"
+                            }
+                        },
+                        {
+                            "SKU": 858236,
+                            "Details": {
+                                "Weight": 0.6,
+                                "Dimensions": "300 x 200 x 210"
+                            }
+                        }
+                    ],
+                    "Total Price": 90.57000000000001
+                },
+                {
+                    "ID": "order104",
+                    "Product": [
+                        {
+                            "SKU": 858383,
+                            "Details": {
+                                "Weight": 0.75,
+                                "Dimensions": "300 x 200 x 210"
+                            }
+                        },
+                        {
+                            "SKU": 345664,
+                            "Details": {
+                                "Weight": 2,
+                                "Dimensions": "30 x 20 x 210"
+                            }
+                        }
+                    ],
+                    "Total Price": 245.79000000000002
+                }
+            ]
+        },
+        "bindings": {}
+    },
+    {
+        "expr":
+            "\n        (\n          $tempReadings := $count(state.tempReadings) = 5 ?\n              [state.tempReadings[[1..4]], event.t] :\n              [state.tempReadings, event.t];\n        \n          {\n            \"tempReadings\": $tempReadings,\n            \"sumTemperatures\": $sum($tempReadings),\n            \"avgTemperature\": $average($tempReadings) ~> $round(2),\n            \"maxTemperature\": $max($tempReadings),\n            \"minTemperature\": $min($tempReadings)\n          }\n        )",
+        "dataset": 36,
+        "result": {
+            "tempReadings": [28.9, 28, 28.2, 28.4, 28.4],
+            "sumTemperatures": 141.9,
+            "avgTemperature": 28.38,
+            "maxTemperature": 28.9,
+            "minTemperature": 28
+        },
+        "bindings": {}
+    },
+    {
+        "expr": "$",
+        "dataset": 37,
+        "result": {
+            "output": {
+                "is": {
+                    "same": {
+                        "as": "input"
+                    }
+                }
+            }
+        },
+        "bindings": {}
+    },
+    {
+        "expr": "foo",
+        "dataset": 38,
+        "result": {
+            "bar": 42
+        },
+        "bindings": {}
+    },
+    {
+        "expr": "baz",
+        "dataset": 39,
+        "result": {
+            "gar": 50
+        },
+        "bindings": {}
+    },
+    {
+        "expr": "Foo",
+        "dataset": 40,
+        "result": {
+            "mama": 45
+        },
+        "bindings": {}
+    },
+    {
+        "expr": "food",
+        "dataset": 41,
+        "result": {
+            "wa": "hume"
+        },
+        "bindings": {}
+    },
+    {
+        "expr": "maz.rar",
+        "dataset": 42,
+        "result": 42,
+        "bindings": {}
+    },
+    {
+        "expr": "jee.par.waa",
+        "dataset": 43,
+        "result": {
+            "bar": 87
+        },
+        "bindings": {}
+    },
+    {
+        "expr": "foo",
+        "dataset": 44,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "foo.bar",
+        "dataset": 44,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$",
+        "dataset": 45,
+        "result": "foo",
+        "bindings": {}
+    },
+    {
+        "expr": "bar",
+        "dataset": 46,
+        "result": "foo",
+        "bindings": {}
+    },
+    {
+        "expr": "$",
+        "dataset": 47,
+        "result": 6754322,
+        "bindings": {}
+    },
+    {
+        "expr": "$",
+        "dataset": 48,
+        "result": 0,
+        "bindings": {}
+    },
+    {
+        "expr": "$",
+        "dataset": 49,
+        "result": -24,
+        "bindings": {}
+    },
+    {
+        "expr": "bar",
+        "dataset": 50,
+        "result": 6.54,
+        "bindings": {}
+    },
+    {
+        "expr": "$",
+        "dataset": 51,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "bar",
+        "dataset": 52,
+        "result": false,
+        "bindings": {}
+    },
+    {
+        "expr": "$",
+        "dataset": 20,
+        "result": null,
+        "bindings": {}
+    },
+    {
+        "expr": "bar",
+        "dataset": 53,
+        "result": null,
+        "bindings": {}
+    },
+    {
+        "expr": "bar",
+        "dataset": 1,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$",
+        "dataset": -1,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "bar",
+        "dataset": 54,
+        "result": "\"Hello\"",
+        "bindings": {}
+    },
+    {
+        "expr": "$",
+        "dataset": 55,
+        "result": "\"Hello\"",
+        "bindings": {}
+    },
+    {
+        "expr": "bar",
+        "dataset": 56,
+        "result": "'Hello'",
+        "bindings": {}
+    },
+    {
+        "expr": "$",
+        "dataset": 57,
+        "result": "'Hello'",
+        "bindings": {}
+    },
+    {
+        "expr": "$lowercase(Salutation)",
+        "dataset": 58,
+        "result": "mr",
+        "bindings": {}
+    },
+    {
+        "expr": "$lowercase(敷)",
+        "dataset": 58,
+        "result": "steve",
+        "bindings": {}
+    },
+    {
+        "expr": "$lowercase(Español)",
+        "dataset": 58,
+        "result": "/ˈspænɪʃ/",
+        "bindings": {}
+    },
+    {
+        "expr": "$lowercase($.\"NI.Number\")",
+        "dataset": 58,
+        "result": "no10furbzness",
+        "bindings": {}
+    },
+    {
+        "expr": "$lowercase(\"COMPENSATION IS : \" & Employment.\"Executive.Compensation\")",
+        "dataset": 58,
+        "result": "compensation is : 1400000",
+        "bindings": {}
+    },
+    {
+        "expr": "\"Hello\"",
+        "dataset": 58,
+        "result": "Hello",
+        "bindings": {}
+    },
+    {
+        "expr": "$uppercase(Salutation)",
+        "dataset": 58,
+        "result": "MR",
+        "bindings": {}
+    },
+    {
+        "expr": "$uppercase(\"Hello World\")",
+        "dataset": 58,
+        "result": "HELLO WORLD",
+        "bindings": {}
+    },
+    {
+        "expr": "$uppercase(\"鯵噂ソ竹\")",
+        "dataset": 58,
+        "result": "鯵噂ソ竹",
+        "bindings": {}
+    },
+    {
+        "expr": "Employment.Name & \" is happy\"",
+        "dataset": 58,
+        "result": "IBM UK is happy",
+        "bindings": {}
+    },
+    {
+        "expr": "Employment.Name & \" is pleased to employ \" & Salutation & \" \" & Surname",
+        "dataset": 58,
+        "result": "IBM UK is pleased to employ Mr Smith",
+        "bindings": {}
+    },
+    {
+        "expr": "$uppercase(\"Hello \" & Salutation & \" \" & Surname)",
+        "dataset": 58,
+        "result": "HELLO MR SMITH",
+        "bindings": {}
+    },
+    {
+        "expr": "$uppercase(Salutation & \" \" & Surname & \" - has \" & Cars & \" registered cars\")",
+        "dataset": 58,
+        "result": "MR SMITH - HAS 3 REGISTERED CARS",
+        "bindings": {}
+    },
+    {
+        "expr": "$uppercase(Employment.ContractType)",
+        "dataset": 58,
+        "result": "PERMANENT",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringBefore(\"Hola\", \"l\")",
+        "dataset": 58,
+        "result": "Ho",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringBefore(\"Hola\", 'l')",
+        "dataset": 58,
+        "result": "Ho",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringBefore(\"Hola\", \"Q\")",
+        "dataset": 58,
+        "result": "Hola",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringBefore(\"Hola\", \"\")",
+        "dataset": 58,
+        "result": "",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringBefore(\"鯵噂ソ竹\", \"ソ\")",
+        "dataset": 58,
+        "result": "鯵噂",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringAfter(\"Coca\" & \"Cola\", \"ca\")",
+        "dataset": 58,
+        "result": "Cola",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringAfter(Salutation & \" \" & MiddleName &\" \" & Surname, MiddleName)",
+        "dataset": 58,
+        "result": " Smith",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringAfter(Salutation & \" \" & Employment.Role, Salutation)",
+        "dataset": 58,
+        "result": " Senior Physician",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringAfter(\"Hola\", 'l')",
+        "dataset": 58,
+        "result": "a",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringAfter(\"Hola\", \"Q\")",
+        "dataset": 58,
+        "result": "Hola",
+        "bindings": {}
+    },
+    {
+        "expr": "$lowercase(Employment.Role) & \" (\" & Employment.Role & \")\"",
+        "dataset": 58,
+        "result": "senior physician (Senior Physician)",
+        "bindings": {}
+    },
+    {
+        "expr": "Employment.Years & \" years of employment\"",
+        "dataset": 58,
+        "result": "12 years of employment",
+        "bindings": {}
+    },
+    {
+        "expr": "$uppercase(Salutation & \" \" & Surname & \" - has \" & Employment.Years & \" years of employment\")",
+        "dataset": 58,
+        "result": "MR SMITH - HAS 12 YEARS OF EMPLOYMENT",
+        "bindings": {}
+    },
+    {
+        "expr": "$substring(Employment.Role, 7,4)",
+        "dataset": 58,
+        "result": "Phys",
+        "bindings": {}
+    },
+    {
+        "expr": "$substring(Employment.Role, -4,4)",
+        "dataset": 58,
+        "result": "cian",
+        "bindings": {}
+    },
+    {
+        "expr": "$substring(\"Hello World\",Cars,5)",
+        "dataset": 58,
+        "result": "lo Wo",
+        "bindings": {}
+    },
+    {
+        "expr": "$lowercase(\"Missing close brackets\"",
+        "dataset": 58,
+        "code": "S0203",
+        "bindings": {}
+    },
+    {
+        "expr": "$unknown(Salutation)",
+        "dataset": 58,
+        "code": "T1006",
+        "bindings": {}
+    },
+    {
+        "expr": "$decrypt(Salutation)",
+        "dataset": 58,
+        "code": "T1006",
+        "bindings": {}
+    },
+    {
+        "expr": "Employment.authentication(Salutation)",
+        "dataset": 58,
+        "code": "T1006",
+        "bindings": {}
+    },
+    {
+        "expr": "$uppercase(Invalid)",
+        "dataset": 58,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$uppercase(Employment.Invalid)",
+        "dataset": 58,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$lowercase(\"Coca\", \"Cola\")",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$lowercase(Salary)",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$lowercase(20)",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$lowercase(20.55)",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$lowercase(Employment)",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$lowercase(Qualifications)",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$uppercase(\"Coca\", \"Cola\")",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$uppercase(Salary)",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$uppercase(28)",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$uppercase(20.55)",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$uppercase(Cars)",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$uppercase(Employment)",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$uppercase(Qualifications)",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringBefore(\"Coca\" & \"ca\")",
+        "dataset": 58,
+        "code": "T0411",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringBefore(Salary,\"xx\")",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringBefore(22,\"xx\")",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringBefore(22.55,\"xx\")",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringBefore(\"22\",2)",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringBefore(\"22.55\",5)",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringBefore(Employment,\"xx\")",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringBefore(Qualifications,\"xx\")",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringAfter(\"Coca\" & \"ca\")",
+        "dataset": 58,
+        "code": "T0411",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringAfter(Salary,\"xx\")",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringAfter(22,\"xx\")",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringAfter(22.55,\"xx\")",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringAfter(\"22\",2)",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringAfter(\"22.55\",5)",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringAfter(Employment,\"xx\")",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$substringAfter(Qualifications,\"xx\")",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$substring(\"Coca\" & \"ca\", 2, 4, 5)",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$substring(\"Coca\", \"Mr\", 4)",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$substring(\"Coca\", 3, \"Whoops\")",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$substring(Salary,2,4)",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$substring(\"Hello\",\"World\",5)",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$substring(\"Hello\",5,\"World\")",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$substring(\"Hello World\",5.5,5)",
+        "dataset": 58,
+        "result": " Worl",
+        "bindings": {}
+    },
+    {
+        "expr": "$substring(Employment,\"xx\")",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$substring(Qualifications,6,5)",
+        "dataset": 58,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "detail.contents",
+        "dataset": 59,
+        "result": "stuff",
+        "bindings": {}
+    },
+    {
+        "expr": "detail.meta",
+        "dataset": 60,
+        "result": "boo",
+        "bindings": {}
+    },
+    {
+        "expr": "detail.meta",
+        "dataset": 59,
+        "result": 5,
+        "bindings": {}
+    }
+]

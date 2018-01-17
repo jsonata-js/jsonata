@@ -1,0 +1,6 @@
+{
+    "expr": "$substringBefore(\"鯵噂ソ竹\", \"ソ\")",
+    "dataset": "dataset21",
+    "bindings": {},
+    "result": "鯵噂"
+}

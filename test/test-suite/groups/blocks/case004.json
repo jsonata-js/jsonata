@@ -1,0 +1,11 @@
+{
+    "expr": "Account.Order.Product.($var1 := Price ; $var2:=Quantity; $var1 * $var2)",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        68.9,
+        21.67,
+        137.8,
+        107.99
+    ]
+}

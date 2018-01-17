@@ -1,0 +1,6 @@
+{
+    "expr": "$substringAfter(Salutation & \" \" & Employment.Role, Salutation)",
+    "dataset": "dataset21",
+    "bindings": {},
+    "result": " Senior Physician"
+}

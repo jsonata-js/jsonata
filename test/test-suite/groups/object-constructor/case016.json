@@ -1,0 +1,13 @@
+{
+    "expr": "Account.Order.{OrderID: $sum(Product.(Price*Quantity))}",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        {
+            "order103": 90.57000000000001
+        },
+        {
+            "order104": 245.79000000000002
+        }
+    ]
+}

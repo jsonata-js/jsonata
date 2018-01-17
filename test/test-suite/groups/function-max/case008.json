@@ -1,0 +1,6 @@
+{
+    "expr": "$max([-1,-5])",
+    "dataset": null,
+    "bindings": {},
+    "result": -1
+}

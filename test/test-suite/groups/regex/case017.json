@@ -1,0 +1,6 @@
+{
+    "expr": "$replace(\"abracadabra\", /bra/, \"*\")",
+    "dataset": null,
+    "bindings": {},
+    "result": "a*cada*"
+}

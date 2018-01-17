@@ -1,0 +1,6 @@
+{
+    "expr": "$average(undefined)",
+    "dataset": null,
+    "bindings": {},
+    "undefinedResult": true
+}

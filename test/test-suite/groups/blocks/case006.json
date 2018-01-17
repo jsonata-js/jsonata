@@ -1,0 +1,6 @@
+{
+    "expr": "(  $func := function($arg) {$arg.Account.Order[0]};  $func($).OrderID)",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": "order103"
+}

@@ -1,0 +1,9 @@
+{
+    "expr": "[Address, Other.`Alternative.Address`].City",
+    "dataset": "dataset1",
+    "bindings": {},
+    "result": [
+        "Winchester",
+        "London"
+    ]
+}

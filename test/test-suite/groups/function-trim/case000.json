@@ -1,0 +1,6 @@
+{
+    "expr": "$trim(\"Hello World\")",
+    "dataset": null,
+    "bindings": {},
+    "result": "Hello World"
+}

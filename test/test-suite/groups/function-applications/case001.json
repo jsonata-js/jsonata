@@ -1,0 +1,6 @@
+{
+    "expr": "Account.Order[0].OrderID ~> $uppercase() ~> $lowercase()",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": "order103"
+}

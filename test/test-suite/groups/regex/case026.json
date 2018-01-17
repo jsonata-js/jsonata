@@ -1,0 +1,6 @@
+{
+    "expr": "$replace(\"abcdefghijklmno\", /(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)(l)(m)/, \"$8$5$12$12$18$123\")",
+    "dataset": null,
+    "bindings": {},
+    "result": "hella8l3no"
+}

@@ -1,0 +1,12 @@
+{
+    "expr": "foo",
+    "data": {
+        "foo": {
+            "bar": 42
+        }
+    },
+    "bindings": {},
+    "result": {
+        "bar": 42
+    }
+}

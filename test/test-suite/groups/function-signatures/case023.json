@@ -1,0 +1,12 @@
+{
+    "expr": "[1..5].λ($num)<(ns)-:n>{$number($num)}()",
+    "dataset": null,
+    "bindings": {},
+    "result": [
+        1,
+        2,
+        3,
+        4,
+        5
+    ]
+}

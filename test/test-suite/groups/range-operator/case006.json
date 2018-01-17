@@ -1,0 +1,12 @@
+{
+    "expr": "[-2..2].($*$)",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": [
+        4,
+        1,
+        0,
+        1,
+        4
+    ]
+}

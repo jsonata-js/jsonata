@@ -1,0 +1,6 @@
+{
+    "expr": "$replace(\"darted\", /^(.*?)d(.*)$/, \"$1c$2\")",
+    "dataset": null,
+    "bindings": {},
+    "result": "carted"
+}

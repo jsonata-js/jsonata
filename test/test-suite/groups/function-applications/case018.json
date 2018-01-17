@@ -1,0 +1,6 @@
+{
+    "expr": "($square := function($x){$x*$x};[1..5] ~> $map($square) ~> $reduce(λ($x, $y) { $x * $y });)",
+    "dataset": null,
+    "bindings": {},
+    "result": 14400
+}

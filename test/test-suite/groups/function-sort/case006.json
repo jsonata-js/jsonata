@@ -1,0 +1,11 @@
+{
+    "expr": "$sort(Account.Order.Product.\"Product Name\")",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        "Bowler Hat",
+        "Bowler Hat",
+        "Cloak",
+        "Trilby hat"
+    ]
+}

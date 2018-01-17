@@ -1,0 +1,6 @@
+{
+    "expr": "$pad(nothing, 1)",
+    "dataset": null,
+    "bindings": {},
+    "undefinedResult": true
+}

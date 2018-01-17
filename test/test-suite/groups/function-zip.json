@@ -1,0 +1,38 @@
+[
+    {
+        "expr": "$zip([1,2,3],[4,5,6])",
+        "dataset": -1,
+        "result": [[1, 4], [2, 5], [3, 6]],
+        "bindings": {}
+    },
+    {
+        "expr": "$zip([1,2,3],[4,5,6],[7,8,9])",
+        "dataset": -1,
+        "result": [[1, 4, 7], [2, 5, 8], [3, 6, 9]],
+        "bindings": {}
+    },
+    {
+        "expr": "$zip([1,2,3],[4,5],[7,8,9])",
+        "dataset": -1,
+        "result": [[1, 4, 7], [2, 5, 8]],
+        "bindings": {}
+    },
+    {
+        "expr": "$zip([1,2,3])",
+        "dataset": -1,
+        "result": [[1], [2], [3]],
+        "bindings": {}
+    },
+    {
+        "expr": "$zip(1,2,3)",
+        "dataset": -1,
+        "result": [[1, 2, 3]],
+        "bindings": {}
+    },
+    {
+        "expr": "$zip([1,2,3], [4,5,6], nothing)",
+        "dataset": -1,
+        "result": [],
+        "bindings": {}
+    }
+]

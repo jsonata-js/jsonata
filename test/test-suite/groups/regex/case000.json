@@ -1,0 +1,11 @@
+{
+    "expr": "$split(\"ababbxabbcc\",/b+/)",
+    "dataset": null,
+    "bindings": {},
+    "result": [
+        "a",
+        "a",
+        "xa",
+        "cc"
+    ]
+}

@@ -1,0 +1,11 @@
+{
+    "expr": "Account.Order.Product^(Price).SKU",
+    "dataset": "dataset13",
+    "bindings": {},
+    "result": [
+        "0406654608",
+        "040657863",
+        "0406654603",
+        "0406634348"
+    ]
+}

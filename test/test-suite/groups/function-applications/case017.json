@@ -1,0 +1,6 @@
+{
+    "expr": "($times := λ($x, $y) { $x * $y };$product := $reduce(?, $times);$square := function($x){$x*$x};$product_of_squares := $map(?, $square) ~> $product;[1..5] ~> $product_of_squares())",
+    "dataset": null,
+    "bindings": {},
+    "result": 14400
+}

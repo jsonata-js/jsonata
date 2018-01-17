@@ -1,0 +1,6 @@
+{
+    "expr": "\"foo\"&\"bar\"",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "foobar"
+}

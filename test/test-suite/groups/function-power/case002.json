@@ -1,0 +1,6 @@
+{
+    "expr": "$power(10, -2)",
+    "dataset": null,
+    "bindings": {},
+    "result": 0.01
+}

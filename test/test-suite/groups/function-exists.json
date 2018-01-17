@@ -1,0 +1,152 @@
+[
+    {
+        "expr": "$exists(\"Hello World\")",
+        "dataset": 7,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$exists(\"\")",
+        "dataset": 7,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$exists(true)",
+        "dataset": 7,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$exists(false)",
+        "dataset": 7,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$exists(0)",
+        "dataset": 7,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$exists(-0.5)",
+        "dataset": 7,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$exists(null)",
+        "dataset": 7,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$exists([])",
+        "dataset": 7,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$exists([0])",
+        "dataset": 7,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$exists([1,2,3])",
+        "dataset": 7,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$exists([[]])",
+        "dataset": 7,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$exists([[null]])",
+        "dataset": 7,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$exists([[[true]]])",
+        "dataset": 7,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$exists({})",
+        "dataset": 7,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$exists({\"hello\":\"world\"})",
+        "dataset": 7,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$exists(Account)",
+        "dataset": 7,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$exists(Account.Order.Product.Price)",
+        "dataset": 7,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$exists($exists)",
+        "dataset": 7,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$exists(function(){true})",
+        "dataset": 7,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$exists(blah)",
+        "dataset": 7,
+        "result": false,
+        "bindings": {}
+    },
+    {
+        "expr": "$exists(Account.blah)",
+        "dataset": 7,
+        "result": false,
+        "bindings": {}
+    },
+    {
+        "expr": "$exists(Account.Order[2])",
+        "dataset": 7,
+        "result": false,
+        "bindings": {}
+    },
+    {
+        "expr": "$exists(Account.Order[0].blah)",
+        "dataset": 7,
+        "result": false,
+        "bindings": {}
+    },
+    {
+        "expr": "$exists(2,3)",
+        "dataset": -1,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$exists()",
+        "dataset": -1,
+        "code": "T0410",
+        "bindings": {}
+    }
+]

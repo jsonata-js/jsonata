@@ -1,0 +1,6 @@
+{
+    "expr": "$round(6.022e-23, 24)",
+    "dataset": null,
+    "bindings": {},
+    "result": 6e-23
+}

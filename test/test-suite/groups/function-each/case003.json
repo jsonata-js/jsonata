@@ -1,0 +1,6 @@
+{
+    "expr": "$reverse(nothing)",
+    "dataset": "dataset1",
+    "bindings": {},
+    "undefinedResult": true
+}

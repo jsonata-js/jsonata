@@ -1,0 +1,6 @@
+{
+    "expr": "3 in [1,2]",
+    "dataset": null,
+    "bindings": {},
+    "result": false
+}

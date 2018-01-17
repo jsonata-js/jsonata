@@ -1,0 +1,82 @@
+{
+    "expr": "$ ~> |Account.Order.Product|{\"Total\":Price*Quantity, \"Price\": Price * 1.2}|",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": {
+        "Account": {
+            "Account Name": "Firefly",
+            "Order": [
+                {
+                    "OrderID": "order103",
+                    "Product": [
+                        {
+                            "Product Name": "Bowler Hat",
+                            "ProductID": 858383,
+                            "SKU": "0406654608",
+                            "Description": {
+                                "Colour": "Purple",
+                                "Width": 300,
+                                "Height": 200,
+                                "Depth": 210,
+                                "Weight": 0.75
+                            },
+                            "Price": 41.34,
+                            "Quantity": 2,
+                            "Total": 68.9
+                        },
+                        {
+                            "Product Name": "Trilby hat",
+                            "ProductID": 858236,
+                            "SKU": "0406634348",
+                            "Description": {
+                                "Colour": "Orange",
+                                "Width": 300,
+                                "Height": 200,
+                                "Depth": 210,
+                                "Weight": 0.6
+                            },
+                            "Price": 26.004,
+                            "Quantity": 1,
+                            "Total": 21.67
+                        }
+                    ]
+                },
+                {
+                    "OrderID": "order104",
+                    "Product": [
+                        {
+                            "Product Name": "Bowler Hat",
+                            "ProductID": 858383,
+                            "SKU": "040657863",
+                            "Description": {
+                                "Colour": "Purple",
+                                "Width": 300,
+                                "Height": 200,
+                                "Depth": 210,
+                                "Weight": 0.75
+                            },
+                            "Price": 41.34,
+                            "Quantity": 4,
+                            "Total": 137.8
+                        },
+                        {
+                            "ProductID": 345664,
+                            "SKU": "0406654603",
+                            "Product Name": "Cloak",
+                            "Description": {
+                                "Colour": "Black",
+                                "Width": 30,
+                                "Height": 20,
+                                "Depth": 210,
+                                "Weight": 2
+                            },
+                            "Price": 129.588,
+                            "Quantity": 1,
+                            "Total": 107.99
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

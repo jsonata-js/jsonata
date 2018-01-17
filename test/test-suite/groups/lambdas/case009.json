@@ -1,0 +1,9 @@
+{
+    "expr": "(  $gcd := λ($a, $b){$b = 0 ? $a : $gcd($b, $a%$b) };  [$gcd(8,12), $gcd(9,12)])",
+    "dataset": null,
+    "bindings": {},
+    "result": [
+        4,
+        3
+    ]
+}

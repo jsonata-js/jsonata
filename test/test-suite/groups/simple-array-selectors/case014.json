@@ -1,0 +1,6 @@
+{
+    "expr": "(foo.blah.baz.fud)[$$.foo.bar / 30]",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "world"
+}

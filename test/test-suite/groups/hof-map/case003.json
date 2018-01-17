@@ -1,0 +1,11 @@
+{
+    "expr": "Account.Order.Product ~> $map(λ($prod, $index) { $index+1 & \": \" & $prod.\"Product Name\" })",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        "1: Bowler Hat",
+        "2: Trilby hat",
+        "3: Bowler Hat",
+        "4: Cloak"
+    ]
+}

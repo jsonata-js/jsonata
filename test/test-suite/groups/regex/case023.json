@@ -1,0 +1,6 @@
+{
+    "expr": "$replace(\"AAAA\", /A+/, \"b\")",
+    "dataset": null,
+    "bindings": {},
+    "result": "b"
+}

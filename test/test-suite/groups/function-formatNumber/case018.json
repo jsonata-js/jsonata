@@ -1,0 +1,6 @@
+{
+    "expr": "$formatNumber(1E20,\"#,######\")",
+    "dataset": null,
+    "bindings": {},
+    "result": "100,000000,000000,000000"
+}

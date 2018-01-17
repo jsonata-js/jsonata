@@ -1,0 +1,6 @@
+{
+    "expr": "$substringAfter(\"Coca\" & \"Cola\", \"ca\")",
+    "dataset": "dataset21",
+    "bindings": {},
+    "result": "Cola"
+}

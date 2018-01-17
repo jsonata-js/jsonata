@@ -1,0 +1,12 @@
+{
+    "expr": "[1..5].$string()",
+    "dataset": null,
+    "bindings": {},
+    "result": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+    ]
+}

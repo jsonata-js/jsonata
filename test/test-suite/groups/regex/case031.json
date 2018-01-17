@@ -1,0 +1,6 @@
+{
+    "expr": "$replace(\"abcdefghijklmno\", /(ijk)/, \"$x$\")",
+    "dataset": null,
+    "bindings": {},
+    "result": "abcdefgh$x$lmno"
+}

@@ -1,0 +1,12 @@
+{
+    "expr": "[0..9][$ % 2 = 0]",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": [
+        0,
+        2,
+        4,
+        6,
+        8
+    ]
+}

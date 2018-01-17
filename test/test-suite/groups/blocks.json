@@ -1,0 +1,44 @@
+[
+    {
+        "expr": "()",
+        "dataset": 20,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "(1; 2; 3)",
+        "dataset": 20,
+        "result": 3,
+        "bindings": {}
+    },
+    {
+        "expr": "(1; 2; 3;)",
+        "dataset": 20,
+        "result": 3,
+        "bindings": {}
+    },
+    {
+        "expr": "($a:=1; $b:=2; $c:=($a:=4; $a+$b); $a+$c)",
+        "dataset": 20,
+        "result": 7,
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.Product.($var1 := Price ; $var2:=Quantity; $var1 * $var2)",
+        "dataset": 7,
+        "result": [68.9, 21.67, 137.8, 107.99],
+        "bindings": {}
+    },
+    {
+        "expr": "(  $func := function($arg) {$arg.Account.Order[0].OrderID};  $func($))",
+        "dataset": 7,
+        "result": "order103",
+        "bindings": {}
+    },
+    {
+        "expr": "(  $func := function($arg) {$arg.Account.Order[0]};  $func($).OrderID)",
+        "dataset": 7,
+        "result": "order103",
+        "bindings": {}
+    }
+]

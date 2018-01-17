@@ -1,0 +1,6 @@
+{
+    "expr": "$power(100, 1000)",
+    "dataset": null,
+    "bindings": {},
+    "code": "D3061"
+}

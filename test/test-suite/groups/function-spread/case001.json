@@ -1,0 +1,67 @@
+{
+    "expr": "$spread((Account.Order.Product.Description))",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        {
+            "Colour": "Purple"
+        },
+        {
+            "Width": 300
+        },
+        {
+            "Height": 200
+        },
+        {
+            "Depth": 210
+        },
+        {
+            "Weight": 0.75
+        },
+        {
+            "Colour": "Orange"
+        },
+        {
+            "Width": 300
+        },
+        {
+            "Height": 200
+        },
+        {
+            "Depth": 210
+        },
+        {
+            "Weight": 0.6
+        },
+        {
+            "Colour": "Purple"
+        },
+        {
+            "Width": 300
+        },
+        {
+            "Height": 200
+        },
+        {
+            "Depth": 210
+        },
+        {
+            "Weight": 0.75
+        },
+        {
+            "Colour": "Black"
+        },
+        {
+            "Width": 30
+        },
+        {
+            "Height": 20
+        },
+        {
+            "Depth": 210
+        },
+        {
+            "Weight": 2
+        }
+    ]
+}

@@ -1,0 +1,6 @@
+{
+    "expr": "λ($num)<(ns)-:n>{$number($num)}(5)",
+    "dataset": null,
+    "bindings": {},
+    "result": 5
+}

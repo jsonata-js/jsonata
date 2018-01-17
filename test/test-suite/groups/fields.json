@@ -1,0 +1,71 @@
+[
+    {
+        "expr": "foo.bar",
+        "dataset": 0,
+        "result": 42,
+        "bindings": {}
+    },
+    {
+        "expr": "foo.blah",
+        "dataset": 0,
+        "result": [
+            {
+                "baz": {
+                    "fud": "hello"
+                }
+            },
+            {
+                "baz": {
+                    "fud": "world"
+                }
+            },
+            {
+                "bazz": "gotcha"
+            }
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "foo.blah.bazz",
+        "dataset": 0,
+        "result": "gotcha",
+        "bindings": {}
+    },
+    {
+        "expr": "foo.blah.baz",
+        "dataset": 0,
+        "result": [
+            {
+                "fud": "hello"
+            },
+            {
+                "fud": "world"
+            }
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "foo.blah.baz.fud",
+        "dataset": 0,
+        "result": ["hello", "world"],
+        "bindings": {}
+    },
+    {
+        "expr": "Other.Misc",
+        "dataset": 2,
+        "result": null,
+        "bindings": {}
+    },
+    {
+        "expr": "bazz",
+        "dataset": 3,
+        "result": "gotcha",
+        "bindings": {}
+    },
+    {
+        "expr": "fud",
+        "dataset": 4,
+        "result": ["hello", "world"],
+        "bindings": {}
+    }
+]

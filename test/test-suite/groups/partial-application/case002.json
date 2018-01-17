@@ -1,0 +1,6 @@
+{
+    "expr": "(  $firstn := $substring(?, 0, ?);  $first5 := $firstn(?, 5);  $first5(\"Hello World\"))",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": "Hello"
+}

@@ -1,0 +1,6 @@
+{
+    "expr": "$contains(\"Hello World\", \"world\")",
+    "dataset": null,
+    "bindings": {},
+    "result": false
+}

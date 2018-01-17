@@ -1,0 +1,6 @@
+{
+    "expr": "$replace(\"hello\", \"\", \"bye\")",
+    "dataset": null,
+    "bindings": {},
+    "code": "D3010"
+}

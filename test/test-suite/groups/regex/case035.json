@@ -1,0 +1,6 @@
+{
+    "expr": "Account.Order.Product.$replace($.\"Product Name\", /hat/i, function($match) { true })",
+    "dataset": "dataset5",
+    "bindings": {},
+    "code": "D3012"
+}

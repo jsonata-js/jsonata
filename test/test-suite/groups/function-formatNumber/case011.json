@@ -1,0 +1,6 @@
+{
+    "expr": "$formatNumber(1234.5678, \"①①.①①①e①\", {\"zero-digit\": \"⑟\"})",
+    "dataset": null,
+    "bindings": {},
+    "result": "①②.③④⑥e②"
+}

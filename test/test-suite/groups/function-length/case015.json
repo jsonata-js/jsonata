@@ -1,0 +1,6 @@
+{
+    "expr": "$length(\"Hello\", \"World\")",
+    "dataset": null,
+    "bindings": {},
+    "code": "T0410"
+}

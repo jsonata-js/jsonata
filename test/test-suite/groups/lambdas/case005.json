@@ -1,0 +1,6 @@
+{
+    "expr": "($nth_price := function($n) { (Account.Order.Product.Price)[$n] }; $nth_price(1) )",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": 21.67
+}

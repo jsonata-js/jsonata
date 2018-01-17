@@ -1,0 +1,6 @@
+{
+    "expr": "$abs(nothing)",
+    "dataset": null,
+    "bindings": {},
+    "undefinedResult": true
+}

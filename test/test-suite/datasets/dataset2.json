@@ -1,0 +1,17 @@
+[
+    [
+        {
+            "baz": {
+                "fud": "hello"
+            }
+        },
+        {
+            "baz": {
+                "fud": "world"
+            }
+        },
+        {
+            "bazz": "gotcha"
+        }
+    ]
+]

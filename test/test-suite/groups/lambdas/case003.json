@@ -1,0 +1,6 @@
+{
+    "expr": "($factorial:= function($x){$x <= 1 ? 1 : $x * $factorial($x-1)}; $factorial(4))",
+    "data": null,
+    "bindings": {},
+    "result": 24
+}

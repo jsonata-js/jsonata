@@ -1,0 +1,6 @@
+{
+    "expr": "($square := function($x){$x*$x};$sum_of_squares := $map(?, $square) ~> $sum;[1..5] ~> $sum_of_squares())  ",
+    "dataset": null,
+    "bindings": {},
+    "result": 55
+}

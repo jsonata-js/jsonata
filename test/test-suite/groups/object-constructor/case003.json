@@ -1,0 +1,6 @@
+{
+    "expr": "{\"one\": 1, \"two\": 2}.two",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": 2
+}

@@ -1,0 +1,6 @@
+{
+    "expr": "( $uppertrim := $trim ~> $uppercase;  $uppertrim(\"   Hello    World   \") )",
+    "dataset": null,
+    "bindings": {},
+    "result": "HELLO WORLD"
+}

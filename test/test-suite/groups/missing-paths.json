@@ -1,0 +1,38 @@
+[
+    {
+        "expr": "fdf",
+        "dataset": 0,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "fdf.ett",
+        "dataset": 0,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "fdf.ett[10]",
+        "dataset": 0,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "fdf.ett[vc > 10]",
+        "dataset": 0,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "fdf.ett + 27",
+        "dataset": 0,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$fdsd",
+        "dataset": 0,
+        "undefinedResult": true,
+        "bindings": {}
+    }
+]

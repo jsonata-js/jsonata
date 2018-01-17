@@ -1,0 +1,11 @@
+{
+    "expr": "nest0.nest1[0]",
+    "dataset": "dataset4",
+    "bindings": {},
+    "result": [
+        1,
+        3,
+        5,
+        6
+    ]
+}

@@ -1,0 +1,12 @@
+{
+    "expr": "( $square := function($x){$x*$x}; [1..5] ~> $map($square) ) ",
+    "dataset": null,
+    "bindings": {},
+    "result": [
+        1,
+        4,
+        9,
+        16,
+        25
+    ]
+}

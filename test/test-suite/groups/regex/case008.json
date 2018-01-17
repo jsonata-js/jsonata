@@ -1,0 +1,6 @@
+{
+    "expr": "$replace(\"ababbxabbcc\",/b+/, \"yy\", 2)",
+    "dataset": null,
+    "bindings": {},
+    "result": "ayyayyxabbcc"
+}

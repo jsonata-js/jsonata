@@ -1,0 +1,6 @@
+{
+    "expr": "$replace(123, 2, 1)",
+    "dataset": null,
+    "bindings": {},
+    "code": "T0410"
+}
