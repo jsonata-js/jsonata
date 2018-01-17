@@ -4,22 +4,26 @@ The data contained in this directory is an attempt at a language neutral
 test suite for `jsonata`. The original test suite (written in Javascript)
 was transformed into a series of JSON files.
 
-## `datasets.json`
+## `datasets` directory
 
-The `datasets.json` file contains all the "input data" used when evaluating
-`jsonata` expressions for the various test cases. It contains a simple
-array. In each test case the index of the dataset to use is specified.
+The `datasets` directory contains a set of JSON files.  Each file represents
+potential input data to a `jsonata` test.  The point of putting this input in
+named files is so that it can be re-used (rather than repeated) by different
+test cases.
 
-## `groups/*.json`
+## `groups/<groupname>/case###.json`
 
-The JSON files in the `groups` directory represent collections of test
-cases. Each file contains an array of cases and each case includes
-the following fields:
+Each `<groupname>` directory is a bundle of test cases related to a given 
+topic.  Inside each of those directories are JSON files that represent
+individual test cases.  Each JSON file contains a test case and each test
+case includes the following fields:
 
 * `expr`: The `jsonata` expression to be evaluated.
-* `data` or `dataset`: If `data` is defined, use that as the input data for
-  the test case.  Otherwise, `dataset` contains the index of the dataset to use.
-  If the index is `-1`, the input data should be `undefined`.
+* `data` or `dataset`: If `data` is defined, use the value of the `data` field
+  as the input data for the test case.  Otherwise, the `dataset` field contains
+  the name of the dataset (in the `datasets` directory) to use as input data.
+  If value of the `dataset` field is `null`, then use `undefined` as the input
+  data when evaluating the `jsonata` expression.
 * `timelimit`: If a timelimit should be imposed on the test, this specifies the
   timelimit in milliseconds.
 * `depth`: If the depth of evaluation should be limited, this specifies the depth.
