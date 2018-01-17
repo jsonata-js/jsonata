@@ -1453,7 +1453,6 @@ var jsonata = (function() {
         switch (expr.type) {
             case 'path':
                 result = yield * evaluatePath(expr, input, environment);
-                // result = normalizeSequence(result, expr.keepSingletonArray);
                 break;
             case 'binary':
                 result = yield * evaluateBinary(expr, input, environment);
@@ -1522,7 +1521,6 @@ var jsonata = (function() {
 
         if (expr.hasOwnProperty('predicate')) {
             result = yield * applyPredicates(expr.predicate, result, environment);
-            // result = normalizeSequence(result);
 
         }
         if (expr.hasOwnProperty('group')) {
@@ -1591,10 +1589,6 @@ var jsonata = (function() {
         return arr;
     }
 
-    // Array.prototype.value = function() {
-    //     return this;
-    // };
-
     /**
      * Evaluate path expression against input data
      * @param {Object} expr - JSONata expression
@@ -1643,30 +1637,6 @@ var jsonata = (function() {
     }
 
     /**
-     * Normalize a JSONata sequence - singleton arrays become atomic values
-     * @param {Array} sequence - input sequence
-     * @param {Boolean} keepSingleton - keep singleton sequences as arrays
-     * @returns {*} normalized sequence
-     */
-    // function normalizeSequence(sequence, keepSingleton) {
-    //     var result;
-    //     if(typeof sequence === 'undefined') {
-    //         result = undefined;
-    //     } else if(!Array.isArray(sequence) || !sequence.sequence) {
-    //         result = sequence;
-    //     } else if (sequence.length === 1) {
-    //         if(keepSingleton || sequence.keepSingleton) {
-    //             result = sequence;
-    //         } else {
-    //             result = sequence[0];
-    //         }
-    //     } else if (sequence.length > 1) {
-    //         result = sequence;
-    //     }
-    //     return result;
-    // }
-
-    /**
      * Evaluate a step within a path
      * @param {Object} expr - JSONata expression
      * @param {Object} input - Input data to evaluate against
@@ -1680,26 +1650,7 @@ var jsonata = (function() {
         for(var ii = 0; ii < input.length; ii++) {
             var res = yield * evaluate(expr, input[ii], environment);
             if(typeof res !== 'undefined') {
-                // if (!Array.isArray(res) || res.cons || res.keepSingleton) {
-                // it's not an array - just push into the result sequence
                 result.push(res);
-                // } else if (res.keepSingleton) {
-                //     // it is an array, but we want to preserve the array structure
-                //     //                    if(!(res.sequence && res.length === 0)) {  // not for empty sequences though
-                //     result.push(res);
-                //     //                    }
-                // } else {
-                //     if(!res.sequence) {
-                //         console.log('ouch!');
-                //     }
-                // res is a sequence - flatten it into the parent sequence
-                // Array.prototype.push.apply(result, res);
-                // res.forEach(function (innerRes) {
-                //     //if (typeof innerRes !== 'undefined') {
-                //     result.push(innerRes);
-                //     //}
-                // });
-                // }
             }
         }
 
@@ -2733,15 +2684,6 @@ var jsonata = (function() {
         }
         // apply the procedure
         try {
-            // if(input instanceof Object) {
-            //     Object.defineProperty(input, '__env__', {
-            //         enumerable: false,
-            //         configurable: true,
-            //         get: function () {
-            //             return environment;
-            //         }
-            //     });
-            // }
             result = yield * apply(proc, evaluatedArgs, input);
         } catch (err) {
             // add the position field to the error
