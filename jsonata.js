@@ -1817,7 +1817,9 @@ var jsonata = (function() {
         switch (expr.value) {
             case '-':
                 result = yield * evaluate(expr.expression, input, environment);
-                if (isNumeric(result)) {
+                if(typeof result === 'undefined') {
+                    result = undefined;
+                } else if (isNumeric(result)) {
                     result = -result;
                 } else {
                     throw {
