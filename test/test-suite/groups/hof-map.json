@@ -1,0 +1,59 @@
+[
+    {
+        "expr":
+            "(  $data := {    \"one\": [1,2,3,4,5],    \"two\": [5,4,3,2,1]  };  $add := function($x){$x*$x};  $map($data.one, $add) )  ",
+        "dataset": 20,
+        "result": [1, 4, 9, 16, 25],
+        "bindings": {}
+    },
+    {
+        "expr":
+            "(  $data := {    \"one\": [1,2,3,4,5],    \"two\": [5,4,3,2,1]  };  $add := function($x){$x*$x};  $map($add) )  ",
+        "dataset": -1,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$map([1,2,3], $string)",
+        "dataset": 20,
+        "result": ["1", "2", "3"],
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.Product ~> $map(λ($prod, $index) { $index+1 & \": \" & $prod.\"Product Name\" })",
+        "dataset": 7,
+        "result": ["1: Bowler Hat", "2: Trilby hat", "3: Bowler Hat", "4: Cloak"],
+        "bindings": {}
+    },
+    {
+        "expr":
+            "Account.Order.Product ~> $map(λ($prod, $index, $arr) { $index+1 & \"/\" & $count($arr) & \": \" & $prod.\"Product Name\" })",
+        "dataset": 7,
+        "result": ["1/4: Bowler Hat", "2/4: Trilby hat", "3/4: Bowler Hat", "4/4: Cloak"],
+        "bindings": {}
+    },
+    {
+        "expr": "$map(Phone, function($v, $i) {$i[$v.type=\"office\"]})",
+        "dataset": 2,
+        "result": [1, 2],
+        "bindings": {}
+    },
+    {
+        "expr": "$map(Phone, function($v, $i) {$v.type=\"office\" ? $i})",
+        "dataset": 2,
+        "result": [1, 2],
+        "bindings": {}
+    },
+    {
+        "expr": "$map(Phone, function($v, $i) {$v.type=\"office\" ? $i: null})",
+        "dataset": 2,
+        "result": [null, 1, 2, null],
+        "bindings": {}
+    },
+    {
+        "expr": "$map(Phone, function($v, $i) {$v.type=\"office\" ? $i: null})",
+        "dataset": 7,
+        "undefinedResult": true,
+        "bindings": {}
+    }
+]

@@ -1,0 +1,6 @@
+{
+    "expr": "content.integration.$lowercase(name)",
+    "dataset": "dataset7",
+    "bindings": {},
+    "result": "fakeintegrationname"
+}

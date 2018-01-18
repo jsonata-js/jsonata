@@ -1,0 +1,6 @@
+{
+    "expr": "λ($arg)<x:b>{$not($arg)}(null)",
+    "dataset": null,
+    "bindings": {},
+    "result": true
+}

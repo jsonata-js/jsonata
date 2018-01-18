@@ -1,0 +1,6 @@
+{
+    "expr": "1 in [1,2]",
+    "dataset": null,
+    "bindings": {},
+    "result": true
+}

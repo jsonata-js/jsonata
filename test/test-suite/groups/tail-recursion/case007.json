@@ -1,0 +1,8 @@
+{
+    "expr": "        (          $even := function($n) { $n = 0 ? true : $odd($n-1) };           $odd := function($n) { $n = 0 ? false : $even($n-1) };           $odd(6555)         )",
+    "dataset": null,
+    "timelimit": 9000,
+    "depth": 500,
+    "bindings": {},
+    "result": true
+}

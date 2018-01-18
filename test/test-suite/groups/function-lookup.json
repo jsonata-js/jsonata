@@ -1,0 +1,26 @@
+[
+    {
+        "expr": "$lookup(Account, \"Account Name\")",
+        "dataset": 7,
+        "result": "Firefly",
+        "bindings": {}
+    },
+    {
+        "expr": "$lookup(Account.Order.Product, \"Product Name\")",
+        "dataset": 7,
+        "result": ["Bowler Hat", "Trilby hat", "Bowler Hat", "Cloak"],
+        "bindings": {}
+    },
+    {
+        "expr": "$lookup(Account.Order.Product.ProductID, \"Product Name\")",
+        "dataset": 7,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$lookup($$, \"gust\")",
+        "dataset": 16,
+        "result": null,
+        "bindings": {}
+    }
+]

@@ -1,0 +1,6 @@
+{
+    "expr": "Account.Order.Product^(Price).SKU",
+    "dataset": "dataset15",
+    "bindings": {},
+    "code": "T2007"
+}

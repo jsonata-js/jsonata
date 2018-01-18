@@ -1,0 +1,6 @@
+{
+    "expr": "$lowercase(\"COMPENSATION IS : \" & Employment.\"Executive.Compensation\")",
+    "dataset": "dataset21",
+    "bindings": {},
+    "result": "compensation is : 1400000"
+}

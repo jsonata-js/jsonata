@@ -1,0 +1,48 @@
+[
+    {
+        "expr": "null",
+        "dataset": 0,
+        "result": null,
+        "bindings": {}
+    },
+    {
+        "expr": "[null]",
+        "dataset": 0,
+        "result": [null],
+        "bindings": {}
+    },
+    {
+        "expr": "[null, null]",
+        "dataset": 0,
+        "result": [null, null],
+        "bindings": {}
+    },
+    {
+        "expr": "$not(null)",
+        "dataset": 0,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "null = null",
+        "dataset": 0,
+        "result": true,
+        "bindings": {}
+    },
+    {
+        "expr": "null != null",
+        "dataset": 0,
+        "result": false,
+        "bindings": {}
+    },
+    {
+        "expr": "{\"true\": true, \"false\":false, \"null\": null}",
+        "dataset": 0,
+        "result": {
+            "true": true,
+            "false": false,
+            "null": null
+        },
+        "bindings": {}
+    }
+]

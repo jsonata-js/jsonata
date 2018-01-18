@@ -1,0 +1,6 @@
+{
+    "expr": "$replace(\"abcd\", /(ab)|(a)/, \"[1=$1][2=$2]\")",
+    "dataset": null,
+    "bindings": {},
+    "result": "[1=ab][2=]cd"
+}

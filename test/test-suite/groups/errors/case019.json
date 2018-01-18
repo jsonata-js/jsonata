@@ -1,0 +1,6 @@
+{
+    "expr": "$foo()",
+    "dataset": null,
+    "bindings": {},
+    "code": "T1006"
+}

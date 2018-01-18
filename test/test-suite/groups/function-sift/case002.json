@@ -1,0 +1,13 @@
+{
+    "expr": "$sift(λ($v, $k){$k ~> /^A/})",
+    "dataset": "dataset1",
+    "bindings": {},
+    "result": {
+        "Age": 28,
+        "Address": {
+            "Street": "Hursley Park",
+            "City": "Winchester",
+            "Postcode": "SO21 2JN"
+        }
+    }
+}

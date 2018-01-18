@@ -1,0 +1,12 @@
+{
+    "expr": "{\"one\": 1, \"two\": {\"three\": 3, \"four\": \"4\"}}",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": {
+        "one": 1,
+        "two": {
+            "three": 3,
+            "four": "4"
+        }
+    }
+}

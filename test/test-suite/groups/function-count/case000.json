@@ -1,0 +1,6 @@
+{
+    "expr": "$count(Account.Order.Product.(Price * Quantity))",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": 4
+}

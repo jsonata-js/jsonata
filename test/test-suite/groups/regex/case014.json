@@ -1,0 +1,6 @@
+{
+    "expr": "$replace(\"265USD\", /([0-9]+)USD/, \"$0 -> $$$1\")",
+    "dataset": null,
+    "bindings": {},
+    "result": "265USD -> $265"
+}

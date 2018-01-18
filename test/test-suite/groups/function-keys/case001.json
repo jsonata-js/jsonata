@@ -1,0 +1,13 @@
+{
+    "expr": "$keys(Account.Order.Product)",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        "Product Name",
+        "ProductID",
+        "SKU",
+        "Description",
+        "Price",
+        "Quantity"
+    ]
+}

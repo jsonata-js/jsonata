@@ -1,0 +1,6 @@
+{
+    "expr": "$",
+    "data": "foo",
+    "bindings": {},
+    "result": "foo"
+}

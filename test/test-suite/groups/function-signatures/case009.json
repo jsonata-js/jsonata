@@ -1,0 +1,6 @@
+{
+    "expr": "λ($str, $prefix)<s-s>{$prefix & $str}(\"World\", \"Hello \")",
+    "dataset": null,
+    "bindings": {},
+    "result": "Hello World"
+}

@@ -1,0 +1,152 @@
+[
+    {
+        "expr": "\"s\" - 1",
+        "dataset": 7,
+        "code": "T2001",
+        "bindings": {}
+    },
+    {
+        "expr": "1 + null",
+        "dataset": 7,
+        "code": "T2002",
+        "bindings": {}
+    },
+    {
+        "expr": "\"no closing quote",
+        "dataset": 7,
+        "code": "S0101",
+        "bindings": {}
+    },
+    {
+        "expr": "`no closing backtick",
+        "dataset": 7,
+        "code": "S0105",
+        "bindings": {}
+    },
+    {
+        "expr": "- \"s\"",
+        "dataset": 7,
+        "code": "D1002",
+        "bindings": {}
+    },
+    {
+        "expr": "unknown(function)",
+        "dataset": 7,
+        "code": "T1006",
+        "bindings": {}
+    },
+    {
+        "expr": "sum(Account.Order.OrderID)",
+        "dataset": 7,
+        "code": "T1005",
+        "bindings": {}
+    },
+    {
+        "expr": "[1,2)",
+        "dataset": 1,
+        "code": "S0202",
+        "bindings": {}
+    },
+    {
+        "expr": "[1:2]",
+        "dataset": 1,
+        "code": "S0202",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"foo\", \"o, \"rr\")",
+        "dataset": 1,
+        "code": "S0202",
+        "bindings": {}
+    },
+    {
+        "expr": "[1!2]",
+        "dataset": 1,
+        "code": "S0204",
+        "bindings": {}
+    },
+    {
+        "expr": "@ bar",
+        "dataset": 1,
+        "code": "S0204",
+        "bindings": {}
+    },
+    {
+        "expr": "2(blah)",
+        "dataset": -1,
+        "code": "T1006",
+        "bindings": {}
+    },
+    {
+        "expr": "2()",
+        "dataset": -1,
+        "code": "T1006",
+        "bindings": {}
+    },
+    {
+        "expr": "3(?)",
+        "dataset": -1,
+        "code": "T1008",
+        "bindings": {}
+    },
+    {
+        "expr": "1=",
+        "dataset": 1,
+        "code": "S0207",
+        "bindings": {}
+    },
+    {
+        "expr": "function(x){$x}(3)",
+        "dataset": 1,
+        "code": "S0208",
+        "bindings": {}
+    },
+    {
+        "expr": "x:=1",
+        "dataset": -1,
+        "code": "D2005",
+        "bindings": {}
+    },
+    {
+        "expr": "2:=1",
+        "dataset": -1,
+        "code": "D2005",
+        "bindings": {}
+    },
+    {
+        "expr": "$foo()",
+        "dataset": -1,
+        "code": "T1006",
+        "bindings": {}
+    },
+    {
+        "expr": "55=>5",
+        "dataset": -1,
+        "code": "S0211",
+        "bindings": {}
+    },
+    {
+        "expr": "Ssum(:)",
+        "dataset": -1,
+        "code": "S0211",
+        "bindings": {}
+    },
+    {
+        "expr": "[1,2,3]{\"num\": $}[true]",
+        "dataset": -1,
+        "code": "S0209",
+        "bindings": {}
+    },
+    {
+        "expr": "[1,2,3]{\"num\": $}{\"num\": $}",
+        "dataset": -1,
+        "code": "S0210",
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order[0].Product;",
+        "dataset": -1,
+        "code": "S0201",
+        "bindings": {}
+    }
+]

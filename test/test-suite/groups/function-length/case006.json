@@ -1,0 +1,6 @@
+{
+    "expr": "$length(\"超明體繁\")",
+    "dataset": null,
+    "bindings": {},
+    "result": 4
+}

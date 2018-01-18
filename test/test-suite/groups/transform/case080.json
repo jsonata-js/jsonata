@@ -1,0 +1,6 @@
+{
+    "expr": "$substringBefore(\"22\",2)",
+    "dataset": "dataset21",
+    "bindings": {},
+    "code": "T0410"
+}

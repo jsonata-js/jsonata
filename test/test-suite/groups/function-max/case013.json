@@ -1,0 +1,6 @@
+{
+    "expr": "$max(undefined)",
+    "dataset": null,
+    "bindings": {},
+    "undefinedResult": true
+}

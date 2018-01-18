@@ -1,0 +1,6 @@
+{
+    "expr": "λ($arg1, $arg2)<nn+:a>{[$arg1, $arg2]}(1,3, 2,\"g\")",
+    "dataset": null,
+    "bindings": {},
+    "code": "T0410"
+}

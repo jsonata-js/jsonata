@@ -1,0 +1,6 @@
+{
+    "expr": "(  $add := function($x, $y){$x+$y};  $add2 := $add(2, ?);  $add2(4))",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": 6
+}

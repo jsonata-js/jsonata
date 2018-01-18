@@ -1,0 +1,6 @@
+{
+    "expr": "function(x){$x}(3)",
+    "data": {},
+    "bindings": {},
+    "code": "S0208"
+}

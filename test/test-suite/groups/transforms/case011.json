@@ -1,0 +1,18 @@
+{
+    "expr": "Account ~> |Order|{\"Product\":\"blah\"},nomatch|",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": {
+        "Account Name": "Firefly",
+        "Order": [
+            {
+                "OrderID": "order103",
+                "Product": "blah"
+            },
+            {
+                "OrderID": "order104",
+                "Product": "blah"
+            }
+        ]
+    }
+}

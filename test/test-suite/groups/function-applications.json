@@ -1,0 +1,140 @@
+[
+    {
+        "expr": "Account.Order[0].OrderID ~> $uppercase()",
+        "dataset": 7,
+        "result": "ORDER103",
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order[0].OrderID ~> $uppercase() ~> $lowercase()",
+        "dataset": 7,
+        "result": "order103",
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.OrderID ~> $join()",
+        "dataset": 7,
+        "result": "order103order104",
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.OrderID ~> $join(\", \")",
+        "dataset": 7,
+        "result": "order103, order104",
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.Product.(Price * Quantity) ~> $sum()",
+        "dataset": 7,
+        "result": 336.36,
+        "bindings": {}
+    },
+    {
+        "expr": "( $uppertrim := $trim ~> $uppercase;  $uppertrim(\"   Hello    World   \") )",
+        "dataset": -1,
+        "result": "HELLO WORLD",
+        "bindings": {}
+    },
+    {
+        "expr": "\"john@example.com\" ~> $substringAfter(\"@\") ~> $substringBefore(\".\") ",
+        "dataset": -1,
+        "result": "example",
+        "bindings": {}
+    },
+    {
+        "expr": "\"\" ~> $substringAfter(\"@\") ~> $substringBefore(\".\") ",
+        "dataset": 34,
+        "result": "",
+        "bindings": {}
+    },
+    {
+        "expr": "foo ~> $substringAfter(\"@\") ~> $substringBefore(\".\") ",
+        "dataset": 34,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "( $domain := $substringAfter(?,\"@\") ~> $substringBefore(?,\".\"); $domain(\"john@example.com\") )",
+        "dataset": -1,
+        "result": "example",
+        "bindings": {}
+    },
+    {
+        "expr": "( $square := function($x){$x*$x}; [1..5] ~> $map($square) ) ",
+        "dataset": -1,
+        "result": [1, 4, 9, 16, 25],
+        "bindings": {}
+    },
+    {
+        "expr": "( $square := function($x){$x*$x}; [1..5] ~> $map($square) ~> $sum() ) ",
+        "dataset": -1,
+        "result": 55,
+        "bindings": {}
+    },
+    {
+        "expr":
+            "($betweenBackets := $substringAfter(?, \"(\") ~> $substringBefore(?, \")\");$betweenBackets(\"test(foo)bar\")) ",
+        "dataset": -1,
+        "result": "foo",
+        "bindings": {}
+    },
+    {
+        "expr":
+            "($square := function($x){$x*$x};$chain := λ($f, $g){λ($x){$g($f($x))}};$instructions := [$sum, $square];$sumsq := $instructions ~> $reduce($chain);[1..5] ~> $sumsq()) ",
+        "dataset": -1,
+        "result": 225,
+        "bindings": {}
+    },
+    {
+        "expr":
+            "($square := function($x){$x*$x};$chain := λ($f, $g){λ($x){ $x ~> $f ~> $g }};$instructions := [$sum, $square, $string];$sumsq := $instructions ~> $reduce($chain);[1..5] ~> $sumsq()) ",
+        "dataset": -1,
+        "result": "225",
+        "bindings": {}
+    },
+    {
+        "expr": "($square := function($x){$x*$x};$instructions := $sum ~> $square;[1..5] ~> $instructions())  ",
+        "dataset": -1,
+        "result": 225,
+        "bindings": {}
+    },
+    {
+        "expr":
+            "($square := function($x){$x*$x};$sum_of_squares := $map(?, $square) ~> $sum;[1..5] ~> $sum_of_squares())  ",
+        "dataset": -1,
+        "result": 55,
+        "bindings": {}
+    },
+    {
+        "expr":
+            "($times := λ($x, $y) { $x * $y };$product := $reduce(?, $times);$square := function($x){$x*$x};$product_of_squares := $map(?, $square) ~> $product;[1..5] ~> $product_of_squares())",
+        "dataset": -1,
+        "result": 14400,
+        "bindings": {}
+    },
+    {
+        "expr": "($square := function($x){$x*$x};[1..5] ~> $map($square) ~> $reduce(λ($x, $y) { $x * $y });)",
+        "dataset": -1,
+        "result": 14400,
+        "bindings": {}
+    },
+    {
+        "expr":
+            "($prices := Account.Order.Product.Price;$quantities := Account.Order.Product.Quantity;$product := λ($arr) { $arr[0] * $arr[1] };$zip($prices, $quantities) ~> $map($product) ~> $sum())",
+        "dataset": 7,
+        "result": 336.36,
+        "bindings": {}
+    },
+    {
+        "expr": "42 ~> \"hello\"",
+        "dataset": 7,
+        "code": "T2006",
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.Product[$.\"Product Name\" ~> /hat/i].ProductID",
+        "dataset": 7,
+        "result": [858383, 858236, 858383],
+        "bindings": {}
+    }
+]

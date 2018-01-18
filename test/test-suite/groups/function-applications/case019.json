@@ -1,0 +1,6 @@
+{
+    "expr": "($prices := Account.Order.Product.Price;$quantities := Account.Order.Product.Quantity;$product := λ($arr) { $arr[0] * $arr[1] };$zip($prices, $quantities) ~> $map($product) ~> $sum())",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": 336.36
+}

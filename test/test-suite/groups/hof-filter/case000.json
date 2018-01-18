@@ -1,0 +1,6 @@
+{
+    "expr": "(library.books~>$filter(λ($v, $i, $a) {$v.price = $max($a.price)})).isbn",
+    "dataset": "dataset6",
+    "bindings": {},
+    "result": "9780262510875"
+}

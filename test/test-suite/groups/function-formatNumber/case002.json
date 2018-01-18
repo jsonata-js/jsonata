@@ -1,0 +1,6 @@
+{
+    "expr": "$formatNumber(123412345678.9, \"9,9,99.99\")",
+    "dataset": null,
+    "bindings": {},
+    "result": "123412345,6,78.90"
+}

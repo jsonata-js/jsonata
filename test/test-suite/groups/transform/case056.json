@@ -1,0 +1,6 @@
+{
+    "expr": "$substring(\"Hello World\",Cars,5)",
+    "dataset": "dataset21",
+    "bindings": {},
+    "result": "lo Wo"
+}

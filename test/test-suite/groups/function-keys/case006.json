@@ -1,0 +1,6 @@
+{
+    "expr": "$keys([\"foo\", \"bar\"])",
+    "dataset": null,
+    "bindings": {},
+    "undefinedResult": true
+}

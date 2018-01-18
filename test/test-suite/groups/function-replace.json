@@ -1,0 +1,74 @@
+[
+    {
+        "expr": "$replace(\"Hello World\", \"World\", \"Everyone\")",
+        "dataset": -1,
+        "result": "Hello Everyone",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"the cat sat on the mat\", \"at\", \"it\")",
+        "dataset": -1,
+        "result": "the cit sit on the mit",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"the cat sat on the mat\", \"at\", \"it\", 0)",
+        "dataset": -1,
+        "result": "the cat sat on the mat",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"the cat sat on the mat\", \"at\", \"it\", 2)",
+        "dataset": -1,
+        "result": "the cit sit on the mat",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(nothing, \"at\", \"it\", 2)",
+        "dataset": -1,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"hello\")",
+        "dataset": -1,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"hello\", \"l\", \"1\", null)",
+        "dataset": -1,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"hello\", \"l\", \"1\", -2)",
+        "dataset": -1,
+        "code": "D3011",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"hello\", 1)",
+        "dataset": 15,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"hello\", \"\", \"bye\")",
+        "dataset": -1,
+        "code": "D3010",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(\"hello\", 2, 1)",
+        "dataset": -1,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$replace(123, 2, 1)",
+        "dataset": -1,
+        "code": "T0410",
+        "bindings": {}
+    }
+]

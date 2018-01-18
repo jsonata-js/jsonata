@@ -1,0 +1,10 @@
+{
+    "expr": "Account.(  $AccName := function() { `Account Name` };  Order[OrderID = \"order104\"].Product{    \"Account\": $AccName(),    \"SKU-\" & $string(ProductID): `Product Name`  } )",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": {
+        "Account": "Firefly",
+        "SKU-858383": "Bowler Hat",
+        "SKU-345664": "Cloak"
+    }
+}

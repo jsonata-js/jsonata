@@ -1,0 +1,6 @@
+{
+    "expr": "$replace(\"Hello World\", \"World\", \"Everyone\")",
+    "dataset": null,
+    "bindings": {},
+    "result": "Hello Everyone"
+}

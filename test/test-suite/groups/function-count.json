@@ -1,0 +1,86 @@
+[
+    {
+        "expr": "$count(Account.Order.Product.(Price * Quantity))",
+        "dataset": 7,
+        "result": 4,
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.$count(Product.(Price * Quantity))",
+        "dataset": 7,
+        "result": [2, 2],
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.(OrderID & \": \" & $count(Product.(Price*Quantity)))",
+        "dataset": 7,
+        "result": ["order103: 2", "order104: 2"],
+        "bindings": {}
+    },
+    {
+        "expr": "$count([])",
+        "dataset": -1,
+        "result": 0,
+        "bindings": {}
+    },
+    {
+        "expr": "$count([1,2,3])",
+        "dataset": -1,
+        "result": 3,
+        "bindings": {}
+    },
+    {
+        "expr": "$count([\"1\",\"2\",\"3\"])",
+        "dataset": -1,
+        "result": 3,
+        "bindings": {}
+    },
+    {
+        "expr": "$count([\"1\",\"2\",3])",
+        "dataset": -1,
+        "result": 3,
+        "bindings": {}
+    },
+    {
+        "expr": "$count(1)",
+        "dataset": -1,
+        "result": 1,
+        "bindings": {}
+    },
+    {
+        "expr": "$count([],[])",
+        "dataset": -1,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$count([1,2,3],[])",
+        "dataset": -1,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$count([],[],[])",
+        "dataset": -1,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$count([1,2],[],[])",
+        "dataset": -1,
+        "code": "T0410",
+        "bindings": {}
+    },
+    {
+        "expr": "$count(undefined)",
+        "dataset": -1,
+        "result": 0,
+        "bindings": {}
+    },
+    {
+        "expr": "$count([1,2,3,4]) / 2",
+        "dataset": -1,
+        "result": 2,
+        "bindings": {}
+    }
+]

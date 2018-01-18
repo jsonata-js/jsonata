@@ -1,0 +1,16 @@
+{
+    "expr": "[1, $two, [\"three\", $four]]",
+    "dataset": "dataset5",
+    "bindings": {
+        "two": 2,
+        "four": "four"
+    },
+    "result": [
+        1,
+        2,
+        [
+            "three",
+            "four"
+        ]
+    ]
+}

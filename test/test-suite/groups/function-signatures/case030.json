@@ -1,0 +1,6 @@
+{
+    "expr": "λ($arr)<a<n>>{$arr}([\"3\"]) ",
+    "dataset": null,
+    "bindings": {},
+    "code": "T0412"
+}

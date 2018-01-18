@@ -1,0 +1,6 @@
+{
+    "expr": "            (              $f := function($n){()};              $f(1)            ) ",
+    "dataset": null,
+    "bindings": {},
+    "undefinedResult": true
+}

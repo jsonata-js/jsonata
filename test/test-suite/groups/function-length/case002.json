@@ -1,0 +1,6 @@
+{
+    "expr": "$length(missing)",
+    "dataset": null,
+    "bindings": {},
+    "undefinedResult": true
+}

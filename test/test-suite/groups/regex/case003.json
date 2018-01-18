@@ -1,0 +1,6 @@
+{
+    "expr": "$contains(\"ababbxabbcc\",/ab+/)",
+    "dataset": null,
+    "bindings": {},
+    "result": true
+}

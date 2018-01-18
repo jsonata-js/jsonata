@@ -1,0 +1,10 @@
+{
+    "expr": "λ($arr)<a<a<n>>>{$arr}([[1]])",
+    "dataset": null,
+    "bindings": {},
+    "result": [
+        [
+            1
+        ]
+    ]
+}

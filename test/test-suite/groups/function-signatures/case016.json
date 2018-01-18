@@ -1,0 +1,6 @@
+{
+    "expr": "λ($arr, $sep)<as?:s>{$join($arr, $sep)}([\"a\", \"b\"], \"-\")",
+    "dataset": null,
+    "bindings": {},
+    "result": "a-b"
+}

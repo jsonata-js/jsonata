@@ -1,0 +1,8 @@
+{
+    "expr": "bar",
+    "data": {
+        "bar": 6.54
+    },
+    "bindings": {},
+    "result": 6.54
+}

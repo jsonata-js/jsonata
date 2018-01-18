@@ -1,0 +1,6 @@
+{
+    "expr": "            (              $even := function($n) { $n = 0 ? true : $odd($n-1) };               $odd := function($n) { $n = 0 ? false : $even($n-1) };               $even(65) )",
+    "dataset": null,
+    "bindings": {},
+    "result": false
+}

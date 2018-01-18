@@ -1,0 +1,6 @@
+{
+    "expr": "Account.Order.OrderID ~> $join()",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": "order103order104"
+}

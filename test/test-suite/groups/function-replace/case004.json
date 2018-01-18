@@ -1,0 +1,6 @@
+{
+    "expr": "$replace(nothing, \"at\", \"it\", 2)",
+    "dataset": null,
+    "bindings": {},
+    "undefinedResult": true
+}

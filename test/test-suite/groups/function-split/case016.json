@@ -1,0 +1,6 @@
+{
+    "expr": "$split(12345, 3)",
+    "dataset": null,
+    "bindings": {},
+    "code": "T0410"
+}

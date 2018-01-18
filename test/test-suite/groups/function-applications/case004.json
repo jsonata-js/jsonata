@@ -1,0 +1,6 @@
+{
+    "expr": "Account.Order.Product.(Price * Quantity) ~> $sum()",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": 336.36
+}

@@ -1,0 +1,11 @@
+{
+    "expr": "Account.Order.Product.$replace($.\"Product Name\", /hat/i, function($match) { \"foo\" })",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        "Bowler foo",
+        "Trilby foo",
+        "Bowler foo",
+        "Cloak"
+    ]
+}

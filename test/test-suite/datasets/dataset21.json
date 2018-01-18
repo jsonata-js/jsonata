@@ -1,0 +1,22 @@
+{
+    "Salutation": "Mr",
+    "Name": "Alexander",
+    "MiddleName": "John",
+    "Surname": "Smith",
+    "Cars": 3,
+    "Employment": {
+        "Name": "IBM UK",
+        "ContractType": "permanent",
+        "Role": "Senior Physician",
+        "Years": 12,
+        "Executive.Compensation": 1400000
+    },
+    "Qualifications": [
+        "GP",
+        "Consultant Opthalmologist"
+    ],
+    "Salary": null,
+    "NI.Number": "NO10FURBZNESS",
+    "敷": "Steve",
+    "Español": "/ˈspænɪʃ/"
+}

@@ -1,0 +1,8 @@
+{
+    "expr": "(  $factorial := function($n){$n = 0 ? 1 : $n * $factorial($n - 1)};  $factorial(100))             ",
+    "dataset": null,
+    "timelimit": 1000,
+    "depth": 302,
+    "bindings": {},
+    "code": "U1001"
+}

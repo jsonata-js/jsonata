@@ -1,0 +1,8 @@
+{
+    "expr": "(  $inf := function(){$inf()};  $inf())",
+    "dataset": null,
+    "timelimit": 1000,
+    "depth": 500,
+    "bindings": {},
+    "code": "U1001"
+}

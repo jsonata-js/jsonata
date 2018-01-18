@@ -1,0 +1,8 @@
+{
+    "expr": "bar",
+    "data": {
+        "bar": "\"Hello\""
+    },
+    "bindings": {},
+    "result": "\"Hello\""
+}

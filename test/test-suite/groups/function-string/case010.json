@@ -1,0 +1,6 @@
+{
+    "expr": "$string(false)",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": "false"
+}

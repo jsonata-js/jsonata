@@ -1,0 +1,6 @@
+{
+    "expr": "(  $data := {    \"one\": [1,2,3,4,5],    \"two\": [5,4,3,2,1]  };  $add := function($x){$x*$x};  $map($add) )  ",
+    "dataset": null,
+    "bindings": {},
+    "code": "T0410"
+}

@@ -1,0 +1,6 @@
+{
+    "expr": "$length(\"\\uD834\\uDD1E\")",
+    "dataset": null,
+    "bindings": {},
+    "result": 2
+}

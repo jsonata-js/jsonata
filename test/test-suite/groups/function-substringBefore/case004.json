@@ -1,0 +1,6 @@
+{
+    "expr": "$substringBefore(blah, \"He\")",
+    "dataset": "dataset5",
+    "bindings": {},
+    "undefinedResult": true
+}

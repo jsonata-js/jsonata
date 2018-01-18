@@ -1,0 +1,19 @@
+{
+    "state": {
+        "tempReadings": [
+            27.2,
+            28.9,
+            28,
+            28.2,
+            28.4
+        ],
+        "readingsCount": 5,
+        "sumTemperatures": 140.7,
+        "avgTemperature": 28.14,
+        "maxTemperature": 28.9,
+        "minTemperature": 27.2
+    },
+    "event": {
+        "t": 28.4
+    }
+}

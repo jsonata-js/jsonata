@@ -1,0 +1,6 @@
+{
+    "expr": "(4 + 2) / 2",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": 3
+}

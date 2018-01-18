@@ -1,0 +1,6 @@
+{
+    "expr": "$number(\"-0.05\")",
+    "dataset": null,
+    "bindings": {},
+    "result": -0.05
+}

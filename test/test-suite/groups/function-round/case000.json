@@ -1,0 +1,6 @@
+{
+    "expr": "$round(4)",
+    "dataset": null,
+    "bindings": {},
+    "result": 4
+}

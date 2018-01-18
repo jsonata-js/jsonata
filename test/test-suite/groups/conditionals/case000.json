@@ -1,0 +1,6 @@
+{
+    "expr": "[\"Red\"[$$=\"Bus\"], \"White\"[$$=\"Police Car\"]][0]",
+    "data": "Bus",
+    "bindings": {},
+    "result": "Red"
+}

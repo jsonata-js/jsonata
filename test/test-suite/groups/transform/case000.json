@@ -1,0 +1,49 @@
+{
+    "expr": "{'Order': Account.Order.{  'ID': OrderID,  'Product': Product.{    'SKU': ProductID,    'Details': {      'Weight': Description.Weight,      'Dimensions': Description.(Width & ' x ' & Height & ' x ' & Depth)    }  },  'Total Price': $sum(Product.(Price * Quantity))}}",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": {
+        "Order": [
+            {
+                "ID": "order103",
+                "Product": [
+                    {
+                        "SKU": 858383,
+                        "Details": {
+                            "Weight": 0.75,
+                            "Dimensions": "300 x 200 x 210"
+                        }
+                    },
+                    {
+                        "SKU": 858236,
+                        "Details": {
+                            "Weight": 0.6,
+                            "Dimensions": "300 x 200 x 210"
+                        }
+                    }
+                ],
+                "Total Price": 90.57000000000001
+            },
+            {
+                "ID": "order104",
+                "Product": [
+                    {
+                        "SKU": 858383,
+                        "Details": {
+                            "Weight": 0.75,
+                            "Dimensions": "300 x 200 x 210"
+                        }
+                    },
+                    {
+                        "SKU": 345664,
+                        "Details": {
+                            "Weight": 2,
+                            "Dimensions": "30 x 20 x 210"
+                        }
+                    }
+                ],
+                "Total Price": 245.79000000000002
+            }
+        ]
+    }
+}

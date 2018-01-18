@@ -1,0 +1,12 @@
+{
+    "expr": "$reverse([1..5])",
+    "dataset": "dataset1",
+    "bindings": {},
+    "result": [
+        5,
+        4,
+        3,
+        2,
+        1
+    ]
+}

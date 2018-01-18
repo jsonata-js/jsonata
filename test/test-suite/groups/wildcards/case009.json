@@ -1,0 +1,9 @@
+{
+    "expr": "Account[$$.Account.`Account Name` = \"Firefly\"].*[OrderID=\"order104\"].Product.Price",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        34.45,
+        107.99
+    ]
+}

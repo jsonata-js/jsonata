@@ -1,0 +1,12 @@
+{
+    "expr": "(  $data := {    \"one\": [1,2,3,4,5],    \"two\": [5,4,3,2,1]  };  $map($zip($data.one, $data.two), $sum)) ",
+    "data": null,
+    "bindings": {},
+    "result": [
+        6,
+        6,
+        6,
+        6,
+        6
+    ]
+}

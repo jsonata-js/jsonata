@@ -1,0 +1,18 @@
+{
+    "expr": "[\"foo.bar\", foo.bar, [\"foo.baz\", foo.blah.baz]]",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": [
+        "foo.bar",
+        42,
+        [
+            "foo.baz",
+            {
+                "fud": "hello"
+            },
+            {
+                "fud": "world"
+            }
+        ]
+    ]
+}

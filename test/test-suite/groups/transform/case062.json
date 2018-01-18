@@ -1,0 +1,6 @@
+{
+    "expr": "$uppercase(Employment.Invalid)",
+    "dataset": "dataset21",
+    "bindings": {},
+    "undefinedResult": true
+}

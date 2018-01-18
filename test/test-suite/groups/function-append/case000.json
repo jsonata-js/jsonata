@@ -1,0 +1,11 @@
+{
+    "expr": "$append([1,2], [3,4])",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        1,
+        2,
+        3,
+        4
+    ]
+}

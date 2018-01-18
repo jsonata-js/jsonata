@@ -1,0 +1,10 @@
+{
+    "expr": "maz.rar",
+    "data": {
+        "maz": {
+            "rar": 42
+        }
+    },
+    "bindings": {},
+    "result": 42
+}

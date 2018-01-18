@@ -1,0 +1,12 @@
+{
+    "expr": "$[x=6][y=3].number",
+    "data": [
+        {
+            "x": 6,
+            "y": 2,
+            "number": 7
+        }
+    ],
+    "bindings": {},
+    "undefinedResult": true
+}

@@ -1,0 +1,6 @@
+{
+    "expr": "$count([1,2,3,4]) / 2",
+    "dataset": null,
+    "bindings": {},
+    "result": 2
+}

@@ -1,0 +1,6 @@
+{
+    "expr": "$contains(\"23\", 3)",
+    "dataset": null,
+    "bindings": {},
+    "code": "T0410"
+}

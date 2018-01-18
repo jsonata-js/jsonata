@@ -1,0 +1,6 @@
+{
+    "expr": "$lowercase(Salutation)",
+    "dataset": "dataset21",
+    "bindings": {},
+    "result": "mr"
+}

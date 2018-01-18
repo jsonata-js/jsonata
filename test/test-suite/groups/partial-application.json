@@ -1,0 +1,32 @@
+[
+    {
+        "expr": "(  $add := function($x, $y){$x+$y};  $add2 := $add(?, 2);  $add2(3))",
+        "dataset": 7,
+        "result": 5,
+        "bindings": {}
+    },
+    {
+        "expr": "(  $add := function($x, $y){$x+$y};  $add2 := $add(2, ?);  $add2(4))",
+        "dataset": 7,
+        "result": 6,
+        "bindings": {}
+    },
+    {
+        "expr": "(  $firstn := $substring(?, 0, ?);  $first5 := $firstn(?, 5);  $first5(\"Hello World\"))",
+        "dataset": 7,
+        "result": "Hello",
+        "bindings": {}
+    },
+    {
+        "expr": "substring(?, 0, ?)",
+        "dataset": 1,
+        "code": "T1007",
+        "bindings": {}
+    },
+    {
+        "expr": "unknown(?)",
+        "dataset": 1,
+        "code": "T1008",
+        "bindings": {}
+    }
+]

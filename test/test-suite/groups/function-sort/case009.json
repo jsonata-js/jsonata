@@ -1,0 +1,11 @@
+{
+    "expr": "$sort(Account.Order.Product, function($a, $b) { $a.Price > $b.Price }).SKU",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        "0406634348",
+        "0406654608",
+        "040657863",
+        "0406654603"
+    ]
+}

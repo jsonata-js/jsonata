@@ -1,0 +1,6 @@
+{
+    "expr": "$average(Account.Order.Product.(Price * Quantity))",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": 84.09
+}

@@ -1,0 +1,8 @@
+{
+    "expr": "foo",
+    "data": {
+        "stuff": 4
+    },
+    "bindings": {},
+    "undefinedResult": true
+}

@@ -1,0 +1,15 @@
+{
+    "expr": "(  $range := function($start, $end, $step) { (      $step:=($step?$step:1);        $start+$step > $end ? $start : $append($start, $range($start+$step, $end, $step))   )};  $range(0,15,2))        ",
+    "dataset": null,
+    "bindings": {},
+    "result": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14
+    ]
+}

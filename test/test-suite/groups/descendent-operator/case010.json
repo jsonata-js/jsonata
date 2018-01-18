@@ -1,0 +1,6 @@
+{
+    "expr": "(foo.**.fud)[0]",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "hello"
+}

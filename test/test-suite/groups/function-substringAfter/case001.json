@@ -1,0 +1,6 @@
+{
+    "expr": "$substringAfter(\"Hello World\", \"l\")",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": "lo World"
+}

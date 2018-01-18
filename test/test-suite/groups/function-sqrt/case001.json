@@ -1,0 +1,6 @@
+{
+    "expr": "$sqrt(2)",
+    "dataset": null,
+    "bindings": {},
+    "result": 1.4142135623730951
+}

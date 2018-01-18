@@ -1,0 +1,6 @@
+{
+    "expr": "42 ~> \"hello\"",
+    "dataset": "dataset5",
+    "bindings": {},
+    "code": "T2006"
+}

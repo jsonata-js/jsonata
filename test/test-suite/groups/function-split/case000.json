@@ -1,0 +1,9 @@
+{
+    "expr": "$split(\"Hello World\", \" \")",
+    "dataset": null,
+    "bindings": {},
+    "result": [
+        "Hello",
+        "World"
+    ]
+}

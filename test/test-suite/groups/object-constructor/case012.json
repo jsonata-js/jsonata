@@ -1,0 +1,19 @@
+{
+    "expr": "Account.Order.Product.{$string(ProductID): Price}",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        {
+            "858383": 34.45
+        },
+        {
+            "858236": 21.67
+        },
+        {
+            "858383": 34.45
+        },
+        {
+            "345664": 107.99
+        }
+    ]
+}

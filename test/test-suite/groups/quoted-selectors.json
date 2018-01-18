@@ -1,0 +1,78 @@
+[
+    {
+        "expr": "foo.\"blah\"",
+        "dataset": 0,
+        "result": [
+            {
+                "baz": {
+                    "fud": "hello"
+                }
+            },
+            {
+                "baz": {
+                    "fud": "world"
+                }
+            },
+            {
+                "bazz": "gotcha"
+            }
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "foo.\"blah\".baz.'fud'",
+        "dataset": 0,
+        "result": ["hello", "world"],
+        "bindings": {}
+    },
+    {
+        "expr": "\"foo\".\"blah\".\"baz\".\"fud\"",
+        "dataset": 0,
+        "result": ["hello", "world"],
+        "bindings": {}
+    },
+    {
+        "expr": "foo.\"blah.baz\"",
+        "dataset": 0,
+        "result": "here",
+        "bindings": {}
+    },
+    {
+        "expr": "foo.`blah`",
+        "dataset": 0,
+        "result": [
+            {
+                "baz": {
+                    "fud": "hello"
+                }
+            },
+            {
+                "baz": {
+                    "fud": "world"
+                }
+            },
+            {
+                "bazz": "gotcha"
+            }
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "foo.`blah`.baz.'fud'",
+        "dataset": 0,
+        "result": ["hello", "world"],
+        "bindings": {}
+    },
+    {
+        "expr": "`foo`.`blah`.`baz`.`fud`",
+        "dataset": 0,
+        "result": ["hello", "world"],
+        "bindings": {}
+    },
+    {
+        "expr": "foo.`blah.baz`",
+        "dataset": 0,
+        "result": "here",
+        "bindings": {}
+    }
+]

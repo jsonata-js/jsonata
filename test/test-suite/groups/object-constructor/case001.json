@@ -1,0 +1,8 @@
+{
+    "expr": "{\"key\": \"value\"}",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": {
+        "key": "value"
+    }
+}

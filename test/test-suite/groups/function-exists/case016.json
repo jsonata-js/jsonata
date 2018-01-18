@@ -1,0 +1,6 @@
+{
+    "expr": "$exists(Account.Order.Product.Price)",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": true
+}

@@ -1,0 +1,6 @@
+{
+    "expr": "$replace(\"the cat sat on the mat\", \"at\", \"it\", 0)",
+    "dataset": null,
+    "bindings": {},
+    "result": "the cat sat on the mat"
+}

@@ -1,0 +1,6 @@
+{
+    "expr": "$substringAfter(Salutation & \" \" & MiddleName &\" \" & Surname, MiddleName)",
+    "dataset": "dataset21",
+    "bindings": {},
+    "result": " Smith"
+}

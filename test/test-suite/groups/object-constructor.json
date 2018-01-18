@@ -1,0 +1,314 @@
+[
+    {
+        "expr": "{}",
+        "dataset": 0,
+        "result": {},
+        "bindings": {}
+    },
+    {
+        "expr": "{\"key\": \"value\"}",
+        "dataset": 0,
+        "result": {
+            "key": "value"
+        },
+        "bindings": {}
+    },
+    {
+        "expr": "{\"one\": 1, \"two\": 2}",
+        "dataset": 0,
+        "result": {
+            "one": 1,
+            "two": 2
+        },
+        "bindings": {}
+    },
+    {
+        "expr": "{\"one\": 1, \"two\": 2}.two",
+        "dataset": 0,
+        "result": 2,
+        "bindings": {}
+    },
+    {
+        "expr": "{\"one\": 1, \"two\": {\"three\": 3, \"four\": \"4\"}}",
+        "dataset": 0,
+        "result": {
+            "one": 1,
+            "two": {
+                "three": 3,
+                "four": "4"
+            }
+        },
+        "bindings": {}
+    },
+    {
+        "expr": "{\"one\": 1, \"two\": [3, \"four\"]}",
+        "dataset": 0,
+        "result": {
+            "one": 1,
+            "two": [3, "four"]
+        },
+        "bindings": {}
+    },
+    {
+        "expr": "{\"test\": ()}",
+        "dataset": 20,
+        "result": {},
+        "bindings": {}
+    },
+    {
+        "expr": "blah.{}",
+        "dataset": 0,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order{OrderID: Product.\"Product Name\"}",
+        "dataset": 7,
+        "result": {
+            "order103": ["Bowler Hat", "Trilby hat"],
+            "order104": ["Bowler Hat", "Cloak"]
+        },
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.{OrderID: Product.\"Product Name\"}",
+        "dataset": 7,
+        "result": [
+            {
+                "order103": ["Bowler Hat", "Trilby hat"]
+            },
+            {
+                "order104": ["Bowler Hat", "Cloak"]
+            }
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.Product{$string(ProductID): Price}",
+        "dataset": 7,
+        "result": {
+            "345664": 107.99,
+            "858236": 21.67,
+            "858383": [34.45, 34.45]
+        },
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.Product{$string(ProductID): (Price)[0]}",
+        "dataset": 7,
+        "result": {
+            "345664": 107.99,
+            "858236": 21.67,
+            "858383": 34.45
+        },
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.Product.{$string(ProductID): Price}",
+        "dataset": 7,
+        "result": [
+            {
+                "858383": 34.45
+            },
+            {
+                "858236": 21.67
+            },
+            {
+                "858383": 34.45
+            },
+            {
+                "345664": 107.99
+            }
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.Product{ProductID: \"Product Name\"}",
+        "dataset": 7,
+        "code": "T1003",
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.Product.{ProductID: \"Product Name\"}",
+        "dataset": 7,
+        "code": "T1003",
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order{OrderID: $sum(Product.(Price*Quantity))}",
+        "dataset": 7,
+        "result": {
+            "order103": 90.57000000000001,
+            "order104": 245.79000000000002
+        },
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.{OrderID: $sum(Product.(Price*Quantity))}",
+        "dataset": 7,
+        "result": [
+            {
+                "order103": 90.57000000000001
+            },
+            {
+                "order104": 245.79000000000002
+            }
+        ],
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.Product{$.\"Product Name\": Price, $.\"Product Name\": Price}",
+        "dataset": 7,
+        "result": {
+            "Bowler Hat": [34.45, 34.45, 34.45, 34.45],
+            "Trilby hat": [21.67, 21.67],
+            "Cloak": [107.99, 107.99]
+        },
+        "bindings": {}
+    },
+    {
+        "expr": "Account.Order.Product{`Product Name`: Price, `Product Name`: Price}",
+        "dataset": 7,
+        "result": {
+            "Bowler Hat": [34.45, 34.45, 34.45, 34.45],
+            "Trilby hat": [21.67, 21.67],
+            "Cloak": [107.99, 107.99]
+        },
+        "bindings": {}
+    },
+    {
+        "expr":
+            "Account.Order{  OrderID: {    \"TotalPrice\":$sum(Product.(Price * Quantity)),    \"Items\": Product.\"Product Name\"  }}",
+        "dataset": 7,
+        "result": {
+            "order103": {
+                "TotalPrice": 90.57000000000001,
+                "Items": ["Bowler Hat", "Trilby hat"]
+            },
+            "order104": {
+                "TotalPrice": 245.79000000000002,
+                "Items": ["Bowler Hat", "Cloak"]
+            }
+        },
+        "bindings": {}
+    },
+    {
+        "expr":
+            "{  \"Order\": Account.Order.{      \"ID\": OrderID,      \"Product\": Product.{          \"Name\": $.\"Product Name\",          \"SKU\": ProductID,          \"Details\": {            \"Weight\": Description.Weight,            \"Dimensions\": Description.(Width & \" x \" & Height & \" x \" & Depth)          }        },      \"Total Price\": $sum(Product.(Price * Quantity))    }}",
+        "dataset": 7,
+        "result": {
+            "Order": [
+                {
+                    "ID": "order103",
+                    "Product": [
+                        {
+                            "Name": "Bowler Hat",
+                            "SKU": 858383,
+                            "Details": {
+                                "Weight": 0.75,
+                                "Dimensions": "300 x 200 x 210"
+                            }
+                        },
+                        {
+                            "Name": "Trilby hat",
+                            "SKU": 858236,
+                            "Details": {
+                                "Weight": 0.6,
+                                "Dimensions": "300 x 200 x 210"
+                            }
+                        }
+                    ],
+                    "Total Price": 90.57000000000001
+                },
+                {
+                    "ID": "order104",
+                    "Product": [
+                        {
+                            "Name": "Bowler Hat",
+                            "SKU": 858383,
+                            "Details": {
+                                "Weight": 0.75,
+                                "Dimensions": "300 x 200 x 210"
+                            }
+                        },
+                        {
+                            "Name": "Cloak",
+                            "SKU": 345664,
+                            "Details": {
+                                "Weight": 2,
+                                "Dimensions": "30 x 20 x 210"
+                            }
+                        }
+                    ],
+                    "Total Price": 245.79000000000002
+                }
+            ]
+        },
+        "bindings": {}
+    },
+    {
+        "expr":
+            "{  \"Order\": Account.Order.{      \"ID\": OrderID,      \"Product\": Product.{          \"Name\": `Product Name`,          \"SKU\": ProductID,          \"Details\": {            \"Weight\": Description.Weight,            \"Dimensions\": Description.(Width & \" x \" & Height & \" x \" & Depth)          }        },      \"Total Price\": $sum(Product.(Price * Quantity))    }}",
+        "dataset": 7,
+        "result": {
+            "Order": [
+                {
+                    "ID": "order103",
+                    "Product": [
+                        {
+                            "Name": "Bowler Hat",
+                            "SKU": 858383,
+                            "Details": {
+                                "Weight": 0.75,
+                                "Dimensions": "300 x 200 x 210"
+                            }
+                        },
+                        {
+                            "Name": "Trilby hat",
+                            "SKU": 858236,
+                            "Details": {
+                                "Weight": 0.6,
+                                "Dimensions": "300 x 200 x 210"
+                            }
+                        }
+                    ],
+                    "Total Price": 90.57000000000001
+                },
+                {
+                    "ID": "order104",
+                    "Product": [
+                        {
+                            "Name": "Bowler Hat",
+                            "SKU": 858383,
+                            "Details": {
+                                "Weight": 0.75,
+                                "Dimensions": "300 x 200 x 210"
+                            }
+                        },
+                        {
+                            "Name": "Cloak",
+                            "SKU": 345664,
+                            "Details": {
+                                "Weight": 2,
+                                "Dimensions": "30 x 20 x 210"
+                            }
+                        }
+                    ],
+                    "Total Price": 245.79000000000002
+                }
+            ]
+        },
+        "bindings": {}
+    },
+    {
+        "expr": "Phone{type: $join(number, \", \"), \"phone\":number}",
+        "dataset": 2,
+        "result": {
+            "home": "0203 544 1234",
+            "phone": ["0203 544 1234", "01962 001234", "01962 001235", "077 7700 1234"],
+            "office": "01962 001234, 01962 001235",
+            "mobile": "077 7700 1234"
+        },
+        "bindings": {}
+    }
+]

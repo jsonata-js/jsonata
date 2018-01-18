@@ -1,0 +1,6 @@
+{
+    "expr": "Account.Order.Product[$contains($.\"Product Name\", /hat/)].ProductID",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": 858236
+}

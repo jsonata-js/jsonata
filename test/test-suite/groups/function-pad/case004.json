@@ -1,0 +1,6 @@
+{
+    "expr": "$pad(\"foo\", 1)",
+    "dataset": null,
+    "bindings": {},
+    "result": "foo"
+}

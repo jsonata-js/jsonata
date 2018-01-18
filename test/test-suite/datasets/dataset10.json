@@ -1,0 +1,22 @@
+{
+    "foo": {
+        "bar": 42,
+        "blah": [
+            {
+                "baz": {
+                    "fud": "hello"
+                }
+            },
+            {
+                "buz": {
+                    "fud": "world"
+                }
+            },
+            {
+                "bazz": "gotcha"
+            }
+        ],
+        "blah.baz": "here"
+    },
+    "bar": 98
+}

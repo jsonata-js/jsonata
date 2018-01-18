@@ -1,0 +1,6 @@
+{
+    "expr": "$toMillis(\"foo\")",
+    "dataset": "dataset5",
+    "bindings": {},
+    "code": "D3110"
+}

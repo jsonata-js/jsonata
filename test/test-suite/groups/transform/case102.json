@@ -1,0 +1,6 @@
+{
+    "expr": "detail.meta",
+    "dataset": "dataset23",
+    "bindings": {},
+    "result": "boo"
+}

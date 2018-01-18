@@ -1,0 +1,259 @@
+[
+    {
+        "expr": "Account.Order.[Product.Price]",
+        "dataset": 7,
+        "result": [[34.45, 21.67], [34.45, 107.99]],
+        "bindings": {}
+    },
+    {
+        "expr": "$.nest0",
+        "dataset": 12,
+        "result": [1, 2, 3, 4],
+        "bindings": {}
+    },
+    {
+        "expr": "nest0",
+        "dataset": 12,
+        "result": [1, 2, 3, 4],
+        "bindings": {}
+    },
+    {
+        "expr": "$[0]",
+        "dataset": 12,
+        "result": {
+            "nest0": [1, 2]
+        },
+        "bindings": {}
+    },
+    {
+        "expr": "$[1]",
+        "dataset": 12,
+        "result": {
+            "nest0": [3, 4]
+        },
+        "bindings": {}
+    },
+    {
+        "expr": "$[-1]",
+        "dataset": 12,
+        "result": {
+            "nest0": [3, 4]
+        },
+        "bindings": {}
+    },
+    {
+        "expr": "$[0].nest0",
+        "dataset": 12,
+        "result": [1, 2],
+        "bindings": {}
+    },
+    {
+        "expr": "$[1].nest0",
+        "dataset": 12,
+        "result": [3, 4],
+        "bindings": {}
+    },
+    {
+        "expr": "$[0].nest0[0]",
+        "dataset": 12,
+        "result": 1,
+        "bindings": {}
+    },
+
+    {
+        "expr": "nest0.[nest1.[nest2.[nest3]]]",
+        "dataset": 13,
+        "result": [[[[1], [2]], [[3], [4]]], [[[5], [6]], [[7], [8]]]],
+        "bindings": {}
+    },
+    {
+        "expr": "nest0.nest1.[nest2.[nest3]]",
+        "dataset": 13,
+        "result": [[[1], [2]], [[3], [4]], [[5], [6]], [[7], [8]]],
+        "bindings": {}
+    },
+    {
+        "expr": "nest0.[nest1.nest2.[nest3]]",
+        "dataset": 13,
+        "result": [[[1], [2], [3], [4]], [[5], [6], [7], [8]]],
+        "bindings": {}
+    },
+    {
+        "expr": "nest0.[nest1.[nest2.nest3]]",
+        "dataset": 13,
+        "result": [[[1, 2], [3, 4]], [[5, 6], [7, 8]]],
+        "bindings": {}
+    },
+    {
+        "expr": "nest0.[nest1.nest2.nest3]",
+        "dataset": 13,
+        "result": [[1, 2, 3, 4], [5, 6, 7, 8]],
+        "bindings": {}
+    },
+    {
+        "expr": "nest0.nest1.[nest2.nest3]",
+        "dataset": 13,
+        "result": [[1, 2], [3, 4], [5, 6], [7, 8]],
+        "bindings": {}
+    },
+    {
+        "expr": "nest0.nest1.nest2.[nest3]",
+        "dataset": 13,
+        "result": [[1], [2], [3], [4], [5], [6], [7], [8]],
+        "bindings": {}
+    },
+    {
+        "expr": "nest0.nest1.nest2.nest3",
+        "dataset": 13,
+        "result": [1, 2, 3, 4, 5, 6, 7, 8],
+        "bindings": {}
+    },
+    {
+        "expr": "nest0.[nest1.[nest2.[nest3]]]",
+        "dataset": 61,
+        "result": [[[[1], [2]], [[3], [4]]], [[[5], [6]], [[7], [8]]]],
+        "bindings": {}
+    },
+    {
+        "expr": "nest0.nest1.[nest2.[nest3]]",
+        "dataset": 61,
+        "result": [[[1], [2]], [[3], [4]], [[5], [6]], [[7], [8]]],
+        "bindings": {}
+    },
+    {
+        "expr": "nest0.[nest1.nest2.[nest3]]",
+        "dataset": 61,
+        "result": [[[1], [2], [3], [4]], [[5], [6], [7], [8]]],
+        "bindings": {}
+    },
+    {
+        "expr": "nest0.[nest1.[nest2.nest3]]",
+        "dataset": 61,
+        "result": [[[1, 2], [3, 4]], [[5, 6], [7, 8]]],
+        "bindings": {}
+    },
+    {
+        "expr": "nest0.[nest1.nest2.nest3]",
+        "dataset": 61,
+        "result": [[1, 2, 3, 4], [5, 6, 7, 8]],
+        "bindings": {}
+    },
+    {
+        "expr": "nest0.nest1.[nest2.nest3]",
+        "dataset": 61,
+        "result": [[1, 2], [3, 4], [5, 6], [7, 8]],
+        "bindings": {}
+    },
+    {
+        "expr": "nest0.nest1.nest2.[nest3]",
+        "dataset": 61,
+        "result": [[1], [2], [3], [4], [5], [6], [7], [8]],
+        "bindings": {}
+    },
+    {
+        "expr": "nest0.nest1.nest2.nest3",
+        "dataset": 61,
+        "result": [1, 2, 3, 4, 5, 6, 7, 8],
+        "bindings": {}
+    },
+
+    {
+        "expr": "{\"a\": 1 }.a",
+        "dataset": -1,
+        "result": 1
+    },
+    {
+        "expr": "a",
+        "data": {"a": 1 },
+        "result": 1
+    },
+    {
+        "expr": "{\"a\": [1] }.a",
+        "dataset": -1,
+        "result": [1]
+    },
+    {
+        "expr": "a",
+        "data": {"a": [1] },
+        "result": [1]
+    },
+    {
+        "expr": "{\"a\": [[1]] }.a",
+        "dataset": -1,
+        "result": [[1]]
+    },
+    {
+        "expr": "a",
+        "data": {"a": [[1]] },
+        "result": [[1]]
+    },
+    {
+        "expr": "[{\"a\":[1,2]}, {\"a\":[3]}].a",
+        "dataset": -1,
+        "result": [1,2,3]
+    },
+    {
+        "expr": "a",
+        "data": [{"a":[1,2]}, {"a":[3]}],
+        "result": [1,2,3]
+    },
+    {
+        "expr": "[{\"a\":[{\"b\":[1]}, {\"b\":[2]}]}, {\"a\":[{\"b\":[3]}, {\"b\":[4]}]}].a[0].b",
+        "dataset": -1,
+        "result": [1,3]
+    },
+    {
+        "expr": "a[0].b",
+        "data": [{"a":[{"b":[1]}, {"b":[2]}]}, {"a":[{"b":[3]}, {"b":[4]}]}],
+        "result": [1,3]
+    },
+    {
+        "expr": "a.b[0]",
+        "data": [{"a":[{"b":[1]}, {"b":[2]}]}, {"a":[{"b":[3]}, {"b":[4]}]}],
+        "result": [1,2,3,4]
+    },
+    {
+        "expr": "Phone[type=\"mobile\"].number",
+        "dataset": 2,
+        "result": "077 7700 1234",
+        "bindings": {}
+    },
+    {
+        "expr": "Phone[type=\"mobile\"][].number",
+        "dataset": 2,
+        "result": ["077 7700 1234"],
+        "bindings": {}
+    },
+    {
+        "expr": "Phone[][type=\"mobile\"].number",
+        "dataset": 2,
+        "result": ["077 7700 1234"],
+        "bindings": {}
+    },
+    {
+        "expr": "Phone[type=\"office\"][].number",
+        "dataset": 2,
+        "result": ["01962 001234", "01962 001235"],
+        "bindings": {}
+    },
+    {
+        "expr": "Phone{type: number}",
+        "dataset": 2,
+        "result": {
+            "home": "0203 544 1234",
+            "office": ["01962 001234", "01962 001235"],
+            "mobile": "077 7700 1234"
+        },
+        "bindings": {}
+    },
+    {
+        "expr": "Phone{type: number[]}",
+        "dataset": 2,
+        "result": {
+            "home": ["0203 544 1234"],
+            "office": ["01962 001234", "01962 001235"],
+            "mobile": ["077 7700 1234"]
+        },
+        "bindings": {}
+    }
+]

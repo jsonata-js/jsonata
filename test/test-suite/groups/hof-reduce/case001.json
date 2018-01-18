@@ -1,0 +1,6 @@
+{
+    "expr": "(  $concat := function($s){function($a, $b){$string($a) & $s & $string($b)}};  $comma_join := $concat(' ... ');  $reduce([1,2,3,4,5], $comma_join))      ",
+    "data": null,
+    "bindings": {},
+    "result": "1 ... 2 ... 3 ... 4 ... 5"
+}

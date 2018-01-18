@@ -1,0 +1,22 @@
+[
+    {
+        "expr": "$clone(foo)",
+        "dataset": 7,
+        "undefinedResult": true,
+        "bindings": {}
+    },
+    {
+        "expr": "$clone({})",
+        "dataset": 7,
+        "result": {},
+        "bindings": {}
+    },
+    {
+        "expr": "$clone({\"a\": 1})",
+        "dataset": 7,
+        "result": {
+            "a": 1
+        },
+        "bindings": {}
+    }
+]

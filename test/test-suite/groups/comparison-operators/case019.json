@@ -1,0 +1,6 @@
+{
+    "expr": "bar = foo.bar + 56",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": true
+}

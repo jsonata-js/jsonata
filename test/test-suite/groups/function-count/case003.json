@@ -1,0 +1,6 @@
+{
+    "expr": "$count([])",
+    "dataset": null,
+    "bindings": {},
+    "result": 0
+}

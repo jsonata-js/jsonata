@@ -1,0 +1,11 @@
+{
+    "expr": "Account.Order.Product^(Quantity, >Description.Colour).Description.Colour",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        "Orange",
+        "Black",
+        "Purple",
+        "Purple"
+    ]
+}

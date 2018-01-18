@@ -1,0 +1,15 @@
+{
+    "expr": "baz",
+    "data": {
+        "foo": {
+            "bar": 42
+        },
+        "baz": {
+            "gar": 50
+        }
+    },
+    "bindings": {},
+    "result": {
+        "gar": 50
+    }
+}
