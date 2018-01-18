@@ -39,7 +39,7 @@
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.5.2",
     "babel-runtime": "^6.23.0",
-    "browserify": "^14.4.0",
+    "browserify": "^15.2.0",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "coveralls": "^3.0.0",
@@ -47,7 +47,7 @@
     "eslint-plugin-ideal": "^0.1.3",
     "istanbul": "^0.4.5",
     "jsdoc": "^3.4.0",
-    "mocha": "^4.1.0",
+    "mocha": "^5.0.0",
     "mocha-lcov-reporter": "^1.2.0",
     "request": "^2.81.0",
     "uglify-es": "^3.0.20"
