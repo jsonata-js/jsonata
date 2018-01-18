@@ -1,0 +1,6 @@
+{
+    "expr": "- notexist",
+    "dataset": "dataset0",
+    "bindings": {},
+    "undefinedResult": true
+}
