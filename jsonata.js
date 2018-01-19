@@ -1387,9 +1387,8 @@ var jsonata = (function() {
     function isNumeric(n) {
         var isNum = false;
         if(typeof n === 'number') {
-            var num = parseFloat(n);
-            isNum = !isNaN(num);
-            if (isNum && !isFinite(num)) {
+            isNum = !isNaN(n);
+            if (isNum && !isFinite(n)) {
                 throw {
                     code: "D1001",
                     value: n,
@@ -2607,9 +2606,9 @@ var jsonata = (function() {
             if(isFunction(lhs)) {
                 // this is function chaining (func1 ~> func2)
                 // λ($f, $g) { λ($x){ $g($f($x)) } }
-                result = yield * apply(chain, [lhs, func], environment, null);
+                result = yield * apply(chain, [lhs, func], environment);
             } else {
-                result = yield * apply(func, [lhs], environment, null);
+                result = yield * apply(func, [lhs], environment);
             }
 
         }
