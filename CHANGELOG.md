@@ -1,3 +1,11 @@
+#### 1.5.0 Milestone Release
+
+- Restructured the entire test suite to be implementation language agnostic (PR #122)
+- Provide es5 as main entry point, es6 as module entry point (PR #106)
+- Added Typescript definitions to package (PR #114)
+- Changes to how 'singleton sequences' are handled (issue #93)
+- Unary negation of undefined (no match) should return undefined (issue #99)
+
 #### 1.4.1 Maintenance Release
 
 - Object transformation syntax should work with arrays of objects as well as objects (issue #94)
