@@ -1,0 +1,6 @@
+{
+    "expr": "$string(1e-6)",
+    "dataset": null,
+    "bindings": {},
+    "result": "0.000001"
+}

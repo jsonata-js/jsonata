@@ -1,0 +1,13 @@
+{
+    "expr": "($product := function($a, $b) { $a * $b };$power := function($x, $n) { $n = 0 ? 1 : $reduce([1..$n].($x), $product) };[0..5].$power(2, $))",
+    "dataset": null,
+    "bindings": {},
+    "result": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32
+    ]
+}

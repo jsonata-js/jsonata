@@ -1,0 +1,6 @@
+{
+    "expr": "($a:=1; $b:=2; $c:=($a:=4; $a+$b); $a+$c)",
+    "data": null,
+    "bindings": {},
+    "result": 7
+}

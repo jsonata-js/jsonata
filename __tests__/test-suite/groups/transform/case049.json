@@ -1,0 +1,6 @@
+{
+    "expr": "$substringAfter(\"Hola\", 'l')",
+    "dataset": "dataset21",
+    "bindings": {},
+    "result": "a"
+}

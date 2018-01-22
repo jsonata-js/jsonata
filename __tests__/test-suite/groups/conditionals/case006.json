@@ -1,0 +1,6 @@
+{
+    "expr": "Account.Order.Product.(Price < 30 ? \"Cheap\")",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": "Cheap"
+}

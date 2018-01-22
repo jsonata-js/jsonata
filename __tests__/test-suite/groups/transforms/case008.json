@@ -1,0 +1,6 @@
+{
+    "expr": "foo ~> |foo.bar|{\"Description\":\"blah\"}|",
+    "dataset": "dataset5",
+    "bindings": {},
+    "undefinedResult": true
+}

@@ -1,0 +1,6 @@
+{
+    "expr": "(  $seq := 1;  $reduce($seq, function($x){$x}))",
+    "dataset": null,
+    "bindings": {},
+    "code": "D3050"
+}

@@ -1,0 +1,11 @@
+{
+    "expr": "$reduce(Account.Order.Product.Quantity, $append)",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        2,
+        1,
+        4,
+        1
+    ]
+}

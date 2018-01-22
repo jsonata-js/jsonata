@@ -1,0 +1,6 @@
+{
+    "expr": "$uppercase(\"鯵噂ソ竹\")",
+    "dataset": "dataset21",
+    "bindings": {},
+    "result": "鯵噂ソ竹"
+}

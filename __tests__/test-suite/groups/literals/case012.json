@@ -1,0 +1,6 @@
+{
+    "expr": "\"C:\\\\Test\\\\test.txt\"",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "C:\\Test\\test.txt"
+}

@@ -1,0 +1,6 @@
+{
+    "expr": "foo.blah[-1].bazz",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "gotcha"
+}

@@ -1,0 +1,8 @@
+{
+    "expr": "$merge({\"a\":1})",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": {
+        "a": 1
+    }
+}

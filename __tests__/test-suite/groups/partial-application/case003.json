@@ -1,0 +1,6 @@
+{
+    "expr": "substring(?, 0, ?)",
+    "data": {},
+    "bindings": {},
+    "code": "T1007"
+}

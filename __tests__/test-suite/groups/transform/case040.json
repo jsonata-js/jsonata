@@ -1,0 +1,6 @@
+{
+    "expr": "$uppercase(Employment.ContractType)",
+    "dataset": "dataset21",
+    "bindings": {},
+    "result": "PERMANENT"
+}

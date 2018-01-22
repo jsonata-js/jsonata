@@ -1,0 +1,6 @@
+{
+    "expr": "$substringAfter(blah, \"ld\")",
+    "dataset": "dataset5",
+    "bindings": {},
+    "undefinedResult": true
+}

@@ -1,0 +1,6 @@
+{
+    "expr": "$replace(\"abcdefghijklmno\", /xyz/, \"$8$5$12$12$18$123\")",
+    "dataset": null,
+    "bindings": {},
+    "result": "abcdefghijklmno"
+}

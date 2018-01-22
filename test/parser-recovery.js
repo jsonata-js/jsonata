@@ -1,6 +1,6 @@
 "use strict";
 
-var jsonata = require('../jsonata');
+var jsonata = require('../lib/src').jsonata;
 var assert = require('assert');
 var chai = require("chai");
 var expect = chai.expect;

@@ -1,0 +1,11 @@
+{
+    "expr": "Account.Order.Product.Description.Colour.λ($str)<s->{$uppercase($str)}()",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        "PURPLE",
+        "ORANGE",
+        "PURPLE",
+        "BLACK"
+    ]
+}

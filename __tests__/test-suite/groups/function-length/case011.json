@@ -1,0 +1,6 @@
+{
+    "expr": "$length(true)",
+    "dataset": null,
+    "bindings": {},
+    "code": "T0410"
+}

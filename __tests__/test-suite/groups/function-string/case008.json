@@ -1,0 +1,9 @@
+{
+    "expr": "Account.Order.$string($sum(Product.(Price* Quantity)))",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        "90.57",
+        "245.79"
+    ]
+}

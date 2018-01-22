@@ -1,0 +1,6 @@
+{
+    "expr": "$split(\"a, b, c, d\", true)",
+    "dataset": null,
+    "bindings": {},
+    "code": "T0410"
+}

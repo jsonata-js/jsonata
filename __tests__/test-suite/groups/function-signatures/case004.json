@@ -1,0 +1,12 @@
+{
+    "expr": "[1..5].function($x,$y)<n-n:n>{$x+$y}(6)",
+    "dataset": null,
+    "bindings": {},
+    "result": [
+        7,
+        8,
+        9,
+        10,
+        11
+    ]
+}

@@ -1,0 +1,6 @@
+{
+    "expr": "($betweenBackets := $substringAfter(?, \"(\") ~> $substringBefore(?, \")\");$betweenBackets(\"test(foo)bar\")) ",
+    "dataset": null,
+    "bindings": {},
+    "result": "foo"
+}

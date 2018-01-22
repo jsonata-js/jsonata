@@ -1,0 +1,6 @@
+{
+    "expr": "\"hello \\\"world\\\"\"",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "hello \"world\""
+}

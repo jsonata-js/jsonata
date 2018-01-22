@@ -1,0 +1,6 @@
+{
+    "expr": "$substringBefore(\"22.55\",5)",
+    "dataset": "dataset21",
+    "bindings": {},
+    "code": "T0410"
+}

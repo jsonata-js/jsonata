@@ -1,0 +1,6 @@
+{
+    "expr": "1 + null",
+    "dataset": "dataset5",
+    "bindings": {},
+    "code": "T2002"
+}

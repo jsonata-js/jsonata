@@ -1,0 +1,6 @@
+{
+    "expr": "$string(1/0)",
+    "dataset": null,
+    "bindings": {},
+    "code": "D3001"
+}

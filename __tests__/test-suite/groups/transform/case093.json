@@ -1,0 +1,6 @@
+{
+    "expr": "$substring(\"Coca\", \"Mr\", 4)",
+    "dataset": "dataset21",
+    "bindings": {},
+    "code": "T0410"
+}

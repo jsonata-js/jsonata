@@ -1,0 +1,6 @@
+{
+    "expr": "[1 .. 5.5]",
+    "dataset": null,
+    "bindings": {},
+    "code": "T2004"
+}

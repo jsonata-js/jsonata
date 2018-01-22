@@ -1,0 +1,6 @@
+{
+    "expr": "$formatNumber(2.14*86.58,\"PREFIX##00.000###SUFFIX\")",
+    "dataset": null,
+    "bindings": {},
+    "result": "PREFIX185.2812SUFFIX"
+}

@@ -1,0 +1,6 @@
+{
+    "expr": "$uppercase(blah)",
+    "dataset": "dataset5",
+    "bindings": {},
+    "undefinedResult": true
+}

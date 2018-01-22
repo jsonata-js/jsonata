@@ -1,0 +1,9 @@
+{
+    "extends": "./tsconfig",
+    "compilerOptions": {
+        "target": "es5",
+        "module": "commonjs",
+        "outDir": "./es5",
+        "downlevelIteration": true
+    }
+}

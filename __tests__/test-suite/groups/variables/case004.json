@@ -1,0 +1,6 @@
+{
+    "expr": "$a := 5",
+    "dataset": null,
+    "bindings": {},
+    "result": 5
+}

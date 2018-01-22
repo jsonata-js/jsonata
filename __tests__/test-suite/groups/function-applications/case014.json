@@ -1,0 +1,6 @@
+{
+    "expr": "($square := function($x){$x*$x};$chain := λ($f, $g){λ($x){ $x ~> $f ~> $g }};$instructions := [$sum, $square, $string];$sumsq := $instructions ~> $reduce($chain);[1..5] ~> $sumsq()) ",
+    "dataset": null,
+    "bindings": {},
+    "result": "225"
+}

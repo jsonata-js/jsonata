@@ -1,0 +1,6 @@
+{
+    "expr": "$substring(Employment.Role, 7,4)",
+    "dataset": "dataset21",
+    "bindings": {},
+    "result": "Phys"
+}

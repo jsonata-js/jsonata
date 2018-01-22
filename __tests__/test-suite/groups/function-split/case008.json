@@ -1,0 +1,11 @@
+{
+    "expr": "$split(\"a, b, c, d\", \", \", 10)",
+    "dataset": null,
+    "bindings": {},
+    "result": [
+        "a",
+        "b",
+        "c",
+        "d"
+    ]
+}

@@ -1,0 +1,6 @@
+{
+    "expr": "$lowercase(\"Missing close brackets\"",
+    "dataset": "dataset21",
+    "bindings": {},
+    "code": "S0203"
+}

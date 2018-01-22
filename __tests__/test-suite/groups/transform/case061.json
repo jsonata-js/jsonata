@@ -1,0 +1,6 @@
+{
+    "expr": "$uppercase(Invalid)",
+    "dataset": "dataset21",
+    "bindings": {},
+    "undefinedResult": true
+}

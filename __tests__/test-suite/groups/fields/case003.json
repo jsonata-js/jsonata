@@ -1,0 +1,13 @@
+{
+    "expr": "foo.blah.baz",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": [
+        {
+            "fud": "hello"
+        },
+        {
+            "fud": "world"
+        }
+    ]
+}

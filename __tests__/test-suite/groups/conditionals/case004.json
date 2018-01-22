@@ -1,0 +1,6 @@
+{
+    "expr": "$lookup({\"Bus\": \"Red\", \"Police Car\": \"White\"}, $$)",
+    "data": "Police Car",
+    "bindings": {},
+    "result": "White"
+}

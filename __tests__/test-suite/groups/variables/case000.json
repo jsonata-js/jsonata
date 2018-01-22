@@ -1,0 +1,12 @@
+{
+    "expr": "$price.foo.bar",
+    "dataset": "dataset5",
+    "bindings": {
+        "price": {
+            "foo": {
+                "bar": 45
+            }
+        }
+    },
+    "result": 45
+}

@@ -1,0 +1,6 @@
+{
+    "expr": "function($x,$y)<n-n:n>{$x+$y}(2, 6)",
+    "dataset": null,
+    "bindings": {},
+    "result": 8
+}

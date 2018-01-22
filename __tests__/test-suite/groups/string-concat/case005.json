@@ -1,0 +1,6 @@
+{
+    "expr": "foo.(none.here & blah[1].baz.fud)",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "world"
+}

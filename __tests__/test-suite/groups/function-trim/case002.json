@@ -1,0 +1,6 @@
+{
+    "expr": "$trim()",
+    "dataset": null,
+    "bindings": {},
+    "undefinedResult": true
+}

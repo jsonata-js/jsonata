@@ -1,0 +1,6 @@
+{
+    "expr": "false and true",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": false
+}

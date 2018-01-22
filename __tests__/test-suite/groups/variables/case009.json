@@ -1,0 +1,8 @@
+{
+    "expr": "[1,2,3].$v",
+    "dataset": null,
+    "bindings": {
+        "v": []
+    },
+    "undefinedResult": true
+}

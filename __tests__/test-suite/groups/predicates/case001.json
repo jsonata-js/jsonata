@@ -1,0 +1,14 @@
+{
+    "expr": "clues[x=6][y=3].number",
+    "data": {
+        "clues": [
+            {
+                "x": 6,
+                "y": 3,
+                "number": 7
+            }
+        ]
+    },
+    "bindings": {},
+    "result": 7
+}

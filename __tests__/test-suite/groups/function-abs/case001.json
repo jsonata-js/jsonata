@@ -1,0 +1,6 @@
+{
+    "expr": "$abs(-3.7)",
+    "dataset": null,
+    "bindings": {},
+    "result": 3.7
+}

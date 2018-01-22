@@ -1,0 +1,12 @@
+{
+    "expr": "$var[1]",
+    "dataset": "dataset5",
+    "bindings": {
+        "var": [
+            1,
+            2,
+            3
+        ]
+    },
+    "result": 2
+}

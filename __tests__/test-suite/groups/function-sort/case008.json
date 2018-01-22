@@ -1,0 +1,11 @@
+{
+    "expr": "$sort(Account.Order.Product, function($a, $b) { $a.(Price * Quantity) > $b.(Price * Quantity) }).(Price & \" x \" & Quantity)",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        "21.67 x 1",
+        "34.45 x 2",
+        "107.99 x 1",
+        "34.45 x 4"
+    ]
+}

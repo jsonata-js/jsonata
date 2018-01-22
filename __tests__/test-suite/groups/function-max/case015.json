@@ -1,0 +1,9 @@
+{
+    "expr": "Account.Order.$min(Product.(Price * Quantity))",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        21.67,
+        107.99
+    ]
+}

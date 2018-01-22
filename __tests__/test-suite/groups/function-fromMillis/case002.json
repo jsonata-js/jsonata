@@ -1,0 +1,6 @@
+{
+    "expr": "$fromMillis(foo)",
+    "dataset": "dataset5",
+    "bindings": {},
+    "undefinedResult": true
+}

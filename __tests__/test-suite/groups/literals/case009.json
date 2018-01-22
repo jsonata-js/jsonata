@@ -1,0 +1,6 @@
+{
+    "expr": "\"hello\\tworld\"",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "hello\tworld"
+}

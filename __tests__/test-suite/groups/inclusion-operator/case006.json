@@ -1,0 +1,6 @@
+{
+    "expr": "\"hello\" in \"hello\"",
+    "dataset": null,
+    "bindings": {},
+    "result": true
+}

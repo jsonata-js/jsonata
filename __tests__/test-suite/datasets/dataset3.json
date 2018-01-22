@@ -1,0 +1,28 @@
+[
+    42,
+    [
+        {
+            "baz": {
+                "fud": "hello"
+            }
+        },
+        {
+            "baz": {
+                "fud": "world"
+            }
+        },
+        {
+            "bazz": "gotcha"
+        }
+    ],
+    "here",
+    {
+        "fud": "hello"
+    },
+    "hello",
+    {
+        "fud": "world"
+    },
+    "world",
+    "gotcha"
+]

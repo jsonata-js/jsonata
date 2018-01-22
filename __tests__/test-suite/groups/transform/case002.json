@@ -1,0 +1,14 @@
+{
+    "expr": "$",
+    "dataset": "dataset19",
+    "bindings": {},
+    "result": {
+        "output": {
+            "is": {
+                "same": {
+                    "as": "input"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,9 @@
+{
+    "expr": "fud",
+    "dataset": "dataset3",
+    "bindings": {},
+    "result": [
+        "hello",
+        "world"
+    ]
+}

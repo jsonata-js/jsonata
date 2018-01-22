@@ -1,0 +1,19 @@
+{
+    "expr": "Account.Order.{OrderID: Product.\"Product Name\"}",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        {
+            "order103": [
+                "Bowler Hat",
+                "Trilby hat"
+            ]
+        },
+        {
+            "order104": [
+                "Bowler Hat",
+                "Cloak"
+            ]
+        }
+    ]
+}

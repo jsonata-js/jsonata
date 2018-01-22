@@ -1,0 +1,6 @@
+{
+    "expr": "[1, 2, 3][0]",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": 1
+}

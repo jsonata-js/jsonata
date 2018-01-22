@@ -1,0 +1,6 @@
+{
+    "expr": "\"hello\" != \"world\"",
+    "dataset": null,
+    "bindings": {},
+    "result": true
+}

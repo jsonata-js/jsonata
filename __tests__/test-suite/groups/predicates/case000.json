@@ -1,0 +1,6 @@
+{
+    "expr": "nothing[x=6][y=3].number",
+    "dataset": null,
+    "bindings": {},
+    "undefinedResult": true
+}

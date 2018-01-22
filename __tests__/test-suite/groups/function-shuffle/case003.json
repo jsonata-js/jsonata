@@ -1,0 +1,8 @@
+{
+    "expr": "$shuffle([1])",
+    "dataset": "dataset1",
+    "bindings": {},
+    "result": [
+        1
+    ]
+}

@@ -1,0 +1,21 @@
+{
+    "expr": "**[*].$sift(λ($v){$v.Postcode})",
+    "dataset": "dataset1",
+    "bindings": {},
+    "result": [
+        {
+            "Address": {
+                "Street": "Hursley Park",
+                "City": "Winchester",
+                "Postcode": "SO21 2JN"
+            }
+        },
+        {
+            "Alternative.Address": {
+                "Street": "Brick Lane",
+                "City": "London",
+                "Postcode": "E1 6RF"
+            }
+        }
+    ]
+}

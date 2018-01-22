@@ -1,0 +1,8 @@
+{
+    "expr": "Phone[type=\"mobile\"][].number",
+    "dataset": "dataset1",
+    "bindings": {},
+    "result": [
+        "077 7700 1234"
+    ]
+}

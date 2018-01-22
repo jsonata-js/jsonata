@@ -1,0 +1,6 @@
+{
+    "expr": "$boolean(function(){true})",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": false
+}

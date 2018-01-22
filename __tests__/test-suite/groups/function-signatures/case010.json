@@ -1,0 +1,6 @@
+{
+    "expr": "FirstName.λ($str, $prefix)<s-s>{$prefix & $str}(\"Hello \")",
+    "dataset": "dataset1",
+    "bindings": {},
+    "result": "Hello Fred"
+}

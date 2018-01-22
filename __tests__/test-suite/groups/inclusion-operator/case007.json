@@ -1,0 +1,9 @@
+{
+    "expr": "library.books[\"Aho\" in authors].title",
+    "dataset": "dataset6",
+    "bindings": {},
+    "result": [
+        "The AWK Programming Language",
+        "Compilers: Principles, Techniques, and Tools"
+    ]
+}

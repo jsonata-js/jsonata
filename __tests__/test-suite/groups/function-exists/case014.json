@@ -1,0 +1,6 @@
+{
+    "expr": "$exists({\"hello\":\"world\"})",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": true
+}

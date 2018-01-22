@@ -1,0 +1,6 @@
+{
+    "expr": "$replace(\"temperature = 68F today\", /(-?\\d+(?:\\.\\d*)?)F\\b/, function($m) { ($number($m.groups[0]) - 32) * 5/9 & \"C\" })",
+    "dataset": null,
+    "bindings": {},
+    "result": "temperature = 20C today"
+}

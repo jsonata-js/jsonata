@@ -1,0 +1,6 @@
+{
+    "expr": "[1,2,3]{\"num\": $}{\"num\": $}",
+    "dataset": null,
+    "bindings": {},
+    "code": "S0210"
+}

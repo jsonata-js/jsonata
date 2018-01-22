@@ -10,7 +10,9 @@
 
 "use strict";
 
-var jsonata = require("../jsonata");
+var jsonata = require('../lib/src').jsonata;
+var timeboxExpression = require('../lib/src/utils').timeboxExpression;
+
 var chai = require("chai");
 var expect = chai.expect;
 
@@ -560,46 +562,3 @@ describe("Tests that include infinite recursion", () => {
         });
     });
 });
-
-/**
- * Protect the process/browser from a runnaway expression
- * i.e. Infinite loop (tail recursion), or excessive stack growth
- *
- * @param {Object} expr - expression to protect
- * @param {Number} timeout - max time in ms
- * @param {Number} maxDepth - max stack depth
- */
-function timeboxExpression(expr, timeout, maxDepth) {
-    var depth = 0;
-    var time = Date.now();
-
-    var checkRunnaway = function() {
-        if (depth > maxDepth) {
-            // stack too deep
-            throw {
-                message:
-                    "Stack overflow error: Check for non-terminating recursive function.  Consider rewriting as tail-recursive.",
-                stack: new Error().stack,
-                code: "U1001"
-            };
-        }
-        if (Date.now() - time > timeout) {
-            // expression has run for too long
-            throw {
-                message: "Expression evaluation timeout: Check for infinite loop",
-                stack: new Error().stack,
-                code: "U1001"
-            };
-        }
-    };
-
-    // register callbacks
-    expr.assign("__evaluate_entry", function() {
-        depth++;
-        checkRunnaway();
-    });
-    expr.assign("__evaluate_exit", function() {
-        depth--;
-        checkRunnaway();
-    });
-}

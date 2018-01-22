@@ -1,0 +1,8 @@
+{
+    "expr": "foo.blah.baz[fud = \"hello\"]",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": {
+        "fud": "hello"
+    }
+}

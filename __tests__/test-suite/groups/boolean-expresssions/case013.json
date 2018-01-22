@@ -1,0 +1,9 @@
+{
+    "expr": "and>1 or or<=2",
+    "data": {
+        "and": 1,
+        "or": 2
+    },
+    "bindings": {},
+    "result": true
+}

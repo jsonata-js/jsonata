@@ -1,0 +1,6 @@
+{
+    "expr": "$shuffle(nothing)",
+    "dataset": "dataset1",
+    "bindings": {},
+    "undefinedResult": true
+}

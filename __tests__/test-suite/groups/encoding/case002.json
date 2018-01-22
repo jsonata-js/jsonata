@@ -1,0 +1,6 @@
+{
+    "expr": "$base64decode(\"aGVsbG86d29ybGQ=\")",
+    "dataset": null,
+    "bindings": {},
+    "result": "hello:world"
+}

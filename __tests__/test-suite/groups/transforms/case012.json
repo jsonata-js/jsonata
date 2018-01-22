@@ -1,0 +1,6 @@
+{
+    "expr": "( $clone := 5; $ ~> |Account.Order.Product|{\"blah\":\"foo\"}| )",
+    "dataset": "dataset5",
+    "bindings": {},
+    "code": "T2013"
+}

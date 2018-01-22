@@ -1,0 +1,6 @@
+{
+    "expr": "(  $seq := [1,2,3,4,5];  $reduce($seq, function($x, $y){$x+$y}, 2))",
+    "data": null,
+    "bindings": {},
+    "result": 17
+}

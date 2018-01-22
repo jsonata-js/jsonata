@@ -1,0 +1,10 @@
+{
+    "expr": "$append(notexist, [2,3,4])",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        2,
+        3,
+        4
+    ]
+}

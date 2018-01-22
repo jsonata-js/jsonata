@@ -1,0 +1,6 @@
+{
+    "expr": "$count(undefined)",
+    "dataset": null,
+    "bindings": {},
+    "result": 0
+}

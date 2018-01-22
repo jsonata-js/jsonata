@@ -1,0 +1,6 @@
+{
+    "expr": "$power(-2, 1/3)",
+    "dataset": null,
+    "bindings": {},
+    "code": "D3061"
+}

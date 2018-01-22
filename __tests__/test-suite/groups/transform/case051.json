@@ -1,0 +1,6 @@
+{
+    "expr": "$lowercase(Employment.Role) & \" (\" & Employment.Role & \")\"",
+    "dataset": "dataset21",
+    "bindings": {},
+    "result": "senior physician (Senior Physician)"
+}

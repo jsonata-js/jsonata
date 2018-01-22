@@ -1,0 +1,6 @@
+{
+    "expr": "$boolean($boolean)",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": false
+}

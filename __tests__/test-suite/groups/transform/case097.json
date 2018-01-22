@@ -1,0 +1,6 @@
+{
+    "expr": "$substring(\"Hello\",5,\"World\")",
+    "dataset": "dataset21",
+    "bindings": {},
+    "code": "T0410"
+}

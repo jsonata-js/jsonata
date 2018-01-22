@@ -1,0 +1,6 @@
+{
+    "expr": "$lowercase($.\"NI.Number\")",
+    "dataset": "dataset21",
+    "bindings": {},
+    "result": "no10furbzness"
+}

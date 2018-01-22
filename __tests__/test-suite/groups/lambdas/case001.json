@@ -1,0 +1,6 @@
+{
+    "expr": "function($x){$x>5 ? \"foo\"}(6)",
+    "data": null,
+    "bindings": {},
+    "result": "foo"
+}
