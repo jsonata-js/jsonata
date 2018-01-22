@@ -1,6 +1,0 @@
-{
-    "expr": "$reduce(Account.Order.Product.Quantity, $append)",
-    "dataset": "dataset1",
-    "bindings": {},
-    "undefinedResult": true
-}

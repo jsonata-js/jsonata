@@ -1,6 +1,0 @@
-{
-    "expr": "$string(function(){true})",
-    "dataset": "dataset5",
-    "bindings": {},
-    "result": ""
-}

@@ -1,6 +1,0 @@
-{
-    "expr": "in in [\"hello\", \"world\"]",
-    "dataset": null,
-    "bindings": {},
-    "result": false
-}

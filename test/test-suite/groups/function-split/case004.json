@@ -1,6 +1,0 @@
-{
-    "expr": "$sum($split(\"12345\", \"\").$number($))",
-    "dataset": null,
-    "bindings": {},
-    "result": 15
-}

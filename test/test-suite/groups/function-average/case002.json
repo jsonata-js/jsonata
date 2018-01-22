@@ -1,9 +1,0 @@
-{
-    "expr": "Account.Order.(OrderID & \": \" & $average(Product.(Price*Quantity)))",
-    "dataset": "dataset5",
-    "bindings": {},
-    "result": [
-        "order103: 45.285",
-        "order104: 122.895"
-    ]
-}

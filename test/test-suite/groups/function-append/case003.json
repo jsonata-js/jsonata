@@ -1,6 +1,0 @@
-{
-    "expr": "$append(1,notexist)",
-    "dataset": "dataset5",
-    "bindings": {},
-    "result": 1
-}

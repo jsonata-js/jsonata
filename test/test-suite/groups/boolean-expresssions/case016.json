@@ -1,8 +1,0 @@
-{
-    "expr": "$[].content.origin.$lowercase(name)",
-    "dataset": "dataset11",
-    "bindings": {},
-    "result": [
-        "fakeintegrationname"
-    ]
-}

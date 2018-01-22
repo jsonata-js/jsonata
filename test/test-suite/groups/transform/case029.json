@@ -1,6 +1,0 @@
-{
-    "expr": "$lowercase(Español)",
-    "dataset": "dataset21",
-    "bindings": {},
-    "result": "/ˈspænɪʃ/"
-}

@@ -1,6 +1,0 @@
-{
-    "expr": "$not(false)",
-    "dataset": "dataset0",
-    "bindings": {},
-    "result": true
-}

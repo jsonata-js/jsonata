@@ -1,6 +1,0 @@
-{
-    "expr": "$string($spread(function($x){$x*$x}))",
-    "dataset": "dataset5",
-    "bindings": {},
-    "result": ""
-}

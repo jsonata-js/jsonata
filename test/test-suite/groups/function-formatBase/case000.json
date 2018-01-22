@@ -1,6 +1,0 @@
-{
-    "expr": "$formatBase(100)",
-    "dataset": null,
-    "bindings": {},
-    "result": "100"
-}

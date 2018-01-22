@@ -1,6 +1,0 @@
-{
-    "expr": "$lookup($$, \"gust\")",
-    "dataset": "dataset9",
-    "bindings": {},
-    "result": null
-}

@@ -1,6 +1,0 @@
-{
-    "expr": "$sort(nothing)",
-    "dataset": "dataset5",
-    "bindings": {},
-    "undefinedResult": true
-}

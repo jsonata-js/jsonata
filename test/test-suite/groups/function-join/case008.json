@@ -1,6 +1,0 @@
-{
-    "expr": "$join(true, \", \")",
-    "dataset": null,
-    "bindings": {},
-    "code": "T0412"
-}

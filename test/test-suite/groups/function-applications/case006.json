@@ -1,6 +1,0 @@
-{
-    "expr": "\"john@example.com\" ~> $substringAfter(\"@\") ~> $substringBefore(\".\") ",
-    "dataset": null,
-    "bindings": {},
-    "result": "example"
-}

@@ -1,6 +1,0 @@
-{
-    "expr": "$lowercase(敷)",
-    "dataset": "dataset21",
-    "bindings": {},
-    "result": "steve"
-}

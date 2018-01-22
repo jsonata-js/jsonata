@@ -1,8 +1,0 @@
-{
-    "expr": "λ($obj)<o>{$obj}({\"hello\": \"world\"})",
-    "dataset": null,
-    "bindings": {},
-    "result": {
-        "hello": "world"
-    }
-}

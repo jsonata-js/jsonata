@@ -1,6 +1,0 @@
-{
-    "expr": "$length(\"hello\")",
-    "dataset": null,
-    "bindings": {},
-    "result": 5
-}

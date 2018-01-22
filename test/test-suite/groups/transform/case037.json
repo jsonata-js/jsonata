@@ -1,6 +1,0 @@
-{
-    "expr": "Employment.Name & \" is pleased to employ \" & Salutation & \" \" & Surname",
-    "dataset": "dataset21",
-    "bindings": {},
-    "result": "IBM UK is pleased to employ Mr Smith"
-}

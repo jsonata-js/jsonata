@@ -1,9 +1,0 @@
-{
-    "expr": "Account.Order.$max(Product.(Price * Quantity))",
-    "dataset": "dataset5",
-    "bindings": {},
-    "result": [
-        68.9,
-        137.8
-    ]
-}

@@ -1,6 +1,0 @@
-{
-    "expr": "$spread(\"Hello World\")",
-    "dataset": "dataset5",
-    "bindings": {},
-    "result": "Hello World"
-}

@@ -1,6 +1,0 @@
-{
-    "expr": "$join(Account.Order.Product.Description.Colour, no.sep)",
-    "dataset": "dataset5",
-    "bindings": {},
-    "result": "PurpleOrangePurpleBlack"
-}

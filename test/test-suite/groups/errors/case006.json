@@ -1,6 +1,0 @@
-{
-    "expr": "sum(Account.Order.OrderID)",
-    "dataset": "dataset5",
-    "bindings": {},
-    "code": "T1005"
-}

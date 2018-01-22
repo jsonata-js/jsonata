@@ -1,6 +1,0 @@
-{
-    "expr": "Account.Order[0].Product;",
-    "dataset": null,
-    "bindings": {},
-    "code": "S0201"
-}

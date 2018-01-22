@@ -1,6 +1,0 @@
-{
-    "expr": "\"hello\"&5",
-    "dataset": "dataset0",
-    "bindings": {},
-    "result": "hello5"
-}

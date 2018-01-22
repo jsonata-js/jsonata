@@ -1,6 +1,0 @@
-{
-    "expr": "$substringBefore(\"Coca\" & \"ca\")",
-    "dataset": "dataset21",
-    "bindings": {},
-    "code": "T0411"
-}

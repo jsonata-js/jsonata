@@ -1,6 +1,0 @@
-{
-    "expr": "$string(2,3)",
-    "dataset": null,
-    "bindings": {},
-    "code": "T0410"
-}

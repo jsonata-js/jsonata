@@ -1,6 +1,0 @@
-{
-    "expr": "$join(\"hello\")",
-    "dataset": null,
-    "bindings": {},
-    "result": "hello"
-}

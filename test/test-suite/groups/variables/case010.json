@@ -1,6 +1,0 @@
-{
-    "expr": "( $foo := \"defined\"; ( $foo := nothing ); $foo )",
-    "dataset": null,
-    "bindings": {},
-    "result": "defined"
-}

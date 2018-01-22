@@ -1,9 +1,0 @@
-{
-    "expr": "Account.Order.$average(Product.(Price * Quantity))",
-    "dataset": "dataset5",
-    "bindings": {},
-    "result": [
-        45.285000000000004,
-        122.89500000000001
-    ]
-}

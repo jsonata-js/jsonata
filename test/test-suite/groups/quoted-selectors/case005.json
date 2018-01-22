@@ -1,9 +1,0 @@
-{
-    "expr": "foo.`blah`.baz.'fud'",
-    "dataset": "dataset0",
-    "bindings": {},
-    "result": [
-        "hello",
-        "world"
-    ]
-}

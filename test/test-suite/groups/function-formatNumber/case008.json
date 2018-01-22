@@ -1,6 +1,0 @@
-{
-    "expr": "$formatNumber(-6, \"000\")",
-    "dataset": null,
-    "bindings": {},
-    "result": "-006"
-}

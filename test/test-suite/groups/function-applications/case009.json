@@ -1,6 +1,0 @@
-{
-    "expr": "( $domain := $substringAfter(?,\"@\") ~> $substringBefore(?,\".\"); $domain(\"john@example.com\") )",
-    "dataset": null,
-    "bindings": {},
-    "result": "example"
-}

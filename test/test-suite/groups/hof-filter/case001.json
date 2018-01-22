@@ -1,6 +1,0 @@
-{
-    "expr": "nothing~>$filter(λ($v, $i, $a) {$v.price = $max($a.price)})",
-    "dataset": "dataset6",
-    "bindings": {},
-    "undefinedResult": true
-}

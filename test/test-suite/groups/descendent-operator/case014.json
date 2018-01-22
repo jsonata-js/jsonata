@@ -1,6 +1,0 @@
-{
-    "expr": "(**.Price)[0]",
-    "dataset": "dataset5",
-    "bindings": {},
-    "result": 34.45
-}

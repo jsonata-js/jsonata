@@ -1,9 +1,0 @@
-{
-    "expr": "foo.*.baz.*",
-    "dataset": "dataset0",
-    "bindings": {},
-    "result": [
-        "hello",
-        "world"
-    ]
-}

@@ -1,6 +1,0 @@
-{
-    "expr": "$lookup(Account, \"Account Name\")",
-    "dataset": "dataset5",
-    "bindings": {},
-    "result": "Firefly"
-}

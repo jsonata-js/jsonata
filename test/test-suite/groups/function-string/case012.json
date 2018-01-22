@@ -1,6 +1,0 @@
-{
-    "expr": "$string(blah)",
-    "dataset": "dataset5",
-    "bindings": {},
-    "undefinedResult": true
-}

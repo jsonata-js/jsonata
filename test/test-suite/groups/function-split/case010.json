@@ -1,6 +1,0 @@
-{
-    "expr": "$split(nothing, \" \")",
-    "dataset": null,
-    "bindings": {},
-    "undefinedResult": true
-}

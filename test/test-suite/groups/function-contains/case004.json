@@ -1,6 +1,0 @@
-{
-    "expr": "$contains(nothing, \"World\")",
-    "dataset": null,
-    "bindings": {},
-    "undefinedResult": true
-}

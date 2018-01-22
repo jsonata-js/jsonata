@@ -1,9 +1,0 @@
-{
-    "expr": "Account.Order.$count(Product.(Price * Quantity))",
-    "dataset": "dataset5",
-    "bindings": {},
-    "result": [
-        2,
-        2
-    ]
-}

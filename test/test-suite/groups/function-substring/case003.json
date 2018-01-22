@@ -1,6 +1,0 @@
-{
-    "expr": "$substring(blah, 6)",
-    "dataset": "dataset5",
-    "bindings": {},
-    "undefinedResult": true
-}

@@ -1,9 +1,0 @@
-{
-    "expr": "Account.Order.$sum(Product.(Price * Quantity))",
-    "dataset": "dataset5",
-    "bindings": {},
-    "result": [
-        90.57000000000001,
-        245.79000000000002
-    ]
-}

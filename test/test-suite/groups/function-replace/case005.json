@@ -1,6 +1,0 @@
-{
-    "expr": "$replace(\"hello\")",
-    "dataset": null,
-    "bindings": {},
-    "code": "T0410"
-}

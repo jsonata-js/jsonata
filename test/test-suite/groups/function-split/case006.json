@@ -1,9 +1,0 @@
-{
-    "expr": "$split(\"a, b, c, d\", \", \", 2)",
-    "dataset": null,
-    "bindings": {},
-    "result": [
-        "a",
-        "b"
-    ]
-}

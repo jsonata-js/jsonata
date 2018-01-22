@@ -1,6 +1,0 @@
-{
-    "expr": "$sum(Account.Order)",
-    "dataset": "dataset5",
-    "bindings": {},
-    "code": "T0412"
-}

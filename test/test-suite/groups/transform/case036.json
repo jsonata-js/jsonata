@@ -1,6 +1,0 @@
-{
-    "expr": "Employment.Name & \" is happy\"",
-    "dataset": "dataset21",
-    "bindings": {},
-    "result": "IBM UK is happy"
-}

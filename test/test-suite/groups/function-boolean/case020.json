@@ -1,6 +1,0 @@
-{
-    "expr": "$boolean(Account.blah)",
-    "dataset": "dataset5",
-    "bindings": {},
-    "undefinedResult": true
-}

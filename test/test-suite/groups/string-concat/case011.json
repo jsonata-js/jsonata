@@ -1,6 +1,0 @@
-{
-    "expr": "\"Prices: \" & Account.Order.Product.Price",
-    "dataset": "dataset5",
-    "bindings": {},
-    "result": "Prices: [34.45,21.67,34.45,107.99]"
-}

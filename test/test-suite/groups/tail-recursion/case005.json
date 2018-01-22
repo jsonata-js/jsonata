@@ -1,8 +1,0 @@
-{
-    "expr": "(  $inf := function($n){$n+$inf($n-1)};  $inf(5))",
-    "dataset": null,
-    "timelimit": 1000,
-    "depth": 300,
-    "bindings": {},
-    "code": "U1001"
-}

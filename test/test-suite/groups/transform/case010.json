@@ -1,8 +1,0 @@
-{
-    "expr": "foo.bar",
-    "data": {
-        "stuff": 4
-    },
-    "bindings": {},
-    "undefinedResult": true
-}

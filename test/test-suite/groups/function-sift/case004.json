@@ -1,6 +1,0 @@
-{
-    "expr": "$toMillis(\"2017-10-30T16:25:32.935Z\")",
-    "dataset": "dataset5",
-    "bindings": {},
-    "result": 1509380732935
-}

@@ -1,6 +1,0 @@
-{
-    "expr": "$length(\"\\u03BB-calculus\")",
-    "dataset": null,
-    "bindings": {},
-    "result": 10
-}

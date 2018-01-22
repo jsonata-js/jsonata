@@ -1,8 +1,0 @@
-{
-    "expr": "bar",
-    "data": {
-        "bar": false
-    },
-    "bindings": {},
-    "result": false
-}

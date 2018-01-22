@@ -1,6 +1,0 @@
-{
-    "expr": "$count(1)",
-    "dataset": null,
-    "bindings": {},
-    "result": 1
-}

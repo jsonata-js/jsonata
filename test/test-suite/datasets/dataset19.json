@@ -1,9 +1,0 @@
-{
-    "output": {
-        "is": {
-            "same": {
-                "as": "input"
-            }
-        }
-    }
-}

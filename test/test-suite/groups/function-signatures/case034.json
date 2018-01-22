@@ -1,6 +1,0 @@
-{
-    "expr": "λ($arr)<(sa<n>)>>{$arr}([[1]])",
-    "dataset": null,
-    "bindings": {},
-    "code": "S0402"
-}

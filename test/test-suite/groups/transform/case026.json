@@ -1,6 +1,0 @@
-{
-    "expr": "$",
-    "data": "'Hello'",
-    "bindings": {},
-    "result": "'Hello'"
-}

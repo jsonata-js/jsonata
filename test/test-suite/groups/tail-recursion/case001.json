@@ -1,8 +1,0 @@
-{
-    "expr": "(  $factorial := function($n){$n = 0 ? 1 : $n * $factorial($n - 1)};  $factorial(99))             ",
-    "dataset": null,
-    "timelimit": 2000,
-    "depth": 302,
-    "bindings": {},
-    "result": 9.33262154439441e+155
-}

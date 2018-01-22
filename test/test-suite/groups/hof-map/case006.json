@@ -1,9 +1,0 @@
-{
-    "expr": "$map(Phone, function($v, $i) {$v.type=\"office\" ? $i})",
-    "dataset": "dataset1",
-    "bindings": {},
-    "result": [
-        1,
-        2
-    ]
-}

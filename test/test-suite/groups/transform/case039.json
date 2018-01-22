@@ -1,6 +1,0 @@
-{
-    "expr": "$uppercase(Salutation & \" \" & Surname & \" - has \" & Cars & \" registered cars\")",
-    "dataset": "dataset21",
-    "bindings": {},
-    "result": "MR SMITH - HAS 3 REGISTERED CARS"
-}
