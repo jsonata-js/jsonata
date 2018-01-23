@@ -45,13 +45,13 @@
     "eslint": "^4.0.0",
     "eslint-plugin-ideal": "^0.1.3",
     "istanbul": "^0.4.5",
-    "jest": "^22.1.3",
+    "jest": "21.2.1",
     "jsdoc": "^3.4.0",
     "mocha": "^5.0.0",
     "mocha-lcov-reporter": "^1.2.0",
     "request": "^2.81.0",
     "rollup": "^0.54.1",
-    "ts-jest": "^22.0.1",
+    "ts-jest": "21.2.3",
     "uglify-es": "^3.0.20"
   },
   "engines": {
@@ -67,7 +67,11 @@
         "skipBabel": true
       }
     },
-    "coverageReporters": ["json", "lcov", "text"],
+    "coverageReporters": [
+      "json",
+      "lcov",
+      "text"
+    ],
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     },
