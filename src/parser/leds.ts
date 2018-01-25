@@ -1,6 +1,6 @@
 import { LED, ParserState } from "./types";
 import { parseSignature } from "../signatures";
-import * as ast from "./ast";
+import * as ast from "../ast";
 import { operators } from "../constants";
 
 export const infixDefaultLED = (bindingPower: number): LED => {
@@ -9,6 +9,7 @@ export const infixDefaultLED = (bindingPower: number): LED => {
         let rhs = state.expression(bindingPower);
         return {
             value: initialToken.value,
+            position: initialToken.position,
             type: "binary",
             lhs: left,
             rhs: rhs,
@@ -107,31 +108,33 @@ export const functionLED: LED = (
     state.advance("}");
     return {
         value: initialToken.value,
+        position: initialToken.position,
         type: "lambda",
         body: body,
         signature: signature,
-        procedure: left,
         arguments: args,
+        thunk: false,
     };
 };
 
 export const filterLED: LED = (state: ParserState, left: ast.ASTNode): ast.ASTNode | ast.BinaryNode => {
     let initialToken = state.previousToken;
+
+    // If the next symbol is a "]", then this is an empty predicate.
     if (state.symbol.id === "]") {
-        // empty predicate means maintain singleton arrays in the output
-        var step = left;
-        while (step && step.type === "binary" && step.value === "[") {
-            let s = step as ast.BinaryNode;
-            step = s.lhs;
-        }
-        step.keepArray = true;
         state.advance("]");
-        return left;
+        return {
+            type: "singleton",
+            value: left.value,
+            position: left.position,
+            next: { ...left },
+        }
     } else {
         let rhs = state.expression(operators["]"]);
         state.advance("]", true);
         let ret: ast.BinaryNode = {
             value: initialToken.value,
+            position: initialToken.position,
             type: "binary",
             lhs: left,
             rhs: rhs,
@@ -140,26 +143,28 @@ export const filterLED: LED = (state: ParserState, left: ast.ASTNode): ast.ASTNo
     }
 };
 
-export const orderByLED: LED = (state: ParserState, left: ast.ASTNode): ast.BinaryNode => {
+export const orderByLED: LED = (state: ParserState, left: ast.ASTNode): ast.SortNode => {
     let initialToken = state.previousToken;
     state.advance("(");
-    var terms = [];
+    var terms: ast.SortTerm[] = [];
     for (;;) {
-        var term = {
-            descending: false,
-        };
+        let descending = false;
         if (state.symbol.id === "<") {
             // ascending sort
+            descending = false;
             state.advance("<");
         } else if (state.symbol.id === ">") {
             // descending sort
-            term.descending = true;
+            descending = true;
             state.advance(">");
         } else {
+            descending = false;
             //unspecified - default to ascending
         }
-        // TODO: Fix any cast
-        (term as any).expression = state.expression(0);
+        let term: ast.SortTerm = {
+            descending: descending,
+            expression: state.expression(0),
+        };
         terms.push(term);
         if (state.symbol.id !== ",") {
             break;
@@ -170,13 +175,13 @@ export const orderByLED: LED = (state: ParserState, left: ast.ASTNode): ast.Bina
     return {
         position: initialToken.position, // REQUIRED?!?
         value: initialToken.value,
-        type: "binary",
+        type: "sort",
         lhs: left,
-        rhs: terms, // TODO: Not an expression node...different node type recommended
+        rhs: terms,
     };
 };
 
-export const objectParserLED: LED = (state: ParserState, left: ast.ASTNode): ast.BinaryNode => {
+export const objectParserLED: LED = (state: ParserState, left: ast.ASTNode): ast.BinaryObjectNode => {
     var a = [];
     let initialToken = state.previousToken;
     /* istanbul ignore else */
@@ -195,7 +200,8 @@ export const objectParserLED: LED = (state: ParserState, left: ast.ASTNode): ast
     state.advance("}", true);
     // LED - binary infix form
     return {
-        value: initialToken.value,
+        value: "{",
+        position: initialToken.position,
         type: "binary",
         lhs: left,
         rhs: a,

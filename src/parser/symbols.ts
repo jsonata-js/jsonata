@@ -3,7 +3,7 @@ import { Symbol, LED, NUD, ParserState, SymbolTable } from "./types";
 import { Token } from "../tokenizer";
 import * as nuds from "./nuds";
 import * as leds from "./leds";
-import * as ast from "./ast";
+import * as ast from "../ast";
 
 export function createTable(recover: boolean, errors: string[], remainingTokens: () => Token[]): SymbolTable {
     let symbol_table: { [id: string]: Symbol } = {};
@@ -105,6 +105,7 @@ export function createTable(recover: boolean, errors: string[], remainingTokens:
     infixr("(error)", 10, (state: ParserState, left: ast.ASTNode): ast.ErrorNode => {
         return {
             value: state.token.value,
+            position: state.token.position,
             lhs: left,
             error: state.error,
             remaining: remainingTokens(),
@@ -151,6 +152,7 @@ export function createTable(recover: boolean, errors: string[], remainingTokens:
         }
         return {
             value: initialToken.value,
+            position: initialToken.position,
             type: "condition",
             condition: left,
             then: then,

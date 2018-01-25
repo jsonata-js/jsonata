@@ -1,7 +1,7 @@
 import { tokenizer, Tokenizer, Token } from "../tokenizer";
 import { ast_optimize } from "./optimize";
 import { createTable } from "./symbols";
-import * as ast from "./ast";
+import * as ast from "../ast";
 
 import { Symbol, ParserState, SymbolTable } from "./types";
 
@@ -12,14 +12,20 @@ import { Symbol, ParserState, SymbolTable } from "./types";
  * to implement the supporting functions (as methods).
  */
 class Parser implements ParserState {
+    // These are used to satisfy the ParserState interface
     symbol: Symbol = undefined;
     previousToken: Token = undefined;
     token: Token = undefined;
     error: any = undefined;
 
+    // This is public state information used after parse is called
+    errors: string[] = [];
+
+    // These are protected elements used by the Parser, but not available to the
+    // NUD and LED handlers
     protected lexer: Tokenizer;
-    protected errors: string[] = [];
     protected symbol_table: SymbolTable;
+
     constructor(protected source: string, protected recover?: boolean) {
         // now invoke the tokenizer and the parser and return the syntax tree
         this.lexer = tokenizer(source);
@@ -41,11 +47,7 @@ class Parser implements ParserState {
         // Decide if we want to collect errors and recover, or just throw an error
         let collect = this.recover ? err => this.errors.push(err) : undefined;
         expr = ast_optimize(expr, collect);
-    
-        if (this.errors.length > 0) {
-            expr.errors = this.errors;
-        }
-    
+        
         return expr;
     }
 
@@ -178,8 +180,10 @@ class Parser implements ParserState {
 // This parser implements the 'Top down operator precedence' algorithm developed by Vaughan R Pratt; http://dl.acm.org/citation.cfm?id=512931.
 // and builds on the Javascript framework described by Douglas Crockford at http://javascript.crockford.com/tdop/tdop.html
 // and in 'Beautiful Code', edited by Andy Oram and Greg Wilson, Copyright 2007 O'Reilly Media, Inc. 798-0-596-51004-6
-export function parser(source: string, recover?: boolean) {
+export function parser(source: string, errors: string[], recover?: boolean): ast.ASTNode {
     let p = new Parser(source, recover);
-    return p.parse();
+    let ast = p.parse();
+    p.errors.forEach((err) => errors.push(err));
+    return ast;
 }
 

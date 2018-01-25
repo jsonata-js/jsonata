@@ -52,14 +52,12 @@
     "request": "^2.81.0",
     "rollup": "^0.54.1",
     "ts-jest": "21.2.3",
-    "uglify-es": "^3.0.20"
+    "uglify-es": "^3.0.20",
+    "@types/node": "^9.3.0",
+    "typescript": "^2.6.2"
   },
   "engines": {
     "node": ">= 4"
-  },
-  "dependencies": {
-    "@types/node": "^9.3.0",
-    "typescript": "^2.6.2"
   },
   "jest": {
     "globals": {

@@ -1,6 +1,6 @@
 import { NUD, ParserState } from "./types";
 import { Token } from "../tokenizer";
-import * as ast from "./ast";
+import * as ast from "../ast";
 
 export const defaultNUD = (recover: boolean, errors: string[], remainingTokens: () => Token[]): NUD => {
     return (state: ParserState): ast.ErrorNode => {
@@ -30,6 +30,7 @@ export const prefixDefaultNUD = (bindingPower: number): NUD => {
         let expr = state.expression(bindingPower);
         return {
             value: initialToken.value,
+            position: initialToken.position,
             type: "unary",
             expression: expr,
         };
@@ -85,6 +86,7 @@ export const terminalNUD: NUD = (state: ParserState): ast.TerminalNode => {
 export const wildcardNUD = (state: ParserState): ast.WildcardNode => {
     return {
         value: state.previousToken.value,
+        position: state.previousToken.position,
         type: "wildcard",
     };
 };
@@ -92,6 +94,7 @@ export const wildcardNUD = (state: ParserState): ast.WildcardNode => {
 export const descendantNUD = (state: ParserState): ast.DescendantNode => {
     return {
         value: state.previousToken.value,
+        position: state.previousToken.position,
         type: "descendant",
     };
 };
@@ -108,6 +111,7 @@ export const blockNUD = (state: ParserState): ast.BlockNode => {
     state.advance(")", true);
     return {
         value: state.token.value,
+        position: state.token.position,
         type: "block",
         expressions: expressions,
     };
@@ -142,11 +146,12 @@ export const arrayNUD = (state: ParserState): ast.UnaryNode => {
         }
     }
     state.advance("]", true);
-    // TODO: Should this be a different type...? (not unary)
     return {
         value: initialToken.value,
+        position: initialToken.position,
         type: "unary",
         expressions: a,
+        consarray: false,
     };
 };
 
@@ -170,6 +175,7 @@ export const objectParserNUD: NUD = (state: ParserState): ast.UnaryNode => {
     // NUD - unary prefix form
     return {
         value: initialToken.value,
+        position: initialToken.position,
         type: "unary",
         lhs: a, // TODO: use expression
     };
@@ -188,6 +194,7 @@ export const transformerNUD = (state: ParserState): ast.TransformNode => {
     state.advance("|");
     return {
         value: initialToken.value,
+        position: initialToken.position,
         type: "transform",
         pattern: expr,
         update: update,

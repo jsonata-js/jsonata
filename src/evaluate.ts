@@ -11,8 +11,9 @@ import {
     toSequence,
 } from "./utils";
 import { defineFunction } from "./signatures";
-import { parser } from "./parser";
+import { parser } from './parser';
 import { functionBoolean, functionAppend, functionString, functionSort, createStandardFrame } from "./functions";
+// import * as ast from "./ast";
 
 /**
  * Evaluate expression against input data

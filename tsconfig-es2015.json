@@ -1,6 +1,5 @@
 {
     "extends": "./tsconfig",
     "compilerOptions": {
-        "moduleResolution": "node"
     }
 }

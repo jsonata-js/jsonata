@@ -3,6 +3,7 @@ import { lookupMessage, createFrame } from './utils';
 import { evaluate } from './evaluate';
 import { defineFunction } from './signatures';
 import { createStandardFrame } from './functions';
+import { ASTNode } from './ast';
 
 export interface Options {
     recover: boolean;
@@ -27,12 +28,10 @@ export type AST = any;
  * @returns {{evaluate: evaluate, assign: assign}} Evaluated expression
  */
 export function jsonata(expr: string, options?: Partial<Options>): Expression {
-    var ast;
-    var errors;
+    let ast: undefined | ASTNode = undefined;
+    let errors: string[] = [];
     try {
-        ast = parser(expr, options && options.recover);
-        errors = ast.errors;
-        delete ast.errors;
+        ast = parser(expr, errors, options && options.recover);
     } catch (err) {
         // insert error message into structure
         err.message = lookupMessage(err);
@@ -59,7 +58,7 @@ export function jsonata(expr: string, options?: Partial<Options>): Expression {
     return {
         evaluate: function(input, bindings, callback) {
             // throw if the expression compiled with syntax errors
-            if (typeof errors !== "undefined") {
+            if (typeof errors !== "undefined" && errors.length>0) {
                 var err: any = {
                     code: "S0500",
                     position: 0,
