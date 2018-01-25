@@ -2,26 +2,28 @@
   "name": "jsonata",
   "version": "1.5.0",
   "description": "JSON query and transformation language",
-  "module": "jsonata.js",
-  "main": "jsonata-es5.js",
-  "typings": "jsonata.d.ts",
+  "module": "es2015/jsonata.js",
+  "main": "es5/jsonata.js",
+  "typings": "lib/jsonata.d.ts",
   "homepage": "http://jsonata.org/",
   "repository": {
     "type": "git",
     "url": "https://github.com/jsonata-js/jsonata.git"
   },
   "scripts": {
-    "pretest": "npm run lint",
     "mocha": "node ./node_modules/istanbul/lib/cli.js cover --report cobertura --report html ./node_modules/mocha/bin/_mocha -- \"test/**/*.js\"",
-    "test": "npm run mocha",
-    "posttest": "npm run check-coverage && npm run minify && npm run babel && npm run browserify && npm run minify-es5",
+    "jest": "jest",
+    "test": "npm run jest --coverage",
+    "posttest": "npm run check-coverage",
     "check-coverage": "istanbul check-coverage -statement 100 -branch 100 -function 100 -line 100",
-    "minify": "uglifyjs jsonata.js -o jsonata.min.js --compress --mangle",
-    "lint": "eslint .",
+    "minify": "uglifyjs dist/jsonata-browser.js -o dist/jsonata.min.js --compress --mangle",
+    "compile-es2015": "tsc -p tsconfig-es2015.json",
+    "compile-es5": "tsc -p tsconfig-es5.json",
+    "compile": "npm run compile-es2015 && npm run compile-es5",
     "doc": "jsdoc --configure jsdoc.json .",
-    "cover": "istanbul cover _mocha",
-    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
-    "babel": "node ./node_modules/babel-cli/bin/babel.js --out-file jsonata-es5.js jsonata.js",
+    "cover": "jest --coverage",
+    "bundle": "npm run compile && npm run jest --coverage && npm run check-coverage && rollup -c",
+    "coveralls": "cat ./coverage/lcov.info | coveralls",
     "browserify": "node ./node_modules/browserify/bin/cmd.js jsonata-es5.js --outfile jsonata-es5.js --standalone jsonata",
     "minify-es5": "uglifyjs jsonata-es5.js -o jsonata-es5.min.js --compress --mangle"
   },
@@ -35,10 +37,7 @@
     "path"
   ],
   "devDependencies": {
-    "babel-cli": "^6.24.1",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-env": "^1.5.2",
-    "babel-runtime": "^6.23.0",
+    "@types/jest": "^22.0.1",
     "browserify": "^15.2.0",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
@@ -46,13 +45,48 @@
     "eslint": "^4.0.0",
     "eslint-plugin-ideal": "^0.1.3",
     "istanbul": "^0.4.5",
+    "jest": "21.2.1",
     "jsdoc": "^3.4.0",
     "mocha": "^5.0.0",
     "mocha-lcov-reporter": "^1.2.0",
     "request": "^2.81.0",
-    "uglify-es": "^3.0.20"
+    "rollup": "^0.54.1",
+    "ts-jest": "21.2.3",
+    "uglify-es": "^3.0.20",
+    "@types/node": "^9.3.0",
+    "typescript": "^2.6.2"
   },
   "engines": {
     "node": ">= 4"
+  },
+  "jest": {
+    "globals": {
+      "ts-jest": {
+        "skipBabel": true
+      }
+    },
+    "coverageReporters": [
+      "json",
+      "lcov",
+      "text"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "collectCoverage": true,
+    "mapCoverage": true,
+    "testRegex": "/__tests__/.*\\.(ts|tsx)$",
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/lib/"
+    ],
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
   }
 }

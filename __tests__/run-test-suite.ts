@@ -8,9 +8,8 @@
 
 var fs = require("fs");
 var path = require("path");
-var jsonata = require("../jsonata");
-var chai = require("chai");
-var expect = chai.expect;
+var jsonata = require('../src').jsonata;
+import { timeboxExpression } from '../src/utils';
 
 let groups = fs.readdirSync(path.join(__dirname, "test-suite", "groups")).filter((name) => !name.endsWith(".json"));
 
@@ -58,7 +57,7 @@ describe("JSONata Test Suite", () => {
                         // If there is a timelimit and depth limit for this case, use the
                         // `timeboxExpression` function to limit evaluation
                         if ("timelimit" in testcase && "depth" in testcase) {
-                            this.timeout(testcase.timelimit * 2);
+                            jest.setTimeout(testcase.timelimit*2);
                             timeboxExpression(expr, testcase.timelimit, testcase.depth);
                         }
                     } catch (e) {
@@ -67,10 +66,10 @@ describe("JSONata Test Suite", () => {
                         // `code` field in the testcase)
                         if (testcase.code) {
                             // See if we go the code we expected
-                            expect(e.code).to.equal(testcase.code);
+                            expect(e.code).toEqual(testcase.code);
                             // If a token was specified, check for that too
                             if (testcase.hasOwnProperty("token")) {
-                                expect(e.token).to.equal(testcase.token);
+                                expect(e.code).toEqual(testcase.token);
                             }
                         } else {
                             // If we get here, something went wrong because an exception
@@ -91,21 +90,26 @@ describe("JSONata Test Suite", () => {
                             // First is that we have an undefined result.  So, check
                             // to see if the result we get from evaluation is undefined
                             let result = expr.evaluate(dataset, testcase.bindings);
-                            expect(result).to.deep.equal(undefined);
+                            expect(result).toBeUndefined();
                         } else if ("result" in testcase) {
                             // Second is that a (defined) result was provided.  In this case,
                             // we do a deep equality check against the expected result.
                             let result = expr.evaluate(dataset, testcase.bindings);
-                            expect(result).to.deep.equal(testcase.result);
+                            expect(result).toEqual(testcase.result);
                         } else if ("code" in testcase) {
                             // Finally, if a `code` field was specified, we expected the
                             // evaluation to fail and include the specified code in the
                             // thrown exception.
-                            expect(function() {
-                                expr.evaluate(dataset, testcase.bindings);
-                            })
-                                .to.throw()
-                                .to.deep.contain({ code: testcase.code });
+                            let error = false;
+                            try {
+                                expr.evaluate(dataset, testcase.bindings);                                
+                            } catch(e) {
+                                expect(e.code).toEqual(testcase.code);
+                                error = true;
+                            }
+                            // If this is thrown, it is because we expected an error to be
+                            // thrown but it wasn't.
+                            expect(error).toBeTruthy();
                         } else {
                             // If we get here, it means there is something wrong with
                             // the test case data because there was nothing to check.
@@ -117,49 +121,6 @@ describe("JSONata Test Suite", () => {
         });
     });
 });
-
-/**
- * Protect the process/browser from a runnaway expression
- * i.e. Infinite loop (tail recursion), or excessive stack growth
- *
- * @param {Object} expr - expression to protect
- * @param {Number} timeout - max time in ms
- * @param {Number} maxDepth - max stack depth
- */
-function timeboxExpression(expr, timeout, maxDepth) {
-    var depth = 0;
-    var time = Date.now();
-
-    var checkRunnaway = function() {
-        if (depth > maxDepth) {
-            // stack too deep
-            throw {
-                message:
-                    "Stack overflow error: Check for non-terminating recursive function.  Consider rewriting as tail-recursive.",
-                stack: new Error().stack,
-                code: "U1001"
-            };
-        }
-        if (Date.now() - time > timeout) {
-            // expression has run for too long
-            throw {
-                message: "Expression evaluation timeout: Check for infinite loop",
-                stack: new Error().stack,
-                code: "U1001"
-            };
-        }
-    };
-
-    // register callbacks
-    expr.assign("__evaluate_entry", function() {
-        depth++;
-        checkRunnaway();
-    });
-    expr.assign("__evaluate_exit", function() {
-        depth--;
-        checkRunnaway();
-    });
-}
 
 /**
  * Based on the collection of datasets and the information provided as part of the testcase,
@@ -181,3 +142,9 @@ function resolveDataset(datasets, testcase) {
     }
     throw new Error("Unable to find dataset "+testcase.dataset+" among known datasets, are you sure the datasets directory has a file named "+testcase.dataset+".json?");
 }
+
+describe("This is a jest test", () => {
+    test("An actual test", async () => {
+        return 5;
+    })
+})

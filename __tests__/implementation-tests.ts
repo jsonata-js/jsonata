@@ -10,9 +10,8 @@
 
 "use strict";
 
-var jsonata = require("../jsonata");
-var chai = require("chai");
-var expect = chai.expect;
+var jsonata = require('../src').jsonata;
+import { timeboxExpression } from '../src/utils';
 
 var testdata2 = {
     Account: {
@@ -96,7 +95,7 @@ describe("Functions with side-effects", () => {
                 var result = expr.evaluate(testdata2);
                 // number between 1502264152715 and 2000000000000 (18 May 2033)
                 var expected = result > 1502264152715 && result < 2000000000000;
-                expect(expected).to.deep.equal(true);
+                expect(expected).toEqual(true);
             });
         });
 
@@ -105,7 +104,7 @@ describe("Functions with side-effects", () => {
                 var expr = jsonata('{"now": $millis(), "delay": $sum([1..10000]), "later": $millis()}.(now = later)');
                 var result = expr.evaluate(testdata2);
                 var expected = true;
-                expect(result).to.deep.equal(expected);
+                expect(result).toEqual(expected);
             });
         });
 
@@ -114,7 +113,7 @@ describe("Functions with side-effects", () => {
                 var expr = jsonata("($sum([1..10000]); $millis())");
                 var result = expr.evaluate(testdata2);
                 var result2 = expr.evaluate(testdata2);
-                expect(result).to.not.equal(result2);
+                expect(result).not.toEqual(result2);
             });
         });
     });
@@ -124,9 +123,9 @@ describe("Functions with side-effects", () => {
             var expr = jsonata("$now()");
             var result = expr.evaluate(testdata2);
             // follows this pattern - "2017-05-09T10:10:16.918Z"
-            expect(result).to.match(/^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d.\d\d\dZ$/);
+            expect(result).toMatch(/^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d.\d\d\dZ$/);
             // var match = /^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d.\d\d\dZ$/.test(result);
-            // expect(match).to.deep.equal(true);
+            // expect(match).toEqual(true);
         });
     });
 
@@ -135,7 +134,7 @@ describe("Functions with side-effects", () => {
             var expr = jsonata('{"now": $now(), "delay": $sum([1..10000]), "later": $now()}.(now = later)');
             var result = expr.evaluate(testdata2);
             var expected = true;
-            expect(result).to.deep.equal(expected);
+            expect(result).toEqual(expected);
         });
     });
 
@@ -144,7 +143,7 @@ describe("Functions with side-effects", () => {
             var expr = jsonata("($sum([1..10000]); $now())");
             var result = expr.evaluate(testdata2);
             var result2 = expr.evaluate(testdata2);
-            expect(result).to.not.equal(result2);
+            expect(result).not.toEqual(result2);
         });
     });
 
@@ -154,7 +153,7 @@ describe("Functions with side-effects", () => {
             var result = expr.evaluate(testdata2);
             // number between 1502264152715 and 2000000000000 (18 May 2033)
             var expected = result > 1502264152715 && result < 2000000000000;
-            expect(expected).to.deep.equal(true);
+            expect(expected).toEqual(true);
         });
     });
 
@@ -164,7 +163,7 @@ describe("Functions with side-effects", () => {
                 var expr = jsonata("$random()");
                 var result = expr.evaluate();
                 var expected = result >= 0 && result < 1;
-                expect(true).to.deep.equal(expected);
+                expect(true).toEqual(expected);
             });
         });
 
@@ -173,7 +172,7 @@ describe("Functions with side-effects", () => {
                 var expr = jsonata("$random() = $random()");
                 var result = expr.evaluate();
                 var expected = false;
-                expect(result).to.deep.equal(expected);
+                expect(result).toEqual(expected);
             });
         });
     });
@@ -202,8 +201,8 @@ describe("Tests that bind Javascript functions", () => {
                     }
                 ]
             };
-            expect(result).to.deep.equal(expected);
-            expect(count).to.equal(1);
+            expect(result).toEqual(expected);
+            expect(count).toEqual(1);
         });
     });
 
@@ -215,7 +214,7 @@ describe("Tests that bind Javascript functions", () => {
                 return "time for tea";
             });
             var result = expr.evaluate(testdata2);
-            expect(result).to.equal("time for tea");
+            expect(result).toEqual("time for tea");
         });
     });
 
@@ -231,7 +230,7 @@ describe("Tests that bind Javascript functions", () => {
             );
             var result = expr.evaluate(testdata2);
             var expected = [1, 2, 3, 4];
-            expect(result).to.deep.equal(expected);
+            expect(result).toEqual(expected);
         });
     });
     describe("map a user-defined Javascript function with undefined signature", function() {
@@ -242,7 +241,7 @@ describe("Tests that bind Javascript functions", () => {
             });
             var result = expr.evaluate(testdata2);
             var expected = [1, 2, 3, 4];
-            expect(result).to.deep.equal(expected);
+            expect(result).toEqual(expected);
         });
     });
 
@@ -254,7 +253,7 @@ describe("Tests that bind Javascript functions", () => {
             });
             var result = expr.evaluate(testdata2);
             var expected = [1, 2, 3, 4];
-            expect(result).to.deep.equal(expected);
+            expect(result).toEqual(expected);
         });
     });
     describe("Partially apply user-defined Javascript function", function() {
@@ -271,7 +270,7 @@ describe("Tests that bind Javascript functions", () => {
             });
             var result = expr.evaluate(testdata2);
             var expected = "Hello";
-            expect(result).to.deep.equal(expected);
+            expect(result).toEqual(expected);
         });
     });
 });
@@ -283,7 +282,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
             var expr = jsonata('/ab/ ("ab")');
             var result = expr.evaluate();
             var expected = { match: "ab", start: 0, end: 2, groups: [] };
-            expect(JSON.stringify(result)).to.equal(JSON.stringify(expected));
+            expect(JSON.stringify(result)).toEqual(JSON.stringify(expected));
         });
     });
 
@@ -292,7 +291,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
             var expr = jsonata("/ab/ ()");
             var result = expr.evaluate();
             var expected = undefined;
-            expect(JSON.stringify(result)).to.equal(JSON.stringify(expected));
+            expect(JSON.stringify(result)).toEqual(JSON.stringify(expected));
         });
     });
 
@@ -301,7 +300,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
             var expr = jsonata('/ab+/ ("ababbabbcc")');
             var result = expr.evaluate();
             var expected = { match: "ab", start: 0, end: 2, groups: [] };
-            expect(JSON.stringify(result)).to.equal(JSON.stringify(expected));
+            expect(JSON.stringify(result)).toEqual(JSON.stringify(expected));
         });
     });
 
@@ -310,7 +309,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
             var expr = jsonata('/a(b+)/ ("ababbabbcc")');
             var result = expr.evaluate();
             var expected = { match: "ab", start: 0, end: 2, groups: ["b"] };
-            expect(JSON.stringify(result)).to.equal(JSON.stringify(expected));
+            expect(JSON.stringify(result)).toEqual(JSON.stringify(expected));
         });
     });
 
@@ -319,7 +318,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
             var expr = jsonata('/a(b+)/ ("ababbabbcc").next()');
             var result = expr.evaluate();
             var expected = { match: "abb", start: 2, end: 5, groups: ["bb"] };
-            expect(JSON.stringify(result)).to.equal(JSON.stringify(expected));
+            expect(JSON.stringify(result)).toEqual(JSON.stringify(expected));
         });
     });
 
@@ -328,7 +327,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
             var expr = jsonata('/a(b+)/ ("ababbabbcc").next().next()');
             var result = expr.evaluate();
             var expected = { match: "abb", start: 5, end: 8, groups: ["bb"] };
-            expect(JSON.stringify(result)).to.equal(JSON.stringify(expected));
+            expect(JSON.stringify(result)).toEqual(JSON.stringify(expected));
         });
     });
 
@@ -337,7 +336,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
             var expr = jsonata('/a(b+)/ ("ababbabbcc").next().next().next()');
             var result = expr.evaluate();
             var expected = undefined;
-            expect(JSON.stringify(result)).to.equal(JSON.stringify(expected));
+            expect(JSON.stringify(result)).toEqual(JSON.stringify(expected));
         });
     });
 
@@ -346,29 +345,25 @@ describe("Tests that are specific to a Javascript runtime", () => {
             var expr = jsonata('/a(b+)/i ("Ababbabbcc")');
             var result = expr.evaluate();
             var expected = { match: "Ab", start: 0, end: 2, groups: ["b"] };
-            expect(JSON.stringify(result)).to.equal(JSON.stringify(expected));
+            expect(JSON.stringify(result)).toEqual(JSON.stringify(expected));
         });
     });
 
     describe("empty regex", function() {
         it("should throw error", function() {
-            expect(function() {
+            expectError(() => {
                 var expr = jsonata("//");
-                expr.evaluate();
-            })
-                .to.throw()
-                .to.deep.contain({ position: 1, code: "S0301" });
+                expr.evaluate();                
+            }, {position: 1, code: "S0301"});
         });
     });
 
-    describe("empty regex", function() {
+    describe("incomplete regex", function() {
         it("should throw error", function() {
-            expect(function() {
+            expectError(() => {
                 var expr = jsonata("/");
                 expr.evaluate();
-            })
-                .to.throw()
-                .to.deep.contain({ position: 1, code: "S0302" });
+            }, {position: 1, code: "S0302"});
         });
     });
 
@@ -386,7 +381,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
                     },
                     { match: "ab", index: 5, groups: [] }
                 ];
-                expect(result).to.deep.equal(expected);
+                expect(result).toEqual(expected);
             });
         });
 
@@ -403,7 +398,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
                     },
                     { match: "abb", index: 5, groups: ["bb"] }
                 ];
-                expect(result).to.deep.equal(expected);
+                expect(result).toEqual(expected);
             });
         });
 
@@ -412,7 +407,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
                 var expr = jsonata('$match("ababbabbcc",/a(b+)/, 1)');
                 var result = expr.evaluate();
                 var expected = { match: "ab", index: 0, groups: ["b"] };
-                expect(result).to.deep.equal(expected);
+                expect(result).toEqual(expected);
             });
         });
 
@@ -421,7 +416,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
                 var expr = jsonata('$match("ababbabbcc",/a(b+)/, 0)');
                 var result = expr.evaluate();
                 var expected = undefined;
-                expect(result).to.deep.equal(expected);
+                expect(result).toEqual(expected);
             });
         });
 
@@ -430,7 +425,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
                 var expr = jsonata("$match(nothing,/a(xb+)/)");
                 var result = expr.evaluate();
                 var expected = undefined;
-                expect(result).to.deep.equal(expected);
+                expect(result).toEqual(expected);
             });
         });
 
@@ -439,84 +434,70 @@ describe("Tests that are specific to a Javascript runtime", () => {
                 var expr = jsonata('$match("ababbabbcc",/a(xb+)/)');
                 var result = expr.evaluate();
                 var expected = undefined;
-                expect(result).to.deep.equal(expected);
+                expect(result).toEqual(expected);
             });
         });
 
         describe('$match("a, b, c, d", /ab/, -3)', function() {
             it("should throw error", function() {
                 var expr = jsonata('$match("a, b, c, d", /ab/, -3)');
-                expect(function() {
+                expectError(() => {
                     expr.evaluate();
-                })
-                    .to.throw()
-                    .to.deep.contain({ position: 7, code: "D3040", token: "match", index: 3, value: -3 });
+                }, { position: 7, code: "D3040", token: "match", index: 3, value: -3 });
             });
         });
 
         describe('$match("a, b, c, d", /ab/, null)', function() {
             it("should throw error", function() {
                 var expr = jsonata('$match("a, b, c, d", /ab/, null)');
-                expect(function() {
+                expectError(() => {
                     expr.evaluate();
-                })
-                    .to.throw()
-                    .to.deep.contain({ position: 7, code: "T0410", token: "match", index: 3, value: null });
+                }, { position: 7, code: "T0410", token: "match", index: 3, value: null });
             });
         });
 
         describe('$match("a, b, c, d", /ab/, "2")', function() {
             it("should throw error", function() {
                 var expr = jsonata('$match("a, b, c, d", /ab/, "2")');
-                expect(function() {
+                expectError(() => {
                     expr.evaluate();
-                })
-                    .to.throw()
-                    .to.deep.contain({ position: 7, code: "T0410", token: "match", index: 3, value: "2" });
+                }, { position: 7, code: "T0410", token: "match", index: 3, value: "2" });
             });
         });
 
         describe('$match("a, b, c, d", "ab")', function() {
             it("should throw error", function() {
                 var expr = jsonata('$match("a, b, c, d", "ab")');
-                expect(function() {
+                expectError(() => {
                     expr.evaluate();
-                })
-                    .to.throw()
-                    .to.deep.contain({ position: 7, code: "T0410", token: "match", index: 2, value: "ab" });
+                }, { position: 7, code: "T0410", token: "match", index: 2, value: "ab" });
             });
         });
 
         describe('$match("a, b, c, d", true)', function() {
             it("should throw error", function() {
                 var expr = jsonata('$match("a, b, c, d", true)');
-                expect(function() {
+                expectError(() => {
                     expr.evaluate();
-                })
-                    .to.throw()
-                    .to.deep.contain({ position: 7, code: "T0410", token: "match", index: 2, value: true });
+                }, { position: 7, code: "T0410", token: "match", index: 2, value: true });
             });
         });
 
         describe("$match(12345, 3)", function() {
             it("should throw error", function() {
                 var expr = jsonata("$match(12345, 3)");
-                expect(function() {
+                expectError(() => {
                     expr.evaluate();
-                })
-                    .to.throw()
-                    .to.deep.contain({ position: 7, code: "T0410", token: "match", index: 1, value: 12345 });
+                }, { position: 7, code: "T0410", token: "match", index: 1, value: 12345 });
             });
         });
 
         describe("$match(12345)", function() {
             it("should throw error", function() {
                 var expr = jsonata("$match(12345)");
-                expect(function() {
+                expectError(() => {
                     expr.evaluate();
-                })
-                    .to.throw()
-                    .to.deep.contain({ position: 7, code: "T0410", token: "match", index: 1 });
+                }, { position: 7, code: "T0410", token: "match", index: 1 });
             });
         });
     });
@@ -529,7 +510,7 @@ describe("Test that yield platform specific results", () => {
             var expr = jsonata("$sqrt(10) * $sqrt(10)");
             var result = expr.evaluate();
             var expected = 10;
-            expect(result).to.be.closeTo(expected, 1e-13);
+            expect(result).toBeCloseTo(expected);
         });
     });
 });
@@ -537,69 +518,36 @@ describe("Test that yield platform specific results", () => {
 describe("Tests that include infinite recursion", () => {
     describe("stack overflow - infinite recursive function - non-tail call", function() {
         it("should throw error", function() {
-            expect(function() {
+            expectError(() => {
                 var expr = jsonata("(" + "  $inf := function($n){$n+$inf($n-1)};" + "  $inf(5)" + ")");
                 timeboxExpression(expr, 1000, 300);
                 expr.evaluate();
-            })
-                .to.throw()
-                .to.deep.contain({ position: 46, code: "U1001" });
+            }, { position: 46, code: "U1001" });
         });
     });
 
     describe("stack overflow - infinite recursive function - tail call", function() {
-        this.timeout(5000);
+        jest.setTimeout(5000);
         it("should throw error", function() {
-            expect(function() {
+            expectError(() => {
                 var expr = jsonata("(" + "  $inf := function(){$inf()};" + "  $inf()" + ")");
                 timeboxExpression(expr, 1000, 500);
                 expr.evaluate();
-            })
-                .to.throw()
-                .to.deep.contain({ position: 37, code: "U1001" });
+            }, { position: 37, code: "U1001" });
         });
     });
 });
 
-/**
- * Protect the process/browser from a runnaway expression
- * i.e. Infinite loop (tail recursion), or excessive stack growth
- *
- * @param {Object} expr - expression to protect
- * @param {Number} timeout - max time in ms
- * @param {Number} maxDepth - max stack depth
- */
-function timeboxExpression(expr, timeout, maxDepth) {
-    var depth = 0;
-    var time = Date.now();
 
-    var checkRunnaway = function() {
-        if (depth > maxDepth) {
-            // stack too deep
-            throw {
-                message:
-                    "Stack overflow error: Check for non-terminating recursive function.  Consider rewriting as tail-recursive.",
-                stack: new Error().stack,
-                code: "U1001"
-            };
-        }
-        if (Date.now() - time > timeout) {
-            // expression has run for too long
-            throw {
-                message: "Expression evaluation timeout: Check for infinite loop",
-                stack: new Error().stack,
-                code: "U1001"
-            };
-        }
-    };
-
-    // register callbacks
-    expr.assign("__evaluate_entry", function() {
-        depth++;
-        checkRunnaway();
-    });
-    expr.assign("__evaluate_exit", function() {
-        depth--;
-        checkRunnaway();
-    });
+function expectError(f: () => any, fields) {
+    let error = false;
+    try {
+        f();
+    } catch(e) {
+        Object.keys(fields).forEach((key) => {
+            expect(e[key]).toEqual(fields[key]);
+        });
+        error = true;
+    }
+    expect(error).toBeTruthy();                        
 }

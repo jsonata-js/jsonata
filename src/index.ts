@@ -1,0 +1,1 @@
+export { jsonata } from './jsonata';
