@@ -4398,8 +4398,7 @@ var jsonata = (function() {
         if (!Array.isArray(arg2)) {
             arg2 = [arg2];
         }
-        Array.prototype.push.apply(arg1, arg2);
-        return arg1;
+        return arg1.concat(arg2);
     }
 
     /**
