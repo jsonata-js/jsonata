@@ -4654,7 +4654,8 @@ var jsonata = (function() {
     }
 
     // Regular expression to match an ISO 8601 formatted timestamp
-    var iso8601regex = new RegExp('^([\\+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24\\:?00)([\\.,]\\d+(?!:))?)?(\\17[0-5]\\d([\\.,]\\d+)?)?([zZ]|([\\+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$');
+    // Uses https://www.myintervals.com/blog/2009/05/20/iso-8601-date-validation-that-doesnt-suck/ but removes the "week number" format not supported by Date.parse
+    var iso8601regex = new RegExp('^\\d{4}(-[01]\\d)*(-[0-3]\\d)*(T[0-2]\\d:[0-5]\\d:[0-5]\\d)*(\\.\\d+)?([+-][0-2]\\d:?[0-5]\\d|Z)?$');
 
     /**
      * Converts an ISO 8601 timestamp to milliseconds since the epoch
