@@ -1,0 +1,6 @@
+{
+    "expr": "$toMillis(\"2018\")",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": 1514764800000
+}

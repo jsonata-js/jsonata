@@ -1,0 +1,6 @@
+{
+    "expr": "$toMillis(\"2018-02-01T09:42:13.123+0000\")",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": 1517478133123
+}
