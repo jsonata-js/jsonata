@@ -1,3 +1,8 @@
+#### 1.5.1 Maintenance Release
+
+- Update `$toMillis()` to allow more complete range of ISO 8601 compatible dates (issue #140)
+- Fix `$append()` so that it doesn't mutate the first argument (issue #139)
+
 #### 1.5.0 Milestone Release
 
 - Restructured the entire test suite to be implementation language agnostic (PR #122)
