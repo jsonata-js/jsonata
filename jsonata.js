@@ -783,14 +783,8 @@ var jsonata = (function() {
         // <expression> <operator> <expression>
         // right associative
         var infixr = function (id, bp, led) {
-            var bindingPower = bp || operators[id];
-            var s = symbol(id, bindingPower);
-            s.led = led || function (left) {
-                this.lhs = left;
-                this.rhs = expression(bindingPower - 1); // subtract 1 from bindingPower for right associative operators
-                this.type = "binary";
-                return this;
-            };
+            var s = symbol(id, bp);
+            s.led = led;
             return s;
         };
 
@@ -836,7 +830,6 @@ var jsonata = (function() {
         terminal("and"); // the 'keywords' can also be used as terminals (field names)
         terminal("or"); //
         terminal("in"); //
-        infixr(":="); // bind variable
         prefix("-"); // unary numeric negation
         infix("~>"); // function application
 
@@ -1055,6 +1048,23 @@ var jsonata = (function() {
 
         // object grouping
         infix("{", operators['{'], objectParser);
+
+        // bind variable
+        infixr(":=", operators[':='], function(left) {
+            if(left.type !== 'variable') {
+                return handleError( {
+                    code: "S0212",
+                    stack: (new Error()).stack,
+                    position: left.position,
+                    token: left.value
+                });
+            }
+            this.lhs = left;
+            this.rhs = expression(operators[':='] - 1); // subtract 1 from bindingPower for right associative operators
+            this.type = "binary";
+            return this;
+
+        });
 
         // if/then/else ternary operator ?:
         infix("?", operators['?'], function (left) {
@@ -2270,17 +2280,8 @@ var jsonata = (function() {
      */
     function* evaluateBindExpression(expr, input, environment) {
         // The RHS is the expression to evaluate
-        // The LHS is the name of the variable to bind to - should be a VARIABLE token
+        // The LHS is the name of the variable to bind to - should be a VARIABLE token (enforced by parser)
         var value = yield * evaluate(expr.rhs, input, environment);
-        if (expr.lhs.type !== 'variable') {
-            throw {
-                code: "D2005",
-                stack: (new Error()).stack,
-                position: expr.position,
-                token: expr.value,
-                value: expr.lhs.type === 'path' ? expr.lhs.steps[0].value : expr.lhs.value
-            };
-        }
         environment.bind(expr.lhs.value, value);
         return value;
     }
@@ -4803,6 +4804,7 @@ var jsonata = (function() {
         "S0209": "A predicate cannot follow a grouping expression in a step",
         "S0210": "Each step can only have one grouping expression",
         "S0211": "The symbol {{token}} cannot be used as a unary operator",
+        "S0212": "The left side of := must be a variable name (start with $)",
         "S0301": "Empty regular expressions are not allowed",
         "S0302": "No terminating / in regular expression",
         "S0402": "Choice groups containing parameterized types are not supported",
@@ -4823,7 +4825,7 @@ var jsonata = (function() {
         "T2002": "The right side of the {{token}} operator must evaluate to a number",
         "T2003": "The left side of the range operator (..) must evaluate to an integer",
         "T2004": "The right side of the range operator (..) must evaluate to an integer",
-        "D2005": "The left side of := must be a variable name (start with $)",
+        "D2005": "The left side of := must be a variable name (start with $)",  // defunct - replaced by S0212 parser error
         "T2006": "The right side of the function application operator ~> must be a function",
         "T2007": "Type mismatch when comparing values {{value}} and {{value2}} in order-by clause",
         "T2008": "The expressions within an order-by clause must evaluate to numeric or string values",
