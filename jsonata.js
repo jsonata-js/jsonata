@@ -1090,7 +1090,7 @@ var jsonata = (function() {
         // This enables tail-recursive functions to be written without growing the stack
         var tail_call_optimize = function(expr) {
             var result;
-            if(expr.type === 'function') {
+            if(expr.type === 'function' && !expr.predicate) {
                 var thunk = {type: 'lambda', thunk: true, arguments: [], position: expr.position};
                 thunk.body = expr;
                 result = thunk;
