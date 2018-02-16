@@ -1,3 +1,9 @@
+#### 1.5.2 Maintenance Release
+
+- Enforce consistent syntax error when attempting to use unquoted numeric property names (issue #147)
+- Invalid token on LHS of binding operator is now a syntax error rather than dynamic (runtime) error (issue #148)
+- Fix corruption of predicated function calls within lambda functions (PR 149)
+
 #### 1.5.1 Maintenance Release
 
 - Update `$toMillis()` to allow more complete range of ISO 8601 compatible dates (issue #140)
