@@ -25,7 +25,7 @@ describe('Invoke parser with valid expression', function() {
                         "predicate": [
                             {
                                 "value": 0,
-                                "type": "literal",
+                                "type": "number",
                                 "position": 15
                             }
                         ]
@@ -142,7 +142,7 @@ describe('Invoke parser with incomplete expression', function() {
                                 "token": ";",
                                 "position": 15,
                                 "remaining": [
-                                    {"value": 0, "type": "literal", "position": 16},
+                                    {"value": 0, "type": "number", "position": 16},
                                     {"type": "operator", "value": "]", "position": 17},
                                     {"type": "operator", "value": ".", "position": 18},
                                     {"type": "name", "value": "Product", "position": 25}
@@ -160,7 +160,7 @@ describe('Invoke parser with incomplete expression', function() {
                     "token": ";",
                     "position": 15,
                     "remaining": [
-                        {"value": 0, "type": "literal", "position": 16},
+                        {"value": 0, "type": "number", "position": 16},
                         {"type": "operator", "value": "]", "position": 17},
                         {"type": "operator", "value": ".", "position": 18},
                         {"type": "name", "value": "Product", "position": 25}
@@ -175,7 +175,7 @@ describe('Invoke parser with incomplete expression', function() {
                     "remaining": [
                         {
                             "value": 0,
-                            "type": "literal",
+                            "type": "number",
                             "position": 16
                         }
                     ]
@@ -205,7 +205,7 @@ describe('Invoke parser with incomplete expression', function() {
                         "predicate": [
                             {
                                 "value": 0,
-                                "type": "literal",
+                                "type": "number",
                                 "position": 15
                             }
                         ]
@@ -251,7 +251,7 @@ describe('Invoke parser with incomplete expression', function() {
                         "predicate": [
                             {
                                 "value": 0,
-                                "type": "literal",
+                                "type": "number",
                                 "position": 15
                             }
                         ]
@@ -301,7 +301,7 @@ describe('Invoke parser with incomplete expression', function() {
                             "predicate": [
                                 {
                                     "value": 0,
-                                    "type": "literal",
+                                    "type": "number",
                                     "position": 14
                                 }
                             ]

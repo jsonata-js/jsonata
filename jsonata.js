@@ -719,7 +719,6 @@ var jsonata = (function() {
                 case 'string':
                 case 'number':
                 case 'value':
-                    type = "literal";
                     symbol = symbol_table["(literal)"];
                     break;
                 case 'regex':
@@ -1154,9 +1153,18 @@ var jsonata = (function() {
                                 rest = {type: 'path', steps: [rest]};
                             }
                             Array.prototype.push.apply(result.steps, rest.steps);
-                            // any steps within a path that are literals, should be changed to 'name'
+                            // any steps within a path that are string literals, should be changed to 'name'
                             result.steps.filter(function(step) {
-                                return step.type === 'literal';
+                                if(step.type === 'number' || step.type === 'value') {
+                                    // don't allow steps to be numbers or the values true/false/null
+                                    throw {
+                                        code: "S0213",
+                                        stack: (new Error()).stack,
+                                        position: step.position,
+                                        value: step.value
+                                    };
+                                }
+                                return step.type === 'string';
                             }).forEach(function(lit) {
                                 lit.type = 'name';
                             });
@@ -1261,7 +1269,7 @@ var jsonata = (function() {
                         // all other unary expressions - just process the expression
                         result.expression = ast_optimize(expr.expression);
                         // if unary minus on a number, then pre-process
-                        if (expr.value === '-' && result.expression.type === 'literal' && isNumeric(result.expression.value)) {
+                        if (expr.value === '-' && result.expression.type === 'number') {
                             result = result.expression;
                             result.value = -result.value;
                         }
@@ -1311,7 +1319,9 @@ var jsonata = (function() {
                         result.keepSingletonArray = true;
                     }
                     break;
-                case 'literal':
+                case 'string':
+                case 'number':
+                case 'value':
                 case 'wildcard':
                 case 'descendant':
                 case 'variable':
@@ -1472,7 +1482,9 @@ var jsonata = (function() {
             case 'name':
                 result = evaluateName(expr, input, environment);
                 break;
-            case 'literal':
+            case 'string':
+            case 'number':
+            case 'value':
                 result = evaluateLiteral(expr, input, environment);
                 break;
             case 'wildcard':
@@ -1706,7 +1718,7 @@ var jsonata = (function() {
                 inputSequence = createSequence(inputSequence);
             }
             results = createSequence();
-            if (predicate.type === 'literal' && isNumeric(predicate.value)) {
+            if (predicate.type === 'number') {
                 var index = predicate.value;
                 if (!Number.isInteger(index)) {
                     // round it down
@@ -4805,6 +4817,7 @@ var jsonata = (function() {
         "S0210": "Each step can only have one grouping expression",
         "S0211": "The symbol {{token}} cannot be used as a unary operator",
         "S0212": "The left side of := must be a variable name (start with $)",
+        "S0213": "The literal value {{value}} cannot be used as a step within a path expression",
         "S0301": "Empty regular expressions are not allowed",
         "S0302": "No terminating / in regular expression",
         "S0402": "Choice groups containing parameterized types are not supported",
