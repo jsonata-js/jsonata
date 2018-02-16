@@ -1,0 +1,8 @@
+{
+    "expr": "($f := function($s, $x)<sn:s> { $x > 0 ? $f([$s, $s], $x-1) : $s};  $f('a', 2)  )",
+    "dataset": null,
+    "timelimit": 1000,
+    "depth": 500,
+    "bindings": {},
+    "code": "T0410"
+}
