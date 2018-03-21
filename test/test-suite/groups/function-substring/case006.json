@@ -1,0 +1,6 @@
+{
+    "expr": "$substring('𝄞💩', 1, 1)",
+    "dataset": null,
+    "bindings": {},
+    "result": "💩"
+}

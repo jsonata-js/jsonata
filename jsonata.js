@@ -3098,7 +3098,13 @@ var jsonata = (function() {
             return undefined;
         }
 
-        return str.substr(start, length);
+        var strArray = Array.from(str);
+        if(typeof length !== 'undefined') {
+            var end = start >= 0 ? start + length : strArray.length - start + length;
+            return strArray.slice(start, end).join('');
+        }
+
+        return strArray.slice(start).join('');
     }
 
     /**
@@ -3180,7 +3186,7 @@ var jsonata = (function() {
             return undefined;
         }
 
-        return str.length;
+        return Array.from(str).length;
     }
 
     /**
@@ -3225,11 +3231,11 @@ var jsonata = (function() {
         }
 
         var result;
-        var padLength = Math.abs(width) - str.length;
+        var padLength = Math.abs(width) - functionLength(str);
         if(padLength > 0) {
             var padding = (new Array(padLength + 1)).join(char);
             if(char.length > 1) {
-                padding = padding.substring(0, padLength);
+                padding = functionSubstring(padding, 0, padLength);
             }
             if(width > 0) {
                 result = str + padding;

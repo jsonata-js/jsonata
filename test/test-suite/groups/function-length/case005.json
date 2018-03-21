@@ -2,5 +2,5 @@
     "expr": "$length(\"𝄞\")",
     "dataset": null,
     "bindings": {},
-    "result": 2
+    "result": 1
 }
