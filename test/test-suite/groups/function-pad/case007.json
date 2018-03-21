@@ -1,0 +1,6 @@
+{
+    "expr": "$pad('a𝄞💩', 7)",
+    "dataset": null,
+    "bindings": {},
+    "result": "a𝄞💩    "
+}
