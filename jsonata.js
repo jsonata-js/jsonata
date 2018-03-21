@@ -3570,6 +3570,11 @@ var jsonata = (function() {
      * @returns {String} The formatted string
      */
     function functionFormatNumber(value, picture, options) {
+        // undefined inputs always return undefined
+        if(typeof value === 'undefined') {
+            return undefined;
+        }
+
         var defaults = {
             "decimal-separator": ".",
             "grouping-separator": ",",

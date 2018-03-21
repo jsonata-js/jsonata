@@ -1,0 +1,6 @@
+{
+    "expr": "$formatNumber(foo, '#0.00')",
+    "dataset": null,
+    "bindings": {},
+    "undefinedResult": true
+}
