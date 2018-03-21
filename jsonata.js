@@ -3815,9 +3815,14 @@ var jsonata = (function() {
 
         var variables = parts.map(analyse);
 
+        var minus_sign = properties['minus-sign'];
+        var zero_digit = properties['zero-digit'];
+        var decimal_separator = properties['decimal-separator'];
+        var grouping_separator = properties['grouping-separator'];
+
         if(variables.length === 1) {
             variables.push(JSON.parse(JSON.stringify(variables[0])));
-            variables[1].prefix = properties['minus-sign'] + variables[1].prefix;
+            variables[1].prefix = minus_sign + variables[1].prefix;
         }
 
         // TODO cache the result of the analysis
@@ -3866,7 +3871,7 @@ var jsonata = (function() {
         // bullet 7:
         var makeString = function(value, dp) {
             var str = Math.abs(value).toFixed(dp);
-            if (properties['zero-digit'] !== '0') {
+            if (zero_digit !== '0') {
                 str = str.split('').map(function (digit) {
                     if(digit >= '0' && digit <='9') {
                         return decimalDigitFamily[digit.charCodeAt(0) - 48];
@@ -3880,43 +3885,43 @@ var jsonata = (function() {
         var stringValue = makeString(roundedNumber, pic.maximumFactionalPartSize);
         var decimalPos = stringValue.indexOf('.');
         if(decimalPos === -1) {
-            stringValue = stringValue + properties['decimal-separator'];
+            stringValue = stringValue + decimal_separator;
         } else {
-            stringValue = stringValue.replace('.', properties['decimal-separator']);
+            stringValue = stringValue.replace('.', decimal_separator);
         }
-        while(stringValue.charAt(0) === properties['zero-digit']) {
+        while(stringValue.charAt(0) === zero_digit) {
             stringValue = stringValue.substring(1);
         }
-        while(stringValue.charAt(stringValue.length - 1) === properties['zero-digit']) {
+        while(stringValue.charAt(stringValue.length - 1) === zero_digit) {
             stringValue = stringValue.substring(0, stringValue.length - 1);
         }
         // bullets 8 & 9:
-        decimalPos = stringValue.indexOf(properties['decimal-separator']);
+        decimalPos = stringValue.indexOf(decimal_separator);
         var padLeft = pic.minimumIntegerPartSize - decimalPos;
         var padRight = pic.minimumFactionalPartSize - (stringValue.length - decimalPos - 1);
-        stringValue = (padLeft > 0 ? new Array(padLeft + 1).join('0') : '') + stringValue;
-        stringValue = stringValue + (padRight > 0 ? new Array(padRight + 1).join('0') : '');
-        decimalPos = stringValue.indexOf(properties['decimal-separator']);
+        stringValue = (padLeft > 0 ? new Array(padLeft + 1).join(zero_digit) : '') + stringValue;
+        stringValue = stringValue + (padRight > 0 ? new Array(padRight + 1).join(zero_digit) : '');
+        decimalPos = stringValue.indexOf(decimal_separator);
         // bullet 10:
         if(pic.regularGrouping > 0) {
             var groupCount = Math.floor((decimalPos - 1) / pic.regularGrouping);
             for(var group = 1; group <= groupCount; group++) {
-                stringValue = [stringValue.slice(0, decimalPos - group * pic.regularGrouping), properties['grouping-separator'], stringValue.slice(decimalPos - group * pic.regularGrouping)].join('');
+                stringValue = [stringValue.slice(0, decimalPos - group * pic.regularGrouping), grouping_separator, stringValue.slice(decimalPos - group * pic.regularGrouping)].join('');
             }
         } else {
             pic.integerPartGroupingPositions.forEach(function (pos) {
-                stringValue = [stringValue.slice(0, decimalPos - pos), properties['grouping-separator'], stringValue.slice(decimalPos - pos)].join('');
+                stringValue = [stringValue.slice(0, decimalPos - pos), grouping_separator, stringValue.slice(decimalPos - pos)].join('');
                 decimalPos++;
             });
         }
         // bullet 11:
-        decimalPos = stringValue.indexOf(properties['decimal-separator']);
+        decimalPos = stringValue.indexOf(decimal_separator);
         pic.fractionalPartGroupingPositions.forEach(function(pos) {
-            stringValue = [stringValue.slice(0, pos + decimalPos + 1), properties['grouping-separator'], stringValue.slice(pos + decimalPos + 1)].join('');
+            stringValue = [stringValue.slice(0, pos + decimalPos + 1), grouping_separator, stringValue.slice(pos + decimalPos + 1)].join('');
         });
         // bullet 12:
-        decimalPos = stringValue.indexOf(properties['decimal-separator']);
-        if(pic.picture.indexOf(properties['decimal-separator']) === -1 || decimalPos === stringValue.length - 1) {
+        decimalPos = stringValue.indexOf(decimal_separator);
+        if(pic.picture.indexOf(decimal_separator) === -1 || decimalPos === stringValue.length - 1) {
             stringValue = stringValue.substring(0, stringValue.length - 1);
         }
         // bullet 13:
@@ -3924,9 +3929,9 @@ var jsonata = (function() {
             var stringExponent = makeString(exponent, 0);
             padLeft = pic.minimumExponentSize - stringExponent.length;
             if(padLeft > 0) {
-                stringExponent = new Array(padLeft + 1).join('0') + stringExponent;
+                stringExponent = new Array(padLeft + 1).join(zero_digit) + stringExponent;
             }
-            stringValue = stringValue + properties['exponent-separator'] + (exponent < 0 ? properties['minus-sign'] : '') + stringExponent;
+            stringValue = stringValue + properties['exponent-separator'] + (exponent < 0 ? minus_sign : '') + stringExponent;
         }
         // bullet 14:
         stringValue = pic.prefix + stringValue + pic.suffix;
