@@ -1,3 +1,10 @@
+#### 1.5.3 Maintenance Release
+
+- `$formatNumber` should use `zero-digit` character for padding (issue #161)
+- Handle undefined inputs in `$formatNumber` (issue #165)
+- Handle surrogate pairs as single char in string functions (issue #156)
+- Throw error if multiple group-by expressions evaluate to same key (issue #163)
+
 #### 1.5.2 Maintenance Release
 
 - Enforce consistent syntax error when attempting to use unquoted numeric property names (issue #147)
