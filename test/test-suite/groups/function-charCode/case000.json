@@ -1,0 +1,6 @@
+{
+    "expr": "$charCode(\"H\")",
+    "dataset": null,
+    "bindings": {},
+    "result": 72
+}

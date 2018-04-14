@@ -1,0 +1,6 @@
+{
+    "expr": "$charCode(\"Hello World\", 3)",
+    "dataset": null,
+    "bindings": {},
+    "result": 108
+}

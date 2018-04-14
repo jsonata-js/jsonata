@@ -4748,6 +4748,22 @@ var jsonata = (function() {
     }
 
     /**
+     * Get the character code of a character in a string
+     * @param {String} str - the string
+     * @param {Number} [index] - index inside the string. If no index is given, this defaults to 0
+     * @returns {Number} - an integer between 0 and 65535 representing the UTF-16 code unit at the given index
+     */
+    function functionCharCode(str, index) {
+        if(typeof str !== 'string') {
+            return undefined;
+        }
+        if(typeof index !== 'number') {
+            index = 0;
+        }
+        return str.charCodeAt(index) ;
+    }
+
+    /**
      * Create frame
      * @param {Object} enclosingEnvironment - Enclosing environment
      * @returns {{bind: bind, lookup: lookup}} Created frame
@@ -4822,6 +4838,7 @@ var jsonata = (function() {
     staticFrame.bind('toMillis', defineFunction(functionToMillis, '<s-:n>'));
     staticFrame.bind('fromMillis', defineFunction(functionFromMillis, '<n-:s>'));
     staticFrame.bind('clone', defineFunction(functionClone, '<(oa)-:o>'));
+    staticFrame.bind('charCode', defineFunction(functionCharCode, '<s-n?:n>'));
 
     /**
      * Error codes

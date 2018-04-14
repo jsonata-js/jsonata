@@ -1,0 +1,6 @@
+{
+    "expr": "$charCode(undefined, 0)",
+    "dataset": null,
+    "bindings": {},
+    "undefinedResult": true
+}
