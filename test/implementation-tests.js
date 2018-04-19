@@ -179,7 +179,37 @@ describe("Functions with side-effects", () => {
     });
 });
 
-describe("Tests that bind Javascript functions", () => {
+describe("Tests that use the $clone() function", () => {
+    // $clone() allows jsonata-js to play nicely with Node-RED.
+    // It's not part of the JSONata standard.
+    // See https://github.com/jsonata-js/jsonata/issues/207.
+    describe('clone undefined', function () {
+        it('should return undefined', function () {
+            var expr = jsonata('$clone(foo)');
+            var result = expr.evaluate(testdata2);
+            var expected = undefined;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('clone empty object', function () {
+        it('should return empty object', function () {
+            var expr = jsonata('$clone({})');
+            var result = expr.evaluate(testdata2);
+            var expected = {};
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('clone object', function () {
+        it('should return same object', function () {
+            var expr = jsonata('$clone({"a": 1})');
+            var result = expr.evaluate(testdata2);
+            var expected = {"a": 1};
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
     describe("transform expression with overridden $clone function", function() {
         it("should return result object", function() {
             var expr = jsonata('Account ~> |Order|{"Product":"blah"},nomatch|');
@@ -207,6 +237,19 @@ describe("Tests that bind Javascript functions", () => {
         });
     });
 
+    describe('transform expression with overridden $clone value', function () {
+        it('should throw error', function () {
+            var expr = jsonata('( $clone := 5; $ ~> |Account.Order.Product|{"blah":"foo"}| )');
+            expect(function () {
+                expr.evaluate(testdata2);
+            })
+                .to.throw()
+                .to.deep.contain({ position: 21, code: 'T2013' });
+        });
+    });
+});
+
+describe("Tests that bind Javascript functions", () => {
     // These involve binding of functions
     describe("Override implementation of $now()", function() {
         it("should return result object", function() {
