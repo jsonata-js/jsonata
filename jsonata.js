@@ -3112,6 +3112,9 @@ var jsonata = (function() {
 
         var strArray = Array.from(str);
         if(typeof length !== 'undefined') {
+            if(start < 0){
+                start = strArray.length + start;
+            }
             var end = start >= 0 ? start + length : strArray.length - start + length;
             return strArray.slice(start, end).join('');
         }
