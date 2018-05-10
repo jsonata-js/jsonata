@@ -4556,12 +4556,6 @@ var jsonata = (function() {
         } else {
             comp = function* (a, b) {
                 return yield * apply(comparator, [a, b], null);
-                // // returns a generator - so iterate over it
-                // var comp = it.next();
-                // while (!comp.done) {
-                //     comp = it.next(comp.value);
-                // }
-                // return comp.value;
             };
         }
 
