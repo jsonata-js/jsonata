@@ -3074,7 +3074,7 @@ var jsonata = (function() {
             };
         } else
             str = JSON.stringify(arg, function (key, val) {
-                return (typeof val !== 'undefined' && val !== null && val.toPrecision && isNumeric(val)) ? Number(val.toPrecision(13)) :
+                return (typeof val !== 'undefined' && val !== null && val.toPrecision && isNumeric(val)) ? Number(val.toPrecision(15)) :
                     (val && isFunction(val)) ? '' : val;
             });
         return str;
