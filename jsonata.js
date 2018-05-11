@@ -1719,11 +1719,7 @@ var jsonata = (function() {
             }
             results = createSequence();
             if (predicate.type === 'number') {
-                var index = predicate.value;
-                if (!Number.isInteger(index)) {
-                    // round it down
-                    index = Math.floor(index);
-                }
+                var index = Math.floor(predicate.value);  // round it down
                 if (index < 0) {
                     // count in from end of array
                     index = inputSequence.length + index;
@@ -1754,15 +1750,13 @@ var jsonata = (function() {
             }
             if(isArrayOfNumbers(res)) {
                 res.forEach(function(ires) {
-                    if (!Number.isInteger(ires)) {
-                        // round it down
-                        ires = Math.floor(ires);
-                    }
-                    if (ires < 0) {
+                    // round it down
+                    var ii = Math.floor(ires);
+                    if (ii < 0) {
                         // count in from end of array
-                        ires = input.length + ires;
+                        ii = input.length + ii;
                     }
-                    if (ires === index) {
+                    if (ii === index) {
                         results.push(item);
                     }
                 });
