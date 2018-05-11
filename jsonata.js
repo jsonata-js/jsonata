@@ -1719,11 +1719,7 @@ var jsonata = (function() {
             }
             results = createSequence();
             if (predicate.type === 'number') {
-                var index = predicate.value;
-                if (!Number.isInteger(index)) {
-                    // round it down
-                    index = Math.floor(index);
-                }
+                var index = Math.floor(predicate.value);  // round it down
                 if (index < 0) {
                     // count in from end of array
                     index = inputSequence.length + index;
@@ -1754,15 +1750,13 @@ var jsonata = (function() {
             }
             if(isArrayOfNumbers(res)) {
                 res.forEach(function(ires) {
-                    if (!Number.isInteger(ires)) {
-                        // round it down
-                        ires = Math.floor(ires);
-                    }
-                    if (ires < 0) {
+                    // round it down
+                    var ii = Math.floor(ires);
+                    if (ii < 0) {
                         // count in from end of array
-                        ires = input.length + ires;
+                        ii = input.length + ii;
                     }
-                    if (ires === index) {
+                    if (ii === index) {
                         results.push(item);
                     }
                 });
@@ -2430,15 +2424,15 @@ var jsonata = (function() {
 
         // sort the lhs array
         // use comparator function
-        var comparator = function(a, b) {
+        var comparator = function*(a, b) { // eslint-disable-line require-yield
             // expr.rhs is an array of order-by in priority order
             var comp = 0;
             for(var index = 0; comp === 0 && index < expr.rhs.length; index++) {
                 var term = expr.rhs[index];
                 //evaluate the rhs expression in the context of a
-                var aa = driveGenerator(term.expression, a, environment);
+                var aa = yield * evaluate(term.expression, a, environment);
                 //evaluate the rhs expression in the context of b
-                var bb = driveGenerator(term.expression, b, environment);
+                var bb = yield * evaluate(term.expression, b, environment);
 
                 // type checks
                 var atype = typeof aa;
@@ -2490,7 +2484,7 @@ var jsonata = (function() {
             return comp === 1;
         };
 
-        result = functionSort(lhs, comparator);
+        result = yield * functionSort(lhs, comparator);
 
         return result;
     }
@@ -2579,25 +2573,7 @@ var jsonata = (function() {
         return defineFunction(transformer, '<(oa):o>');
     }
 
-    /**
-     * Evaluate an expression by driving the generator to completion
-     * Used when it's not possible to yield
-     * @param {Object} expr - AST
-     * @param {Object} input - Input data to evaluate against
-     * @param {Object} environment - Environment
-     * @returns {*} result
-     */
-    function driveGenerator(expr, input, environment) {
-        var gen = evaluate(expr, input, environment);
-        // returns a generator - so iterate over it
-        var comp = gen.next();
-        while (!comp.done) {
-            comp = gen.next(comp.value);
-        }
-        return comp.value;
-    }
-
-    var chain = driveGenerator(parser('function($f, $g) { function($x){ $g($f($x)) } }'), null, staticFrame);
+    var chainAST = parser('function($f, $g) { function($x){ $g($f($x)) } }');
 
     /**
      * Apply the function on the RHS using the sequence on the LHS as the first argument
@@ -2631,6 +2607,7 @@ var jsonata = (function() {
             if(isFunction(lhs)) {
                 // this is function chaining (func1 ~> func2)
                 // λ($f, $g) { λ($x){ $g($f($x)) } }
+                var chain = yield * evaluate(chainAST, null, environment);
                 result = yield * apply(chain, [lhs, func], environment);
             } else {
                 result = yield * apply(func, [lhs], environment);
@@ -3091,7 +3068,7 @@ var jsonata = (function() {
             };
         } else
             str = JSON.stringify(arg, function (key, val) {
-                return (typeof val !== 'undefined' && val !== null && val.toPrecision && isNumeric(val)) ? Number(val.toPrecision(13)) :
+                return (typeof val !== 'undefined' && val !== null && val.toPrecision && isNumeric(val)) ? Number(val.toPrecision(15)) :
                     (val && isFunction(val)) ? '' : val;
             });
         return str;
@@ -4296,19 +4273,11 @@ var jsonata = (function() {
 
         var result = createSequence();
 
-        var predicate = function (value, index, array) {
-            var it = apply(func, [value, index, array], null);
-            // returns a generator - so iterate over it
-            var res = it.next();
-            while (!res.done) {
-                res = it.next(res.value);
-            }
-            return res.value;
-        };
-
         for(var i = 0; i < arr.length; i++) {
             var entry = arr[i];
-            if(functionBoolean(predicate(entry, i, arr))) {
+            // invoke func
+            var res = yield * apply(func, [entry, i, arr], null);
+            if(functionBoolean(res)) {
                 result.push(entry);
             }
         }
@@ -4554,7 +4523,7 @@ var jsonata = (function() {
      * @param {*} comparator - comparator function
      * @returns {Array} - sorted array
      */
-    function functionSort(arr, comparator) {
+    function* functionSort(arr, comparator) {
         // undefined inputs always return undefined
         if(typeof arr === 'undefined') {
             return undefined;
@@ -4575,59 +4544,53 @@ var jsonata = (function() {
                 };
             }
 
-            comp = function (a, b) {
+            comp = function* (a, b) {  // eslint-disable-line require-yield
                 return a > b;
             };
         } else if(typeof comparator === 'function') {
             // for internal usage of functionSort (i.e. order-by syntax)
             comp = comparator;
         } else {
-            comp = function (a, b) {
-                var it = apply(comparator, [a, b], null);
-                // returns a generator - so iterate over it
-                var comp = it.next();
-                while (!comp.done) {
-                    comp = it.next(comp.value);
-                }
-                return comp.value;
+            comp = function* (a, b) {
+                return yield * apply(comparator, [a, b], null);
             };
         }
 
-        var merge = function(l, r) {
-            var merge_iter = function(result, left, right) {
+        var merge = function*(l, r) {
+            var merge_iter = function*(result, left, right) {
                 if (left.length === 0) {
                     Array.prototype.push.apply(result, right);
                 } else if (right.length === 0) {
                     Array.prototype.push.apply(result, left);
-                } else if (comp(left[0], right[0])) { // invoke the comparator function
+                } else if (yield * comp(left[0], right[0])) { // invoke the comparator function
                     // if it returns true - swap left and right
                     result.push(right[0]);
-                    merge_iter(result, left, right.slice(1));
+                    yield * merge_iter(result, left, right.slice(1));
                 } else {
                     // otherwise keep the same order
                     result.push(left[0]);
-                    merge_iter(result, left.slice(1), right);
+                    yield * merge_iter(result, left.slice(1), right);
                 }
             };
             var merged = [];
-            merge_iter(merged, l, r);
+            yield * merge_iter(merged, l, r);
             return merged;
         };
 
-        var sort = function(array) {
+        var sort = function*(array) {
             if(array.length <= 1) {
                 return array;
             } else {
                 var middle = Math.floor(array.length / 2);
                 var left = array.slice(0, middle);
                 var right = array.slice(middle);
-                left = sort(left);
-                right = sort(right);
-                return merge(left, right);
+                left = yield * sort(left);
+                right = yield * sort(right);
+                return yield * merge(left, right);
             }
         };
 
-        var result = sort(arr);
+        var result = yield * sort(arr);
 
         return result;
     }
@@ -4668,22 +4631,14 @@ var jsonata = (function() {
      * @param {object} func - the predicate function (lambda or native)
      * @returns {object} - sifted object
      */
-    function functionSift(arg, func) {
+    function* functionSift(arg, func) {
         var result = {};
-
-        var predicate = function (value, key, object) {
-            var it = apply(func, [value, key, object], null);
-            // returns a generator - so iterate over it
-            var res = it.next();
-            while (!res.done) {
-                res = it.next(res.value);
-            }
-            return res.value;
-        };
 
         for(var item in arg) {
             var entry = arg[item];
-            if(functionBoolean(predicate(entry, item, arg))) {
+            // invoke func
+            var res = yield * apply(func, [entry, item, arg], null);
+            if(functionBoolean(res)) {
                 result[item] = entry;
             }
         }
@@ -5004,21 +4959,21 @@ var jsonata = (function() {
                 // if a callback function is supplied, then drive the generator in a promise chain
                 if(typeof callback === 'function') {
                     exec_env.bind('__jsonata_async', true);
+                    var catchHandler = function (err) {
+                        err.message = lookupMessage(err);
+                        callback(err, null);
+                    };
                     var thenHandler = function (response) {
                         result = it.next(response);
                         if (result.done) {
                             callback(null, result.value);
                         } else {
-                            result.value.then(thenHandler)
-                                .catch(function (err) {
-                                    err.message = lookupMessage(err);
-                                    callback(err, null);
-                                });
+                            result.value.then(thenHandler).catch(catchHandler);
                         }
                     };
                     it = evaluate(ast, input, exec_env);
                     result = it.next();
-                    result.value.then(thenHandler);
+                    result.value.then(thenHandler).catch(catchHandler);
                 } else {
                     // no callback function - drive the generator to completion synchronously
                     try {
