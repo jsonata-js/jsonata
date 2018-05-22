@@ -1,0 +1,6 @@
+{
+    "expr": "$substring(\"hello world\", -5, 1)",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": "w"
+}
