@@ -300,6 +300,7 @@ describe("Tests that bind Javascript functions", () => {
             expect(result).to.deep.equal(expected);
         });
     });
+
     describe("Partially apply user-defined Javascript function", function() {
         it("should return result object", function() {
             var expr = jsonata(
@@ -316,6 +317,69 @@ describe("Tests that bind Javascript functions", () => {
             var expected = "Hello";
             expect(result).to.deep.equal(expected);
         });
+    });
+
+    describe("User defined matchers", function() {
+        var repeatingLetters = function(char, repeat) {
+            // custom matcher to match `repeat` contiguous occurrences of `char`
+            var chars = char.repeat(repeat);
+            var match = function(str, offset) {
+                var pos = str.indexOf(chars, (offset || 0));
+                if (pos === -1) {
+                    return;
+                } else {
+                    return {
+                        match: chars,
+                        start: pos,
+                        end: pos + chars.length,
+                        groups: [],
+                        next: function () {
+                            return match(str, pos + chars.length);
+                        }
+                    };
+                }
+            };
+            return match;
+        };
+
+        it("should match using a custom matcher", function() {
+            var expr = jsonata("$match('LLANFAIRPWLLGWYNGYLLGOGERYCHWYRNDROBWLLLLANTYSILIOGOGOGOCH', $repeatingLetters('L', 2))");
+            expr.registerFunction("repeatingLetters", repeatingLetters);
+            var result = expr.evaluate();
+            var expected = [
+                {"match": "LL", "index": 0, "groups": []},
+                {"match": "LL", "index": 10, "groups": []},
+                {"match": "LL", "index": 18, "groups": []},
+                {"match": "LL", "index": 37, "groups": []},
+                {"match": "LL", "index": 39, "groups": []}
+            ];
+            expect(result).to.deep.equal(expected);
+        });
+
+        it("should split using a custom matcher", function() {
+            var expr = jsonata("$split('LLANFAIRPWLLGWYNGYLLGOGERYCHWYRNDROBWLLLLANTYSILIOGOGOGOCH', $repeatingLetters('L', 2))");
+            expr.registerFunction("repeatingLetters", repeatingLetters);
+            var result = expr.evaluate();
+            var expected = ["","ANFAIRPW","GWYNGY","GOGERYCHWYRNDROBW","","ANTYSILIOGOGOGOCH"];
+            expect(result).to.deep.equal(expected);
+        });
+
+        it("should replace using a custom matcher", function() {
+            var expr = jsonata("$replace('LLANFAIRPWLLGWYNGYLLGOGERYCHWYRNDROBWLLLLANTYSILIOGOGOGOCH', $repeatingLetters('L', 2), 'Ỻ')");
+            expr.registerFunction("repeatingLetters", repeatingLetters);
+            var result = expr.evaluate();
+            var expected = "ỺANFAIRPWỺGWYNGYỺGOGERYCHWYRNDROBWỺỺANTYSILIOGOGOGOCH";
+            expect(result).to.deep.equal(expected);
+        });
+
+        it("should test inclusion using a custom matcher", function() {
+            var expr = jsonata("$contains('LLANFAIRPWLLGWYNGYLLGOGERYCHWYRNDROBWLLLLANTYSILIOGOGOGOCH', $repeatingLetters('L', 4))");
+            expr.registerFunction("repeatingLetters", repeatingLetters);
+            var result = expr.evaluate();
+            var expected = true;
+            expect(result).to.deep.equal(expected);
+        });
+
     });
 });
 

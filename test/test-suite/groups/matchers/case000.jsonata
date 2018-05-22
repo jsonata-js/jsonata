@@ -1,0 +1,18 @@
+(
+    $generateMatcher := function($ch) {
+      $match := function($str, $offset) {(
+        $before := $substringBefore($str, $ch);
+        $start := $length($before) + ($exists($offset) ? $offset : 0);
+        $end := $start + $length($ch);
+        $before != $str and $length($ch) > 0 ? {
+          'match': $ch,
+          'start': $start,
+          'end': $end,
+          'groups': [],
+          'next': function() {$match($substringAfter($str, $ch), $end)}
+        }
+      )}
+    };
+
+    $match("abracadabra", $generateMatcher('a'))
+)
