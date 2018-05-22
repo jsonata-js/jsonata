@@ -58,7 +58,7 @@ function jsonataPromise(expr, data, bindings) {
 describe("JSONata Test Suite - async mode", () => {
     // Iterate over all groups of tests
     groups.forEach(group => {
-        let casenames = fs.readdirSync(path.join(__dirname, "test-suite", "groups", group));
+        let casenames = fs.readdirSync(path.join(__dirname, "test-suite", "groups", group)).filter((name) => name.endsWith(".json"));
         // Read JSON file containing all cases for this group
         let cases = casenames.map((name) => readJSON(path.join("test-suite", "groups", group), name));
         describe("Group: " + group, () => {
@@ -66,6 +66,11 @@ describe("JSONata Test Suite - async mode", () => {
             for (let i = 0; i < cases.length; i++) {
                 // Extract the current test case of interest
                 let testcase = cases[i];
+
+                // if the testcase references and external jsonata file, read it in
+                if(testcase['expr-file']) {
+                    testcase.expr = fs.readFileSync(path.join(__dirname, "test-suite", "groups", group, testcase['expr-file'])).toString();
+                }
 
                 // Create a test based on the data in this testcase
                 it(casenames[i]+": "+testcase.expr, function() {
