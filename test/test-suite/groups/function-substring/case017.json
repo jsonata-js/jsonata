@@ -1,0 +1,6 @@
+{
+    "expr": "$substring(\"😂😁😀\", -4, 1)",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": "😂"
+}

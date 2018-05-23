@@ -3106,8 +3106,17 @@ var jsonata = (function() {
         }
 
         var strArray = Array.from(str);
+        var strLength = strArray.length;
+
+        if(strLength + start < 0) {
+            start = 0;
+        }
+
         if(typeof length !== 'undefined') {
-            var end = start >= 0 ? start + length : strArray.length - start + length;
+            if(length <= 0) {
+                return '';
+            }
+            var end = start >= 0 ? start + length : strLength + start + length;
             return strArray.slice(start, end).join('');
         }
 
