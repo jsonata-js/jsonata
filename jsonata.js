@@ -3087,16 +3087,18 @@ var jsonata = (function() {
             return undefined;
         }
 
-        if(str.length + start < 0) {
+        var strArray = Array.from(str);
+        var strLength = strArray.length;
+
+        if(strLength + start < 0) {
             start = 0;
         }
 
-        var strArray = Array.from(str);
         if(typeof length !== 'undefined') {
             if(length <= 0) {
                 return '';
             }
-            var end = start >= 0 ? start + length : strArray.length + start + length;
+            var end = start >= 0 ? start + length : strLength + start + length;
             return strArray.slice(start, end).join('');
         }
 
