@@ -2349,9 +2349,8 @@ var jsonata = (function() {
      * @returns {Function} Higher order function representing prepared regex
      */
     function evaluateRegex(expr) {
-        expr.value.lastIndex = 0;
+        var re = new RegExp(expr.value);
         var closure = function(str) {
-            var re = expr.value;
             var result;
             var match = re.exec(str);
             if(match !== null) {
@@ -2371,7 +2370,7 @@ var jsonata = (function() {
                         return undefined;
                     } else {
                         var next = closure(str);
-                        if(next && next.match === '' && re.lastIndex === expr.value.lastIndex) {
+                        if(next && next.match === '') {
                             // matches zero length string; this will never progress
                             throw {
                                 code: "D1004",
