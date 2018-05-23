@@ -2390,6 +2390,25 @@ var jsonata = (function() {
     }
 
     /**
+     * Evaluate the matcher function against the str arg
+     *
+     * @param {*} matcher - matching function (native or lambda)
+     * @param {string} str - the string to match against
+     * @returns {object} - structure that represents the match(es)
+     */
+    function* evaluateMatcher(matcher, str) {
+        var result = yield * apply(matcher, [str]);
+        if(result && !(typeof result.start === 'number' || result.end === 'number' || Array.isArray(result.groups) || isFunction(result.next))) {
+            // the matcher function didn't return the correct structure
+            throw {
+                code: "T1010",
+                stack: (new Error()).stack,
+            };
+        }
+        return result;
+    }
+
+    /**
      * Evaluate variable against input data
      * @param {Object} expr - JSONata expression
      * @param {Object} input - Input data to evaluate against
@@ -3242,7 +3261,7 @@ var jsonata = (function() {
      * @param {String} token - substring or regex to find
      * @returns {Boolean} - true if str contains token
      */
-    function functionContains(str, token) {
+    function* functionContains(str, token) {
         // undefined inputs always return undefined
         if(typeof str === 'undefined') {
             return undefined;
@@ -3253,7 +3272,7 @@ var jsonata = (function() {
         if(typeof token === 'string') {
             result = (str.indexOf(token) !== -1);
         } else {
-            var matches = token(str);
+            var matches = yield * evaluateMatcher(token, str);
             result = (typeof matches !== 'undefined');
         }
 
@@ -3267,7 +3286,7 @@ var jsonata = (function() {
      * @param {Integer} [limit] - max number of matches to return
      * @returns {Array} The array of match objects
      */
-    function functionMatch(str, regex, limit) {
+    function* functionMatch(str, regex, limit) {
         // undefined inputs always return undefined
         if(typeof str === 'undefined') {
             return undefined;
@@ -3287,7 +3306,7 @@ var jsonata = (function() {
 
         if(typeof limit === 'undefined' || limit > 0) {
             var count = 0;
-            var matches = regex(str);
+            var matches = yield * evaluateMatcher(regex, str);
             if (typeof matches !== 'undefined') {
                 while (typeof matches !== 'undefined' && (typeof limit === 'undefined' || count < limit)) {
                     result.push({
@@ -3295,7 +3314,7 @@ var jsonata = (function() {
                         index: matches.start,
                         groups: matches.groups
                     });
-                    matches = matches.next();
+                    matches = yield * evaluateMatcher(matches.next);
                     count++;
                 }
             }
@@ -3408,7 +3427,7 @@ var jsonata = (function() {
                 }
                 result += str.substring(position);
             } else {
-                var matches = pattern(str);
+                var matches = yield * evaluateMatcher(pattern, str);
                 if (typeof matches !== 'undefined') {
                     while (typeof matches !== 'undefined' && (typeof limit === 'undefined' || count < limit)) {
                         result += str.substring(position, matches.start);
@@ -3426,7 +3445,7 @@ var jsonata = (function() {
                         }
                         position = matches.start + matches.match.length;
                         count++;
-                        matches = matches.next();
+                        matches = yield * evaluateMatcher(matches.next);
                     }
                     result += str.substring(position);
                 } else {
@@ -3492,7 +3511,7 @@ var jsonata = (function() {
      * @param {Integer} [limit] - max number of substrings
      * @returns {Array} The array of string
      */
-    function functionSplit(str, separator, limit) {
+    function* functionSplit(str, separator, limit) {
         // undefined inputs always return undefined
         if(typeof str === 'undefined') {
             return undefined;
@@ -3515,13 +3534,13 @@ var jsonata = (function() {
                 result = str.split(separator, limit);
             } else {
                 var count = 0;
-                var matches = separator(str);
+                var matches = yield * evaluateMatcher(separator, str);
                 if (typeof matches !== 'undefined') {
                     var start = 0;
                     while (typeof matches !== 'undefined' && (typeof limit === 'undefined' || count < limit)) {
                         result.push(str.substring(start, matches.start));
                         start = matches.end;
-                        matches = matches.next();
+                        matches = yield * evaluateMatcher(matches.next);
                         count++;
                     }
                     if(typeof limit === 'undefined' || count < limit) {
@@ -4827,6 +4846,7 @@ var jsonata = (function() {
         "T1007": "Attempted to partially apply a non-function. Did you mean ${{{token}}}?",
         "T1008": "Attempted to partially apply a non-function",
         "D1009": "Multiple key definitions evaluate to same key: {{value}}",
+        "T1010": "The matcher function argument passed to function {{token}} does not return the correct object structure",
         "T2001": "The left side of the {{token}} operator must evaluate to a number",
         "T2002": "The right side of the {{token}} operator must evaluate to a number",
         "T2003": "The left side of the range operator (..) must evaluate to an integer",
