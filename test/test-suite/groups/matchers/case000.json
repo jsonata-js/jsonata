@@ -1,0 +1,32 @@
+{
+  "expr-file": "case000.jsonata",
+  "dataset": null,
+  "bindings": {},
+  "result": [
+    {
+      "match": "a",
+      "index": 0,
+      "groups": []
+    },
+    {
+      "match": "a",
+      "index": 3,
+      "groups": []
+    },
+    {
+      "match": "a",
+      "index": 5,
+      "groups": []
+    },
+    {
+      "match": "a",
+      "index": 7,
+      "groups": []
+    },
+    {
+      "match": "a",
+      "index": 10,
+      "groups": []
+    }
+  ]
+}
