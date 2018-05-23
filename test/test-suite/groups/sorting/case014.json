@@ -1,0 +1,14 @@
+{
+    "expr": "$^(age).name",
+    "data": [
+        {"name": "Bill", "age": 35},
+        {"name": "Sally", "age": 33},
+        {"name": "Jim", "age": 42}
+    ],
+    "bindings": {},
+    "result": [
+        "Sally",
+        "Bill",
+        "Jim"
+    ]
+}

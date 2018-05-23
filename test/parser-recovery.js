@@ -291,6 +291,7 @@ describe('Invoke parser with incomplete expression', function() {
                 "type": "sort",
                 "value": "^",
                 "position": 36,
+                "consarray": true,
                 "lhs": {
                     "type": "path",
                     "steps": [
