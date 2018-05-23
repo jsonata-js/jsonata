@@ -49,7 +49,7 @@ describe("JSONata Test Suite", () => {
                 // Extract the current test case of interest
                 let testcase = cases[i];
 
-                // if the testcase references and external jsonata file, read it in
+                // if the testcase references an external jsonata file, read it in
                 if(testcase['expr-file']) {
                     testcase.expr = fs.readFileSync(path.join(__dirname, "test-suite", "groups", group, testcase['expr-file'])).toString();
                 }
