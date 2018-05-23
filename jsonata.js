@@ -2397,7 +2397,7 @@ var jsonata = (function() {
      * @returns {object} - structure that represents the match(es)
      */
     function* evaluateMatcher(matcher, str) {
-        var result = yield * apply(matcher, [str]);
+        var result = yield * apply(matcher, [str], null);
         if(result && !(typeof result.start === 'number' || result.end === 'number' || Array.isArray(result.groups) || isFunction(result.next))) {
             // the matcher function didn't return the correct structure
             throw {
@@ -2532,7 +2532,7 @@ var jsonata = (function() {
                     position: expr.position
                 };
             }
-            var result = yield * apply(cloneFunction, [obj], environment);
+            var result = yield * apply(cloneFunction, [obj], null);
             var matches = yield * evaluate(expr.pattern, result, environment);
             if(typeof matches !== 'undefined') {
                 if(!Array.isArray(matches)) {
@@ -2626,9 +2626,9 @@ var jsonata = (function() {
                 // this is function chaining (func1 ~> func2)
                 // λ($f, $g) { λ($x){ $g($f($x)) } }
                 var chain = yield * evaluate(chainAST, null, environment);
-                result = yield * apply(chain, [lhs, func], environment);
+                result = yield * apply(chain, [lhs, func], null);
             } else {
-                result = yield * apply(func, [lhs], environment);
+                result = yield * apply(func, [lhs], null);
             }
 
         }
