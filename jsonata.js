@@ -1228,7 +1228,7 @@ var jsonata = (function() {
                             // order-by
                             // LHS is the array to be ordered
                             // RHS defines the terms
-                            result = {type: 'sort', value: expr.value, position: expr.position};
+                            result = {type: 'sort', value: expr.value, position: expr.position, consarray: true};
                             result.lhs = ast_optimize(expr.lhs);
                             result.rhs = expr.rhs.map(function (terms) {
                                 return {
@@ -1308,7 +1308,11 @@ var jsonata = (function() {
                     result = {type: expr.type, position: expr.position};
                     // array of expressions - process each one
                     result.expressions = expr.expressions.map(function (item) {
-                        return ast_optimize(item);
+                        var part = ast_optimize(item);
+                        if(part.consarray || (part.type === 'path' && part.steps[0].consarray)) {
+                            result.consarray = true;
+                        }
+                        return part;
                     });
                     // TODO scan the array of expressions to see if any of them assign variables
                     // if so, need to mark the block as one that needs to create a new frame
@@ -1640,6 +1644,9 @@ var jsonata = (function() {
             // if the first step is an explicit array constructor, then just evaluate that (i.e. don't iterate over a context array)
             if(ii === 0 && step.consarray) {
                 resultSequence = yield * evaluate(step, inputSequence, environment);
+                if(!Array.isArray(resultSequence)) {
+                    resultSequence = createSequence(resultSequence);
+                }
             } else {
                 resultSequence = yield * evaluateStep(step, inputSequence, environment, ii === expr.steps.length - 1);
             }
@@ -4602,7 +4609,7 @@ var jsonata = (function() {
         };
 
         var sort = function*(array) {
-            if(array.length <= 1) {
+            if(!Array.isArray(array) || array.length <= 1) {
                 return array;
             } else {
                 var middle = Math.floor(array.length / 2);
