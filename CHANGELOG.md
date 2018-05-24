@@ -1,3 +1,14 @@
+#### 1.5.4 Maintenance Release
+
+- Fully test and fix bugs in async mode (PR #219)
+- Publish Typescript definition file (issue #182)
+- Numeric precision should be 15 decimal digits, not 13 (issue 194)
+- Defining functions for use with `$match` etc. (issue #213)
+- Fix regression in `$substring` for negative start position & length (issue #204)
+- Fix for 'sort' syntax error (issue #210)
+- Various code optimizations (issues #184, #205, #164)
+- Add support for node 10.x (PR #228)
+
 #### 1.5.3 Maintenance Release
 
 - `$formatNumber` should use `zero-digit` character for padding (issue #161)
