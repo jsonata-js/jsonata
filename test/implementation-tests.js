@@ -10,7 +10,7 @@
 
 "use strict";
 
-var jsonata = require("../jsonata");
+var jsonata = require("../src/jsonata");
 var chai = require("chai");
 var expect = chai.expect;
 
