@@ -1,5 +1,6 @@
 coverage/
 doc/
+jsonata.js
 jsonata.min.js
 jsonata-es5.js
 jsonata-es5.min.js

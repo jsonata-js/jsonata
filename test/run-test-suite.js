@@ -8,7 +8,7 @@
 
 var fs = require("fs");
 var path = require("path");
-var jsonata = require("../jsonata");
+var jsonata = require("../src/jsonata");
 var chai = require("chai");
 var expect = chai.expect;
 
