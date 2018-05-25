@@ -18,7 +18,7 @@
     "copy": "ncp src/jsonata.js ./jsonata.js",
     "check-coverage": "istanbul check-coverage -statement 100 -branch 100 -function 100 -line 100",
     "minify": "uglifyjs jsonata.js -o jsonata.min.js --compress --mangle",
-    "lint": "eslint ./src",
+    "lint": "eslint .",
     "doc": "jsdoc --configure jsdoc.json .",
     "cover": "istanbul cover _mocha",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
