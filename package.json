@@ -14,8 +14,7 @@
     "pretest": "npm run lint",
     "mocha": "node ./node_modules/istanbul/lib/cli.js cover --report cobertura --report html ./node_modules/mocha/bin/_mocha -- \"test/**/*.js\"",
     "test": "npm run mocha",
-    "posttest": "npm run check-coverage && npm run copy && npm run mkdirp-es6 && npm run babel-es6 && npm run browserify-es6 && npm run minify && npm run babel && npm run browserify && npm run minify-es5",
-    "copy": "ncp src/jsonata.js ./jsonata.js",
+    "posttest": "npm run check-coverage && npm run mkdirp-es6 && npm run babel-es6 && npm run browserify-es6 && npm run minify && npm run babel && npm run browserify && npm run minify-es5",
     "mkdirp-es6": "mkdirp ./dist/es",
     "babel-es6": "babel --no-babelrc --plugins transform-regenerator --out-file dist/es/jsonata.js src/jsonata.js",
     "browserify-es6": "browserify dist/es/jsonata.js --outfile jsonata.js --standalone jsonata",
@@ -54,7 +53,6 @@
     "mkdirp": "^0.5.1",
     "mocha": "^5.0.0",
     "mocha-lcov-reporter": "^1.2.0",
-    "ncp": "^2.0.0",
     "request": "^2.81.0",
     "uglify-es": "^3.0.20"
   },
