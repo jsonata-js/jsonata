@@ -9,7 +9,10 @@
  * @description JSON query and transformation language
  */
 
-var regeneratorRuntime = require("regenerator-runtime");
+// istanbul ignore else
+if(typeof module !== 'undefined') {
+    var regeneratorRuntime = require("regenerator-runtime");
+}
 
 /**
  * jsonata
@@ -2542,7 +2545,12 @@ var jsonata = (function() {
             return comp === 1;
         };
 
-        result = yield * functionSort(lhs, comparator);
+        var focus = {
+            environment: environment,
+            input: input
+        };
+        // the `focus` is passed in as the `this` for the invoked function
+        result = yield * functionSort.apply(focus, [lhs, comparator]);
 
         return result;
     }
@@ -2572,7 +2580,7 @@ var jsonata = (function() {
                     position: expr.position
                 };
             }
-            var result = yield * apply(cloneFunction, [obj], null);
+            var result = yield * apply(cloneFunction, [obj], null, environment);
             var matches = yield * evaluate(expr.pattern, result, environment);
             if(typeof matches !== 'undefined') {
                 if(!Array.isArray(matches)) {
@@ -2666,9 +2674,9 @@ var jsonata = (function() {
                 // this is function chaining (func1 ~> func2)
                 // λ($f, $g) { λ($x){ $g($f($x)) } }
                 var chain = yield * evaluate(chainAST, null, environment);
-                result = yield * apply(chain, [lhs, func], null);
+                result = yield * apply(chain, [lhs, func], null, environment);
             } else {
-                result = yield * apply(func, [lhs], null);
+                result = yield * apply(func, [lhs], null, environment);
             }
 
         }
@@ -2713,7 +2721,6 @@ var jsonata = (function() {
      * @param {Object} expr - JSONata expression
      * @param {Object} input - Input data to evaluate against
      * @param {Object} environment - Environment
-     * @param {Object} [applyto] - LHS of ~> operator
      * @returns {*} Evaluated input data
      */
     function* evaluateFunction(expr, input, environment) {
@@ -2742,7 +2749,7 @@ var jsonata = (function() {
         }
         // apply the procedure
         try {
-            result = yield * apply(proc, evaluatedArgs, input);
+            result = yield * apply(proc, evaluatedArgs, input, environment);
         } catch (err) {
             // add the position field to the error
             err.position = expr.position;
@@ -2757,12 +2764,13 @@ var jsonata = (function() {
      * Apply procedure or function
      * @param {Object} proc - Procedure
      * @param {Array} args - Arguments
-     * @param {Object} self - Self
+     * @param {Object} input - input
+     * @param {Object} environment - environment
      * @returns {*} Result of procedure
      */
-    function* apply(proc, args, self) {
+    function* apply(proc, args, input, environment) {
         var result;
-        result = yield * applyInner(proc, args, self);
+        result = yield * applyInner(proc, args, input, environment);
         while(isLambda(result) && result.thunk === true) {
             // trampoline loop - this gets invoked as a result of tail-call optimization
             // the function returned a tail-call thunk
@@ -2773,7 +2781,7 @@ var jsonata = (function() {
                 evaluatedArgs.push(yield * evaluate(result.body.arguments[ii], result.input, result.environment));
             }
 
-            result = yield * applyInner(next, evaluatedArgs, self);
+            result = yield * applyInner(next, evaluatedArgs, input, environment);
         }
         return result;
     }
@@ -2782,26 +2790,37 @@ var jsonata = (function() {
      * Apply procedure or function
      * @param {Object} proc - Procedure
      * @param {Array} args - Arguments
-     * @param {Object} self - Self
+     * @param {Object} input - input
+     * @param {Object} environment - environment
      * @returns {*} Result of procedure
      */
-    function* applyInner(proc, args, self) {
+    function* applyInner(proc, args, input, environment) {
         var result;
         var validatedArgs = args;
         if(proc) {
-            validatedArgs = validateArguments(proc.signature, args, self);
+            validatedArgs = validateArguments(proc.signature, args, input);
         }
+
         if (isLambda(proc)) {
             result = yield * applyProcedure(proc, validatedArgs);
         } else if (proc && proc._jsonata_function === true) {
-            result = proc.implementation.apply(self, validatedArgs);
+            var focus = {
+                environment: environment,
+                input: input
+            };
+            // the `focus` is passed in as the `this` for the invoked function
+            result = proc.implementation.apply(focus, validatedArgs);
             // `proc.implementation` might be a generator function
             // and `result` might be a generator - if so, yield
             if(isIterable(result)) {
                 result = yield *result;
             }
         } else if (typeof proc === 'function') {
-            result = proc.apply(self, validatedArgs);
+            // typically these are functions that are returned by the invocation of plugin functions
+            // the `input` is being passed in as the `this` for the invoked function
+            // this is so that functions that return objects containing functions can chain
+            // e.g. $func().next().next()
+            result = proc.apply(input, validatedArgs);
             /* istanbul ignore next */
             if(isIterable(result)) {
                 result = yield *result;
@@ -2987,7 +3006,10 @@ var jsonata = (function() {
             return env.lookup(sigArg.trim());
         });
 
-        var result = proc.apply(null, args);
+        var focus = {
+            environment: env
+        };
+        var result = proc.apply(focus, args);
         if(isIterable(result)) {
             result = yield * result;
         }
@@ -3384,6 +3406,8 @@ var jsonata = (function() {
             return undefined;
         }
 
+        var environment = this.environment;
+
         // pattern cannot be an empty string
         if(pattern === '') {
             throw {
@@ -3478,7 +3502,7 @@ var jsonata = (function() {
                 if (typeof matches !== 'undefined') {
                     while (typeof matches !== 'undefined' && (typeof limit === 'undefined' || count < limit)) {
                         result += str.substring(position, matches.start);
-                        var replacedWith = yield * apply(replacer, [matches], null);
+                        var replacedWith = yield * apply(replacer, [matches], null, environment);
                         // check replacedWith is a string
                         if(typeof replacedWith === 'string') {
                             result += replacedWith;
@@ -4310,7 +4334,7 @@ var jsonata = (function() {
                 func_args.push(arr);
             }
             // invoke func
-            var res = yield * apply(func, func_args, null);
+            var res = yield * apply(func, func_args, null, this.environment);
             if(typeof res !== 'undefined') {
                 result.push(res);
             }
@@ -4338,7 +4362,7 @@ var jsonata = (function() {
         for(var i = 0; i < arr.length; i++) {
             var entry = arr[i];
             // invoke func
-            var res = yield * apply(func, [entry, i, arr], null);
+            var res = yield * apply(func, [entry, i, arr], null, this.environment);
             if(functionBoolean(res)) {
                 result.push(entry);
             }
@@ -4403,7 +4427,7 @@ var jsonata = (function() {
         }
 
         while (index < sequence.length) {
-            result = yield * apply(func, [result, sequence[index]], null);
+            result = yield * apply(func, [result, sequence[index]], null, this.environment);
             index++;
         }
 
@@ -4572,7 +4596,7 @@ var jsonata = (function() {
         for(var key in obj) {
             var func_args = [obj[key], key];
             // invoke func
-            result.push(yield * apply(func, func_args, null));
+            result.push(yield * apply(func, func_args, null, this.environment));
         }
 
         return result;
@@ -4590,6 +4614,8 @@ var jsonata = (function() {
         if(typeof arr === 'undefined') {
             return undefined;
         }
+
+        var environment = this.environment;
 
         if(arr.length <= 1) {
             return arr;
@@ -4614,7 +4640,7 @@ var jsonata = (function() {
             comp = comparator;
         } else {
             comp = function* (a, b) {
-                return yield * apply(comparator, [a, b], null);
+                return yield * apply(comparator, [a, b], null, environment);
             };
         }
 
@@ -4699,7 +4725,7 @@ var jsonata = (function() {
         for(var item in arg) {
             var entry = arg[item];
             // invoke func
-            var res = yield * apply(func, [entry, item, arg], null);
+            var res = yield * apply(func, [entry, item, arg], null, this.environment);
             if(functionBoolean(res)) {
                 result[item] = entry;
             }
@@ -4708,6 +4734,49 @@ var jsonata = (function() {
         // empty objects should be changed to undefined
         if(Object.keys(result).length === 0) {
             result = undefined;
+        }
+
+        return result;
+    }
+
+    /**
+     * parses and evaluates the supplied expression
+     * @param {string} expr - expression to evaluate
+     * @returns {*} - result of evaluating the expression
+     */
+    function* functionEval(expr, focus) {
+        // undefined inputs always return undefined
+        if(typeof expr === 'undefined') {
+            return undefined;
+        }
+        var input = this.input;
+        if(typeof focus !== 'undefined') {
+            input = focus;
+        }
+
+        try {
+            var ast = parser(expr, false);
+        } catch(err) {
+            // error parsing the expression passed to $eval
+            populateMessage(err);
+            throw {
+                stack: (new Error()).stack,
+                code: "D3120",
+                value: err.message,
+                error: err
+            };
+        }
+        try {
+            var result = yield* evaluate(ast, input, this.environment);
+        } catch(err) {
+            // error evaluating the expression passed to $eval
+            populateMessage(err);
+            throw {
+                stack: (new Error()).stack,
+                code: "D3121",
+                value:err.message,
+                error: err
+            };
         }
 
         return result;
@@ -4839,6 +4908,7 @@ var jsonata = (function() {
     staticFrame.bind('shuffle', defineFunction(functionShuffle, '<a:a>'));
     staticFrame.bind('base64encode', defineFunction(functionBase64encode, '<s-:s>'));
     staticFrame.bind('base64decode', defineFunction(functionBase64decode, '<s-:s>'));
+    staticFrame.bind('eval', defineFunction(functionEval, '<s-x?:x>'));
     staticFrame.bind('toMillis', defineFunction(functionToMillis, '<s-:n>'));
     staticFrame.bind('fromMillis', defineFunction(functionFromMillis, '<n-:s>'));
     staticFrame.bind('clone', defineFunction(functionClone, '<(oa)-:o>'));
@@ -4934,7 +5004,9 @@ var jsonata = (function() {
         "D3092": "A sub-picture that contains a 'percent' or 'per-mille' character must not contain a character treated as an 'exponent-separator'",
         "D3093": "The exponent part of the sub-picture must comprise only of one or more characters that are members of the 'decimal digit family'",
         "D3100": "The radix of the formatBase function must be between 2 and 36.  It was given {{value}}",
-        "D3110": "The argument of the toMillis function must be an ISO 8601 formatted timestamp. Given {{value}}"
+        "D3110": "The argument of the toMillis function must be an ISO 8601 formatted timestamp. Given {{value}}",
+        "D3120": "Syntax error in expression passed to function eval: {{value}}",
+        "D3121": "Dynamic error evaluating the expression passed to function eval: {{value}}"
     };
 
     /**

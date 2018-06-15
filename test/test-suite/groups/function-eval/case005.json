@@ -1,0 +1,23 @@
+{
+    "expr": "Account.Order.Product.{'Name': `Product Name`, 'Volume': $eval('Width*Height*Depth', Description)}",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        {
+            "Name": "Bowler Hat",
+            "Volume": 12600000
+        },
+        {
+            "Name": "Trilby hat",
+            "Volume": 12600000
+        },
+        {
+            "Name": "Bowler Hat",
+            "Volume": 12600000
+        },
+        {
+            "Name": "Cloak",
+            "Volume": 126000
+        }
+    ]
+}

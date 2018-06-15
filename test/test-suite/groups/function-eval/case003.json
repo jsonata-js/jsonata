@@ -1,0 +1,6 @@
+{
+    "expr": "$eval('Account.Order.Product.Quantity ~> $sum()')",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": 8
+}
