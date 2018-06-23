@@ -1,18 +1,9 @@
 {
-    "expr": "*[type=\"home\"]",
-    "dataset": "dataset1",
+    "expr": "Account[$$.Account.\"Account Name\" = \"Firefly\"].*[OrderID=\"order104\"].Product.Price",
+    "dataset": "dataset5",
     "bindings": {},
     "result": [
-        {
-            "type": "home",
-            "number": "0203 544 1234"
-        },
-        {
-            "type": "home",
-            "address": [
-                "freddy@my-social.com",
-                "frederic.smith@very-serious.com"
-            ]
-        }
+        34.45,
+        107.99
     ]
 }

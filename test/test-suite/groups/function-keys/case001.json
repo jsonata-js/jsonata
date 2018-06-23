@@ -9,5 +9,6 @@
         "Description",
         "Price",
         "Quantity"
-    ]
+    ],
+    "unordered": true
 }

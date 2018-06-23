@@ -1,6 +1,6 @@
 {
-    "expr": "**[2]",
+    "expr": "Account.Order.blah.**",
     "dataset": "dataset5",
     "bindings": {},
-    "result": "Firefly"
+    "undefinedResult": true
 }

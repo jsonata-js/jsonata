@@ -1,6 +1,6 @@
 {
-    "expr": "Account.Order.blah.**",
-    "dataset": "dataset5",
+    "expr": "**",
+    "dataset": null,
     "bindings": {},
     "undefinedResult": true
 }
