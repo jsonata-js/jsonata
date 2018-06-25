@@ -2665,15 +2665,13 @@ var jsonata = (function() {
 
     /**
      * @param {Object} arg - expression to test
-     * @returns {boolean} - true if it is a generator i.e. the result from calling a
-     * generator function
+     * @returns {boolean} - true if it is iterable
      */
-    function isGenerator(arg) {
+    function isIterable(arg) {
         return (
             typeof arg === 'object' &&
             arg !== null &&
             Symbol.iterator in arg &&
-            typeof arg[Symbol.iterator] === 'function' &&
             'next' in arg &&
             typeof arg.next === 'function'
         );
@@ -2768,13 +2766,13 @@ var jsonata = (function() {
             result = proc.implementation.apply(self, validatedArgs);
             // `proc.implementation` might be a generator function
             // and `result` might be a generator - if so, yield
-            if(isGenerator(result)) {
+            if(isIterable(result)) {
                 result = yield *result;
             }
         } else if (typeof proc === 'function') {
             result = proc.apply(self, validatedArgs);
             /* istanbul ignore next */
-            if(isGenerator(result)) {
+            if(isIterable(result)) {
                 result = yield *result;
             }
         } else {
@@ -2959,7 +2957,7 @@ var jsonata = (function() {
         });
 
         var result = proc.apply(null, args);
-        if(isGenerator(result)) {
+        if(isIterable(result)) {
             result = yield * result;
         }
         return result;
