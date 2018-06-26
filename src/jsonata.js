@@ -9,6 +9,8 @@
  * @description JSON query and transformation language
  */
 
+var regeneratorRuntime = require("regenerator-runtime");
+
 /**
  * jsonata
  * @function
