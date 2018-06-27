@@ -14,6 +14,14 @@ var jsonata = require("../src/jsonata");
 var chai = require("chai");
 var expect = chai.expect;
 
+var testdata1 = {
+    "foo": {
+        "bar": 42,
+        "blah": [{"baz": {"fud": "hello"}}, {"baz": {"fud": "world"}}, {"bazz": "gotcha"}],
+        "blah.baz": "here"
+    }, "bar": 98
+};
+
 var testdata2 = {
     Account: {
         "Account Name": "Firefly",
@@ -175,6 +183,32 @@ describe("Functions with side-effects", () => {
                 var expected = false;
                 expect(result).to.deep.equal(expected);
             });
+        });
+    });
+});
+
+describe("Tests that rely on JavaScript-style object traversal", () => {
+    // A JSON object is an unordered list of key-value pairs.
+    // When traversing an object, the entries may be returned
+    // in a non-deterministic order (depending on the language).
+    // The following tests assume a traversal order which works
+    // in JavaScript but may not apply to other languages.
+    // See https://github.com/jsonata-js/jsonata/issues/179.
+    describe('foo.*[0]', function () {
+        it('should return result object', function () {
+            var expr = jsonata('foo.*[0]');
+            var result = expr.evaluate(testdata1);
+            var expected = 42;
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe('**[2]', function () {
+        it('should return result object', function () {
+            var expr = jsonata('**[2]');
+            var result = expr.evaluate(testdata2);
+            var expected = "Firefly";
+            expect(result).to.deep.equal(expected);
         });
     });
 });

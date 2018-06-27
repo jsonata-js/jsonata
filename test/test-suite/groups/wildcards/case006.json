@@ -1,6 +1,19 @@
 {
-    "expr": "foo.*[0]",
-    "dataset": "dataset0",
+    "expr": "*[type=\"home\"]",
+    "dataset": "dataset1",
     "bindings": {},
-    "result": 42
+    "result": [
+        {
+            "type": "home",
+            "number": "0203 544 1234"
+        },
+        {
+            "type": "home",
+            "address": [
+                "freddy@my-social.com",
+                "frederic.smith@very-serious.com"
+            ]
+        }
+    ],
+    "unordered": true
 }

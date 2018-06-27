@@ -63,5 +63,6 @@
         {
             "Weight": 2
         }
-    ]
+    ],
+    "unordered": true
 }
