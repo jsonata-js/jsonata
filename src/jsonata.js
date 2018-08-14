@@ -70,6 +70,17 @@ var jsonata = (function() {
         't': '\t'
     };
 
+    // A mapping between the function signature symbols and the full plural of the type
+    // Expected to be used in error messages
+    var arraySignatureMapping = {
+        "a": "arrays",
+        "b": "booleans",
+        "f": "functions",
+        "n": "numbers",
+        "o": "objects",
+        "s": "strings"
+    }
+
     // Tokenizer (lexer) - invoked by the parser to return one token at a time
     var tokenizer = function (path) {
         var position = 0;
@@ -575,7 +586,7 @@ var jsonata = (function() {
                                                 stack: (new Error()).stack,
                                                 value: arg,
                                                 index: argIndex + 1,
-                                                type: param.subtype // TODO translate symbol to type name
+                                                type: arraySignatureMapping[param.subtype]
                                             };
                                         }
                                         // the function expects an array. If it's not one, make it so
