@@ -1,0 +1,25 @@
+/* An expression to return the square root of a number without using the $sqrt function */
+/* Pointless, but demonstrates capability */
+
+(
+  /**
+   * Implements the square root function
+   * Uses the Newton-Raphson method
+   */
+  $my_sqrt := function($n) {(
+
+    $good_enough := function($guess) {
+      $abs($guess * $guess - $n) < 0.000000000001
+    };
+    $improve_guess := function($guess) {
+      ($guess + $n / $guess) / 2
+    };
+
+    /* Iterate using a tail-recursive function until convergence */
+    $sqrt_iter := function($guess) {
+      $good_enough($guess) ? $guess : $sqrt_iter($improve_guess($guess))
+    };
+    $n >= 0 ? $sqrt_iter(1) : "no complex numbers today"
+  )};
+  $my_sqrt($$)
+)

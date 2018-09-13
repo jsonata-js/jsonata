@@ -145,6 +145,26 @@ var jsonata = (function() {
                 position++;
                 currentChar = path.charAt(position);
             }
+            // skip comments
+            if(currentChar === '/' && path.charAt(position+1) === '*') {
+                var commentStart = position;
+                position += 2;
+                currentChar = path.charAt(position);
+                while(!(currentChar === '*' && path.charAt(position+1) === '/')) {
+                    currentChar = path.charAt(++position);
+                    if (position >= length) {
+                        // no closing tag
+                        throw {
+                            code: "S0106",
+                            stack: (new Error()).stack,
+                            position: commentStart
+                        };
+                    }
+                }
+                position += 2;
+                currentChar = path.charAt(position);
+                return next(prefix); // need this to swallow any following whitespace
+            }
             // test for regex
             if (prefix !== true && currentChar === '/') {
                 position++;
@@ -4843,6 +4863,7 @@ var jsonata = (function() {
         "S0103": "Unsupported escape sequence: \\{{token}}",
         "S0104": "The escape sequence \\u must be followed by 4 hex digits",
         "S0105": "Quoted property name must be terminated with a backquote (`)",
+        "S0106": "Comment has no closing tag",
         "S0201": "Syntax error: {{token}}",
         "S0202": "Expected {{value}}, got {{token}}",
         "S0203": "Expected {{value}} before end of expression",
