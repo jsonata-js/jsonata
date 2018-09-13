@@ -1,0 +1,6 @@
+{
+    "expr-file": "case003.jsonata",
+    "data": 256,
+    "bindings": {},
+    "result": 16
+}

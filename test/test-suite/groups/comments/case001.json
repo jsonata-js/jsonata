@@ -1,0 +1,6 @@
+{
+    "expr-file": "case001.jsonata",
+    "dataset": null,
+    "bindings": {},
+    "result": "Hello"
+}

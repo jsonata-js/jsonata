@@ -1,0 +1,1 @@
+$substring('Hello, world', 0 /* start at index 0 */, 5/*length*/)
