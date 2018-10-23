@@ -4939,18 +4939,14 @@ var jsonata = (function() {
 
     /**
      * lookup a message template from the catalog and substitute the inserts.
-     * Populates `err.message` with the substituted message.
+     * Populates `err.message` with the substituted message. Leaves `err.message`
+     * untouched if code lookup fails.
      * @param {string} err - error code to lookup
      * @returns {undefined} - `err` is modified in place
      */
     function populateMessage(err) {
         var template = errorCodes[err.code];
-        if(typeof template === 'undefined') {
-            if(typeof err.message === 'undefined') {
-                err.message = 'Unknown error';
-            }
-            // Otherwise retain the original `err.message`
-        } else {
+        if(typeof template !== 'undefined') {
             // if there are any handlebars, replace them with the field references
             // triple braces - replace with value
             // double braces - replace with json stringified value
@@ -4962,6 +4958,7 @@ var jsonata = (function() {
             });
             err.message = message;
         }
+        // Otherwise retain the original `err.message`
     }
 
     /**
