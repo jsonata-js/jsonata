@@ -5024,7 +5024,10 @@ var jsonata = (function() {
                 if(typeof callback === 'function') {
                     exec_env.bind('__jsonata_async', true);
                     var catchHandler = function (err) {
-                        err.message = lookupMessage(err);
+                        var message = lookupMessage(err);
+                        if (err.message !== message) {
+                            err.message = message
+                        }
                         callback(err, null);
                     };
                     var thenHandler = function (response) {
@@ -5049,7 +5052,10 @@ var jsonata = (function() {
                         return result.value;
                     } catch (err) {
                         // insert error message into structure
-                        err.message = lookupMessage(err);
+                        var message = lookupMessage(err);
+                        if (err.message !== message) {
+                            err.message = message
+                        }
                         throw err;
                     }
                 }
