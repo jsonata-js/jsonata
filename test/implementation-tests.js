@@ -299,8 +299,8 @@ describe("Tests that bind Javascript functions", () => {
 
     // Issue #261. Previously we would attempt to assign to the read-only `message` property,
     // causing an unrelated `TypeError` to be thrown instead
-    describe("User-defined function throws a `DOMException` with a read-only `message` property", function() {
-        it("Rethrows correctly", function() {
+    describe("function throws a `DOMException` with a read-only `message` property", function() {
+        it("rethrows correctly when invoked synchronously", function() {
             var expr = jsonata("$throwDomEx()");
             expr.registerFunction("throwDomEx", function() {
                 throw new DOMException('Here is my message');
@@ -312,7 +312,7 @@ describe("Tests that bind Javascript functions", () => {
                 .to.deep.contain({ message: 'Here is my message', position: 12, token: 'throwDomEx' });
         });
 
-        it("Rethrows correctly when invoked asynchronously", function (done) {
+        it("rethrows correctly when invoked asynchronously", function (done) {
             var expr = jsonata("$throwDomEx()");
             expr.registerFunction("throwDomEx", function() {
                 throw new DOMException('Here is my message');
