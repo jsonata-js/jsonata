@@ -10,6 +10,7 @@
 
 "use strict";
 
+var DOMException = require("domexception");
 var jsonata = require("../src/jsonata");
 var chai = require("chai");
 var expect = chai.expect;
@@ -293,6 +294,35 @@ describe("Tests that bind Javascript functions", () => {
             });
             var result = expr.evaluate(testdata2);
             expect(result).to.equal("time for tea");
+        });
+    });
+
+    // Issue #261. Previously we would attempt to assign to the read-only `message` property,
+    // causing an unrelated `TypeError` to be thrown instead
+    describe("User-defined function throws a `DOMException` with a read-only `message` property", function() {
+        it("Rethrows correctly", function() {
+            var expr = jsonata("$throwDomEx()");
+            expr.registerFunction("throwDomEx", function() {
+                throw new DOMException('Here is my message');
+            });
+            expect(function () {
+                expr.evaluate({});
+            })
+                .to.throw(DOMException)
+                .to.deep.contain({ message: 'Here is my message', position: 12, token: 'throwDomEx' });
+        });
+
+        it("Rethrows correctly when invoked asynchronously", function (done) {
+            var expr = jsonata("$throwDomEx()");
+            expr.registerFunction("throwDomEx", function() {
+                throw new DOMException('Here is my message');
+            });
+            expr.evaluate({}, undefined, function (err) {
+                expect(err)
+                    .to.be.a('DOMException')
+                    .to.deep.contain({ message: 'Here is my message', position: 12, token: 'throwDomEx' });
+                done();
+            });
         });
     });
 
