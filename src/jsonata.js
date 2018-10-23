@@ -4938,28 +4938,30 @@ var jsonata = (function() {
     };
 
     /**
-     * lookup a message template from the catalog and substitute the inserts
+     * lookup a message template from the catalog and substitute the inserts.
+     * Populates `err.message` with the substituted message.
      * @param {string} err - error code to lookup
-     * @returns {string} message
+     * @returns {undefined} - `err` is modified in place
      */
-    function lookupMessage(err) {
-        var message = 'Unknown error';
-        if(typeof err.message !== 'undefined') {
-            message = err.message;
-        }
+    function populateMessage(err) {
         var template = errorCodes[err.code];
-        if(typeof template !== 'undefined') {
+        if(typeof template === 'undefined') {
+            if(typeof err.message === 'undefined') {
+                err.message = 'Unknown error';
+            }
+            // Otherwise retain the original `err.message`
+        } else {
             // if there are any handlebars, replace them with the field references
             // triple braces - replace with value
             // double braces - replace with json stringified value
-            message = template.replace(/\{\{\{([^}]+)}}}/g, function() {
+            var message = template.replace(/\{\{\{([^}]+)}}}/g, function() {
                 return err[arguments[1]];
             });
             message = message.replace(/\{\{([^}]+)}}/g, function() {
                 return JSON.stringify(err[arguments[1]]);
             });
+            err.message = message;
         }
-        return message;
     }
 
     /**
@@ -4977,7 +4979,7 @@ var jsonata = (function() {
             delete ast.errors;
         } catch(err) {
             // insert error message into structure
-            err.message = lookupMessage(err);
+            populateMessage(err); // possible side-effects on `err`
             throw err;
         }
         var environment = createFrame(staticFrame);
@@ -4998,7 +5000,7 @@ var jsonata = (function() {
                         code: 'S0500',
                         position: 0
                     };
-                    err.message = lookupMessage(err);
+                    populateMessage(err); // possible side-effects on `err`
                     throw err;
                 }
 
@@ -5024,10 +5026,7 @@ var jsonata = (function() {
                 if(typeof callback === 'function') {
                     exec_env.bind('__jsonata_async', true);
                     var catchHandler = function (err) {
-                        var message = lookupMessage(err);
-                        if (err.message !== message) {
-                            err.message = message
-                        }
+                        populateMessage(err); // possible side-effects on `err`
                         callback(err, null);
                     };
                     var thenHandler = function (response) {
@@ -5052,10 +5051,7 @@ var jsonata = (function() {
                         return result.value;
                     } catch (err) {
                         // insert error message into structure
-                        var message = lookupMessage(err);
-                        if (err.message !== message) {
-                            err.message = message
-                        }
+                        populateMessage(err); // possible side-effects on `err`
                         throw err;
                     }
                 }
