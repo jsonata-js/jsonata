@@ -318,16 +318,9 @@ describe("Tests that bind Javascript functions", () => {
             });
         }
 
-        Object.defineProperty(DOMException.prototype, Symbol.toStringTag, {
-            value: "DOMException",
-            writable: false,
-            enumerable: false,
-            configurable: true
-        });
-
         Object.setPrototypeOf(DOMException.prototype, Error.prototype);
 
-        it("rethrows correctly when invoked synchronously", function() {
+        it("rethrows correctly", function() {
             var expr = jsonata("$throwDomEx()");
             expr.registerFunction("throwDomEx", function() {
                 throw new DOMException('Here is my message');
@@ -337,19 +330,6 @@ describe("Tests that bind Javascript functions", () => {
             })
                 .to.throw(DOMException)
                 .to.deep.contain({ message: 'Here is my message', position: 12, token: 'throwDomEx' });
-        });
-
-        it("rethrows correctly when invoked asynchronously", function (done) {
-            var expr = jsonata("$throwDomEx()");
-            expr.registerFunction("throwDomEx", function() {
-                throw new DOMException('Here is my message');
-            });
-            expr.evaluate({}, undefined, function (err) {
-                expect(err)
-                    .to.be.a('DOMException')
-                    .to.deep.contain({ message: 'Here is my message', position: 12, token: 'throwDomEx' });
-                done();
-            });
         });
     });
 
