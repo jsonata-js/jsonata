@@ -10,7 +10,6 @@
 
 "use strict";
 
-var DOMException = require("domexception");
 var jsonata = require("../src/jsonata");
 var chai = require("chai");
 var expect = chai.expect;
@@ -300,6 +299,34 @@ describe("Tests that bind Javascript functions", () => {
     // Issue #261. Previously we would attempt to assign to the read-only `message` property,
     // causing an unrelated `TypeError` to be thrown instead
     describe("function throws a `DOMException` with a read-only `message` property", function() {
+        /**
+         * `DOMException` is not available in our testing environment. Additionally, we can't
+         * just import the `domexception` module since it doesn't work on Node.js v4, which
+         * we still support. So, here's a fake skeleton implementation which has the relevant
+         * qualities we need to reproduce the bug, most importantly a read-only `message`
+         * property
+         * @param {string} message - Error message
+         * @constructor
+         */
+        function DOMException (message) {
+            Object.defineProperty(this, "message", {
+                get() {
+                    return message;
+                },
+                enumerable: true,
+                configurable: true
+            });
+        }
+
+        Object.defineProperty(DOMException.prototype, Symbol.toStringTag, {
+            value: "DOMException",
+            writable: false,
+            enumerable: false,
+            configurable: true
+        });
+
+        Object.setPrototypeOf(DOMException.prototype, Error.prototype);
+
         it("rethrows correctly when invoked synchronously", function() {
             var expr = jsonata("$throwDomEx()");
             expr.registerFunction("throwDomEx", function() {
