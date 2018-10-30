@@ -372,6 +372,42 @@ describe("Tests that bind Javascript functions", () => {
         });
     });
 
+    describe("filter with a user-defined Javascript function", function() {
+        it("should return result object", function() {
+            var expr = jsonata("$filter([1,4,9,16], $even)");
+            expr.assign("even", function(num) {
+                return num % 2 === 0;
+            });
+            var result = expr.evaluate(testdata2);
+            var expected = [4, 16];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe("sift with a user-defined Javascript function", function() {
+        it("should return result object", function() {
+            var expr = jsonata("$sift({'one': 1, 'four': 4, 'nine': 9, 'sixteen': 16}, $even)");
+            expr.assign("even", function(num) {
+                return num % 2 === 0;
+            });
+            var result = expr.evaluate(testdata2);
+            var expected = {'four': 4, 'sixteen': 16};
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
+    describe("$each with a user-defined Javascript function", function() {
+        it("should return result object", function() {
+            var expr = jsonata("$each({'one': 1, 'four': 4, 'nine': 9, 'sixteen': 16}, $squareroot)");
+            expr.assign("squareroot", function(num) {
+                return Math.sqrt(num);
+            });
+            var result = expr.evaluate(testdata2);
+            var expected = [1, 2, 3, 4];
+            expect(result).to.deep.equal(expected);
+        });
+    });
+
     describe("Partially apply user-defined Javascript function", function() {
         it("should return result object", function() {
             var expr = jsonata(

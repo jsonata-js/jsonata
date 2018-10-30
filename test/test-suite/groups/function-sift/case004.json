@@ -1,0 +1,6 @@
+{
+    "expr": "$sift({'a': 'hello', 'b': 'world', 'hello': 'again'}, λ($v,$k,$o){$lookup($o, $v)})",
+    "dataset": "dataset1",
+    "bindings": {},
+    "result": {"a": "hello"}
+}

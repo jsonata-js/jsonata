@@ -4309,6 +4309,29 @@ var jsonata = (function() {
     }
 
     /**
+     * Helper function to build the arguments to be supplied to the function arg of the
+     * HOFs map, filter, each and sift
+     * @param func - the function to be invoked
+     * @param arg1 - the first (required) arg - the value
+     * @param arg2 - the second (optional) arg - the position (index or key)
+     * @param arg3 - the third (optional) arg - the whole structure (array or object)
+     * @returns {*[]}
+     */
+    function hofFuncArgs(func, arg1, arg2, arg3) {
+        var func_args = [arg1]; // the first arg (the value) is required
+        // the other two are optional - only supply it if the function can take it
+        var length = typeof func === 'function' ? func.length :
+            func._jsonata_function === true ? func.implementation.length : func.arguments.length;
+        if(length >= 2) {
+            func_args.push(arg2);
+        }
+        if(length >= 3) {
+            func_args.push(arg3);
+        }
+        return func_args
+    }
+
+    /**
      * Create a map from an array of arguments
      * @param {Array} [arr] - array to map over
      * @param {Function} func - function to apply
@@ -4323,16 +4346,7 @@ var jsonata = (function() {
         var result = createSequence();
         // do the map - iterate over the arrays, and invoke func
         for (var i = 0; i < arr.length; i++) {
-            var func_args = [arr[i]]; // the first arg (value) is required
-            // the other two are optional - only supply it if the function can take it
-            var length = typeof func === 'function' ? func.length :
-                func._jsonata_function === true ? func.implementation.length : func.arguments.length;
-            if(length >= 2) {
-                func_args.push(i);
-            }
-            if(length >= 3) {
-                func_args.push(arr);
-            }
+            var func_args = hofFuncArgs(func, arr[i], i, arr);
             // invoke func
             var res = yield * apply(func, func_args, null, this.environment);
             if(typeof res !== 'undefined') {
@@ -4361,8 +4375,9 @@ var jsonata = (function() {
 
         for(var i = 0; i < arr.length; i++) {
             var entry = arr[i];
+            var func_args = hofFuncArgs(func, entry, i, arr);
             // invoke func
-            var res = yield * apply(func, [entry, i, arr], null, this.environment);
+            var res = yield * apply(func, func_args, null, this.environment);
             if(functionBoolean(res)) {
                 result.push(entry);
             }
@@ -4594,7 +4609,7 @@ var jsonata = (function() {
         var result = createSequence();
 
         for(var key in obj) {
-            var func_args = [obj[key], key];
+            var func_args = hofFuncArgs(func, obj[key], key, obj);
             // invoke func
             result.push(yield * apply(func, func_args, null, this.environment));
         }
@@ -4724,8 +4739,9 @@ var jsonata = (function() {
 
         for(var item in arg) {
             var entry = arg[item];
+            var func_args = hofFuncArgs(func, entry, item, arg);
             // invoke func
-            var res = yield * apply(func, [entry, item, arg], null, this.environment);
+            var res = yield * apply(func, func_args, null, this.environment);
             if(functionBoolean(res)) {
                 result[item] = entry;
             }
