@@ -1,0 +1,7 @@
+{
+    "expr": "$each({'a': 'hello', 'b': 'world'}, $uppercase)",
+    "dataset": "dataset1",
+    "bindings": {},
+    "result": ["HELLO", "WORLD"],
+    "unordered": true
+}

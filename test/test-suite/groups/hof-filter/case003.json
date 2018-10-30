@@ -1,0 +1,6 @@
+{
+    "expr": "$filter([0, 1, 2], $boolean)",
+    "data": {"data": 5},
+    "bindings": {},
+    "result": [1,2]
+}

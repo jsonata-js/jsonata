@@ -1,0 +1,6 @@
+{
+    "expr": "$sift({'a': 1, 'b': 0}, $boolean)",
+    "dataset": "dataset1",
+    "bindings": {},
+    "result": {"a": 1}
+}

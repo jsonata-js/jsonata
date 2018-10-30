@@ -1,0 +1,6 @@
+{
+    "expr": "$map([0, 1, 2], $boolean)",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [false, true, true]
+}
