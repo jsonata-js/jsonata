@@ -2593,7 +2593,7 @@ var jsonata = (function() {
                     // update must be an object
                     var updateType = typeof update;
                     if(updateType !== 'undefined') {
-                        if(updateType !== 'object' || update === null) {
+                        if(updateType !== 'object' || update === null || Array.isArray(update)) {
                             // throw type error
                             throw {
                                 code: "T2011",
