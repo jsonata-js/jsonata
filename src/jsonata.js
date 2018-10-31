@@ -1410,6 +1410,9 @@ var jsonata = (function() {
                         throw err;
                     }
             }
+            if(expr.keepArray) {
+                result.keepArray = true;
+            }
             return result;
         };
 
@@ -1594,6 +1597,9 @@ var jsonata = (function() {
         }
 
         if(result && result.sequence) {
+            if(expr.keepArray) {
+                result.keepSingleton = true;
+            }
             result = result.value();
         }
 

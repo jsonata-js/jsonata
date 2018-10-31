@@ -1,0 +1,5 @@
+{
+    "expr": "$filter($, function($e) { $e != 0 })[]",
+    "data": [0,0,5,0],
+    "result": [5]
+}
