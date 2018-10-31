@@ -1,0 +1,5 @@
+{
+    "expr": "foo and true",
+    "data": "null",
+    "result": false
+}
