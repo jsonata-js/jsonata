@@ -2201,12 +2201,23 @@ var jsonata = (function() {
     function evaluateBooleanExpression(lhs, rhs, op) {
         var result;
 
+        var lBool = functionBoolean(lhs);
+        var rBool = functionBoolean(rhs);
+
+        if (typeof  lBool === 'undefined') {
+            lBool = false;
+        }
+
+        if (typeof  rBool === 'undefined') {
+            rBool = false;
+        }
+
         switch (op) {
             case 'and':
-                result = functionBoolean(lhs) && functionBoolean(rhs);
+                result = lBool && rBool;
                 break;
             case 'or':
-                result = functionBoolean(lhs) || functionBoolean(rhs);
+                result = lBool || rBool;
                 break;
         }
         return result;
