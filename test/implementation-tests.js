@@ -372,7 +372,7 @@ describe("Tests that bind Javascript functions", () => {
         });
     });
 
-    describe("filter with a user-defined Javascript function", function() {
+    describe("$filter with a user-defined Javascript function", function() {
         it("should return result object", function() {
             var expr = jsonata("$filter([1,4,9,16], $even)");
             expr.assign("even", function(num) {
