@@ -1410,6 +1410,9 @@ var jsonata = (function() {
                         throw err;
                     }
             }
+            if(expr.keepArray) {
+                result.keepArray = true;
+            }
             return result;
         };
 
@@ -1594,6 +1597,9 @@ var jsonata = (function() {
         }
 
         if(result && result.sequence) {
+            if(expr.keepArray) {
+                result.keepSingleton = true;
+            }
             result = result.value();
         }
 
@@ -2604,7 +2610,7 @@ var jsonata = (function() {
                     // update must be an object
                     var updateType = typeof update;
                     if(updateType !== 'undefined') {
-                        if(updateType !== 'object' || update === null) {
+                        if(updateType !== 'object' || update === null || Array.isArray(update)) {
                             // throw type error
                             throw {
                                 code: "T2011",

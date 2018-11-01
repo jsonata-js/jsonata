@@ -1,0 +1,5 @@
+{
+    "expr": "$[type='command'][]",
+    "data": [{"type":"command"},{"type":"commands"}],
+    "result": [{"type":"command"}]
+}

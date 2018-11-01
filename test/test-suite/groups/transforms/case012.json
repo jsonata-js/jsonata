@@ -1,0 +1,6 @@
+{
+    "expr": "{} ~> |$|['one', 'two', 'three']|",
+    "dataset": "dataset5",
+    "bindings": {},
+    "code": "T2011"
+}
