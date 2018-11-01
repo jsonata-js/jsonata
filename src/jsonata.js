@@ -1596,7 +1596,7 @@ var jsonata = (function() {
             exitCallback(expr, input, environment, result);
         }
 
-        if(result && result.sequence) {
+        if(result && isSequence(result)) {
             if(expr.keepArray) {
                 result.keepSingleton = true;
             }
@@ -1616,6 +1616,17 @@ var jsonata = (function() {
             sequence.push(arguments[0]);
         }
         return sequence;
+    }
+
+    function isSequence(value) {
+        var sequence = value.sequence;
+        if(sequence === true) {
+            var desc = Object.getOwnPropertyDescriptor(value, 'sequence');
+            if(desc.enumerable === false) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -1725,7 +1736,7 @@ var jsonata = (function() {
         }
 
         var resultSequence = createSequence();
-        if(lastStep && result.length === 1 && Array.isArray(result[0]) && !result[0].sequence) {
+        if(lastStep && result.length === 1 && Array.isArray(result[0]) && !isSequence(result[0])) {
             resultSequence = result[0];
         } else {
             // flatten the sequence

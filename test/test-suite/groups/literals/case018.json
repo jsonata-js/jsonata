@@ -1,0 +1,5 @@
+{
+    "expr": "{ 'foo': { 'sequence': 123, 'bar': 'baz' } } ",
+    "data": {},
+    "result": { "foo": { "sequence": 123, "bar": "baz" } }
+}
