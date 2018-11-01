@@ -384,7 +384,7 @@ describe("Tests that bind Javascript functions", () => {
         });
     });
 
-    describe("sift with a user-defined Javascript function", function() {
+    describe("$sift with a user-defined Javascript function", function() {
         it("should return result object", function() {
             var expr = jsonata("$sift({'one': 1, 'four': 4, 'nine': 9, 'sixteen': 16}, $even)");
             expr.assign("even", function(num) {
