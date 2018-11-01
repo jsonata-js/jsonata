@@ -61,6 +61,6 @@
     "node": ">= 4"
   },
   "dependencies": {
-    "regenerator-runtime": "^0.11.1"
+    "regenerator-runtime": "^0.12.1"
   }
 }
