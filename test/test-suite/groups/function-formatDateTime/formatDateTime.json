@@ -1,0 +1,546 @@
+[
+    {
+        "function": "#formatDateTime",
+        "category": "undefined value",
+        "description": "should return nothing",
+        "expr": "$formatDateTime(undefined, 'undefined')",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "basic date patterns",
+        "description": "should return literal",
+        "expr": "$formatDateTime(1521801216617, 'Hello')",
+        "data": {},
+        "result": "Hello"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "basic date patterns",
+        "description": "should format the year",
+        "expr": "$formatDateTime(1521801216617, 'Year: [Y0001]')",
+        "data": {},
+        "result": "Year: 2018"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "basic date patterns",
+        "description": "should format the year",
+        "expr": "$formatDateTime(1521801216617, 'Year: <[Y0001]>')",
+        "data": {},
+        "result": "Year: <2018>"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "basic date patterns",
+        "description": "should format the year with grouping separator",
+        "expr": "$formatDateTime(1521801216617, 'Year: <[Y9,999,*]>')",
+        "data": {},
+        "result": "Year: <2,018>"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "basic date patterns",
+        "description": "should handle opening square bracket literal",
+        "expr": "$formatDateTime(1521801216617, '[[Year: <[Y0001]>')",
+        "data": {},
+        "result": "[Year: <2018>"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "basic date patterns",
+        "description": "should handle closing square bracket literal",
+        "expr": "$formatDateTime(1521801216617, 'Year]]: <[Y0001]>')",
+        "data": {},
+        "result": "Year]: <2018>"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "basic date patterns",
+        "description": "should handle opening and closing square bracket literal",
+        "expr": "$formatDateTime(1521801216617, '[[Year]]: [[[Y0001]]]')",
+        "data": {},
+        "result": "[Year]: [2018]"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "basic date patterns",
+        "description": "should format the date in European style",
+        "expr": "$formatDateTime(1521801216617, '[D#1]/[M#1]/[Y0001]')",
+        "data": {},
+        "result": "23/3/2018"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "basic date patterns",
+        "description": "Sunday should be day 7",
+        "expr": "$formatDateTime(1522616700000, '[F0] [FNn]')",
+        "data": {},
+        "result": "7 Sunday"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "basic date patterns",
+        "description": "Monday should be day 1",
+        "expr": "$formatDateTime(1522703100000, '[F0] [FNn]')",
+        "data": {},
+        "result": "1 Monday"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "basic date patterns",
+        "description": "should format the date in ISO 8601 style",
+        "expr": "$formatDateTime(1521801216617, '[Y0001]-[M01]-[D01]')",
+        "data": {},
+        "result": "2018-03-23"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "basic date patterns",
+        "description": "should format the date & time in US style",
+        "expr": "$formatDateTime(1521801216617, '[M01]/[D01]/[Y0001] at [H01]:[m01]:[s01]')",
+        "data": {},
+        "result": "03/23/2018 at 10:33:36"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "basic date patterns",
+        "description": "should format the date & time in ISO 8601 style",
+        "expr": "$formatDateTime(1521801216617, '[Y]-[M01]-[D01]T[H01]:[m]:[s].[f001][Z01:01t]')",
+        "data": {},
+        "result": "2018-03-23T10:33:36.617Z"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "basic date patterns",
+        "description": "should ignore whitespace in variable markers",
+        "expr": "$formatDateTime(1521801216617, '[Y]-[ M01]-[D 01]T[H01 ]:[ m   ]:[s].[f0  01][Z01:\n 01t]')",
+        "data": {},
+        "result": "2018-03-23T10:33:36.617Z"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "timezone",
+        "description": "should offset for BST +0100",
+        "expr": "$formatDateTime(1521801216617, '[Y]-[M01]-[D01]T[H01]:[m]:[s].[f001][Z0101t]', '+0100')",
+        "data": {},
+        "result": "2018-03-23T11:33:36.617+0100"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "timezone",
+        "description": "should offset for UTC",
+        "expr": "$formatDateTime(1531306800000, '[Y]-[M01]-[D01]T[H01]:[m]:[s][Z01:01]')",
+        "data": {},
+        "result": "2018-07-11T12:00:00+00:00"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "timezone",
+        "description": "should offset for Z",
+        "expr": "$formatDateTime(1531306800000, '[Y]-[M01]-[D01]T[H01]:[m]:[s][Z01:01t]')",
+        "data": {},
+        "result": "2018-07-11T12:00:00Z"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "timezone",
+        "description": "should offset for UTC",
+        "expr": "$formatDateTime(1531306800000, '[Y]-[M01]-[D01]T[H01]:[m]:[s][Z]', '-0500')",
+        "data": {},
+        "result": "2018-07-11T07:00:00-05:00"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "timezone",
+        "description": "should offset for UTC",
+        "expr": "$formatDateTime(1531306800000, '[Y]-[M01]-[D01]T[H01]:[m]:[s][Z0]', '-0500')",
+        "data": {},
+        "result": "2018-07-11T07:00:00-5"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "timezone",
+        "description": "should offset for UTC",
+        "expr": "$formatDateTime(1531306800000, '[Y]-[M01]-[D01]T[H01]:[m]:[s][Z]', '+1000')",
+        "data": {},
+        "result": "2018-07-11T22:00:00+10:00"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "timezone",
+        "description": "should offset for UTC",
+        "expr": "$formatDateTime(1531306800000, '[Y]-[M01]-[D01]T[H01]:[m]:[s][Z0]', '+1000')",
+        "data": {},
+        "result": "2018-07-11T22:00:00+10"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "timezone",
+        "description": "should offset for UTC",
+        "expr": "$formatDateTime(1531306800000, '[Y]-[M01]-[D01]T[H01]:[m]:[s][Z0]', '+0530')",
+        "data": {},
+        "result": "2018-07-11T17:30:00+5:30"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "timezone",
+        "description": "should offset for UTC",
+        "expr": "$formatDateTime(1531306800000, '[Y]-[M01]-[D01]T[H01]:[m]:[s][z]', '-0500')",
+        "data": {},
+        "result": "2018-07-11T07:00:00GMT-05:00"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "timezone",
+        "description": "should rollover day boundaries",
+        "expr": "$formatDateTime(1204405500000, '[Y]-[M01]-[D01]T[H01]:[m]:[s].[f001][Z0101t]', '+0530')",
+        "data": {},
+        "result": "2008-03-02T02:35:00.000+0530"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "timezone",
+        "description": "should rollover year boundaries",
+        "expr": "$formatDateTime(1230757500000, '[Y]-[M01]-[D01]T[H01]:[m]:[s].[f001][Z0101t]', '+0530')",
+        "data": {},
+        "result": "2009-01-01T02:35:00.000+0530"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "timezone",
+        "description": "picture string has 6 digit timezone - error",
+        "expr": "$formatDateTime(1230757500000, '[Y]-[M01]-[D01]T[H01]:[m]:[s].[f001][Z010101t]', '+0530')",
+        "data": {},
+        "code": "D3134"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "width modifier",
+        "description": "should return literal",
+        "expr": "$formatDateTime(1521801216617, '[D#1,2]/[M1,2]/[Y,2]')",
+        "data": {},
+        "result": "23/03/18"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "width modifier",
+        "description": "should return literal",
+        "expr": "$formatDateTime(1521801216617, '[D#1,2]/[M1,2]/[Y0001,2]')",
+        "data": {},
+        "result": "23/03/2018"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "width modifier",
+        "description": "width modifier should override pattern",
+        "expr": "$formatDateTime(1521801216617, '[D#1,2]/[M1,2]/[Y##01,2-2]')",
+        "data": {},
+        "result": "23/03/18"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "width modifier",
+        "description": "width modifier should override pattern",
+        "expr": "$formatDateTime(1521801216617, '[D#1,2]/[M1,2]/[Y0001,2-2]')",
+        "data": {},
+        "result": "23/03/18"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "roman numeral dates",
+        "description": "year in roman numerals",
+        "expr": "$formatDateTime(1521801216617, '[D1] [M01] [YI]')",
+        "data": {},
+        "result": "23 03 MMXVIII"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "dates with letters instead of numbers",
+        "description": "day/month in letters, year in roman numerals",
+        "expr": "$formatDateTime(1521801216617, '[Da] [MA] [Yi]')",
+        "data": {},
+        "result": "w C mmxviii"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "ordinals",
+        "description": "day in ordinal numerals",
+        "expr": "$formatDateTime(1521801216617, '[D1o] [M01] [Y]')",
+        "data": {},
+        "result": "23rd 03 2018"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "date in words",
+        "description": "year in words",
+        "expr": "$formatDateTime(1521801216617, '[Yw]')",
+        "data": {},
+        "result": "two thousand and eighteen"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "date in words",
+        "description": "day of month in ordinal words",
+        "expr": "$formatDateTime(1521801216617, '[Dwo] [M01] [Y]')",
+        "data": {},
+        "result": "twenty-third 03 2018"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "date in words",
+        "description": "month in words",
+        "expr": "$formatDateTime(1521801216617, '[D1o] [MNn] [Y]')",
+        "data": {},
+        "result": "23rd March 2018"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "date in words",
+        "description": "month in uppercase words",
+        "expr": "$formatDateTime(1521801216617, '[D1o] [MN] [Y]')",
+        "data": {},
+        "result": "23rd MARCH 2018"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "date in words",
+        "description": "day/month in words",
+        "expr": "$formatDateTime(1521801216617, '[FNn], [D1o] [MNn] [Y]')",
+        "data": {},
+        "result": "Friday, 23rd March 2018"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "date in words",
+        "description": "day/date/month in words",
+        "expr": "$formatDateTime(1521801216617, '[FNn], the [Dwo] of [MNn] [Y] [E]')",
+        "data": {},
+        "result": "Friday, the twenty-third of March 2018 ISO"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "date in words",
+        "description": "abbreviated day/month in words",
+        "expr": "$formatDateTime(1521801216617, '[FNn,3-3], [D1o] [MNn,3-3] [Y] [C]')",
+        "data": {},
+        "result": "Fri, 23rd Mar 2018 ISO"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "Default presentation modifiers",
+        "description": "should apply default modifiers to day/date/time",
+        "expr": "$formatDateTime(1521801216617, '[F], [D]/[M]/[Y] [h]:[m]:[s] [P]')",
+        "data": {},
+        "result": "friday, 23/3/2018 10:33:36 am"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "Default presentation modifiers",
+        "description": "should apply default modifiers to day/date/time 12hr pm",
+        "expr": "$formatDateTime(1204405500000, '[F], [D]/[M]/[Y] [h]:[m]:[s] [P]')",
+        "data": {},
+        "result": "saturday, 1/3/2008 9:05:00 pm"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "Default presentation modifiers",
+        "description": "should apply default modifiers to day/date/time 12hr midnight",
+        "expr": "$formatDateTime(1199664000000, '[F], [D]/[M]/[Y] [h]:[m]:[s] [P]')",
+        "data": {},
+        "result": "monday, 7/1/2008 12:00:00 am"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "Day of year; week of year; week of month",
+        "description": "1st Jan should be day 1",
+        "expr": "$formatDateTime(1514808000000, '[dwo] day of the year')",
+        "data": {},
+        "result": "first day of the year"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "Day of year; week of year; week of month",
+        "description": "31st Dec should be day 365",
+        "expr": "$formatDateTime(1546257600000, '[d] days in [Y0001]')",
+        "data": {},
+        "result": "365 days in 2018"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "Day of year; week of year; week of month",
+        "description": "31st Dec should be day 366 in a leap year",
+        "expr": "$formatDateTime(1483185600000, '[d] days in [Y0001]')",
+        "data": {},
+        "result": "366 days in 2016"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "Day of year; week of year; week of month",
+        "description": "Monday 1st Jan should be in the first week of 2018",
+        "expr": "$formatDateTime(1514808000000, 'Week: [W]')",
+        "data": {},
+        "result": "Week: 1"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "Day of year; week of year; week of month",
+        "description": "Sunday 7st Jan should be in the first week of 2018",
+        "expr": "$formatDateTime(1515326400000, 'Week: [W]')",
+        "data": {},
+        "result": "Week: 1"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "Day of year; week of year; week of month",
+        "description": "Sunday 25th Dec should be in week 52 of 2018",
+        "expr": "$formatDateTime(1545739200000, 'Week: [W]')",
+        "data": {},
+        "result": "Week: 52"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "Day of year; week of year; week of month",
+        "description": "Wed 1st Jan 2014 should be in week 1",
+        "expr": "$formatDateTime(1388577600000, 'Week: [W]')",
+        "data": {},
+        "result": "Week: 1"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "Day of year; week of year; week of month",
+        "description": "Mon 29th Dec 2014 should be in week 1 of 2015",
+        "expr": "$formatDateTime(1419854400000, 'Week: [W]')",
+        "data": {},
+        "result": "Week: 1"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "Day of year; week of year; week of month",
+        "description": "Sun 28th Dec 2014 should be in week 52 of 2014",
+        "expr": "$formatDateTime(1419768000000, 'Week: [W]')",
+        "data": {},
+        "result": "Week: 52"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "Day of year; week of year; week of month",
+        "description": "Tues 23th Dec 2014 should be in week 52 of 2014",
+        "expr": "$formatDateTime(1419336000000, 'Week: [W]')",
+        "data": {},
+        "result": "Week: 52"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "Day of year; week of year; week of month",
+        "description": "Thur 1st Jan 2015 should be in week 1 of 2015",
+        "expr": "$formatDateTime(1420113600000, 'Week: [W]')",
+        "data": {},
+        "result": "Week: 1"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "Day of year; week of year; week of month",
+        "description": "Mon 5th Jan 2015 should be in week 2 of 2015",
+        "expr": "$formatDateTime(1420459200000, 'Week: [W]')",
+        "data": {},
+        "result": "Week: 2"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "Day of year; week of year; week of month",
+        "description": "Mon 28th Dec 2015 should be in week 53 of 2015",
+        "expr": "$formatDateTime(1451304000000, 'Week: [W]')",
+        "data": {},
+        "result": "Week: 53"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "Day of year; week of year; week of month",
+        "description": "Thur 31th Dec 2015 should be in week 53 of 2015",
+        "expr": "$formatDateTime(1451563200000, 'Week: [W]')",
+        "data": {},
+        "result": "Week: 53"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "Day of year; week of year; week of month",
+        "description": "Sat 2nd Jan 2016 should be in week 53 of 2015",
+        "expr": "$formatDateTime(1451736000000, 'Week: [W]')",
+        "data": {},
+        "result": "Week: 53"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "Day of year; week of year; week of month",
+        "description": "Tue 29th Jan 2013 should be in week 5 of Jan",
+        "expr": "$formatDateTime(1359460800000, 'Week: [w] of [xNn]')",
+        "data": {},
+        "result": "Week: 5 of January"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "Day of year; week of year; week of month",
+        "description": "Thur 31st Jan 2013 should be in week 5 of Jan",
+        "expr": "$formatDateTime(1359633600000, 'Week: [w] of [xNn]')",
+        "data": {},
+        "result": "Week: 5 of January"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "Day of year; week of year; week of month",
+        "description": "Thur 1st Feb 2013 should be in week 5 of Jan",
+        "expr": "$formatDateTime(1359720000000, 'Week: [w] of [xNn]')",
+        "data": {},
+        "result": "Week: 5 of January"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "Day of year; week of year; week of month",
+        "description": "Mon 1st Jan 2018 should be in week 1 of Jan",
+        "expr": "$formatDateTime(1514808000000, 'Week: [w] of [xNn]')",
+        "data": {},
+        "result": "Week: 1 of January"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "Day of year; week of year; week of month",
+        "description": "Sun 1st Jan 2017 should be in week 5 of Dec",
+        "expr": "$formatDateTime(1483272000000, 'Week: [w] of [xNn]')",
+        "data": {},
+        "result": "Week: 5 of December"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "Day of year; week of year; week of month",
+        "description": "Tues 31st July 2018 should be in week 1 of Aug",
+        "expr": "$formatDateTime(1533038400000, 'Week: [w] of [xNn]')",
+        "data": {},
+        "result": "Week: 1 of August"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "Day of year; week of year; week of month",
+        "description": "Tues 30th Dec 2014 should be in week 1 of Jan",
+        "expr": "$formatDateTime(1419940800000, 'Week: [w] of [xNn]')",
+        "data": {},
+        "result": "Week: 1 of January"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "error",
+        "description": "throws error asking for year name",
+        "expr": "$formatDateTime(1419940800000, '[YN]-[M]-[D]')",
+        "data": {},
+        "code": "D3133"
+    },
+    {
+        "function": "#formatDateTime",
+        "category": "error",
+        "description": "throws error for component with no closing bracket",
+        "expr": "$formatDateTime(1419940800000, '[YN]-[M')",
+        "data": {},
+        "code": "D3135"
+    }
+]

@@ -9,10 +9,7 @@
  * @description JSON query and transformation language
  */
 
-// istanbul ignore else
-if(typeof module !== 'undefined') {
-    var regeneratorRuntime = require("regenerator-runtime");
-}
+var datetime = require('./datetime');
 
 /**
  * jsonata
@@ -4925,6 +4922,10 @@ var jsonata = (function() {
     staticFrame.bind('join', defineFunction(functionJoin, '<a<s>s?:s>'));
     staticFrame.bind('formatNumber', defineFunction(functionFormatNumber, '<n-so?:s>'));
     staticFrame.bind('formatBase', defineFunction(functionFormatBase, '<n-n?:s>'));
+    staticFrame.bind('formatInteger', defineFunction(datetime.formatInteger, '<n-s:s>'));
+    staticFrame.bind('parseInteger', defineFunction(datetime.parseInteger, '<s-s:n>'));
+    staticFrame.bind('formatDateTime', defineFunction(datetime.formatDateTime, '<n-ss?:s>'));
+    staticFrame.bind('parseDateTime', defineFunction(datetime.parseDateTime, '<s-s:n>'));
     staticFrame.bind('number', defineFunction(functionNumber, '<(ns)-:n>'));
     staticFrame.bind('floor', defineFunction(functionFloor, '<n-:n>'));
     staticFrame.bind('ceil', defineFunction(functionCeil, '<n-:n>'));
@@ -5050,7 +5051,13 @@ var jsonata = (function() {
         "D3100": "The radix of the formatBase function must be between 2 and 36.  It was given {{value}}",
         "D3110": "The argument of the toMillis function must be an ISO 8601 formatted timestamp. Given {{value}}",
         "D3120": "Syntax error in expression passed to function eval: {{value}}",
-        "D3121": "Dynamic error evaluating the expression passed to function eval: {{value}}"
+        "D3121": "Dynamic error evaluating the expression passed to function eval: {{value}}",
+        "D3130": "Formatting an integer as a sequence starting with {{value}} is not supported by this implementation",
+        "D3131": "In a decimal digit pattern, all digits must be from the same decimal group",
+        "D3132": "Unknown component specifier {{value}} in date/time picture string",
+        "D3133": "The 'name' modifier can only be applied to months and days in the date/time picture string, not {{value}}",
+        "D3134": "The timezone integer format specifier cannot have more than four digits",
+        "D3135": "No matching closing bracket ']' in date/time picture string"
     };
 
     /**

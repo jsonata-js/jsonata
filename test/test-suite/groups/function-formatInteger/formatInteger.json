@@ -1,0 +1,522 @@
+[
+    {
+        "function": "#formatInteger",
+        "category": "undefined value",
+        "description": "should return result object",
+        "expr": "$formatInteger(undefined, '0')",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#formatInteger",
+        "category": "decimal-digit-pattern - cardinal",
+        "description": "should format a number",
+        "expr": "$formatInteger(123, '000')",
+        "data": {},
+        "result": "123"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "decimal-digit-pattern - cardinal",
+        "description": "should pad number with zeros",
+        "expr": "$formatInteger(123, '0000')",
+        "data": {},
+        "result": "0123"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "decimal-digit-pattern - cardinal",
+        "description": "should pad number with zeros",
+        "expr": "$formatInteger(-3, '0000')",
+        "data": {},
+        "result": "-0003"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "decimal-digit-pattern - cardinal",
+        "description": "should pad number with zeros",
+        "expr": "$formatInteger(1234, '0;c')",
+        "data": {},
+        "result": "1234"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "decimal-digit-pattern - cardinal",
+        "description": "should pad number with zeros",
+        "expr": "$formatInteger(1234, '###0')",
+        "data": {},
+        "result": "1234"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "decimal-digit-pattern - cardinal",
+        "description": "should pad number with zeros",
+        "expr": "$formatInteger(12, '###0')",
+        "data": {},
+        "result": "12"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "decimal-digit-pattern - cardinal",
+        "description": "should round down floats",
+        "expr": "$formatInteger(12.6, '###0')",
+        "data": {},
+        "result": "12"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "decimal-digit-pattern - ordinal",
+        "description": "should format a number",
+        "expr": "$formatInteger(123, '000;o')",
+        "data": {},
+        "result": "123rd"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "decimal-digit-pattern - ordinal",
+        "description": "should pad number with zeros",
+        "expr": "$formatInteger(1, '0;o')",
+        "data": {},
+        "result": "1st"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "decimal-digit-pattern - ordinal",
+        "description": "should pad number with zeros",
+        "expr": "$formatInteger(28, '#0;o')",
+        "data": {},
+        "result": "28th"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "decimal-digit-pattern - ordinal",
+        "description": "should pad number with zeros",
+        "expr": "$formatInteger(1234, '###0;o')",
+        "data": {},
+        "result": "1234th"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "decimal-digit-pattern - ordinal",
+        "description": "should pad number with zeros",
+        "expr": "$formatInteger(12, '###0;o')",
+        "data": {},
+        "result": "12th"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "decimal-digit-pattern - unicode decimal groups",
+        "description": "should insert regular groups",
+        "expr": "$formatInteger(12340, '###١')",
+        "data": {},
+        "result": "١٢٣٤٠"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "decimal-digit-pattern - unicode decimal groups",
+        "description": "should insert regular groups",
+        "expr": "$formatInteger(12340, '###０')",
+        "data": {},
+        "result": "１２３４０"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "decimal-digit-pattern - unicode decimal groups",
+        "description": "should throw error with mixed integer groups",
+        "expr": "$formatInteger(12340, '##0０')",
+        "data": {},
+        "code": "D3131"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "decimal-digit-pattern - grouping separator",
+        "description": "should insert regular groups",
+        "expr": "$formatInteger(12, '#,##0')",
+        "data": {},
+        "result": "12"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "decimal-digit-pattern - grouping separator",
+        "description": "should insert regular groups",
+        "expr": "$formatInteger(1200, '#,##0')",
+        "data": {},
+        "result": "1,200"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "decimal-digit-pattern - grouping separator",
+        "description": "should insert regular groups",
+        "expr": "$formatInteger(120000, '#,##0')",
+        "data": {},
+        "result": "120,000"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "decimal-digit-pattern - grouping separator",
+        "description": "should insert regular groups",
+        "expr": "$formatInteger(12345678, '#,##0')",
+        "data": {},
+        "result": "12,345,678"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "decimal-digit-pattern - grouping separator",
+        "description": "should insert regular groups",
+        "expr": "$formatInteger(1234567890, '#,##0')",
+        "data": {},
+        "result": "1,234,567,890"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "decimal-digit-pattern - grouping separator",
+        "description": "should insert regular groups",
+        "expr": "$formatInteger(1234567890, '#,###,##0')",
+        "data": {},
+        "result": "1,234,567,890"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "decimal-digit-pattern - grouping separator",
+        "description": "should insert non-regular groups - different chars",
+        "expr": "$formatInteger(1234567890, '#:###,##0')",
+        "data": {},
+        "result": "1234:567,890"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "decimal-digit-pattern - grouping separator",
+        "description": "should insert non-regular groups - different positions",
+        "expr": "$formatInteger(1234567890, '##,##,##0')",
+        "data": {},
+        "result": "12345,67,890"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "roman numerals",
+        "description": "0",
+        "expr": "$formatInteger(0, 'I')",
+        "data": {},
+        "result": ""
+    },
+    {
+        "function": "#formatInteger",
+        "category": "roman numerals",
+        "description": "1984",
+        "expr": "$formatInteger(1984, 'I')",
+        "data": {},
+        "result": "MCMLXXXIV"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "roman numerals",
+        "description": "99",
+        "expr": "$formatInteger(99, 'i')",
+        "data": {},
+        "result": "xcix"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - cardinal",
+        "description": "12",
+        "expr": "$formatInteger(12, 'w')",
+        "data": {},
+        "result": "twelve"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - cardinal",
+        "description": "20",
+        "expr": "$formatInteger(20, 'w')",
+        "data": {},
+        "result": "twenty"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - cardinal",
+        "description": "34",
+        "expr": "$formatInteger(34, 'w')",
+        "data": {},
+        "result": "thirty-four"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - cardinal",
+        "description": "99",
+        "expr": "$formatInteger(99, 'W')",
+        "data": {},
+        "result": "NINETY-NINE"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - cardinal",
+        "description": "100",
+        "expr": "$formatInteger(100, 'w')",
+        "data": {},
+        "result": "one hundred"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - cardinal",
+        "description": "555",
+        "expr": "$formatInteger(555, 'W')",
+        "data": {},
+        "result": "FIVE HUNDRED AND FIFTY-FIVE"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - cardinal",
+        "description": "555",
+        "expr": "$formatInteger(555, 'Ww')",
+        "data": {},
+        "result": "Five Hundred and Fifty-Five"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - cardinal",
+        "description": "919",
+        "expr": "$formatInteger(919, 'w')",
+        "data": {},
+        "result": "nine hundred and nineteen"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - cardinal",
+        "description": "730",
+        "expr": "$formatInteger(730, 'w')",
+        "data": {},
+        "result": "seven hundred and thirty"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - cardinal",
+        "description": "1000",
+        "expr": "$formatInteger(1000, 'w')",
+        "data": {},
+        "result": "one thousand"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - cardinal",
+        "description": "3730",
+        "expr": "$formatInteger(3730, 'w')",
+        "data": {},
+        "result": "three thousand, seven hundred and thirty"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - cardinal",
+        "description": "327730",
+        "expr": "$formatInteger(327730, 'w')",
+        "data": {},
+        "result": "three hundred and twenty-seven thousand, seven hundred and thirty"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - cardinal",
+        "description": "4327730",
+        "expr": "$formatInteger(4327730, 'w')",
+        "data": {},
+        "result": "four million, three hundred and twenty-seven thousand, seven hundred and thirty"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - cardinal",
+        "description": "1e12 + 1",
+        "expr": "$formatInteger(1000000000001, 'w')",
+        "data": {},
+        "result": "one trillion and one"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - cardinal",
+        "description": "1234567890123",
+        "expr": "$formatInteger(1234567890123, 'w')",
+        "data": {},
+        "result": "one trillion, two hundred and thirty-four billion, five hundred and sixty-seven million, eight hundred and ninety thousand, one hundred and twenty-three"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - cardinal",
+        "description": "1e15",
+        "expr": "$formatInteger(1000000000000000, 'w')",
+        "data": {},
+        "result": "one thousand trillion"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - cardinal",
+        "description": "1e46",
+        "expr": "$formatInteger(1e+46, 'w')",
+        "data": {},
+        "result": "ten billion trillion trillion trillion"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - cardinal",
+        "description": "1234567890123456",
+        "expr": "$formatInteger(1234567890123456, 'w')",
+        "data": {},
+        "result": "one thousand, two hundred and thirty-four trillion, five hundred and sixty-seven billion, eight hundred and ninety million, one hundred and twenty-three thousand, four hundred and fifty-six"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - ordinal",
+        "description": "12",
+        "expr": "$formatInteger(12, 'w;o')",
+        "data": {},
+        "result": "twelfth"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - ordinal",
+        "description": "20",
+        "expr": "$formatInteger(20, 'w;o')",
+        "data": {},
+        "result": "twentieth"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - ordinal",
+        "description": "34",
+        "expr": "$formatInteger(34, 'w;o')",
+        "data": {},
+        "result": "thirty-fourth"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - ordinal",
+        "description": "99",
+        "expr": "$formatInteger(99, 'W;o')",
+        "data": {},
+        "result": "NINETY-NINTH"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - ordinal",
+        "description": "100",
+        "expr": "$formatInteger(100, 'w;o')",
+        "data": {},
+        "result": "one hundredth"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - ordinal",
+        "description": "555",
+        "expr": "$formatInteger(555, 'W;o')",
+        "data": {},
+        "result": "FIVE HUNDRED AND FIFTY-FIFTH"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - ordinal",
+        "description": "919",
+        "expr": "$formatInteger(919, 'w;o')",
+        "data": {},
+        "result": "nine hundred and nineteenth"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - ordinal",
+        "description": "730",
+        "expr": "$formatInteger(730, 'w;o')",
+        "data": {},
+        "result": "seven hundred and thirtieth"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - ordinal",
+        "description": "1000",
+        "expr": "$formatInteger(1000, 'w;o')",
+        "data": {},
+        "result": "one thousandth"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - ordinal",
+        "description": "3730",
+        "expr": "$formatInteger(3731, 'w;o')",
+        "data": {},
+        "result": "three thousand, seven hundred and thirty-first"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - ordinal",
+        "description": "327730",
+        "expr": "$formatInteger(327713, 'w;o')",
+        "data": {},
+        "result": "three hundred and twenty-seven thousand, seven hundred and thirteenth"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - ordinal",
+        "description": "4327730",
+        "expr": "$formatInteger(4327732, 'w;o')",
+        "data": {},
+        "result": "four million, three hundred and twenty-seven thousand, seven hundred and thirty-second"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "words - ordinal",
+        "description": "1e12 + 1",
+        "expr": "$formatInteger(1000000000001, 'w;o')",
+        "data": {},
+        "result": "one trillion and first"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "spreadsheet column names",
+        "description": "1",
+        "expr": "$formatInteger(1, 'A')",
+        "data": {},
+        "result": "A"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "spreadsheet column names",
+        "description": "12",
+        "expr": "$formatInteger(12, 'a')",
+        "data": {},
+        "result": "l"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "spreadsheet column names",
+        "description": "26",
+        "expr": "$formatInteger(26, 'a')",
+        "data": {},
+        "result": "z"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "spreadsheet column names",
+        "description": "27",
+        "expr": "$formatInteger(27, 'a')",
+        "data": {},
+        "result": "aa"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "spreadsheet column names",
+        "description": "300",
+        "expr": "$formatInteger(300, 'A')",
+        "data": {},
+        "result": "KN"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "spreadsheet column names",
+        "description": "123456",
+        "expr": "$formatInteger(123456, 'A')",
+        "data": {},
+        "result": "FZPH"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "spreadsheet column names",
+        "description": "sequence starting with greek alpha, α",
+        "expr": "$formatInteger(123456, 'α')",
+        "data": {},
+        "code": "D3130"
+    }
+]
