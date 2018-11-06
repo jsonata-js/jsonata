@@ -701,33 +701,33 @@ const dateTime = (function () {
             var componentValue;
             switch (markerSpec.component) {
                 case 'Y':
-                    componentValue = date.getFullYear();
+                    componentValue = date.getUTCFullYear();
                     break;
                 case 'M':
-                    componentValue = date.getMonth() + 1;
+                    componentValue = date.getUTCMonth() + 1;
                     break;
                 case 'D':
-                    componentValue = date.getDate();
+                    componentValue = date.getUTCDate();
                     break;
                 case 'd': {
                     // millis for given date (at 00:00 UTC)
-                    const today = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+                    const today = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
                     // millis for given 1st Jan of that year (at 00:00 UTC)
-                    const firstJan = Date.UTC(date.getFullYear(), 0);
+                    const firstJan = Date.UTC(date.getUTCFullYear(), 0);
                     componentValue = (today - firstJan) / millisInADay + 1;
                     break;
                 }
                 case 'F':
-                    componentValue = date.getDay();
+                    componentValue = date.getUTCDay();
                     if (componentValue === 0) {
                         // ISO 8601 defines days 1-7: Mon-Sun
                         componentValue = 7;
                     }
                     break;
                 case 'W': {
-                    const thisYear = yearMonth(date.getFullYear(), 0);
+                    const thisYear = yearMonth(date.getUTCFullYear(), 0);
                     const startOfWeek1 = startOfFirstWeek(thisYear);
-                    const today = Date.UTC(thisYear.year, date.getMonth(), date.getDate());
+                    const today = Date.UTC(thisYear.year, date.getUTCMonth(), date.getUTCDate());
                     let week = deltaWeeks(startOfWeek1, today);
                     if (week > 52) {
                         // might be first week of the following year
@@ -744,9 +744,9 @@ const dateTime = (function () {
                     break;
                 }
                 case 'w': {
-                    const thisMonth = yearMonth(date.getFullYear(), date.getMonth());
+                    const thisMonth = yearMonth(date.getUTCFullYear(), date.getUTCMonth());
                     const startOfWeek1 = startOfFirstWeek(thisMonth);
-                    const today = Date.UTC(thisMonth.year, thisMonth.month, date.getDate());
+                    const today = Date.UTC(thisMonth.year, thisMonth.month, date.getUTCDate());
                     let week = deltaWeeks(startOfWeek1, today);
                     if (week > 4) {
                         // might be first week of the following month
@@ -767,7 +767,7 @@ const dateTime = (function () {
                     // e.g. Sat 1 Jan 2005 is in the 53rd week of 2004.
                     // The 'W' component specifier gives 53, but 'Y' will give 2005.
                     // I propose to add 'X' as the component specifier to give the ISO week-numbering year (2004 in this example)
-                    const thisYear = yearMonth(date.getFullYear(), 0);
+                    const thisYear = yearMonth(date.getUTCFullYear(), 0);
                     const startOfISOYear = startOfFirstWeek(thisYear);
                     const endOfISOYear = startOfFirstWeek(thisYear.nextYear());
                     const now = date.getTime();
@@ -785,7 +785,7 @@ const dateTime = (function () {
                     // e.g. Sat 1 Jan 2005 is in the 5th week of December 2004.
                     // The 'w' component specifier gives 5, but 'W' will give January and 'Y' will give 2005.
                     // I propose to add 'x' as the component specifier to give the 'week-numbering' month (December in this example)
-                    const thisMonth = yearMonth(date.getFullYear(), date.getMonth());
+                    const thisMonth = yearMonth(date.getUTCFullYear(), date.getUTCMonth());
                     const startOfISOMonth = startOfFirstWeek(thisMonth);
                     const nextMonth = thisMonth.nextMonth();
                     const endOfISOMonth = startOfFirstWeek(nextMonth);
@@ -800,26 +800,26 @@ const dateTime = (function () {
                     break;
                 }
                 case 'H':
-                    componentValue = date.getHours();
+                    componentValue = date.getUTCHours();
                     break;
                 case 'h':
-                    componentValue = date.getHours();
+                    componentValue = date.getUTCHours();
                     componentValue = componentValue % 12;
                     if (componentValue === 0) {
                         componentValue = 12;
                     }
                     break;
                 case 'P':
-                    componentValue = date.getHours() >= 12 ? 'pm' : 'am';
+                    componentValue = date.getUTCHours() >= 12 ? 'pm' : 'am';
                     break;
                 case 'm':
-                    componentValue = date.getMinutes();
+                    componentValue = date.getUTCMinutes();
                     break;
                 case 's':
-                    componentValue = date.getSeconds();
+                    componentValue = date.getUTCSeconds();
                     break;
                 case 'f':
-                    componentValue = date.getMilliseconds();
+                    componentValue = date.getUTCMilliseconds();
                     break;
                 case 'Z':
                 case 'z':
