@@ -131,7 +131,7 @@
         "function": "#formatDateTime",
         "category": "timezone",
         "description": "should offset for UTC",
-        "expr": "$formatDateTime(1531306800000, '[Y]-[M01]-[D01]T[H01]:[m]:[s][Z01:01]')",
+        "expr": "$formatDateTime(1531310400000, '[Y]-[M01]-[D01]T[H01]:[m]:[s][Z01:01]')",
         "data": {},
         "result": "2018-07-11T12:00:00+00:00"
     },
@@ -139,7 +139,7 @@
         "function": "#formatDateTime",
         "category": "timezone",
         "description": "should offset for Z",
-        "expr": "$formatDateTime(1531306800000, '[Y]-[M01]-[D01]T[H01]:[m]:[s][Z01:01t]')",
+        "expr": "$formatDateTime(1531310400000, '[Y]-[M01]-[D01]T[H01]:[m]:[s][Z01:01t]')",
         "data": {},
         "result": "2018-07-11T12:00:00Z"
     },
@@ -147,7 +147,7 @@
         "function": "#formatDateTime",
         "category": "timezone",
         "description": "should offset for UTC",
-        "expr": "$formatDateTime(1531306800000, '[Y]-[M01]-[D01]T[H01]:[m]:[s][Z]', '-0500')",
+        "expr": "$formatDateTime(1531310400000, '[Y]-[M01]-[D01]T[H01]:[m]:[s][Z]', '-0500')",
         "data": {},
         "result": "2018-07-11T07:00:00-05:00"
     },
@@ -155,7 +155,7 @@
         "function": "#formatDateTime",
         "category": "timezone",
         "description": "should offset for UTC",
-        "expr": "$formatDateTime(1531306800000, '[Y]-[M01]-[D01]T[H01]:[m]:[s][Z0]', '-0500')",
+        "expr": "$formatDateTime(1531310400000, '[Y]-[M01]-[D01]T[H01]:[m]:[s][Z0]', '-0500')",
         "data": {},
         "result": "2018-07-11T07:00:00-5"
     },
@@ -163,7 +163,7 @@
         "function": "#formatDateTime",
         "category": "timezone",
         "description": "should offset for UTC",
-        "expr": "$formatDateTime(1531306800000, '[Y]-[M01]-[D01]T[H01]:[m]:[s][Z]', '+1000')",
+        "expr": "$formatDateTime(1531310400000, '[Y]-[M01]-[D01]T[H01]:[m]:[s][Z]', '+1000')",
         "data": {},
         "result": "2018-07-11T22:00:00+10:00"
     },
@@ -171,7 +171,7 @@
         "function": "#formatDateTime",
         "category": "timezone",
         "description": "should offset for UTC",
-        "expr": "$formatDateTime(1531306800000, '[Y]-[M01]-[D01]T[H01]:[m]:[s][Z0]', '+1000')",
+        "expr": "$formatDateTime(1531310400000, '[Y]-[M01]-[D01]T[H01]:[m]:[s][Z0]', '+1000')",
         "data": {},
         "result": "2018-07-11T22:00:00+10"
     },
@@ -179,7 +179,7 @@
         "function": "#formatDateTime",
         "category": "timezone",
         "description": "should offset for UTC",
-        "expr": "$formatDateTime(1531306800000, '[Y]-[M01]-[D01]T[H01]:[m]:[s][Z0]', '+0530')",
+        "expr": "$formatDateTime(1531310400000, '[Y]-[M01]-[D01]T[H01]:[m]:[s][Z0]', '+0530')",
         "data": {},
         "result": "2018-07-11T17:30:00+5:30"
     },
@@ -187,7 +187,7 @@
         "function": "#formatDateTime",
         "category": "timezone",
         "description": "should offset for UTC",
-        "expr": "$formatDateTime(1531306800000, '[Y]-[M01]-[D01]T[H01]:[m]:[s][z]', '-0500')",
+        "expr": "$formatDateTime(1531310400000, '[Y]-[M01]-[D01]T[H01]:[m]:[s][z]', '-0500')",
         "data": {},
         "result": "2018-07-11T07:00:00GMT-05:00"
     },
