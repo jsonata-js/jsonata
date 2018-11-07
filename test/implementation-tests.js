@@ -138,6 +138,24 @@ describe("Functions with side-effects", () => {
         });
     });
 
+    describe("$now() returns timestamp with defined format", function() {
+        it("should return result object", function() {
+            var expr = jsonata("$now('[h]:[M][P] [z]')");
+            var result = expr.evaluate(testdata2);
+            // follows this pattern - "10:23am GMT+00:00"
+            expect(result).to.match(/^\d?\d:\d\d[ap]m GMT\+00:00$/);
+        });
+    });
+
+    describe("$now() returns timestamp with defined format and timezone", function() {
+        it("should return result object", function() {
+            var expr = jsonata("$now('[h]:[M][P] [z]', '-0500')");
+            var result = expr.evaluate(testdata2);
+            // follows this pattern - "10:23am GMT-05:00"
+            expect(result).to.match(/^\d?\d:\d\d[ap]m GMT-05:00$/);
+        });
+    });
+
     describe("$now() always returns same value within an expression", function() {
         it("should return result object", function() {
             var expr = jsonata('{"now": $now(), "delay": $sum([1..10000]), "later": $now()}.(now = later)');

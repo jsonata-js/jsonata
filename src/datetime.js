@@ -683,10 +683,6 @@ const dateTime = (function () {
      * @returns {string} - the formatted timestamp
      */
     function formatDateTime(millis, picture, timezone) {
-        if (typeof millis === 'undefined') {
-            return undefined;
-        }
-
         var offsetHours = 0;
         var offsetMinutes = 0;
         if (typeof timezone !== 'undefined') {
@@ -1041,10 +1037,6 @@ const dateTime = (function () {
      * @returns {number} - the parsed timestamp in millis since the epoch
      */
     function parseDateTime(timestamp, picture) {
-        if (typeof timestamp === 'undefined') {
-            return undefined;
-        }
-
         const formatSpec = analyseDateTimePicture(picture);
         const matchSpec = generateRegex(formatSpec);
         const fullRegex = '^' + matchSpec.parts.map(part => '(' + part.regex + ')').join('') + '$';

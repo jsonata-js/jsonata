@@ -2,133 +2,133 @@
     {
         "category": "ISO week date format",
         "description": "Sat 1 Jan 2005",
-        "expr": "($ts := $parseDateTime('2005-01-01', '[Y]-[M]-[D]'); $formatDateTime($ts, '[X0001]-W[W01]-[F1]') )",
+        "expr": "($ts := $toMillis('2005-01-01', '[Y]-[M]-[D]'); $fromMillis($ts, '[X0001]-W[W01]-[F1]') )",
         "data": {},
         "result": "2004-W53-6"
     },
     {
         "category": "ISO week date format",
         "description": "Sun 2 Jan 2005",
-        "expr": "($ts := $parseDateTime('2005-01-02', '[Y]-[M]-[D]'); $formatDateTime($ts, '[X0001]-W[W01]-[F1]') )",
+        "expr": "($ts := $toMillis('2005-01-02', '[Y]-[M]-[D]'); $fromMillis($ts, '[X0001]-W[W01]-[F1]') )",
         "data": {},
         "result": "2004-W53-7"
     },
     {
         "category": "ISO week date format",
         "description": "Sat 31 Dec 2005",
-        "expr": "($ts := $parseDateTime('2005-12-31', '[Y]-[M]-[D]'); $formatDateTime($ts, '[X0001]-W[W01]-[F1]') )",
+        "expr": "($ts := $toMillis('2005-12-31', '[Y]-[M]-[D]'); $fromMillis($ts, '[X0001]-W[W01]-[F1]') )",
         "data": {},
         "result": "2005-W52-6"
     },
     {
         "category": "ISO week date format",
         "description": "Sun 1 Jan 2006",
-        "expr": "($ts := $parseDateTime('2006-01-01', '[Y]-[M]-[D]'); $formatDateTime($ts, '[X0001]-W[W01]-[F1]') )",
+        "expr": "($ts := $toMillis('2006-01-01', '[Y]-[M]-[D]'); $fromMillis($ts, '[X0001]-W[W01]-[F1]') )",
         "data": {},
         "result": "2005-W52-7"
     },
     {
         "category": "ISO week date format",
         "description": "Mon 2 Jan 2006",
-        "expr": "($ts := $parseDateTime('2006-01-02', '[Y]-[M]-[D]'); $formatDateTime($ts, '[X0001]-W[W01]-[F1]') )",
+        "expr": "($ts := $toMillis('2006-01-02', '[Y]-[M]-[D]'); $fromMillis($ts, '[X0001]-W[W01]-[F1]') )",
         "data": {},
         "result": "2006-W01-1"
     },
     {
         "category": "ISO week date format",
         "description": "Sun 31 Dec 2006",
-        "expr": "($ts := $parseDateTime('2006-12-31', '[Y]-[M]-[D]'); $formatDateTime($ts, '[X0001]-W[W01]-[F1]') )",
+        "expr": "($ts := $toMillis('2006-12-31', '[Y]-[M]-[D]'); $fromMillis($ts, '[X0001]-W[W01]-[F1]') )",
         "data": {},
         "result": "2006-W52-7"
     },
     {
         "category": "ISO week date format",
         "description": "Mon 1 Jan 2007",
-        "expr": "($ts := $parseDateTime('2007-01-01', '[Y]-[M]-[D]'); $formatDateTime($ts, '[X0001]-W[W01]-[F1]') )",
+        "expr": "($ts := $toMillis('2007-01-01', '[Y]-[M]-[D]'); $fromMillis($ts, '[X0001]-W[W01]-[F1]') )",
         "data": {},
         "result": "2007-W01-1"
     },
     {
         "category": "ISO week date format",
         "description": "Sun 30 Dec 2007",
-        "expr": "($ts := $parseDateTime('2007-12-30', '[Y]-[M]-[D]'); $formatDateTime($ts, '[X0001]-W[W01]-[F1]') )",
+        "expr": "($ts := $toMillis('2007-12-30', '[Y]-[M]-[D]'); $fromMillis($ts, '[X0001]-W[W01]-[F1]') )",
         "data": {},
         "result": "2007-W52-7"
     },
     {
         "category": "ISO week date format",
         "description": "Mon 31 Dec 2007",
-        "expr": "($ts := $parseDateTime('2007-12-31', '[Y]-[M]-[D]'); $formatDateTime($ts, '[X0001]-W[W01]-[F1]') )",
+        "expr": "($ts := $toMillis('2007-12-31', '[Y]-[M]-[D]'); $fromMillis($ts, '[X0001]-W[W01]-[F1]') )",
         "data": {},
         "result": "2008-W01-1"
     },
     {
         "category": "ISO week date format",
         "description": "Tue 1 Jan 2008",
-        "expr": "($ts := $parseDateTime('2008-01-01', '[Y]-[M]-[D]'); $formatDateTime($ts, '[X0001]-W[W01]-[F1]') )",
+        "expr": "($ts := $toMillis('2008-01-01', '[Y]-[M]-[D]'); $fromMillis($ts, '[X0001]-W[W01]-[F1]') )",
         "data": {},
         "result": "2008-W01-2"
     },
     {
         "category": "ISO week date format",
         "description": "Sun 28 Dec 2008",
-        "expr": "($ts := $parseDateTime('2008-12-28', '[Y]-[M]-[D]'); $formatDateTime($ts, '[X0001]-W[W01]-[F1]') )",
+        "expr": "($ts := $toMillis('2008-12-28', '[Y]-[M]-[D]'); $fromMillis($ts, '[X0001]-W[W01]-[F1]') )",
         "data": {},
         "result": "2008-W52-7"
     },
     {
         "category": "ISO week date format",
         "description": "Mon 29 Dec 2008",
-        "expr": "($ts := $parseDateTime('2008-12-29', '[Y]-[M]-[D]'); $formatDateTime($ts, '[X0001]-W[W01]-[F1]') )",
+        "expr": "($ts := $toMillis('2008-12-29', '[Y]-[M]-[D]'); $fromMillis($ts, '[X0001]-W[W01]-[F1]') )",
         "data": {},
         "result": "2009-W01-1"
     },
     {
         "category": "ISO week date format",
         "description": "Tue 30 Dec 2008",
-        "expr": "($ts := $parseDateTime('2008-12-30', '[Y]-[M]-[D]'); $formatDateTime($ts, '[X0001]-W[W01]-[F1]') )",
+        "expr": "($ts := $toMillis('2008-12-30', '[Y]-[M]-[D]'); $fromMillis($ts, '[X0001]-W[W01]-[F1]') )",
         "data": {},
         "result": "2009-W01-2"
     },
     {
         "category": "ISO week date format",
         "description": "Wed 31 Dec 2008",
-        "expr": "($ts := $parseDateTime('2008-12-31', '[Y]-[M]-[D]'); $formatDateTime($ts, '[X0001]-W[W01]-[F1]') )",
+        "expr": "($ts := $toMillis('2008-12-31', '[Y]-[M]-[D]'); $fromMillis($ts, '[X0001]-W[W01]-[F1]') )",
         "data": {},
         "result": "2009-W01-3"
     },
     {
         "category": "ISO week date format",
         "description": "Thu 1 Jan 2009",
-        "expr": "($ts := $parseDateTime('2009-01-01', '[Y]-[M]-[D]'); $formatDateTime($ts, '[X0001]-W[W01]-[F1]') )",
+        "expr": "($ts := $toMillis('2009-01-01', '[Y]-[M]-[D]'); $fromMillis($ts, '[X0001]-W[W01]-[F1]') )",
         "data": {},
         "result": "2009-W01-4"
     },
     {
         "category": "ISO week date format",
         "description": "Thu 31 Dec 2009",
-        "expr": "($ts := $parseDateTime('2009-12-31', '[Y]-[M]-[D]'); $formatDateTime($ts, '[X0001]-W[W01]-[F1]') )",
+        "expr": "($ts := $toMillis('2009-12-31', '[Y]-[M]-[D]'); $fromMillis($ts, '[X0001]-W[W01]-[F1]') )",
         "data": {},
         "result": "2009-W53-4"
     },
     {
         "category": "ISO week date format",
         "description": "Fri 1 Jan 2010",
-        "expr": "($ts := $parseDateTime('2010-01-01', '[Y]-[M]-[D]'); $formatDateTime($ts, '[X0001]-W[W01]-[F1]') )",
+        "expr": "($ts := $toMillis('2010-01-01', '[Y]-[M]-[D]'); $fromMillis($ts, '[X0001]-W[W01]-[F1]') )",
         "data": {},
         "result": "2009-W53-5"
     },
     {
         "category": "ISO week date format",
         "description": "Sat 2 Jan 2010",
-        "expr": "($ts := $parseDateTime('2010-01-02', '[Y]-[M]-[D]'); $formatDateTime($ts, '[X0001]-W[W01]-[F1]') )",
+        "expr": "($ts := $toMillis('2010-01-02', '[Y]-[M]-[D]'); $fromMillis($ts, '[X0001]-W[W01]-[F1]') )",
         "data": {},
         "result": "2009-W53-6"
     },
     {
         "category": "ISO week date format",
         "description": "Sun 3 Jan 2010",
-        "expr": "($ts := $parseDateTime('2010-01-03', '[Y]-[M]-[D]'); $formatDateTime($ts, '[X0001]-W[W01]-[F1]') )",
+        "expr": "($ts := $toMillis('2010-01-03', '[Y]-[M]-[D]'); $fromMillis($ts, '[X0001]-W[W01]-[F1]') )",
         "data": {},
         "result": "2009-W53-7"
     }
