@@ -4829,38 +4829,49 @@ var jsonata = (function() {
     /**
      * Converts an ISO 8601 timestamp to milliseconds since the epoch
      *
-     * @param {string} timestamp - the ISO 8601 timestamp to be converted
+     * @param {string} timestamp - the timestamp to be converted
+     * @param {string} [picture] - the picture string defining the format of the timestamp (defaults to ISO 8601)
      * @returns {Number} - milliseconds since the epoch
      */
-    function functionToMillis(timestamp) {
+    function functionToMillis(timestamp, picture) {
         // undefined inputs always return undefined
         if(typeof timestamp === 'undefined') {
             return undefined;
         }
 
-        if(!iso8601regex.test(timestamp)) {
-            throw {
-                stack: (new Error()).stack,
-                code: "D3110",
-                value: timestamp
-            };
-        }
+        if(typeof picture === 'undefined') {
+            if (!iso8601regex.test(timestamp)) {
+                throw {
+                    stack: (new Error()).stack,
+                    code: "D3110",
+                    value: timestamp
+                };
+            }
 
-        return Date.parse(timestamp);
+            return Date.parse(timestamp);
+        } else {
+            return datetime.parseDateTime(timestamp, picture);
+        }
     }
 
     /**
      * Converts milliseconds since the epoch to an ISO 8601 timestamp
      * @param {Number} millis - milliseconds since the epoch to be converted
-     * @returns {String} - an ISO 8601 formatted timestamp
+     * @param {string} [picture] - the picture string defining the format of the timestamp (defaults to ISO 8601)
+     * @param {string} [timezone] - the timezone to format the timestamp in (defaults to UTC)
+     * @returns {String} - the formatted timestamp
      */
-    function functionFromMillis(millis) {
+    function functionFromMillis(millis, picture, timezone) {
         // undefined inputs always return undefined
         if(typeof millis === 'undefined') {
             return undefined;
         }
 
-        return new Date(millis).toISOString();
+        if(typeof picture === 'undefined') {
+            return new Date(millis).toISOString();
+        } else {
+            return datetime.formatDateTime(millis, picture, timezone);
+        }
     }
 
     /**
@@ -4924,8 +4935,6 @@ var jsonata = (function() {
     staticFrame.bind('formatBase', defineFunction(functionFormatBase, '<n-n?:s>'));
     staticFrame.bind('formatInteger', defineFunction(datetime.formatInteger, '<n-s:s>'));
     staticFrame.bind('parseInteger', defineFunction(datetime.parseInteger, '<s-s:n>'));
-    staticFrame.bind('formatDateTime', defineFunction(datetime.formatDateTime, '<n-ss?:s>'));
-    staticFrame.bind('parseDateTime', defineFunction(datetime.parseDateTime, '<s-s:n>'));
     staticFrame.bind('number', defineFunction(functionNumber, '<(ns)-:n>'));
     staticFrame.bind('floor', defineFunction(functionFloor, '<n-:n>'));
     staticFrame.bind('ceil', defineFunction(functionCeil, '<n-:n>'));
@@ -4954,8 +4963,8 @@ var jsonata = (function() {
     staticFrame.bind('base64encode', defineFunction(functionBase64encode, '<s-:s>'));
     staticFrame.bind('base64decode', defineFunction(functionBase64decode, '<s-:s>'));
     staticFrame.bind('eval', defineFunction(functionEval, '<s-x?:x>'));
-    staticFrame.bind('toMillis', defineFunction(functionToMillis, '<s-:n>'));
-    staticFrame.bind('fromMillis', defineFunction(functionFromMillis, '<n-:s>'));
+    staticFrame.bind('toMillis', defineFunction(functionToMillis, '<s-s?:n>'));
+    staticFrame.bind('fromMillis', defineFunction(functionFromMillis, '<n-s?s?:s>'));
     staticFrame.bind('clone', defineFunction(functionClone, '<(oa)-:o>'));
 
     /**
@@ -5105,9 +5114,9 @@ var jsonata = (function() {
         var environment = createFrame(staticFrame);
 
         var timestamp = new Date(); // will be overridden on each call to evalute()
-        environment.bind('now', defineFunction(function() {
-            return timestamp.toJSON();
-        }, '<:s>'));
+        environment.bind('now', defineFunction(function(picture, timezone) {
+            return typeof picture === 'undefined' ? timestamp.toJSON() : datetime.formatDateTime(timestamp.getTime(), picture, timezone);
+        }, '<s?s?:s>'));
         environment.bind('millis', defineFunction(function() {
             return timestamp.getTime();
         }, '<:n>'));

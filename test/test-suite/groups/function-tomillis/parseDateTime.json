@@ -1,249 +1,249 @@
 [
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "undefined value",
         "description": "should return undefined",
-        "expr": "$parseDateTime(undefined, 'pic')",
+        "expr": "$toMillis(undefined, 'pic')",
         "data": {},
         "undefinedResult": true
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "basic date patterns",
         "description": "should parse string literal",
-        "expr": "$parseDateTime('Hello', 'Hello')",
+        "expr": "$toMillis('Hello', 'Hello')",
         "data": {},
         "undefinedResult": true
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "basic date patterns",
         "description": "should parse year",
-        "expr": "$parseDateTime('2018', '[Y1]')",
+        "expr": "$toMillis('2018', '[Y1]')",
         "data": {},
         "result": 1514764800000
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "basic date patterns",
         "description": "should parse year/month/day",
-        "expr": "$parseDateTime('2018-03-27', '[Y1]-[M01]-[D01]')",
+        "expr": "$toMillis('2018-03-27', '[Y1]-[M01]-[D01]')",
         "data": {},
         "result": 1522108800000
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "basic date patterns",
         "description": "should parse ISO 8601 format",
-        "expr": "$parseDateTime('2018-03-27T14:03:00.123Z', '[Y0001]-[M01]-[D01]T[H01]:[m01]:[s01].[f001]Z')",
+        "expr": "$toMillis('2018-03-27T14:03:00.123Z', '[Y0001]-[M01]-[D01]T[H01]:[m01]:[s01].[f001]Z')",
         "data": {},
         "result": 1522159380123
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "ordinal numeric dates",
         "description": "should parse year/month/day",
-        "expr": "$parseDateTime('27th 3 1976', '[D1o] [M#1] [Y0001]')",
+        "expr": "$toMillis('27th 3 1976', '[D1o] [M#1] [Y0001]')",
         "data": {},
         "result": 196732800000
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "ordinal numeric dates",
         "description": "should parse year/month/day",
-        "expr": "$parseDateTime('21st 12 1881', '[D1o] [M01] [Y0001]')",
+        "expr": "$toMillis('21st 12 1881', '[D1o] [M01] [Y0001]')",
         "data": {},
         "result": -2777932800000
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "ordinal numeric dates",
         "description": "should parse year/month/day",
-        "expr": "$parseDateTime('2nd 12 2012', '[D1o] [M01] [Y0001]')",
+        "expr": "$toMillis('2nd 12 2012', '[D1o] [M01] [Y0001]')",
         "data": {},
         "result": 1354406400000
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "roman numeral dates",
         "description": "should parse year",
-        "expr": "$parseDateTime('MCMLXXXIV', '[YI]')",
+        "expr": "$toMillis('MCMLXXXIV', '[YI]')",
         "data": {},
         "result": 441763200000
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "roman numeral dates",
         "description": "should parse year/month/day",
-        "expr": "$parseDateTime('27 03 MMXVIII', '[D1] [M01] [YI]')",
+        "expr": "$toMillis('27 03 MMXVIII', '[D1] [M01] [YI]')",
         "data": {},
         "result": 1522108800000
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "roman numeral dates",
         "description": "should parse year/month/day",
-        "expr": "$parseDateTime('27 iii MMXVIII', '[D1] [Mi] [YI]')",
+        "expr": "$toMillis('27 iii MMXVIII', '[D1] [Mi] [YI]')",
         "data": {},
         "result": 1522108800000
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "dates with letters instead of numbers",
         "description": "day/month in letters, year in roman numerals",
-        "expr": "$parseDateTime('w C mmxviii', '[Da] [MA] [Yi]')",
+        "expr": "$toMillis('w C mmxviii', '[Da] [MA] [Yi]')",
         "data": {},
         "result": 1521763200000
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "dates with letters instead of numbers",
         "description": "day/month in letters, year in roman numerals",
-        "expr": "$parseDateTime('ae C mmxviii', '[Da] [MA] [Yi]')",
+        "expr": "$toMillis('ae C mmxviii', '[Da] [MA] [Yi]')",
         "data": {},
         "result": 1522454400000
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "months in words",
         "description": "should parse year/month/day",
-        "expr": "$parseDateTime('27th April 2008', '[D1o] [MNn] [Y0001]')",
+        "expr": "$toMillis('27th April 2008', '[D1o] [MNn] [Y0001]')",
         "data": {},
         "result": 1209254400000
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "months in words",
         "description": "should parse year/month/day",
-        "expr": "$parseDateTime('21 August 2017', '[D1] [MNn] [Y0001]')",
+        "expr": "$toMillis('21 August 2017', '[D1] [MNn] [Y0001]')",
         "data": {},
         "result": 1503273600000
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "months in words",
         "description": "should parse year/month/day",
-        "expr": "$parseDateTime('2 Feb 2012', '[D1] [MNn,3-3] [Y0001]')",
+        "expr": "$toMillis('2 Feb 2012', '[D1] [MNn,3-3] [Y0001]')",
         "data": {},
         "result": 1328140800000
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "dates/years in words",
         "description": "should parse year in words",
-        "expr": "$parseDateTime('one thousand, nine hundred and eighty-four', '[Yw]')",
+        "expr": "$toMillis('one thousand, nine hundred and eighty-four', '[Yw]')",
         "data": {},
         "result": 441763200000
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "dates/years in words",
         "description": "should parse year in words",
-        "expr": "$parseDateTime('nineteen hundred and eighty-four', '[Yw]')",
+        "expr": "$toMillis('nineteen hundred and eighty-four', '[Yw]')",
         "data": {},
         "result": 441763200000
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "dates/years in words",
         "description": "should parse date/month in words",
-        "expr": "$parseDateTime('twenty-seven April 2008', '[Dw] [MNn] [Y0001]')",
+        "expr": "$toMillis('twenty-seven April 2008', '[Dw] [MNn] [Y0001]')",
         "data": {},
         "result": 1209254400000
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "dates/years in words",
         "description": "should parse date/month in ordinal words",
-        "expr": "$parseDateTime('twenty-seventh April 2008', '[Dw] [MNn] [Y0001]')",
+        "expr": "$toMillis('twenty-seventh April 2008', '[Dw] [MNn] [Y0001]')",
         "data": {},
         "result": 1209254400000
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "dates/years in words",
         "description": "should parse ordinal date/month/year",
-        "expr": "$parseDateTime('twenty-first August two thousand and seventeen', '[Dw] [MNn] [Yw]')",
+        "expr": "$toMillis('twenty-first August two thousand and seventeen', '[Dw] [MNn] [Yw]')",
         "data": {},
         "result": 1503273600000
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "dates/years in words",
         "description": "should parse ordinal date/month/year",
-        "expr": "$parseDateTime('TWENTY-SECOND August two thousand and seventeen', '[DW] [MNn] [Yw]')",
+        "expr": "$toMillis('TWENTY-SECOND August two thousand and seventeen', '[DW] [MNn] [Yw]')",
         "data": {},
         "result": 1503360000000
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "dates/years in words",
         "description": "should parse ordinal date/month/year",
-        "expr": "$parseDateTime('Twentieth of August, two thousand and seventeen', '[DW] of [MNn], [Yw]')",
+        "expr": "$toMillis('Twentieth of August, two thousand and seventeen', '[DW] of [MNn], [Yw]')",
         "data": {},
         "result": 1503187200000
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "12 hour clock",
         "description": "just after midnight",
-        "expr": "$parseDateTime('4/4/2018 12:06 am', '[D1]/[M1]/[Y0001] [h]:[m] [P]')",
+        "expr": "$toMillis('4/4/2018 12:06 am', '[D1]/[M1]/[Y0001] [h]:[m] [P]')",
         "data": {},
         "result": 1522800360000
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "12 hour clock",
         "description": "breakfast time",
-        "expr": "$parseDateTime('4/4/2018 06:30 am', '[D1]/[M1]/[Y0001] [h]:[m] [P]')",
+        "expr": "$toMillis('4/4/2018 06:30 am', '[D1]/[M1]/[Y0001] [h]:[m] [P]')",
         "data": {},
         "result": 1522823400000
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "12 hour clock",
         "description": "just after midday",
-        "expr": "$parseDateTime('4/4/2018 12:06 pm', '[D1]/[M1]/[Y0001] [h]:[m] [P]')",
+        "expr": "$toMillis('4/4/2018 12:06 pm', '[D1]/[M1]/[Y0001] [h]:[m] [P]')",
         "data": {},
         "result": 1522843560000
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "12 hour clock",
         "description": "just before midnight",
-        "expr": "$parseDateTime('4/4/2018 11:30 pm', '[D1]/[M1]/[Y0001] [h]:[m] [P]')",
+        "expr": "$toMillis('4/4/2018 11:30 pm', '[D1]/[M1]/[Y0001] [h]:[m] [P]')",
         "data": {},
         "result": 1522884600000
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "derive the date",
         "description": "ordinal date: day 94 of the year 2018",
-        "expr": "$parseDateTime('2018-094', '[Y0001]-[d001]')",
+        "expr": "$toMillis('2018-094', '[Y0001]-[d001]')",
         "data": {},
         "result": 1522800000000
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "nothing matches",
         "description": "parsing a non-date string returns undefined",
-        "expr": "$parseDateTime('irrelevent string', '[Y]-[M]-[D]')",
+        "expr": "$toMillis('irrelevent string', '[Y]-[M]-[D]')",
         "data": {},
         "undefinedResult": true
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "nothing matches",
         "description": "picture string contains an unknown component",
-        "expr": "$parseDateTime('2018-05-22', '[Y]-[M]-[q]')",
+        "expr": "$toMillis('2018-05-22', '[Y]-[M]-[q]')",
         "data": {},
         "code": "D3132"
     },
     {
-        "function": "#parseDateTime",
+        "function": "#toMillis",
         "category": "nothing matches",
         "description": "picture string contains a named year",
-        "expr": "$parseDateTime('2018-05-22', '[YN]-[M]-[D]')",
+        "expr": "$toMillis('2018-05-22', '[YN]-[M]-[D]')",
         "data": {},
         "code": "D3133"
     }
