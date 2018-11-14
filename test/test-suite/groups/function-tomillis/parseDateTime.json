@@ -225,6 +225,54 @@
     },
     {
         "function": "#toMillis",
+        "category": "default unspecified parts",
+        "description": "time only defaults to todays date",
+        "expr": "$toMillis('13:45', '[H]:[m]') ~> $fromMillis() ~> $substringBefore('T') = $substringBefore($now(), 'T')",
+        "data": {},
+        "result": true
+    },
+    {
+        "function": "#toMillis",
+        "category": "default unspecified parts",
+        "description": "hours/minutes only defaults seconds to zero",
+        "expr": "$toMillis('13:45', '[H]:[m]') ~> $fromMillis() ~> $substringAfter('T')",
+        "data": {},
+        "result": "13:45:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "default unspecified parts",
+        "description": "date only defaults time to midnight",
+        "expr": "$toMillis('Wednesday, 14th November 2018', '[FNn], [D1o] [MNn] [Y]') ~> $fromMillis()",
+        "data": {},
+        "result": "2018-11-14T00:00:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "default unspecified parts",
+        "description": "date only defaults time to midnight",
+        "expr": "$toMillis('Mon, Twelfth November 2018', '[FNn,*-3], [DWwo] [MNn] [Y]') ~> $fromMillis()",
+        "data": {},
+        "result": "2018-11-12T00:00:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "parsing day-of-year",
+        "description": "180th day of 2018 is 29th June",
+        "expr": "$toMillis('2018--180', '[Y]--[d]') ~> $fromMillis()",
+        "data": {},
+        "result": "2018-06-29T00:00:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "parsing day-of-year",
+        "description": "365th day of 2018 is 31st December",
+        "expr": "$toMillis('three hundred and sixty-fifth day of 2018', '[dwo] day of [Y]') ~> $fromMillis()",
+        "data": {},
+        "result": "2018-12-31T00:00:00.000Z"
+    },
+    {
+        "function": "#toMillis",
         "category": "nothing matches",
         "description": "parsing a non-date string returns undefined",
         "expr": "$toMillis('irrelevent string', '[Y]-[M]-[D]')",
@@ -246,5 +294,37 @@
         "expr": "$toMillis('2018-05-22', '[YN]-[M]-[D]')",
         "data": {},
         "code": "D3133"
+    },
+    {
+        "function": "#toMillis",
+        "category": "date/time underspecified (gaps)",
+        "description": "year/date with no month",
+        "expr": "$toMillis('2018-22', '[Y]-[D]')",
+        "data": {},
+        "code": "D3136"
+    },
+    {
+        "function": "#toMillis",
+        "category": "date/time underspecified (gaps)",
+        "description": "month/date, min/sec with no hours",
+        "expr": "$toMillis('5-22 23:59', '[M]-[D] [m]:[s]')",
+        "data": {},
+        "code": "D3136"
+    },
+    {
+        "function": "#toMillis",
+        "category": "unsupported format",
+        "description": "currently no support for year/month-of-year/week-of-month/day-of-week",
+        "expr": "$toMillis('2018-3-2-5', '[Y]-[x]-[w]-[F1]')",
+        "data": {},
+        "code": "D3136"
+    },
+    {
+        "function": "#toMillis",
+        "category": "unsupported format",
+        "description": "currently no support for year/week-of-year/day-of-week",
+        "expr": "$toMillis('2018-32-5', '[X]-[W]-[F1]')",
+        "data": {},
+        "code": "D3136"
     }
 ]

@@ -675,6 +675,144 @@ const dateTime = (function () {
         return (end - start) / (millisInADay * 7) + 1;
     };
 
+    const getDateTimeFragment = (date, component) => {
+        let componentValue;
+        switch (component) {
+            case 'Y': // year
+                componentValue = date.getUTCFullYear();
+                break;
+            case 'M': // month in year
+                componentValue = date.getUTCMonth() + 1;
+                break;
+            case 'D': // day in month
+                componentValue = date.getUTCDate();
+                break;
+            case 'd': { // day in year
+                // millis for given date (at 00:00 UTC)
+                const today = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+                // millis for given 1st Jan of that year (at 00:00 UTC)
+                const firstJan = Date.UTC(date.getUTCFullYear(), 0);
+                componentValue = (today - firstJan) / millisInADay + 1;
+                break;
+            }
+            case 'F': // day of week
+                componentValue = date.getUTCDay();
+                if (componentValue === 0) {
+                    // ISO 8601 defines days 1-7: Mon-Sun
+                    componentValue = 7;
+                }
+                break;
+            case 'W': { // week in year
+                const thisYear = yearMonth(date.getUTCFullYear(), 0);
+                const startOfWeek1 = startOfFirstWeek(thisYear);
+                const today = Date.UTC(thisYear.year, date.getUTCMonth(), date.getUTCDate());
+                let week = deltaWeeks(startOfWeek1, today);
+                if (week > 52) {
+                    // might be first week of the following year
+                    const startOfFollowingYear = startOfFirstWeek(thisYear.nextYear());
+                    if (today >= startOfFollowingYear) {
+                        week = 1;
+                    }
+                } else if (week < 1) {
+                    // must be end of the previous year
+                    const startOfPreviousYear = startOfFirstWeek(thisYear.previousYear());
+                    week = deltaWeeks(startOfPreviousYear, today);
+                }
+                componentValue = Math.floor(week);
+                break;
+            }
+            case 'w': { // week in month
+                const thisMonth = yearMonth(date.getUTCFullYear(), date.getUTCMonth());
+                const startOfWeek1 = startOfFirstWeek(thisMonth);
+                const today = Date.UTC(thisMonth.year, thisMonth.month, date.getUTCDate());
+                let week = deltaWeeks(startOfWeek1, today);
+                if (week > 4) {
+                    // might be first week of the following month
+                    const startOfFollowingMonth = startOfFirstWeek(thisMonth.nextMonth());
+                    if (today >= startOfFollowingMonth) {
+                        week = 1;
+                    }
+                } else if (week < 1) {
+                    // must be end of the previous month
+                    const startOfPreviousMonth = startOfFirstWeek(thisMonth.previousMonth());
+                    week = deltaWeeks(startOfPreviousMonth, today);
+                }
+                componentValue = Math.floor(week);
+                break;
+            }
+            case 'X': { // ISO week-numbering year
+                // Extension: The F&O spec says nothing about how to access the year associated with the week-of-the-year
+                // e.g. Sat 1 Jan 2005 is in the 53rd week of 2004.
+                // The 'W' component specifier gives 53, but 'Y' will give 2005.
+                // I propose to add 'X' as the component specifier to give the ISO week-numbering year (2004 in this example)
+                const thisYear = yearMonth(date.getUTCFullYear(), 0);
+                const startOfISOYear = startOfFirstWeek(thisYear);
+                const endOfISOYear = startOfFirstWeek(thisYear.nextYear());
+                const now = date.getTime();
+                if (now < startOfISOYear) {
+                    componentValue = thisYear.year - 1;
+                } else if (now >= endOfISOYear) {
+                    componentValue = thisYear.year + 1;
+                } else {
+                    componentValue = thisYear.year;
+                }
+                break;
+            }
+            case 'x': { // ISO week-numbering month
+                // Extension: The F&O spec says nothing about how to access the month associated with the week-of-the-month
+                // e.g. Sat 1 Jan 2005 is in the 5th week of December 2004.
+                // The 'w' component specifier gives 5, but 'W' will give January and 'Y' will give 2005.
+                // I propose to add 'x' as the component specifier to give the 'week-numbering' month (December in this example)
+                const thisMonth = yearMonth(date.getUTCFullYear(), date.getUTCMonth());
+                const startOfISOMonth = startOfFirstWeek(thisMonth);
+                const nextMonth = thisMonth.nextMonth();
+                const endOfISOMonth = startOfFirstWeek(nextMonth);
+                const now = date.getTime();
+                if (now < startOfISOMonth) {
+                    componentValue = thisMonth.previousMonth().month + 1;
+                } else if (now >= endOfISOMonth) {
+                    componentValue = nextMonth.month + 1;
+                } else {
+                    componentValue = thisMonth.month + 1;
+                }
+                break;
+            }
+            case 'H': // hour in day (24 hours)
+                componentValue = date.getUTCHours();
+                break;
+            case 'h': // hour in half-day (12 hours)
+                componentValue = date.getUTCHours();
+                componentValue = componentValue % 12;
+                if (componentValue === 0) {
+                    componentValue = 12;
+                }
+                break;
+            case 'P': // am/pm marker
+                componentValue = date.getUTCHours() >= 12 ? 'pm' : 'am';
+                break;
+            case 'm': // minute in hour
+                componentValue = date.getUTCMinutes();
+                break;
+            case 's': // second in minute
+                componentValue = date.getUTCSeconds();
+                break;
+            case 'f': // fractional seconds
+                componentValue = date.getUTCMilliseconds();
+                break;
+            case 'Z': // timezone
+            case 'z':
+                // since the date object is constructed from epoch millis, the TZ component is always be UTC.
+                break;
+            case 'C': // calendar name
+                componentValue = 'ISO';
+                break;
+            case 'E': // era
+                componentValue = 'ISO';
+                break;
+        }
+        return componentValue;
+    };
+
     /**
      * formats the date/time as specified by the XPath fn:format-dateTime function
      * @param {number} millis - the timestamp to be formatted, in millis since the epoch
@@ -694,140 +832,8 @@ const dateTime = (function () {
         }
 
         var formatComponent = function (date, markerSpec) {
-            var componentValue;
-            switch (markerSpec.component) {
-                case 'Y':
-                    componentValue = date.getUTCFullYear();
-                    break;
-                case 'M':
-                    componentValue = date.getUTCMonth() + 1;
-                    break;
-                case 'D':
-                    componentValue = date.getUTCDate();
-                    break;
-                case 'd': {
-                    // millis for given date (at 00:00 UTC)
-                    const today = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
-                    // millis for given 1st Jan of that year (at 00:00 UTC)
-                    const firstJan = Date.UTC(date.getUTCFullYear(), 0);
-                    componentValue = (today - firstJan) / millisInADay + 1;
-                    break;
-                }
-                case 'F':
-                    componentValue = date.getUTCDay();
-                    if (componentValue === 0) {
-                        // ISO 8601 defines days 1-7: Mon-Sun
-                        componentValue = 7;
-                    }
-                    break;
-                case 'W': {
-                    const thisYear = yearMonth(date.getUTCFullYear(), 0);
-                    const startOfWeek1 = startOfFirstWeek(thisYear);
-                    const today = Date.UTC(thisYear.year, date.getUTCMonth(), date.getUTCDate());
-                    let week = deltaWeeks(startOfWeek1, today);
-                    if (week > 52) {
-                        // might be first week of the following year
-                        const startOfFollowingYear = startOfFirstWeek(thisYear.nextYear());
-                        if (today >= startOfFollowingYear) {
-                            week = 1;
-                        }
-                    } else if (week < 1) {
-                        // must be end of the previous year
-                        const startOfPreviousYear = startOfFirstWeek(thisYear.previousYear());
-                        week = deltaWeeks(startOfPreviousYear, today);
-                    }
-                    componentValue = Math.floor(week);
-                    break;
-                }
-                case 'w': {
-                    const thisMonth = yearMonth(date.getUTCFullYear(), date.getUTCMonth());
-                    const startOfWeek1 = startOfFirstWeek(thisMonth);
-                    const today = Date.UTC(thisMonth.year, thisMonth.month, date.getUTCDate());
-                    let week = deltaWeeks(startOfWeek1, today);
-                    if (week > 4) {
-                        // might be first week of the following month
-                        const startOfFollowingMonth = startOfFirstWeek(thisMonth.nextMonth());
-                        if (today >= startOfFollowingMonth) {
-                            week = 1;
-                        }
-                    } else if (week < 1) {
-                        // must be end of the previous month
-                        const startOfPreviousMonth = startOfFirstWeek(thisMonth.previousMonth());
-                        week = deltaWeeks(startOfPreviousMonth, today);
-                    }
-                    componentValue = Math.floor(week);
-                    break;
-                }
-                case 'X': {
-                    // Extension: The F&O spec says nothing about how to access the year associated with the week-of-the-year
-                    // e.g. Sat 1 Jan 2005 is in the 53rd week of 2004.
-                    // The 'W' component specifier gives 53, but 'Y' will give 2005.
-                    // I propose to add 'X' as the component specifier to give the ISO week-numbering year (2004 in this example)
-                    const thisYear = yearMonth(date.getUTCFullYear(), 0);
-                    const startOfISOYear = startOfFirstWeek(thisYear);
-                    const endOfISOYear = startOfFirstWeek(thisYear.nextYear());
-                    const now = date.getTime();
-                    if (now < startOfISOYear) {
-                        componentValue = thisYear.year - 1;
-                    } else if (now >= endOfISOYear) {
-                        componentValue = thisYear.year + 1;
-                    } else {
-                        componentValue = thisYear.year;
-                    }
-                    break;
-                }
-                case 'x': {
-                    // Extension: The F&O spec says nothing about how to access the month associated with the week-of-the-month
-                    // e.g. Sat 1 Jan 2005 is in the 5th week of December 2004.
-                    // The 'w' component specifier gives 5, but 'W' will give January and 'Y' will give 2005.
-                    // I propose to add 'x' as the component specifier to give the 'week-numbering' month (December in this example)
-                    const thisMonth = yearMonth(date.getUTCFullYear(), date.getUTCMonth());
-                    const startOfISOMonth = startOfFirstWeek(thisMonth);
-                    const nextMonth = thisMonth.nextMonth();
-                    const endOfISOMonth = startOfFirstWeek(nextMonth);
-                    const now = date.getTime();
-                    if (now < startOfISOMonth) {
-                        componentValue = thisMonth.previousMonth().month + 1;
-                    } else if (now >= endOfISOMonth) {
-                        componentValue = nextMonth.month + 1;
-                    } else {
-                        componentValue = thisMonth.month + 1;
-                    }
-                    break;
-                }
-                case 'H':
-                    componentValue = date.getUTCHours();
-                    break;
-                case 'h':
-                    componentValue = date.getUTCHours();
-                    componentValue = componentValue % 12;
-                    if (componentValue === 0) {
-                        componentValue = 12;
-                    }
-                    break;
-                case 'P':
-                    componentValue = date.getUTCHours() >= 12 ? 'pm' : 'am';
-                    break;
-                case 'm':
-                    componentValue = date.getUTCMinutes();
-                    break;
-                case 's':
-                    componentValue = date.getUTCSeconds();
-                    break;
-                case 'f':
-                    componentValue = date.getUTCMilliseconds();
-                    break;
-                case 'Z':
-                case 'z':
-                    // since the date object is constructed from epoch millis, the TZ component is always be UTC.
-                    break;
-                case 'C':
-                    componentValue = 'ISO';
-                    break;
-                case 'E':
-                    componentValue = 'ISO';
-                    break;
-            }
+            var componentValue = getDateTimeFragment(date, markerSpec.component);
+
             // §9.8.4.3 Formatting Integer-Valued Date/Time Components
             if ('YMDdFWwXxHhms'.indexOf(markerSpec.component) !== -1) {
                 if (markerSpec.component === 'Y') {
@@ -940,6 +946,17 @@ const dateTime = (function () {
                                 lookup[name] = index + 1;
                             }
                         });
+                    } else if (part.component === 'F') {
+                        // days
+                        days.forEach(function (name, index) {
+                            if (index > 0) {
+                                if (part.width && part.width.max) {
+                                    lookup[name.substring(0, part.width.max)] = index;
+                                } else {
+                                    lookup[name] = index;
+                                }
+                            }
+                        });
                     } else if (part.component === 'P') {
                         lookup = {'am': 0, 'AM': 0, 'pm': 1, 'PM': 1};
                     } else {
@@ -1044,43 +1061,160 @@ const dateTime = (function () {
         const matcher = new RegExp(fullRegex, 'i'); // TODO can cache this against the picture
         var info = matcher.exec(timestamp);
         if (info !== null) {
-            var components = {D: 1, m: 0, s: 0, f: 0};
-            for (var i = 1; i < info.length; i++) {
+            // validate what we've just parsed - do we have enough information to create a timestamp?
+            // rules:
+            // The date is specified by one of:
+            //    {Y, M, D}    (dateA)
+            // or {Y, d}       (dateB)
+            // or {Y, x, w, F} (dateC)
+            // or {X, W, F}    (dateD)
+            // The time is specified by one of:
+            //    {H, m, s, f}    (timeA)
+            // or {P, h, m, s, f} (timeB)
+            // All sets can have an optional Z
+            // To create a timestamp (epoch millis) we need both date and time, but we can default missing
+            // information according to the following rules:
+            // - line up one combination of the above from date, and one from time, most significant value (MSV) to least significant (LSV
+            // - for the values that have been captured, if there are any gaps between MSV and LSV, then throw an error
+            //     (e.g.) if hour and seconds, but not minutes is given - throw
+            //     (e.g.) if month, hour and minutes, but not day-of-month is given - throw
+            // - anything right of the LSV should be defaulted to zero
+            //     (e.g.) if hour and minutes given, default seconds and fractional seconds to zero
+            //     (e.g.) if date only given, default the time to 0:00:00.000 (midnight)
+            // - anything left of the MSV should be defaulted to the value of that component returned by $now()
+            //     (e.g.) if time only given, default the date to today
+            //     (e.g.) if month and date given, default to this year (and midnight, by previous rule)
+            //   -- default values for X, x, W, w, F will be derived from the values returned by $now()
+
+            // implement the above rules
+            // determine which of the above date/time combinations we have by using bit masks
+
+            //        Y X M x W w d D F P H h m s f Z
+            // dateA  1 0 1 0 0 0 0 1 ?                     0 - must not appear
+            // dateB  1 0 0 0 0 0 1 0 ?                     1 - can appear - relevant
+            // dateC  1 0 0 1 0 1 0 0 1                     ? - can appear - ignored
+            // dateD  0 1 0 0 1 0 0 0 1
+            // timeA                    0 1 0 1 1 1
+            // timeB                    1 0 1 1 1 1
+
+            // create bitmasks based on the above
+            //    date mask             YXMxWwdD
+            const dmA = 161;  // binary 10100001
+            const dmB = 130;  // binary 10000010
+            const dmC = 148;  // binary 10010100
+            const dmD = 72;   // binary 01001000
+            //    time mask             PHhmsf
+            const tmA = 23;   // binary 010111
+            const tmB = 47;   // binary 101111
+
+            const components = {};
+            for (let i = 1; i < info.length; i++) {
                 const mpart = matchSpec.parts[i - 1];
                 if (mpart.parse) {
                     components[mpart.component] = mpart.parse(info[i]);
                 }
             }
 
+            if(Object.getOwnPropertyNames(components).length === 0) {
+                // nothing specified
+                return undefined;
+            }
+
+            let mask = 0;
+
+            const shift = bit => {
+                mask <<= 1;
+                mask += bit ? 1 : 0;
+            };
+
+            const isType = type => {
+                // shouldn't match any 0's, must match at least one 1
+                return !(~type & mask) && !!(type & mask);
+            };
+
+            'YXMxWwdD'.split('').forEach(part => shift(components[part]));
+
+            const dateA = isType(dmA);
+            const dateB = !dateA && isType(dmB);
+            const dateC = !dateA && isType(dmC);
+            const dateD = isType(dmD);
+
+            mask = 0;
+            'PHhmsf'.split('').forEach(part => shift(components[part]));
+
+            const timeA = isType(tmA);
+            const timeB = !timeA && isType(tmB);
+
+            // should only be zero or one date type and zero or one time type
+
+            const dateComps = dateB ? 'YD' : dateC ? 'YxwF' : dateD? 'XWF' : 'YMD';
+            const timeComps = timeB ? 'Phmsf' : 'Hmsf';
+
+            const comps = dateComps + timeComps;
+
+            // step through the candidate parts from most significant to least significant
+            // default the most significant unspecified parts to current timestamp component
+            // default the least significant unspecified parts to zero
+            // if any gaps in between the specified parts, throw an error
+
+            const now = this.environment.timestamp; // must get the fixed timestamp from jsonata
+
+            let startSpecified = false;
+            let endSpecified = false;
+            comps.split('').forEach(part => {
+                if(typeof components[part] === 'undefined') {
+                    if(startSpecified) {
+                        // past the specified block - default to zero
+                        components[part] = ('MDd'.indexOf(part) !== -1) ? 1 : 0;
+                        endSpecified = true;
+                    } else {
+                        // haven't hit the specified block yet, default to current timestamp
+                        components[part] = getDateTimeFragment(now, part);
+                    }
+                } else {
+                    startSpecified = true;
+                    if(endSpecified) {
+                        throw {
+                            code: 'D3136'
+                        };
+                    }
+                }
+            });
+
             // validate and fill in components
-            if (typeof components.M !== 'undefined') {
+            if (components.M > 0) {
                 components.M -= 1;  // Date.UTC requires a zero-indexed month
             } else {
                 components.M = 0; // default to January
             }
-            if (typeof components.d !== 'undefined') {
-                // TODO should we throw errors if 'd' is found when 'M' & 'D' is also present?
+            if (dateB) {
                 // millis for given 1st Jan of that year (at 00:00 UTC)
                 const firstJan = Date.UTC(components.Y, 0);
-                const offsetMillis = components.d * 1000 * 60 * 60 * 24;
+                const offsetMillis = (components.d - 1) * 1000 * 60 * 60 * 24;
                 const derivedDate = new Date(firstJan + offsetMillis);
                 components.M = derivedDate.getMonth();
-                components.D = derivedDate.getDay();
+                components.D = derivedDate.getDate();
             }
-            if (typeof components.H === 'undefined') {
-                if (components.h !== 'undefined' && typeof components.P !== 'undefined') {
-                    // 12hr to 24hr
-                    components.H = components.h === 12 ? 0 : components.h;
-                    if (components.P === 1) {
-                        components.H += 12;
-                    }
-                } else {
-                    // TODO only apply default if the m, s & f are unspecified
-                    components.H = 0; // default to midnight
+            if (dateC) {
+                // TODO implement this
+                // parsing this format not currently supported
+                throw {
+                    code: 'D3136'
+                };
+            }
+            if (dateD) {
+                // TODO implement this
+                // parsing this format not currently supported
+                throw {
+                    code: 'D3136'
+                };
+            }
+            if (timeB) {
+                // 12hr to 24hr
+                components.H = components.h === 12 ? 0 : components.h;
+                if (components.P === 1) {
+                    components.H += 12;
                 }
-            }
-            if (typeof components.Y === 'undefined') {
-                return undefined;
             }
 
             var millis = Date.UTC(components.Y, components.M, components.D, components.H, components.m, components.s, components.f);

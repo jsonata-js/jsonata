@@ -4850,7 +4850,7 @@ var jsonata = (function() {
 
             return Date.parse(timestamp);
         } else {
-            return datetime.parseDateTime(timestamp, picture);
+            return datetime.parseDateTime.call(this, timestamp, picture);
         }
     }
 
@@ -4870,7 +4870,7 @@ var jsonata = (function() {
         if(typeof picture === 'undefined') {
             return new Date(millis).toISOString();
         } else {
-            return datetime.formatDateTime(millis, picture, timezone);
+            return datetime.formatDateTime.call(this, millis, picture, timezone);
         }
     }
 
@@ -4907,7 +4907,8 @@ var jsonata = (function() {
                     value = enclosingEnvironment.lookup(name);
                 }
                 return value;
-            }
+            },
+            timestamp: enclosingEnvironment ? enclosingEnvironment.timestamp : null
         };
     }
 
@@ -5066,7 +5067,8 @@ var jsonata = (function() {
         "D3132": "Unknown component specifier {{value}} in date/time picture string",
         "D3133": "The 'name' modifier can only be applied to months and days in the date/time picture string, not {{value}}",
         "D3134": "The timezone integer format specifier cannot have more than four digits",
-        "D3135": "No matching closing bracket ']' in date/time picture string"
+        "D3135": "No matching closing bracket ']' in date/time picture string",
+        "D3136": "The date/time picture string is missing specifiers required to parse the timestamp"
     };
 
     /**
@@ -5149,6 +5151,7 @@ var jsonata = (function() {
                 // capture the timestamp and put it in the execution environment
                 // the $now() and $millis() functions will return this value - whenever it is called
                 timestamp = new Date();
+                exec_env.timestamp = timestamp;
 
                 var result, it;
                 // if a callback function is supplied, then drive the generator in a promise chain
