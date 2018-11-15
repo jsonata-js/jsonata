@@ -1092,7 +1092,7 @@ const dateTime = (function () {
             //        Y X M x W w d D F P H h m s f Z
             // dateA  1 0 1 0 0 0 0 1 ?                     0 - must not appear
             // dateB  1 0 0 0 0 0 1 0 ?                     1 - can appear - relevant
-            // dateC  1 0 0 1 0 1 0 0 1                     ? - can appear - ignored
+            // dateC  0 1 0 1 0 1 0 0 1                     ? - can appear - ignored
             // dateD  0 1 0 0 1 0 0 0 1
             // timeA                    0 1 0 1 1 1
             // timeB                    1 0 1 1 1 1
@@ -1101,7 +1101,7 @@ const dateTime = (function () {
             //    date mask             YXMxWwdD
             const dmA = 161;  // binary 10100001
             const dmB = 130;  // binary 10000010
-            const dmC = 148;  // binary 10010100
+            const dmC = 84;   // binary 01010100
             const dmD = 72;   // binary 01001000
             //    time mask             PHhmsf
             const tmA = 23;   // binary 010111
@@ -1136,8 +1136,8 @@ const dateTime = (function () {
 
             const dateA = isType(dmA);
             const dateB = !dateA && isType(dmB);
-            const dateC = !dateA && isType(dmC);
-            const dateD = isType(dmD);
+            const dateC = isType(dmC);
+            const dateD = !dateC && isType(dmD);
 
             mask = 0;
             'PHhmsf'.split('').forEach(part => shift(components[part]));
@@ -1147,7 +1147,7 @@ const dateTime = (function () {
 
             // should only be zero or one date type and zero or one time type
 
-            const dateComps = dateB ? 'YD' : dateC ? 'YxwF' : dateD? 'XWF' : 'YMD';
+            const dateComps = dateB ? 'YD' : dateC ? 'XxwF' : dateD? 'XWF' : 'YMD';
             const timeComps = timeB ? 'Phmsf' : 'Hmsf';
 
             const comps = dateComps + timeComps;
@@ -1204,7 +1204,7 @@ const dateTime = (function () {
             }
             if (dateD) {
                 // TODO implement this
-                // parsing this format not currently supported
+                // parsing this format (ISO week date) not currently supported
                 throw {
                     code: 'D3136'
                 };
