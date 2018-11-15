@@ -315,7 +315,7 @@
         "function": "#toMillis",
         "category": "unsupported format",
         "description": "currently no support for year/month-of-year/week-of-month/day-of-week",
-        "expr": "$toMillis('2018-3-2-5', '[Y]-[x]-[w]-[F1]')",
+        "expr": "$toMillis('2018-3-2-5', '[X]-[x]-[w]-[F1]')",
         "data": {},
         "code": "D3136"
     },
