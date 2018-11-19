@@ -813,6 +813,8 @@ const dateTime = (function () {
         return componentValue;
     };
 
+    const iso8601Spec = analyseDateTimePicture('[Y0001]-[M01]-[D01]T[H01]:[m01]:[s01].[f001][Z01:01t]');
+
     /**
      * formats the date/time as specified by the XPath fn:format-dateTime function
      * @param {number} millis - the timestamp to be formatted, in millis since the epoch
@@ -823,6 +825,7 @@ const dateTime = (function () {
     function formatDateTime(millis, picture, timezone) {
         var offsetHours = 0;
         var offsetMinutes = 0;
+
         if (typeof timezone !== 'undefined') {
             // parse the hour and minute offsets
             // assume for now the format supplied is +hhmm
@@ -901,12 +904,18 @@ const dateTime = (function () {
             return componentValue;
         };
 
-        var formatSpec = analyseDateTimePicture(picture);
+        let formatSpec;
+        if(typeof picture === 'undefined') {
+            // default to ISO 8601 format
+            formatSpec = iso8601Spec;
+        } else {
+            formatSpec = analyseDateTimePicture(picture);
+        }
 
         const offsetMillis = (60 * offsetHours + offsetMinutes) * 60 * 1000;
-        var dateTime = new Date(millis + offsetMillis);
+        const dateTime = new Date(millis + offsetMillis);
 
-        var result = '';
+        let result = '';
         formatSpec.parts.forEach(function (part) {
             if (part.type === 'literal') {
                 result += part.value;

@@ -4859,11 +4859,7 @@ var jsonata = (function() {
             return undefined;
         }
 
-        if(typeof picture === 'undefined') {
-            return new Date(millis).toISOString();
-        } else {
-            return datetime.formatDateTime.call(this, millis, picture, timezone);
-        }
+        return datetime.formatDateTime.call(this, millis, picture, timezone);
     }
 
     /**
@@ -5109,7 +5105,7 @@ var jsonata = (function() {
 
         var timestamp = new Date(); // will be overridden on each call to evalute()
         environment.bind('now', defineFunction(function(picture, timezone) {
-            return typeof picture === 'undefined' ? timestamp.toJSON() : datetime.formatDateTime(timestamp.getTime(), picture, timezone);
+            return datetime.formatDateTime(timestamp.getTime(), picture, timezone);
         }, '<s?s?:s>'));
         environment.bind('millis', defineFunction(function() {
             return timestamp.getTime();

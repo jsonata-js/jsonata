@@ -529,6 +529,18 @@
     },
     {
         "function": "#fromMillis",
+        "category": "Default format",
+        "description": "Undefined picture string defaults to ISO 8601",
+        "expr": "$toMillis('2018-10-21T13:05:00Z').[$fromMillis(), $fromMillis($, (),'-0500'), $fromMillis($, (),'0000')] ",
+        "data": {},
+        "result": [
+            "2018-10-21T13:05:00.000Z",
+            "2018-10-21T08:05:00.000-05:00",
+            "2018-10-21T13:05:00.000Z"
+        ]
+    },
+    {
+        "function": "#fromMillis",
         "category": "error",
         "description": "throws error asking for year name",
         "expr": "$fromMillis(1419940800000, '[YN]-[M]-[D]')",
