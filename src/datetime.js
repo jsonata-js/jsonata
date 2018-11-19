@@ -1223,10 +1223,10 @@ const dateTime = (function () {
     }
 
     return {
-        formatInteger,
-        formatDateTime,
-        parseInteger,
-        parseDateTime
+        formatInteger: formatInteger,
+        formatDateTime: formatDateTime,
+        parseInteger: parseInteger,
+        parseDateTime: parseDateTime
     };
 })();
 
