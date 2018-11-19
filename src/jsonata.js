@@ -1486,14 +1486,6 @@ var jsonata = (function() {
         return result;
     }
 
-    // Polyfill
-    /* istanbul ignore next */
-    Number.isInteger = Number.isInteger || function(value) {
-        return typeof value === "number" &&
-          isFinite(value) &&
-          Math.floor(value) === value;
-    };
-
     /**
      * Evaluate expression against input data
      * @param {Object} expr - JSONata expression
