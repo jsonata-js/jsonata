@@ -4096,6 +4096,12 @@ var jsonata = (function() {
             result = arg;
         } else if(typeof arg === 'string' && /^-?(0|([1-9][0-9]*))(\.[0-9]+)?([Ee][-+]?[0-9]+)?$/.test(arg) && !isNaN(parseFloat(arg)) && isFinite(arg)) {
             result = parseFloat(arg);
+        } else if (arg === true) {
+            // boolean true casts to 1
+            result = 1;
+        } else if (arg === false) {
+            // boolean false casts to 0
+            result = 0;
         } else {
             throw {
                 code: "D3030",
@@ -4924,7 +4930,7 @@ var jsonata = (function() {
     staticFrame.bind('formatBase', defineFunction(functionFormatBase, '<n-n?:s>'));
     staticFrame.bind('formatInteger', defineFunction(datetime.formatInteger, '<n-s:s>'));
     staticFrame.bind('parseInteger', defineFunction(datetime.parseInteger, '<s-s:n>'));
-    staticFrame.bind('number', defineFunction(functionNumber, '<(ns)-:n>'));
+    staticFrame.bind('number', defineFunction(functionNumber, '<(nsb)-:n>'));
     staticFrame.bind('floor', defineFunction(functionFloor, '<n-:n>'));
     staticFrame.bind('ceil', defineFunction(functionCeil, '<n-:n>'));
     staticFrame.bind('round', defineFunction(functionRound, '<n-n?:n>'));

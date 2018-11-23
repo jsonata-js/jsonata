@@ -2,5 +2,5 @@
     "expr": "$number(true)",
     "dataset": null,
     "bindings": {},
-    "code": "T0410"
+    "result": 1
 }
