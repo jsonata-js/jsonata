@@ -19,7 +19,7 @@
     "check-coverage": "istanbul check-coverage -statement 100 -branch 100 -function 100 -line 100",
     "browserify": "browserify src/jsonata.js --outfile jsonata.js --standalone jsonata",
     "mkdir-dist": "mkdirp ./dist",
-    "regenerator": "regenerator --include-runtime src dist",
+    "regenerator": "regenerator src dist; regenerator --include-runtime src/jsonata.js > dist/jsonata.js",
     "browserify-es5": "cat polyfill.js > jsonata-es5.js; browserify dist/jsonata.js --standalone jsonata >> jsonata-es5.js",
     "lint": "eslint src",
     "doc": "jsdoc --configure jsdoc.json .",

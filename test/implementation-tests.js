@@ -506,6 +506,60 @@ describe("Tests that bind Javascript functions", () => {
         });
 
     });
+
+    describe('User defined higher-order functions', () => {
+        var myfunc = function*(arr, fn) {
+            const val = yield * fn(arr);
+            return 2 * val;
+        };
+
+        var startsWith = function(str) {
+            // returns a function that returns true if its argument starts with the string `str`
+            return (arg) => {
+                return arg.startsWith(str);
+            };
+        };
+
+        it('should be able to invoke a built-in function passed as an argument', () => {
+            var expr = jsonata("$myfunc([1,2,3], $sum)");
+            expr.registerFunction('myfunc', myfunc);
+            var result = expr.evaluate();
+            var expected = 12;
+            expect(result).to.deep.equal(expected);
+        });
+
+        it('should be able to invoke a lambda function passed as an argument', () => {
+            var expr = jsonata("$myfunc([1,2,3], λ($arr) { $arr[1] + $arr[2] })");
+            expr.registerFunction('myfunc', myfunc);
+            var result = expr.evaluate();
+            var expected = 10;
+            expect(result).to.deep.equal(expected);
+        });
+
+        it('should be able to invoke a user-defined function passed as an argument', () => {
+            var expr = jsonata("$myfunc([1,2,3], $myfunc2)");
+            expr.registerFunction('myfunc', myfunc);
+            expr.registerFunction('myfunc2', (arr) => {
+                return 2 * arr[1];
+            });
+            var result = expr.evaluate();
+            var expected = 8;
+            expect(result).to.deep.equal(expected);
+        });
+
+        it('should be able to return a function from a user-defined function', () => {
+            var expr = jsonata(`
+            (
+              $startsWithHello := $startsWith("Hello");
+              [$startsWithHello("Hello, Bob"), $startsWithHello("Goodbye, Bill")]
+            )`);
+            expr.registerFunction('startsWith', startsWith);
+            var result = expr.evaluate();
+            var expected = [true, false];
+            expect(result).to.deep.equal(expected);
+        })
+
+    });
 });
 
 describe("Tests that are specific to a Javascript runtime", () => {
