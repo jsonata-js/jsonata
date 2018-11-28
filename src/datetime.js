@@ -1231,17 +1231,56 @@ const dateTime = (function () {
         }
     }
 
+    // Regular expression to match an ISO 8601 formatted timestamp
+    var iso8601regex = new RegExp('^\\d{4}(-[01]\\d)*(-[0-3]\\d)*(T[0-2]\\d:[0-5]\\d:[0-5]\\d)*(\\.\\d+)?([+-][0-2]\\d:?[0-5]\\d|Z)?$');
+
+    /**
+     * Converts an ISO 8601 timestamp to milliseconds since the epoch
+     *
+     * @param {string} timestamp - the timestamp to be converted
+     * @param {string} [picture] - the picture string defining the format of the timestamp (defaults to ISO 8601)
+     * @returns {Number} - milliseconds since the epoch
+     */
+    function toMillis(timestamp, picture) {
+        // undefined inputs always return undefined
+        if(typeof timestamp === 'undefined') {
+            return undefined;
+        }
+
+        if(typeof picture === 'undefined') {
+            if (!iso8601regex.test(timestamp)) {
+                throw {
+                    stack: (new Error()).stack,
+                    code: "D3110",
+                    value: timestamp
+                };
+            }
+
+            return Date.parse(timestamp);
+        } else {
+            return parseDateTime.call(this, timestamp, picture);
+        }
+    }
+
+    /**
+     * Converts milliseconds since the epoch to an ISO 8601 timestamp
+     * @param {Number} millis - milliseconds since the epoch to be converted
+     * @param {string} [picture] - the picture string defining the format of the timestamp (defaults to ISO 8601)
+     * @param {string} [timezone] - the timezone to format the timestamp in (defaults to UTC)
+     * @returns {String} - the formatted timestamp
+     */
+    function fromMillis(millis, picture, timezone) {
+        // undefined inputs always return undefined
+        if(typeof millis === 'undefined') {
+            return undefined;
+        }
+
+        return formatDateTime.call(this, millis, picture, timezone);
+    }
+
     return {
-        formatInteger: formatInteger,
-        formatDateTime: formatDateTime,
-        parseInteger: parseInteger,
-        parseDateTime: parseDateTime
+        formatInteger, parseInteger, fromMillis, toMillis
     };
 })();
 
-module.exports = {
-    formatInteger: dateTime.formatInteger,
-    formatDateTime: dateTime.formatDateTime,
-    parseInteger: dateTime.parseInteger,
-    parseDateTime: dateTime.parseDateTime
-};
+module.exports = dateTime;
