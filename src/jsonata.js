@@ -332,6 +332,8 @@ var jsonata = (function() {
                     break;
                 case '=':
                 case '!=':
+                    result = evaluateEqualityExpression(lhs, rhs, op);
+                    break
                 case '<':
                 case '<=':
                 case '>':
@@ -535,24 +537,24 @@ var jsonata = (function() {
     function evaluateNumericExpression(lhs, rhs, op) {
         var result;
 
-        if (typeof lhs === 'undefined' || typeof rhs === 'undefined') {
-            // if either side is undefined, the result is undefined
-            return result;
-        }
-
-        if (!isNumeric(lhs)) {
+        if (typeof lhs !== 'undefined' && !isNumeric(lhs)) {
             throw {
                 code: "T2001",
                 stack: (new Error()).stack,
                 value: lhs
             };
         }
-        if (!isNumeric(rhs)) {
+        if (typeof rhs !== 'undefined' && !isNumeric(rhs)) {
             throw {
                 code: "T2002",
                 stack: (new Error()).stack,
                 value: rhs
             };
+        }
+
+        if (typeof lhs === 'undefined' || typeof rhs === 'undefined') {
+            // if either side is undefined, the result is undefined
+            return result;
         }
 
         switch (op) {
@@ -576,6 +578,36 @@ var jsonata = (function() {
     }
 
     /**
+     * Evaluate equality expression against input data
+     * @param {Object} lhs - LHS value
+     * @param {Object} rhs - RHS value
+     * @param {Object} op - opcode
+     * @returns {*} Result
+     */
+    function evaluateEqualityExpression(lhs, rhs, op) {
+        var result;
+
+        // type checks
+        var ltype = typeof lhs;
+        var rtype = typeof rhs;
+
+        if (ltype === 'undefined' || rtype === 'undefined') {
+            // if either side is undefined, the result is false
+            return false;
+        }
+
+        switch (op) {
+            case '=':
+                result = lhs === rhs;
+                break;
+            case '!=':
+                result = (lhs !== rhs);
+                break;
+        }
+        return result;
+    }
+
+    /**
      * Evaluate comparison expression against input data
      * @param {Object} lhs - LHS value
      * @param {Object} rhs - RHS value
@@ -589,53 +621,44 @@ var jsonata = (function() {
         var ltype = typeof lhs;
         var rtype = typeof rhs;
 
-        if (ltype === 'undefined' || rtype === 'undefined') {
-            // if either side is undefined, the result is false
-            return false;
+        var lcomparable = (ltype === 'undefined' || ltype === 'string' || ltype === 'number');
+        var rcomparable = (rtype === 'undefined' || rtype === 'string' || rtype === 'number');
+
+        // if either aa or bb are not comparable (string or numeric) values, then throw an error
+        if (!lcomparable || !rcomparable) {
+            throw {
+                code: "T2010",
+                stack: (new Error()).stack,
+                value: !(ltype === 'string' || ltype === 'number') ? lhs : rhs
+            };
         }
 
-        var validate = function() {
-            // if aa or bb are not string or numeric values, then throw an error
-            if (!(ltype === 'string' || ltype === 'number') || !(rtype === 'string' || rtype === 'number')) {
-                throw {
-                    code: "T2010",
-                    stack: (new Error()).stack,
-                    value: !(ltype === 'string' || ltype === 'number') ? lhs : rhs
-                };
-            }
+        // if either side is undefined, the result is undefined
+        if (ltype === 'undefined' || rtype === 'undefined') {
+            return undefined;
+        }
 
-            //if aa and bb are not of the same type
-            if (ltype !== rtype) {
-                throw {
-                    code: "T2009",
-                    stack: (new Error()).stack,
-                    value: lhs,
-                    value2: rhs
-                };
-            }
-        };
+        //if aa and bb are not of the same type
+        if (ltype !== rtype) {
+            throw {
+                code: "T2009",
+                stack: (new Error()).stack,
+                value: lhs,
+                value2: rhs
+            };
+        }
 
         switch (op) {
-            case '=':
-                result = lhs === rhs;
-                break;
-            case '!=':
-                result = (lhs !== rhs);
-                break;
             case '<':
-                validate();
                 result = lhs < rhs;
                 break;
             case '<=':
-                validate();
                 result = lhs <= rhs;
                 break;
             case '>':
-                validate();
                 result = lhs > rhs;
                 break;
             case '>=':
-                validate();
                 result = lhs >= rhs;
                 break;
         }
@@ -797,6 +820,21 @@ var jsonata = (function() {
     function evaluateRangeExpression(lhs, rhs) {
         var result;
 
+        if (typeof lhs !== 'undefined' && !Number.isInteger(lhs)) {
+            throw {
+                code: "T2003",
+                stack: (new Error()).stack,
+                value: lhs
+            };
+        }
+        if (typeof rhs !== 'undefined' && !Number.isInteger(rhs)) {
+            throw {
+                code: "T2004",
+                stack: (new Error()).stack,
+                value: rhs
+            };
+        }
+
         if (typeof lhs === 'undefined' || typeof rhs === 'undefined') {
             // if either side is undefined, the result is undefined
             return result;
@@ -805,21 +843,6 @@ var jsonata = (function() {
         if (lhs > rhs) {
             // if the lhs is greater than the rhs, return undefined
             return result;
-        }
-
-        if (!Number.isInteger(lhs)) {
-            throw {
-                code: "T2003",
-                stack: (new Error()).stack,
-                value: lhs
-            };
-        }
-        if (!Number.isInteger(rhs)) {
-            throw {
-                code: "T2004",
-                stack: (new Error()).stack,
-                value: rhs
-            };
         }
 
         result = new Array(rhs - lhs + 1);
