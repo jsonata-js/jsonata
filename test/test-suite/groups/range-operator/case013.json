@@ -1,0 +1,6 @@
+{
+    "expr": "['dogs'..'cats']",
+    "dataset": null,
+    "bindings": {},
+    "code": "T2003"
+}

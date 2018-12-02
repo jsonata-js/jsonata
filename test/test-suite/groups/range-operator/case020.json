@@ -1,0 +1,6 @@
+{
+    "expr": "[false..$x]",
+    "dataset": null,
+    "bindings": {},
+    "code": "T2003"
+}
