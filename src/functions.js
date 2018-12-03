@@ -1478,20 +1478,13 @@ const functions = (() => {
             var merge = {};
             arg.forEach(function (item) {
                 var allkeys = keys(item);
-                if (Array.isArray(allkeys)) {
-                    allkeys.forEach(function (key) {
-                        merge[key] = true;
-                    });
-                }
+                allkeys.forEach(function (key) {
+                    merge[key] = true;
+                });
             });
             result = keys(merge);
         } else if (arg !== null && typeof arg === 'object' && !(isLambda(arg))) {
-            result = Object.keys(arg);
-            if (result.length === 0) {
-                result = undefined;
-            }
-        } else {
-            result = undefined;
+            Object.keys(arg).forEach(key => result.push(key));
         }
         return result;
     }

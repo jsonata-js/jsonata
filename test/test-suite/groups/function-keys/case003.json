@@ -2,7 +2,5 @@
     "expr": "$keys({\"foo\":{}})",
     "dataset": null,
     "bindings": {},
-    "result": [
-        "foo"
-    ]
+    "result": "foo"
 }
