@@ -1,0 +1,5 @@
+{
+    "expr": "$x <= 'hello'",
+    "data": {},
+    "undefinedResult": true
+}
