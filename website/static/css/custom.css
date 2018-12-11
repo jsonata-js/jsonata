@@ -1,0 +1,62 @@
+/* your custom css */
+
+@media only screen and (min-device-width: 360px) and (max-device-width: 736px) {
+}
+
+@media only screen and (min-width: 1024px) {
+}
+
+@media only screen and (max-width: 1023px) {
+}
+
+@media only screen and (min-width: 1400px) {
+}
+
+@media only screen and (min-width: 1500px) {
+}
+
+.fixedHeaderContainer header .headerTitleWithLogo {
+    display: block;
+    font-size: 1.4em;
+    font-weight: normal;
+    line-height: 18px;
+    margin: 0;
+    position: relative;
+    z-index: 9999;
+}
+
+.jsonata-example pre {
+    margin-bottom: 0;
+}
+
+.jsonata-example td:nth-child(1) {
+    width: 100px;
+}
+
+.jsonata-example td:nth-child(2) {
+    width: 100%;
+}
+
+.jsonata-example code {
+    background-color: unset;
+}
+
+.jsonata-ex {
+    display: none;
+}
+
+a {
+    /*color: rgb(200, 0, 80);*/
+    color: #6ca158;
+    text-decoration: none;
+}
+  
+.toc .toggleNav ul li.navListItem a:hover,
+.toc .toggleNav ul li.navListItemActive a {
+    /*color: rgb(200, 0, 80);*/
+    color: #6ca158;
+}
+
+footer section div p {
+    color: white;
+}
