@@ -113,23 +113,34 @@ where
 The `~>` operator is the operator for function chaining and passes the value on the left hand side to the function on the right hand side as its first argument. The expression on the right hand side must evaluate to a function, hence the `|...|...|` syntax generates a function with one argument.
 
 Example:
-`| Account.Order.Product | {'Price': Price * 1.2} |` defines a transform that will return a deep copy the object passed to it, but with the `Product` object modified such that its `Price` property has had its value increased by 20%. The first part of the expression is the path location that specifies all of the objects within the overall object to change, and the second part defines an object that will get merged into the object(s) matched by the first part. The merging semantics is the same as that of the `$merge()` function.
+
+`| Account.Order.Product | {'Price': Price * 1.2} |` 
+
+defines a transform that will return a deep copy the object passed to it, but with the `Product` object modified such that its `Price` property has had its value increased by 20%. The first part of the expression is the path location that specifies all of the objects within the overall object to change, and the second part defines an object that will get merged into the object(s) matched by the first part. The merging semantics is the same as that of the `$merge()` function.
 
 This transform definition syntax creates a JSONata function which you can either assign to a variable and use multiple times, or invoke inline.
 Example:   
+
 `payload ~> |Account.Order.Product|{'Price': Price * 1.2}|`   
+
 or:   
+
 `$increasePrice := |Account.Order.Product|{'Price': Price * 1.2}|`   
+
 This also has the benefit that multiple transforms can be chained together for more complex transformations.
 
 In common with `$merge()`, multiple changes (inserts or updates) can be made to an object.
 Example:   
+
 `|Account.Order.Product|{'Price': Price * 1.2, 'Total': Price * Quantity}|`   
+
 Note that the Total will be calculated using the original price, not the modified one (JSONata is declarative not imperative).
 
 Properties can also be removed from objects.  This is done using the optional `delete` clause which specifies the name(s) of the properties to delete.
 Example:   
+
 `$ ~> |Account.Order.Product|{'Total': Price * Quantity}, ['Price', 'Quantity']|`   
+
 This copies the input, but for each `Product` it inserts a Total and removes the `Price` and `Quantity` properties.
 
 ## `&` (Concatenation)
@@ -158,5 +169,5 @@ The variable binding operator is used to bind the value of the RHS to the variab
 
 __Examples__
 
-`$five := 5`   
-`$square := function($n) { $n * $n }`
+- `$five := 5`   
+- `$square := function($n) { $n * $n }`

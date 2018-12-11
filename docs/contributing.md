@@ -1,6 +1,6 @@
 ---
 id: contributing
-title: The JSONata Ecosystem
+title: Contributing to JSONata
 sidebar_label: Community and Contributing
 ---
 

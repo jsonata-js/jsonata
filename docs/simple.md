@@ -181,7 +181,7 @@ If no index is specified for an array (i.e. no square brackets after the field r
 
 ## Sequence flattening
 
-## Singleton sequences
+## Empty sequences and singleton sequences
 
 ### Top level arrays, nested arrays and array flattening
 

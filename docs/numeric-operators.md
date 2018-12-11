@@ -55,7 +55,7 @@ The sequence generation operator is used to create an array of monotonically inc
 
 __Examples__
 
-`[1..5]` => `[1, 2, 3, 4, 5]`
-`[1..3, 7..9]` => `[1, 2, 3, 7, 8, 9]`
-`[1..$count(Items)].("Item " & $)` => `["Item 1","Item 2","Item 3"]`
-`[1..5].($*$)` => `[1, 4, 9, 16, 25]`
+- `[1..5]` => `[1, 2, 3, 4, 5]`
+- `[1..3, 7..9]` => `[1, 2, 3, 7, 8, 9]`
+- `[1..$count(Items)].("Item " & $)` => `["Item 1","Item 2","Item 3"]`
+- `[1..5].($*$)` => `[1, 4, 9, 16, 25]`
