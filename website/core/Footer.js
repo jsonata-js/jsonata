@@ -37,9 +37,6 @@ class Footer extends React.Component {
           </div>
           <div>
             <h5>Community</h5>
-            <a href={this.pageUrl('users.html', this.props.language)}>
-              User Showcase
-            </a>
             <a
               href="https://stackoverflow.com/questions/tagged/jsonata"
               target="_blank"
@@ -56,7 +53,6 @@ class Footer extends React.Component {
           </div>
           <div>
             <h5>More</h5>
-            <a href={`${this.props.config.baseUrl}blog`}>Blog</a>
             <a href="https://github.com/jsonata-js/jsonata">GitHub</a>
             <a
               className="github-button"
