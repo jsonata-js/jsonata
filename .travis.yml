@@ -7,10 +7,16 @@ node_js:
 after_success:
 - npm run coveralls
 deploy:
-  provider: npm
-  skip_cleanup: true
-  email: andrew_coleman@uk.ibm.com
-  api_key:
-    secure: UTQx4ZBj5XhErrrRhVjDbANvagiKRTsaavT99025D2msX0nWa/J+GuXVhFMYb2Qd040C1ygT1ndTYITXOMNZFHtGUEXUH/cfDX0CGJjEWgwSxQX6KokOaABwSXZOmGqy1AJ2KwjlEsGU9IHc2dvYhBB6/zC6ImCFzsf5GKUECMu9g9obKUkmXdkZ+F7VYkgiOTn+nG6uwhp5Kser3WPUhoc6HqCZQO0h3fq4JtLHvlM7CqCCb2BTTaxXKXxsR9LMEDNPCztFGq0HrqadtHLip96Y4aS4w0Ml+EHL33LUyQyPq7okMurE7FbNMgsOK8sUTL6hsNShao+76TEFAL7SmnL5+5ViCNJb6llSDVZzRF+xYyJdis7sLMbyVmZ7XzqtkBUHfwlrvPHoOtGhQe2tCbfMHDWd5wiMM3CoRhi0n2wz5jKcqS0ZuzfxYRZ83SSEB95jM/0Q6tv6p1RIB8vDxf7/vdKXR95R3+ZnaaONxty3v9P83ZMjYXg08fY5HlC8x8IIO2sHuj+padhxShsDVchbjSQ5xDUZcTp0kVCcJ9b0fGWM/ESBcsOfuEHz4DK0/RPv9B6ZRGbZTtG6HHa+6ufqrCCsdJv8acKdgm12XsqtZQWvSyjTclu2QSi6IUXfD4lbwMJmjPx5R2YK7MRZ//3kcGyHnwl1O9levmrpP0I=
-  on:
-    repo: jsonata-js/jsonata
+  - provider: npm
+    skip_cleanup: true
+    email: andrew_coleman@uk.ibm.com
+    api_key:
+      secure: UTQx4ZBj5XhErrrRhVjDbANvagiKRTsaavT99025D2msX0nWa/J+GuXVhFMYb2Qd040C1ygT1ndTYITXOMNZFHtGUEXUH/cfDX0CGJjEWgwSxQX6KokOaABwSXZOmGqy1AJ2KwjlEsGU9IHc2dvYhBB6/zC6ImCFzsf5GKUECMu9g9obKUkmXdkZ+F7VYkgiOTn+nG6uwhp5Kser3WPUhoc6HqCZQO0h3fq4JtLHvlM7CqCCb2BTTaxXKXxsR9LMEDNPCztFGq0HrqadtHLip96Y4aS4w0Ml+EHL33LUyQyPq7okMurE7FbNMgsOK8sUTL6hsNShao+76TEFAL7SmnL5+5ViCNJb6llSDVZzRF+xYyJdis7sLMbyVmZ7XzqtkBUHfwlrvPHoOtGhQe2tCbfMHDWd5wiMM3CoRhi0n2wz5jKcqS0ZuzfxYRZ83SSEB95jM/0Q6tv6p1RIB8vDxf7/vdKXR95R3+ZnaaONxty3v9P83ZMjYXg08fY5HlC8x8IIO2sHuj+padhxShsDVchbjSQ5xDUZcTp0kVCcJ9b0fGWM/ESBcsOfuEHz4DK0/RPv9B6ZRGbZTtG6HHa+6ufqrCCsdJv8acKdgm12XsqtZQWvSyjTclu2QSi6IUXfD4lbwMJmjPx5R2YK7MRZ//3kcGyHnwl1O9levmrpP0I=
+    on:
+      repo: jsonata-js/jsonata
+  - provider: script
+    script:
+      - git config --global user.name "${GH_NAME}"
+      - git config --global user.email "${GH_EMAIL}"
+      - echo "machine github.com login ${GH_NAME} password ${GH_TOKEN}" > ~/.netrc
+      - cd website && npm install && GIT_USER="${GH_NAME}" npm run publish-gh-pages
