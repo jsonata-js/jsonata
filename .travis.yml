@@ -17,7 +17,7 @@ jobs:
         - echo "machine github.com login ${GH_NAME} password ${GH_TOKEN}" > ~/.netrc
         - cd website && npm install && GIT_USER="${GH_NAME}" npm run publish-gh-pages
       on:
-        repo: andrew-coleman/jsonata
+        repo: jsonata-js/jsonata
     - stage: npm release
       node_js: "10"
       script: echo "Deploying to npm..."
