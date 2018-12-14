@@ -8,23 +8,10 @@
 // See https://docusaurus.io/docs/site-config for all the possible
 // site configuration options.
 
-// List of projects/orgs using your project for the users page.
-const users = [
-  // {
-  //   caption: 'User1',
-  //   // You will need to prepend the image path with your baseUrl
-  //   // if it is not '/', like: '/test-site/img/docusaurus.svg'.
-  //   image: '/img/docusaurus.svg',
-  //   infoLink: 'http://jsonata.org',
-  //   pinned: true,
-  // },
-];
-
 const siteConfig = {
   title: 'JSONata', // Title for your website.
   tagline: 'JSON query and transformation language',
-  //  url: 'https:jsonata-js.github.io/', // Your website URL
-    url: 'https://andrew-coleman.github.io',
+  url: 'https:jsonata-js.github.io/', // Your website URL
   baseUrl: '/', // Base URL for your project */
   // For github.io type URLs, you would set the url and baseUrl like:
   //   url: 'https://facebook.github.io',
@@ -33,9 +20,8 @@ const siteConfig = {
   docsUrl: '',
 
   // Used for publishing and more
-  projectName: 'andrew-coleman.github.io',
-  //organizationName: 'jsonata-js',
-    organizationName: 'andrew-coleman',
+  projectName: 'jsonata-js.github.io',
+  organizationName: 'jsonata-js',
     // For top-level user or org sites, the organization is still the same.
   // e.g., for the https://JoelMarcey.github.io site, it would be set like...
   //   organizationName: 'JoelMarcey'
@@ -47,9 +33,6 @@ const siteConfig = {
     { href: "https://github.com/jsonata-js/jsonata", label: "GitHub" },
     { href: "https://www.npmjs.com/package/jsonata", label: "NPM" },
   ],
-
-  // If you have users set above, you add it here:
-  users,
 
   /* path to images for header/footer */
   headerIcon: 'img/jsonata-button.png',
@@ -96,11 +79,10 @@ const siteConfig = {
   cleanUrl: true,
 
   // Open Graph and Twitter card images.
-  ogImage: 'img/docusaurus.png',
-  twitterImage: 'img/docusaurus.png',
+  //ogImage: 'img/docusaurus.png',
+  //twitterImage: 'img/docusaurus.png',
 
-  //editUrl: 'https://github.com/jsonata-js/jsonata/edit/master/docs/docs/'
-    editUrl: 'https://github.com/andrew-coleman/jsonata-docs/edit/master/docs/'
+  editUrl: 'https://github.com/jsonata-js/jsonata/edit/master/docs/'
 
   // Show documentation's last contributor's name.
   // enableUpdateBy: true,
