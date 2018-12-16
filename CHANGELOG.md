@@ -1,3 +1,20 @@
+#### 1.6.0 Milestone Release
+
+- New date/time formatting and parsing capability (issue #166)
+- Support for comments in expressions (issue #75)
+- Higher-order extension functions (issue #259)
+- Allow Boolean to be cast to a number (issue #257)
+- New functions
+  - $eval - parse/evaluate the contexts of a JSON/JSONata string (issue #134)
+  - $formatInteger - format an integer to a string using picture string definition
+  - $parseInteger - parse an integer from a string using picture string definition
+- Non-functional enhancements:
+  - Split codebase into multiple files; fixed multiple issues with ES5 generated library
+  - Multiple conformance tests in a single file
+  - Documentation moved to main jsonata repo; generated using docusaurus.io
+  - Minimum node.js runtime v6 (dropped support for v4)
+- Numerous bug fixes (#236, #179, #261, #236, #245, #246, #233, #250, #247, #242, #249)
+
 #### 1.5.4 Maintenance Release
 
 - Fully test and fix bugs in async mode (PR #219)
@@ -122,7 +139,7 @@
 - The following (previously undocumented) functions have been modified to align them with other functions
     - $map - apply a function to all values in an array
     - $reduce - apply a function to aggregate (fold) all values in an array
-   
+
 
 
 #### 1.1.1 Maintenance Release
@@ -151,4 +168,4 @@
     - to support runtime validation of function arguments
 - Errors now have error codes
     - messages maintained in separate catalog
-    
+
