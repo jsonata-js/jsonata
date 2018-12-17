@@ -1,4 +1,4 @@
-#### 1.6.0 Milestone Release
+#### 1.6.1 Milestone Release (v1.6.0 was not published)
 
 - New date/time formatting and parsing capability (issue #166)
 - Support for comments in expressions (issue #75)
