@@ -26,6 +26,8 @@ const siteConfig = {
   // e.g., for the https://JoelMarcey.github.io site, it would be set like...
   //   organizationName: 'JoelMarcey'
 
+  cname: 'docs.jsonata.org', // adds the CNAME file to the generated docs repo
+
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
     {doc: 'overview', label: 'Docs'},

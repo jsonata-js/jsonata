@@ -21,6 +21,7 @@
     "mkdir-dist": "mkdirp ./dist",
     "regenerator": "regenerator src dist; regenerator --include-runtime src/jsonata.js > dist/jsonata.js",
     "browserify-es5": "cat polyfill.js > jsonata-es5.js; browserify dist/jsonata.js --standalone jsonata >> jsonata-es5.js",
+    "prepublishOnly": "npm run browserify && npm run minify && npm run build-es5",
     "lint": "eslint src",
     "doc": "jsdoc --configure jsdoc.json .",
     "cover": "istanbul cover _mocha",
