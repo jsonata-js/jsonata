@@ -150,6 +150,11 @@ const utils = (() => {
         return arg && arg._jsonata_lambda === true;
     }
 
+    // istanbul ignore next
+    var $Symbol = typeof Symbol === "function" ? Symbol : {};
+    // istanbul ignore next
+    var iteratorSymbol = $Symbol.iterator || "@@iterator";
+
     /**
      * @param {Object} arg - expression to test
      * @returns {boolean} - true if it is iterable
@@ -158,7 +163,7 @@ const utils = (() => {
         return (
             typeof arg === 'object' &&
             arg !== null &&
-            Symbol.iterator in arg &&
+            iteratorSymbol in arg &&
             'next' in arg &&
             typeof arg.next === 'function'
         );
