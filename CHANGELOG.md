@@ -1,3 +1,8 @@
+
+#### 1.6.2 Maintenance Release
+
+- Fix insertion of regenerator runtime at top of ES5 file (PR #284)
+
 #### 1.6.1 Milestone Release (v1.6.0 was not published)
 
 - New date/time formatting and parsing capability (issue #166)
