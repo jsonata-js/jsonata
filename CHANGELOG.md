@@ -1,3 +1,7 @@
+#### 1.6.3 Maintenance Release
+
+- Fix es5 build and polyfills to enable test suite to (mostly) run in Nashorn (PR #288)
+- Extra polyfill required for running jsonata-es5.js in IE 11 (PR #289)
 
 #### 1.6.2 Maintenance Release
 
