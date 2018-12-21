@@ -13,8 +13,6 @@ const functions = (() => {
     var isArrayOfStrings = utils.isArrayOfStrings;
     var isArrayOfNumbers = utils.isArrayOfNumbers;
     var createSequence = utils.createSequence;
-    // var isSequence = utils.isSequence;
-    // var toSequence = utils.toSequence;
     var isFunction = utils.isFunction;
     var isLambda = utils.isLambda;
     var isIterable = utils.isIterable;
