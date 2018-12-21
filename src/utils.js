@@ -59,7 +59,8 @@ const utils = (() => {
      * @returns {Array} - empty sequence
      */
     function createSequence() {
-        var sequence = toSequence([]);
+        var sequence = [];
+        sequence.sequence = true;
         if (arguments.length === 1) {
             sequence.push(arguments[0]);
         }
@@ -72,52 +73,7 @@ const utils = (() => {
      * @returns {boolean} true if it's a sequence
      */
     function isSequence(value) {
-        var sequence = value.sequence;
-        if(sequence === true) {
-            var desc = Object.getOwnPropertyDescriptor(value, 'sequence');
-            if(desc.enumerable === false) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Converts an array to a result sequence (by adding special properties)
-     * @param {Array} arr - the array to convert
-     * @returns {*} - the sequence
-     */
-    function toSequence(arr) {
-        Object.defineProperty(arr, 'sequence', {
-            enumerable: false,
-            configurable: false,
-            get: function () {
-                return true;
-            }
-        });
-        Object.defineProperty(arr, 'keepSingleton', {
-            enumerable: false,
-            configurable: false,
-            writable: true,
-            value: false
-        });
-        Object.defineProperty(arr, 'value', {
-            enumerable: false,
-            configurable: false,
-            get: function () {
-                return function() {
-                    switch (this.length) {
-                        case 0:
-                            return undefined;
-                        case 1:
-                            return this.keepSingleton ? this : this[0];
-                        default:
-                            return this;
-                    }
-                };
-            }
-        });
-        return arr;
+        return value.sequence === true && Array.isArray(value);
     }
 
     /**
@@ -175,7 +131,6 @@ const utils = (() => {
         isArrayOfNumbers,
         createSequence,
         isSequence,
-        toSequence,
         isFunction,
         isLambda,
         isIterable,

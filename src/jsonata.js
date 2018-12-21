@@ -29,7 +29,6 @@ var jsonata = (function() {
     var isArrayOfNumbers = utils.isArrayOfNumbers;
     var createSequence = utils.createSequence;
     var isSequence = utils.isSequence;
-    var toSequence = utils.toSequence;
     var isFunction = utils.isFunction;
     var isLambda = utils.isLambda;
     var isIterable = utils.isIterable;
@@ -113,11 +112,11 @@ var jsonata = (function() {
                 break;
         }
 
-        if(environment.lookup('__jsonata_async') &&
+        if(environment.async &&
           (typeof result === 'undefined' || result === null || typeof result.then !== 'function')) {
             result = Promise.resolve(result);
         }
-        if(environment.lookup('__jsonata_async') && typeof result.then === 'function' && expr.nextFunction && typeof result[expr.nextFunction] === 'function') {
+        if(environment.async && typeof result.then === 'function' && expr.nextFunction && typeof result[expr.nextFunction] === 'function') {
             // although this is a 'thenable', it is chaining a different function
             // so don't yield since yielding will trigger the .then()
         } else {
@@ -142,7 +141,12 @@ var jsonata = (function() {
             if(expr.keepArray) {
                 result.keepSingleton = true;
             }
-            result = result.value();
+            if(result.length === 0) {
+                result = undefined;
+            } else if(result.length === 1) {
+                result =  result.keepSingleton ? result : result[0];
+            }
+
         }
 
         return result;
@@ -849,7 +853,8 @@ var jsonata = (function() {
         for (var item = lhs, index = 0; item <= rhs; item++, index++) {
             result[index] = item;
         }
-        return toSequence(result);
+        result.sequence = true;
+        return result;
     }
 
     /**
@@ -1606,7 +1611,8 @@ var jsonata = (function() {
                 }
                 return value;
             },
-            timestamp: enclosingEnvironment ? enclosingEnvironment.timestamp : null
+            timestamp: enclosingEnvironment ? enclosingEnvironment.timestamp : null,
+            async: enclosingEnvironment ? enclosingEnvironment.async : false
         };
     }
 
@@ -1854,7 +1860,7 @@ var jsonata = (function() {
                 var result, it;
                 // if a callback function is supplied, then drive the generator in a promise chain
                 if(typeof callback === 'function') {
-                    exec_env.bind('__jsonata_async', true);
+                    exec_env.async = true;
                     var catchHandler = function (err) {
                         populateMessage(err); // possible side-effects on `err`
                         callback(err, null);
