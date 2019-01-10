@@ -1,0 +1,7 @@
+{
+    "expr": "$each(function($v, $k) {$k[$v>2]})",
+    "data": { "a": 1, "b": 2, "c": 3, "d": 4 },
+    "bindings": {},
+    "result": ["c", "d"],
+    "unordered": true
+}

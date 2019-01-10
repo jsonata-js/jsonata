@@ -1630,7 +1630,10 @@ const functions = (() => {
         for (var key in obj) {
             var func_args = hofFuncArgs(func, obj[key], key, obj);
             // invoke func
-            result.push(yield* func.apply(this, func_args));
+            var val = yield* func.apply(this, func_args);
+            if(typeof val !== 'undefined') {
+                result.push(val);
+            }
         }
 
         return result;
