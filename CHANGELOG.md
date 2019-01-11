@@ -1,3 +1,8 @@
+#### 1.6.4 Maintenance Release
+
+- Fix performance regression (PR #292)
+- Fix bug in `$each` function (PR #293)
+
 #### 1.6.3 Maintenance Release
 
 - Fix es5 build and polyfills to enable test suite to (mostly) run in Nashorn (PR #288)
