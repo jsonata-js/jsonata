@@ -142,7 +142,7 @@ Casts the `number` to a string and formats it to an integer represented in the n
 
 __Examples__
 
-- `$formatBase(100, 2)` => "1100100"
+- `$formatBase(100, 2)` => `"1100100"`
 - `$formatBase(2555, 16)` => `"9fb"`
 
 
@@ -155,7 +155,8 @@ The behaviour of this function is consistent with the two-argument version of th
 
 __Examples__
 
-- 
+- `$formatInteger(2789, 'w')` => `"two thousand, seven hundred and eighty-nine"`
+- `$formatInteger(1999, 'I')` => `"MCMXCIX"`
 
 ## `$parseInteger()`
 __Signature:__ `$parseInteger(string, picture)`
@@ -166,4 +167,5 @@ function for parsing integers, this capability has been added to JSONata.
 
 __Examples__
 
-- 
+- `$parseInteger("twelve thousand, four hundred and seventy-six", 'w')` => `12476`
+- `$parseInteger('12,345,678', '#,##0')` => `12345678`
