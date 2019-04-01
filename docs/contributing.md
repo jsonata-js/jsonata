@@ -6,25 +6,26 @@ sidebar_label: Community and Contributing
 
 ## General questions - StackOverflow
 
-Tagged with `jsonata`
+See questions [tagged with `jsonata`](https://stackoverflow.com/questions/tagged/jsonata)
 
 ## Bugs reporting
 
-Bugs, suspected bugs, odd behaviour.
-Open a GitHub issue - preferably contain link to exerciser 
+For bugs, suspected bugs and any other odd behaviour, please [open a GitHub issue](https://github.com/jsonata-js/jsonata/issues/new). Preferably include a link to the [JSONata exerciser](http://try.jsonata.org/) which includes your source data and expression. This can be done using the "Share" function in the top-right.
 
 ## Enhancement requests
 
-Open a GitHub issue
+For any enhacement request, please [open a GitHub issue](https://github.com/jsonata-js/jsonata/issues/new)
 
 ## Cloning and building
 
+To contribute changes to the JSONata code (or documentation), [fork the `jsonata` repository](https://help.github.com/en/articles/fork-a-repo), [clone the fork](https://help.github.com/en/articles/cloning-a-repository) and make your changes. You can then contribute back to the main project by opening a pull request, ensuring you have maintained code coverage.
+
 ## JSONata conformance test suite
 
-The purpose, the structure, how to write a test suite driver
+_This section is incomplete_
 
-The implementation specific tests - mocha
+The tests use the `mocha` framework and can be executed by running `npm t` or `npm run test` which also runs `eslint` linting to check the code meets the formatting requirements of the project.
 
 ## Documentation
 
-Open source, how to contribute
+Documentation, such as this, is all part of the `jsonata` main GitHub project. It is written in Markdown, and updates (improvements, fix, etc.) are welcome via pull requests.
