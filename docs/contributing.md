@@ -14,7 +14,7 @@ For bugs, suspected bugs and any other odd behaviour, please [open a GitHub issu
 
 ## Enhancement requests
 
-For any enhacement request, please [open a GitHub issue]([open a GitHub issue](https://github.com/jsonata-js/jsonata/issues/new)
+For any enhacement request, please [open a GitHub issue](https://github.com/jsonata-js/jsonata/issues/new)
 
 ## Cloning and building
 
