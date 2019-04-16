@@ -12,7 +12,7 @@ A good first start would be to ask a question here, or see previous questions [t
 
 ### Slack
 
-There are a community of users in the [JSONata Slack workspace](http://jsonata.slack.com) who can help with queries. You can request an invite by going to the [JSONata exerciser](http://try.jsonata.org/) and clicking the Slack icon in the top-left.
+There are a community of users in the [JSONata Slack workspace](http://jsonata.slack.com) who can help with queries. You can request an invite by going to the [JSONata exerciser](http://try.jsonata.org/) and clicking the Slack icon in the top-right.
 
 ## Bugs reporting
 
