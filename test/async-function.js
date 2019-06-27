@@ -91,6 +91,29 @@ describe('Invoke JSONata with callback - return values', function() {
     });
 });
 
+describe('Evaluate concurrent expressions with callbacks', function() {
+    it('should process two expressions concurrently', function(done) {
+        const expr = jsonata("{'1':'goat','2': 'cheese'} ~> $lookup($string(payload))");
+
+        var count = 0;
+        var partDone = function() {
+            count++;
+            if(count >= 2) {
+                done();
+            }
+        };
+
+        expr.evaluate({"payload":1}, {}, function(err,result) {
+            expect(result).to.equal('goat');
+            partDone();
+        });
+        expr.evaluate({"payload":2}, {}, function(err,result) {
+            expect(result).to.equal('cheese');
+            partDone();
+        });
+    });
+});
+
 describe('Handle chained functions that end in promises', function() {
 
     var counter = function(count) {
