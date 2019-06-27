@@ -1158,13 +1158,11 @@ var jsonata = (function() {
         var result;
 
 
+        var lhs = yield * evaluate(expr.lhs, input, environment);
         if(expr.rhs.type === 'function') {
             // this is a function _invocation_; invoke it with lhs expression as the first argument
-            expr.rhs.arguments.unshift(expr.lhs);
-            result = yield * evaluateFunction(expr.rhs, input, environment);
-            expr.rhs.arguments.shift();
+            result = yield * evaluateFunction(expr.rhs, input, environment, { context: lhs });
         } else {
-            var lhs = yield * evaluate(expr.lhs, input, environment);
             var func = yield * evaluate(expr.rhs, input, environment);
 
             if(!isFunction(func)) {
@@ -1197,7 +1195,7 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function* evaluateFunction(expr, input, environment) {
+    function* evaluateFunction(expr, input, environment, applyto) {
         var result;
 
         // create the procedure
@@ -1217,6 +1215,9 @@ var jsonata = (function() {
         }
 
         var evaluatedArgs = [];
+        if(typeof applyto !== 'undefined') {
+            evaluatedArgs.push(applyto.context);
+        }
         // eager evaluation - evaluate the arguments
         for (var jj = 0; jj < expr.arguments.length; jj++) {
             const arg = yield* evaluate(expr.arguments[jj], input, environment);
