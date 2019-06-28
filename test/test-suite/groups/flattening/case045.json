@@ -1,0 +1,17 @@
+{
+    "expr": "$.tags[title='example'][]",
+    "data": {
+        "tags": [
+            {
+                "title": "example",
+                "description": "Hello"
+            }
+        ]
+    },
+    "result": [
+        {
+            "title": "example",
+            "description": "Hello"
+        }
+    ]
+}

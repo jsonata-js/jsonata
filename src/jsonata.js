@@ -226,7 +226,7 @@ var jsonata = (function() {
         } else {
             // flatten the sequence
             result.forEach(function(res) {
-                if (!Array.isArray(res) || res.cons || res.keepSingleton) {
+                if (!Array.isArray(res) || res.cons) {
                     // it's not an array - just push into the result sequence
                     resultSequence.push(res);
                 } else {
