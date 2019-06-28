@@ -296,7 +296,7 @@ describe("Tests that use the $clone() function", () => {
                 expr.evaluate(testdata2);
             })
                 .to.throw()
-                .to.deep.contain({ position: 21, code: 'T2013' });
+                .to.deep.contain({ code: 'T2013' });
         });
     });
 });
@@ -829,7 +829,7 @@ describe("Tests that include infinite recursion", () => {
                 expr.evaluate();
             })
                 .to.throw()
-                .to.deep.contain({ position: 46, code: "U1001" });
+                .to.deep.contain({ token: "inf", position: 32, code: "U1001" });
         });
     });
 
@@ -837,12 +837,12 @@ describe("Tests that include infinite recursion", () => {
         this.timeout(5000);
         it("should throw error", function() {
             expect(function() {
-                var expr = jsonata("(" + "  $inf := function(){$inf()};" + "  $inf()" + ")");
+                var expr = jsonata("( $inf := function(){$inf()}; $inf())");
                 timeboxExpression(expr, 1000, 500);
                 expr.evaluate();
             })
                 .to.throw()
-                .to.deep.contain({ position: 37, code: "U1001" });
+                .to.deep.contain({ token: "inf", code: "U1001" });
         });
     });
 });

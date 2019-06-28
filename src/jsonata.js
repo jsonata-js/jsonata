@@ -1234,13 +1234,22 @@ var jsonata = (function() {
             }
         }
         // apply the procedure
+        var procName = expr.procedure.type === 'path' ? expr.procedure.steps[0].value : expr.procedure.value;
         try {
+            if(typeof proc === 'object') {
+                proc.token = procName;
+                proc.position = expr.position;
+            }
             result = yield * apply(proc, evaluatedArgs, input, environment);
         } catch (err) {
-            // add the position field to the error
-            err.position = expr.position;
-            // and the function identifier
-            err.token = expr.procedure.type === 'path' ? expr.procedure.steps[0].value : expr.procedure.value;
+            if(!err.position) {
+                // add the position field to the error
+                err.position = expr.position;
+            }
+            if (!err.token) {
+                // and the function identifier
+                err.token = procName;
+            }
             throw err;
         }
         return result;
@@ -1262,6 +1271,10 @@ var jsonata = (function() {
             // the function returned a tail-call thunk
             // unpack it, evaluate its arguments, and apply the tail call
             var next = yield * evaluate(result.body.procedure, result.input, result.environment);
+            if(result.body.procedure.type === 'variable') {
+                next.token = result.body.procedure.value;
+            }
+            next.position = result.body.procedure.position;
             var evaluatedArgs = [];
             for(var ii = 0; ii < result.body.arguments.length; ii++) {
                 evaluatedArgs.push(yield * evaluate(result.body.arguments[ii], result.input, result.environment));
@@ -1282,40 +1295,50 @@ var jsonata = (function() {
      */
     function* applyInner(proc, args, input, environment) {
         var result;
-        var validatedArgs = args;
-        if(proc) {
-            validatedArgs = validateArguments(proc.signature, args, input);
-        }
+        try {
+            var validatedArgs = args;
+            if (proc) {
+                validatedArgs = validateArguments(proc.signature, args, input);
+            }
 
-        if (isLambda(proc)) {
-            result = yield * applyProcedure(proc, validatedArgs);
-        } else if (proc && proc._jsonata_function === true) {
-            var focus = {
-                environment: environment,
-                input: input
-            };
-            // the `focus` is passed in as the `this` for the invoked function
-            result = proc.implementation.apply(focus, validatedArgs);
-            // `proc.implementation` might be a generator function
-            // and `result` might be a generator - if so, yield
-            if(isIterable(result)) {
-                result = yield *result;
+            if (isLambda(proc)) {
+                result = yield* applyProcedure(proc, validatedArgs);
+            } else if (proc && proc._jsonata_function === true) {
+                var focus = {
+                    environment: environment,
+                    input: input
+                };
+                // the `focus` is passed in as the `this` for the invoked function
+                result = proc.implementation.apply(focus, validatedArgs);
+                // `proc.implementation` might be a generator function
+                // and `result` might be a generator - if so, yield
+                if (isIterable(result)) {
+                    result = yield* result;
+                }
+            } else if (typeof proc === 'function') {
+                // typically these are functions that are returned by the invocation of plugin functions
+                // the `input` is being passed in as the `this` for the invoked function
+                // this is so that functions that return objects containing functions can chain
+                // e.g. $func().next().next()
+                result = proc.apply(input, validatedArgs);
+                /* istanbul ignore next */
+                if (isIterable(result)) {
+                    result = yield* result;
+                }
+            } else {
+                throw {
+                    code: "T1006",
+                    stack: (new Error()).stack
+                };
             }
-        } else if (typeof proc === 'function') {
-            // typically these are functions that are returned by the invocation of plugin functions
-            // the `input` is being passed in as the `this` for the invoked function
-            // this is so that functions that return objects containing functions can chain
-            // e.g. $func().next().next()
-            result = proc.apply(input, validatedArgs);
-            /* istanbul ignore next */
-            if(isIterable(result)) {
-                result = yield *result;
+        } catch(err) {
+            if(proc) {
+                if (typeof err.token == 'undefined' && typeof proc.token !== 'undefined') {
+                    err.token = proc.token;
+                }
+                err.position = proc.position;
             }
-        } else {
-            throw {
-                code: "T1006",
-                stack: (new Error()).stack
-            };
+            throw err;
         }
         return result;
     }

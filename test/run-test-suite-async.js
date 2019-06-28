@@ -134,6 +134,11 @@ describe("JSONata Test Suite - async mode", () => {
                             // Second is that a (defined) result was provided.  In this case,
                             // we do a deep equality check against the expected result.
                             return expect(jsonataPromise(expr, dataset, testcase.bindings)).to.eventually.deep.equal(testcase.result);
+                        } else if ("error" in testcase) {
+                            // If an error was expected,
+                            // we do a deep equality check against the expected error structure.
+                            return expect(jsonataPromise(expr, dataset, testcase.bindings)).to.be.rejected
+                                .and.eventually.have.property('code', testcase.error.code);
                         } else if ("code" in testcase) {
                             // Finally, if a `code` field was specified, we expected the
                             // evaluation to fail and include the specified code in the
