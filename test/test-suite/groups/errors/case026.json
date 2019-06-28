@@ -1,0 +1,9 @@
+{
+    "expr": "( $B := function(){''}; $A := function(){2 + $B()}; $A() )",
+    "dataset": null,
+    "bindings": {},
+    "error": {
+        "code": "T2002",
+        "token": "+"
+    }
+}

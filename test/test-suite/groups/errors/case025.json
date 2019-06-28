@@ -1,0 +1,9 @@
+{
+    "expr": "( $A := function(){$min(2, 3)}; $A() )",
+    "dataset": null,
+    "bindings": {},
+    "error": {
+        "code": "T0410",
+        "token": "min"
+    }
+}

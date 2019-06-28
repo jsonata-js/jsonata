@@ -118,6 +118,14 @@ describe("JSONata Test Suite", () => {
                             // we do a deep equality check against the expected result.
                             let result = expr.evaluate(dataset, testcase.bindings);
                             expect(result).to.deep.equal(testcase.result);
+                        } else if ("error" in testcase) {
+                            // If an error was expected,
+                            // we do a deep equality check against the expected error structure.
+                            expect(function() {
+                                expr.evaluate(dataset, testcase.bindings);
+                            })
+                                .to.throw()
+                                .to.deep.contain(testcase.error);
                         } else if ("code" in testcase) {
                             // Finally, if a `code` field was specified, we expected the
                             // evaluation to fail and include the specified code in the
