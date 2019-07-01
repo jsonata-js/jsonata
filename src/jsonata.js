@@ -981,7 +981,7 @@ var jsonata = (function() {
         var result;
         // if the variable name is empty string, then it refers to context value
         if (expr.value === '') {
-            result = input;
+            result = input && input.outerWrapper ? input[0] : input;
         } else {
             result = environment.lookup(expr.value);
         }
@@ -1903,6 +1903,12 @@ var jsonata = (function() {
                 // the $now() and $millis() functions will return this value - whenever it is called
                 timestamp = new Date();
                 exec_env.timestamp = timestamp;
+
+                // if the input is a JSON array, then wrap it in a singleton sequence si it gets treated as a single input
+                if(Array.isArray(input) && !isSequence(input)) {
+                    input = createSequence(input);
+                    input.outerWrapper = true;
+                }
 
                 var result, it;
                 // if a callback function is supplied, then drive the generator in a promise chain

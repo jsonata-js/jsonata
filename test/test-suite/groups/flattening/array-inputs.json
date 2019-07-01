@@ -1,0 +1,72 @@
+[
+    {
+        "expr": "phone",
+        "data": [
+            {"phone": [{"number" : 0}]},
+            {"phone": [{"number" : 1}]},
+            {"phone": [{"number" : 2}]}
+        ],
+        "result": [
+            {"number":0},
+            {"number":1},
+            {"number":2}
+        ]
+    },
+    {
+        "expr": "phone[0]",
+        "data": [
+            {"phone": [{"number" : 0}]},
+            {"phone": [{"number" : 1}]},
+            {"phone": [{"number" : 2}]}
+        ],
+        "result": {"number":0}
+    },
+    {
+        "expr": "phone[0][]",
+        "data": [
+            {"phone": [{"number" : 0}]},
+            {"phone": [{"number" : 1}]},
+            {"phone": [{"number" : 2}]}
+        ],
+        "result": [
+            {"number":0}
+        ]
+    },
+    {
+        "expr": "phone[0].number",
+        "data": [
+            {"phone": [{"number" : 0}]},
+            {"phone": [{"number" : 1}]},
+            {"phone": [{"number" : 2}]}
+        ],
+        "result": 0
+    },
+    {
+        "expr": "(phone)[0].number",
+        "data": [
+            {"phone": [{"number" : 0}]},
+            {"phone": [{"number" : 1}]},
+            {"phone": [{"number" : 2}]}
+        ],
+        "result": 0
+    },
+    {
+        "expr": "$.phone[0].number",
+        "data": [
+            {"phone": [{"number" : 0}]},
+            {"phone": [{"number" : 1}]},
+            {"phone": [{"number" : 2}]}
+        ],
+        "result": [0,1,2]
+    },
+    {
+        "expr": "{'Hello':'World'}",
+        "data": [],
+        "result": {"Hello": "World"}
+    },
+    {
+        "expr": "$.{'Hello':'World'}",
+        "data": [],
+        "undefinedResult": true
+    }
+]

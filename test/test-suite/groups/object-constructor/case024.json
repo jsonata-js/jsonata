@@ -1,5 +1,5 @@
 {
-    "expr": "$.{ type: $average(value), kind: $sum(value) } ",
+    "expr": "{ type: $average(value), kind: $sum(value) } ",
     "data": [
         { "type": "a", "kind": "a", "value": 0 },
         { "type": "a", "kind": "b", "value": 1 },
@@ -7,5 +7,5 @@
         { "type": "b", "kind": "b", "value": 3 }
     ],
     "bindings": {},
-    "code": "D1009"
+    "code": "T1003"
 }

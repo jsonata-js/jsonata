@@ -1665,7 +1665,11 @@ const functions = (() => {
             for(var ii = 0; ii < input.length; ii++) {
                 var res =  lookup(input[ii], key);
                 if (typeof res !== 'undefined') {
-                    result.push(res);
+                    if (Array.isArray(res)) {
+                        result.push(...res);
+                    } else {
+                        result.push(res);
+                    }
                 }
             }
         } else if (input !== null && typeof input === 'object') {
