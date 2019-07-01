@@ -1,0 +1,6 @@
+{
+    "expr": "[100..10000099] ~> $count()",
+    "dataset": null,
+    "bindings": {},
+    "result": 1e7
+}
