@@ -849,7 +849,19 @@ var jsonata = (function() {
             return result;
         }
 
-        result = new Array(rhs - lhs + 1);
+        // limit the size of the array to ten million entries (1e7)
+        // this is an implementation defined limit to protect against
+        // memory and performance issues.  This value may increase in the future.
+        var size = rhs - lhs + 1;
+        if(size > 1e7) {
+            throw {
+                code: "D2014",
+                stack: (new Error()).stack,
+                value: size
+            };
+        }
+
+        result = new Array(size);
         for (var item = lhs, index = 0; item <= rhs; item++, index++) {
             result[index] = item;
         }
@@ -1761,6 +1773,7 @@ var jsonata = (function() {
         "T2011": "The insert/update clause of the transform expression must evaluate to an object: {{value}}",
         "T2012": "The delete clause of the transform expression must evaluate to a string or array of strings: {{value}}",
         "T2013": "The transform expression clones the input object using the $clone() function.  This has been overridden in the current scope by a non-function.",
+        "D2014": "The size of the sequence allocated by the range operator (..) must not exceed 1e6.  Attempted to allocate {{value}}.",
         "D3001": "Attempting to invoke string function on Infinity or NaN",
         "D3010": "Second argument of replace function cannot be an empty string",
         "D3011": "Fourth argument of replace function must evaluate to a positive number",
