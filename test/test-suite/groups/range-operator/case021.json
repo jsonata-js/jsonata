@@ -2,5 +2,7 @@
     "expr": "[1..10000000] ~> $count()",
     "dataset": null,
     "bindings": {},
-    "result": 1e7
+    "result": 1e7,
+    "timelimit": 10000,
+    "depth": 10
 }
