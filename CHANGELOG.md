@@ -1,3 +1,10 @@
+#### 1.6.5 Maintenance Release
+
+- Fix concurrency bug in chain operator (issue #335)
+- Fix flattening login in map operator (issue #314)
+- Fix message inserts for errors thrown in function bodies (issue #297)
+- Limit array size allocatable by range operator to ten million entries (issue #240)
+
 #### 1.6.4 Maintenance Release
 
 - Fix performance regression (PR #292)
