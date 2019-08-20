@@ -1699,6 +1699,7 @@ var jsonata = (function() {
     staticFrame.bind('merge', defineFunction(fn.merge, '<a<o>:o>'));
     staticFrame.bind('reverse', defineFunction(fn.reverse, '<a:a>'));
     staticFrame.bind('each', defineFunction(fn.each, '<o-f:a>'));
+    staticFrame.bind('error', defineFunction(fn.error, '<s?:x>'));
     staticFrame.bind('sort', defineFunction(fn.sort, '<af?:a>'));
     staticFrame.bind('shuffle', defineFunction(fn.shuffle, '<a:a>'));
     staticFrame.bind('base64encode', defineFunction(fn.base64encode, '<s-:s>'));

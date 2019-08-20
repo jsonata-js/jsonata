@@ -1,0 +1,6 @@
+{
+    "expr": "Account.Order[0].Product[0].Price > 34 ? Account.Order[0].Product[0].Price : $error('Too Expensive')",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": 34.45
+}

@@ -1640,6 +1640,19 @@ const functions = (() => {
     }
 
     /**
+     *
+     * @param {string} [message] - the message to attach to the error
+     * @throws custom error with code 'D3137'
+     */
+    function error(message) {
+        throw {
+            code: "D3137",
+            stack: (new Error()).stack,
+            message: message || "$error() function evaluated"
+        };
+    }
+
+    /**
      * Implements the merge sort (stable) with optional comparator function
      *
      * @param {Array} arr - the array to sort
@@ -1778,7 +1791,7 @@ const functions = (() => {
         formatNumber, formatBase, number, floor, ceil, round, abs, sqrt, power, random,
         boolean, not,
         map, zip, filter, foldLeft, sift,
-        keys, lookup, append, exists, spread, merge, reverse, each, sort, shuffle,
+        keys, lookup, append, exists, spread, merge, reverse, each, error, sort, shuffle,
         base64encode, base64decode
     };
 })();
