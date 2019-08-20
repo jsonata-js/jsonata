@@ -1,0 +1,6 @@
+{
+    "expr": "$error(foo)",
+    "dataset": "dataset5",
+    "bindings": {},
+    "code": "D3137"
+}
