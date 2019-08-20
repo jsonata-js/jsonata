@@ -1,5 +1,5 @@
 {
-    "expr": "$toMillis(\"2017-10-30T15:28:34\")",
+    "expr": "$toMillis(\"2017-10-30T15:28:34Z\")",
     "dataset": "dataset5",
     "bindings": {},
     "result": 1509377314000
