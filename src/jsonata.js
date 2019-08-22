@@ -1811,6 +1811,7 @@ var jsonata = (function() {
         "D3134": "The timezone integer format specifier cannot have more than four digits",
         "D3135": "No matching closing bracket ']' in date/time picture string",
         "D3136": "The date/time picture string is missing specifiers required to parse the timestamp"
+        // D3137 references errors raised by calling the $error() function
     };
 
     /**

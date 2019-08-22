@@ -2,5 +2,6 @@
     "expr": "$error(foo)",
     "dataset": "dataset5",
     "bindings": {},
-    "code": "D3137"
+    "code": "D3137",
+    "errorMessage": "$error() function evaluated"
 }
