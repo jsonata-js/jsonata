@@ -1658,7 +1658,7 @@ var jsonata = (function() {
     staticFrame.bind('max', defineFunction(fn.max, '<a<n>:n>'));
     staticFrame.bind('min', defineFunction(fn.min, '<a<n>:n>'));
     staticFrame.bind('average', defineFunction(fn.average, '<a<n>:n>'));
-    staticFrame.bind('string', defineFunction(fn.string, '<x-:s>'));
+    staticFrame.bind('string', defineFunction(fn.string, '<x-b?:s>'));
     staticFrame.bind('substring', defineFunction(fn.substring, '<s-nn?:s>'));
     staticFrame.bind('substringBefore', defineFunction(fn.substringBefore, '<s-s:s>'));
     staticFrame.bind('substringAfter', defineFunction(fn.substringAfter, '<s-s:s>'));

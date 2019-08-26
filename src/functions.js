@@ -97,11 +97,12 @@ const functions = (() => {
     }
 
     /**
-     * Stingify arguments
+     * Stringify arguments
      * @param {Object} arg - Arguments
+     * @param {boolean} [prettify] - Pretty print the result
      * @returns {String} String from arguments
      */
-    function string(arg) {
+    function string(arg, prettify = false) {
         // undefined inputs always return undefined
         if (typeof arg === 'undefined') {
             return undefined;
@@ -121,11 +122,13 @@ const functions = (() => {
                 value: arg,
                 stack: (new Error()).stack
             };
-        } else
+        } else {
+            var space = prettify ? 2 : 0;
             str = JSON.stringify(arg, function (key, val) {
                 return (typeof val !== 'undefined' && val !== null && val.toPrecision && isNumeric(val)) ? Number(val.toPrecision(15)) :
                     (val && isFunction(val)) ? '' : val;
-            });
+            }, space);
+        }
         return str;
     }
 

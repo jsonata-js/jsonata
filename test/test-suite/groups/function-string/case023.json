@@ -1,0 +1,6 @@
+{
+    "expr": "$string({\"string\": \"hello\"}, false)",
+    "dataset": null,
+    "bindings": {},
+    "result": "{\"string\":\"hello\"}"
+}
