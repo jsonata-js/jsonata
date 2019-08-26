@@ -93,9 +93,6 @@ describe("JSONata Test Suite", () => {
                             if (testcase.hasOwnProperty("token")) {
                                 expect(e.token).to.equal(testcase.token);
                             }
-                            if (testcase.hasOwnProperty("errorMessage")) {
-                                expect(e.message).to.equal(testcase.errorMessage);
-                            }
                         } else {
                             // If we get here, something went wrong because an exception
                             // was thrown when we didn't expect one to be thrown.
@@ -133,17 +130,11 @@ describe("JSONata Test Suite", () => {
                             // Finally, if a `code` field was specified, we expected the
                             // evaluation to fail and include the specified code in the
                             // thrown exception.
-
-                            // If a `errorMessage` field was specified then we should rest that as well
-                            const assertion = { code: testcase.code };
-                            if (testcase.hasOwnProperty("errorMessage")) {
-                                assertion.message = testcase.errorMessage;
-                            }
                             expect(function() {
                                 expr.evaluate(dataset, testcase.bindings);
                             })
                                 .to.throw()
-                                .to.deep.contain(assertion);
+                                .to.deep.contain({ code: testcase.code });
                         } else {
                             // If we get here, it means there is something wrong with
                             // the test case data because there was nothing to check.

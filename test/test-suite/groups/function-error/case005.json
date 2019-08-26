@@ -2,6 +2,8 @@
     "expr": "$count(Account.Order[0].Product) < 3 ? $error('Not enough products in orders')",
     "dataset": "dataset5",
     "bindings": {},
-    "code": "D3137",
-    "errorMessage": "Not enough products in orders"
+    "error": {
+        "code": "D3137",
+        "message": "Not enough products in orders"
+    }
 }
