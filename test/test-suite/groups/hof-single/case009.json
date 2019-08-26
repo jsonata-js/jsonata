@@ -1,0 +1,6 @@
+{
+    "expr": "$single(['zero', 'one', 'two'], function($v, $i, $k) {$i=1})",
+    "data": {"data": 5},
+    "bindings": {},
+    "result": "one"
+}

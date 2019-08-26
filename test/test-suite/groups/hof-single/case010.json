@@ -1,0 +1,9 @@
+{
+    "expr": "Phone ~> $filter(function($p) {$p.type = 'home'}) ~> $single(function($p) {$p.number = '0203 544 1234'})",
+    "dataset": "dataset1",
+    "bindings": {},
+    "result": {
+        "type": "home",
+        "number": "0203 544 1234"
+    }
+}

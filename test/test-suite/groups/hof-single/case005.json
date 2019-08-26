@@ -1,0 +1,6 @@
+{
+    "expr": "$single([0, 1, 2])",
+    "data": {"data": 5},
+    "bindings": {},
+    "code": "D3138"
+}
