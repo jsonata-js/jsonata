@@ -1704,6 +1704,10 @@ var jsonata = (function() {
     staticFrame.bind('shuffle', defineFunction(fn.shuffle, '<a:a>'));
     staticFrame.bind('base64encode', defineFunction(fn.base64encode, '<s-:s>'));
     staticFrame.bind('base64decode', defineFunction(fn.base64decode, '<s-:s>'));
+    staticFrame.bind('encodeUrlComponent', defineFunction(fn.encodeUrlComponent, '<s-:s>'));
+    staticFrame.bind('encodeUrl', defineFunction(fn.encodeUrl, '<s-:s>'));
+    staticFrame.bind('decodeUrlComponent', defineFunction(fn.decodeUrlComponent, '<s-:s>'));
+    staticFrame.bind('decodeUrl', defineFunction(fn.decodeUrl, '<s-:s>'));
     staticFrame.bind('eval', defineFunction(functionEval, '<sx?:x>'));
     staticFrame.bind('toMillis', defineFunction(datetime.toMillis, '<s-s?:n>'));
     staticFrame.bind('fromMillis', defineFunction(datetime.fromMillis, '<n-s?s?:s>'));

@@ -578,6 +578,62 @@ const functions = (() => {
     }
 
     /**
+     * Encode a string into a component for a url
+     * @param {String} str - String to encode
+     * @returns {string} Encoded string
+     */
+    function encodeUrlComponent(str) {
+        // undefined inputs always return undefined
+        if (typeof str === 'undefined') {
+            return undefined;
+        }
+
+        return encodeURIComponent(str);
+    }
+
+    /**
+     * Encode a string into a url
+     * @param {String} str - String to encode
+     * @returns {string} Encoded string
+     */
+    function encodeUrl(str) {
+        // undefined inputs always return undefined
+        if (typeof str === 'undefined') {
+            return undefined;
+        }
+
+        return encodeURI(str);
+    }
+
+    /**
+     * Decode a string from a component for a url
+     * @param {String} str - String to decode
+     * @returns {string} Decoded string
+     */
+    function decodeUrlComponent(str) {
+        // undefined inputs always return undefined
+        if (typeof str === 'undefined') {
+            return undefined;
+        }
+
+        return decodeURIComponent(str);
+    }
+
+    /**
+     * Decode a string from a url
+     * @param {String} str - String to decode
+     * @returns {string} Decoded string
+     */
+    function decodeUrl(str) {
+        // undefined inputs always return undefined
+        if (typeof str === 'undefined') {
+            return undefined;
+        }
+
+        return decodeURI(str);
+    }
+
+    /**
      * Split a string into an array of substrings
      * @param {String} str - string
      * @param {String} separator - the token or regex that splits the string
@@ -1792,7 +1848,7 @@ const functions = (() => {
         boolean, not,
         map, zip, filter, foldLeft, sift,
         keys, lookup, append, exists, spread, merge, reverse, each, error, sort, shuffle,
-        base64encode, base64decode
+        base64encode, base64decode,  encodeUrlComponent, encodeUrl, decodeUrlComponent, decodeUrl
     };
 })();
 

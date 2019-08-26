@@ -18,7 +18,7 @@ If `arg` is not specified (i.e. this function is invoked with no arguments), the
 
 __Examples__
 
-- `$string(5)` => `"5"`  
+- `$string(5)` => `"5"`
 - `[1..5].$string()` => `["1", "2", "3", "4", "5"]`
 
 ## `$length()`
@@ -35,15 +35,15 @@ __Signature:__ `$substring(str, start[, length])`
 
 Returns a string containing the characters in the first parameter `str` starting at position `start` (zero-offset).  If `str` is not specified (i.e. this function is invoked with only the numeric argument(s)), then the context value is used as the value of `str`.  An error is thrown if `str` is not a string.
 
-If `length` is specified, then the substring will contain maximum `length` characters.  
+If `length` is specified, then the substring will contain maximum `length` characters.
 
 If `start` is negative then it indicates the number of characters from the end of `str`.  See [substr](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substr) for full definition.
 
 __Examples__
 
-- `$substring("Hello World", 3)` => `"lo World"`  
-- `$substring("Hello World", 3, 5)` => `"lo Wo"`  
-- `$substring("Hello World", -4)` => `"orld"`  
+- `$substring("Hello World", 3)` => `"lo World"`
+- `$substring("Hello World", 3, 5)` => `"lo Wo"`
+- `$substring("Hello World", -4)` => `"orld"`
 - `$substring("Hello World", -4, 2)` => `"or"`
 
 ## `$substringBefore()`
@@ -122,17 +122,17 @@ The `pattern` parameter can either be a string or a regular expression (regex). 
 
 __Examples__
 
-- `$contains("abracadabra", "bra")` => `true`  
-- `$contains("abracadabra", /a.*a/)` => `true`  
-- `$contains("abracadabra", /ar.*a/)` => `false`  
-- `$contains("Hello World", /wo/)` => `false`  
-- `$contains("Hello World", /wo/i)` => `true`  
+- `$contains("abracadabra", "bra")` => `true`
+- `$contains("abracadabra", /a.*a/)` => `true`
+- `$contains("abracadabra", /ar.*a/)` => `false`
+- `$contains("Hello World", /wo/)` => `false`
+- `$contains("Hello World", /wo/i)` => `true`
 - `Phone[$contains(number, /^077/)]` => `{ "type": "mobile", "number": "077 7700 1234" }`
 
 ## `$split()`
 __Signature:__ `$split(str, separator [, limit])`
 
-Splits the `str` parameter into an array of substrings.  If `str` is not specified, then the context value is used as the value of `str`.  It is an error if `str` is not a string.  
+Splits the `str` parameter into an array of substrings.  If `str` is not specified, then the context value is used as the value of `str`.  It is an error if `str` is not a string.
 
 The `separator` parameter can either be a string or a regular expression (regex).  If it is a string, it specifies the characters within `str` about which it should be split.  If it is the empty string, `str` will be split into an array of single characters.  If it is a regex, it splits the string around any sequence of characters that match the regex.
 
@@ -140,8 +140,8 @@ The optional `limit` parameter is a number that specifies the maximum number of 
 
 __Examples__
 
-- `$split("so many words", " ")` => `[ "so", "many", "words" ]`  
-- `$split("so many words", " ", 2)` => `[ "so", "many" ]`  
+- `$split("so many words", " ")` => `[ "so", "many", "words" ]`
+- `$split("so many words", " ", 2)` => `[ "so", "many" ]`
 - `$split("too much, punctuation. hard; to read", /[ ,.;]+/)` => `["too", "much", "punctuation", "hard", "to", "read"]`
 
 ## `$join()`
@@ -155,7 +155,7 @@ If `separator` is not specified, then it is assumed to be the empty string, i.e.
 
 __Examples__
 
-- `$join(['a','b','c'])` => `"abc"`  
+- `$join(['a','b','c'])` => `"abc"`
 - `$split("too much, punctuation. hard; to read", /[ ,.;]+/, 3) ~> $join(', ')` => `"too, much, punctuation"`
 
 ## `$match()`
@@ -278,7 +278,7 @@ __Signature:__ `$base64encode()`
 
 Converts an ASCII string to a base 64 representation. Each each character in the string is treated as a byte of binary data. This requires that all characters in the string are in the 0x00 to 0xFF range, which includes all characters in URI encoded strings. Unicode characters outside of that range are not supported.
 
-__Examples__  
+__Examples__
 
 - `$base64encode("myuser:mypass")` => `"bXl1c2VyOm15cGFzcw=="`
 
@@ -288,6 +288,42 @@ __Signature:__ `$base64decode()`
 
 Converts base 64 encoded bytes to a string, using a UTF-8 Unicode codepage.
 
-__Examples__  
+__Examples__
 
 - `$base64decode("bXl1c2VyOm15cGFzcw==")` => `"myuser:mypass"`
+
+## `$encodeUrlComponent()`
+__Signature:__ `$encodeUrlComponent(str)`
+
+Encodes a Uniform Resource Locator (URL) component by replacing each instance of certain characters by one, two, three, or four escape sequences representing the UTF-8 encoding of the character.
+
+__Examples__
+
+- `$encodeUrlComponent("?x=test")` => `"%3Fx%3Dtest"`
+
+## `$encodeUrl()`
+__Signature:__ `$encodeUrl(str)`
+
+Encodes a Uniform Resource Locator (URL) by replacing each instance of certain characters by one, two, three, or four escape sequences representing the UTF-8 encoding of the character.
+
+__Examples__
+
+- `$encodeUrl("https://mozilla.org/?x=шеллы")` => `"https://mozilla.org/?x=%D1%88%D0%B5%D0%BB%D0%BB%D1%8B"`
+
+## `$decodeUrlComponent()`
+__Signature:__ `$decodeUrlComponent(str)`
+
+Decodes a Uniform Resource Locator (URL) component previously created by encodeUrlComponent.
+
+__Examples__
+
+- `$decodeUrlComponent("%3Fx%3Dtest")` => `"?x=test"`
+
+## `$decodeUrl()`
+__Signature:__ `$decodeUrl(str)`
+
+Decodes a Uniform Resource Locator (URL) previously created by encodeUrl.
+
+__Examples__
+
+- `$decodeUrl("https://mozilla.org/?x=%D1%88%D0%B5%D0%BB%D0%BB%D1%8B")` => `"https://mozilla.org/?x=шеллы"`
