@@ -1689,6 +1689,7 @@ var jsonata = (function() {
     staticFrame.bind('map', defineFunction(fn.map, '<af>'));
     staticFrame.bind('zip', defineFunction(fn.zip, '<a+>'));
     staticFrame.bind('filter', defineFunction(fn.filter, '<af>'));
+    staticFrame.bind('single', defineFunction(fn.single, '<af?>'));
     staticFrame.bind('reduce', defineFunction(fn.foldLeft, '<afj?:j>')); // TODO <f<jj:j>a<j>j?:j>
     staticFrame.bind('sift', defineFunction(fn.sift, '<o-f?:o>'));
     staticFrame.bind('keys', defineFunction(fn.keys, '<x-:a<s>>'));
@@ -1811,7 +1812,9 @@ var jsonata = (function() {
         "D3134": "The timezone integer format specifier cannot have more than four digits",
         "D3135": "No matching closing bracket ']' in date/time picture string",
         "D3136": "The date/time picture string is missing specifiers required to parse the timestamp",
-        "D3137": "{{{message}}}"
+        "D3137": "{{{message}}}",
+        "D3138": "The $single() function expected exactly 1 matching result.  Instead it matched more.",
+        "D3139": "The $single() function expected exactly 1 matching result.  Instead it matched 0."
     };
 
     /**
