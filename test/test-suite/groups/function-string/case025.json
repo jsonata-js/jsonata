@@ -1,0 +1,6 @@
+{
+    "expr": "$string([\"string\", 5], false)",
+    "dataset": null,
+    "bindings": {},
+    "result": "[\"string\",5]"
+}
