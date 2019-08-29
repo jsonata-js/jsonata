@@ -1705,6 +1705,10 @@ var jsonata = (function() {
     staticFrame.bind('shuffle', defineFunction(fn.shuffle, '<a:a>'));
     staticFrame.bind('base64encode', defineFunction(fn.base64encode, '<s-:s>'));
     staticFrame.bind('base64decode', defineFunction(fn.base64decode, '<s-:s>'));
+    staticFrame.bind('encodeUrlComponent', defineFunction(fn.encodeUrlComponent, '<s-:s>'));
+    staticFrame.bind('encodeUrl', defineFunction(fn.encodeUrl, '<s-:s>'));
+    staticFrame.bind('decodeUrlComponent', defineFunction(fn.decodeUrlComponent, '<s-:s>'));
+    staticFrame.bind('decodeUrl', defineFunction(fn.decodeUrl, '<s-:s>'));
     staticFrame.bind('eval', defineFunction(functionEval, '<sx?:x>'));
     staticFrame.bind('toMillis', defineFunction(datetime.toMillis, '<s-s?:n>'));
     staticFrame.bind('fromMillis', defineFunction(datetime.fromMillis, '<n-s?s?:s>'));
@@ -1814,7 +1818,8 @@ var jsonata = (function() {
         "D3136": "The date/time picture string is missing specifiers required to parse the timestamp",
         "D3137": "{{{message}}}",
         "D3138": "The $single() function expected exactly 1 matching result.  Instead it matched more.",
-        "D3139": "The $single() function expected exactly 1 matching result.  Instead it matched 0."
+        "D3139": "The $single() function expected exactly 1 matching result.  Instead it matched 0.",
+        "D3140": "Malformed URL passed to ${{{functionName}}}(): {{value}}"
     };
 
     /**

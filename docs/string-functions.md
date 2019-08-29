@@ -293,3 +293,39 @@ Converts base 64 encoded bytes to a string, using a UTF-8 Unicode codepage.
 __Examples__
 
 - `$base64decode("bXl1c2VyOm15cGFzcw==")` => `"myuser:mypass"`
+
+## `$encodeUrlComponent()`
+__Signature:__ `$encodeUrlComponent(str)`
+
+Encodes a Uniform Resource Locator (URL) component by replacing each instance of certain characters by one, two, three, or four escape sequences representing the UTF-8 encoding of the character.
+
+__Examples__
+
+- `$encodeUrlComponent("?x=test")` => `"%3Fx%3Dtest"`
+
+## `$encodeUrl()`
+__Signature:__ `$encodeUrl(str)`
+
+Encodes a Uniform Resource Locator (URL) by replacing each instance of certain characters by one, two, three, or four escape sequences representing the UTF-8 encoding of the character.
+
+__Examples__
+
+- `$encodeUrl("https://mozilla.org/?x=шеллы")` => `"https://mozilla.org/?x=%D1%88%D0%B5%D0%BB%D0%BB%D1%8B"`
+
+## `$decodeUrlComponent()`
+__Signature:__ `$decodeUrlComponent(str)`
+
+Decodes a Uniform Resource Locator (URL) component previously created by encodeUrlComponent.
+
+__Examples__
+
+- `$decodeUrlComponent("%3Fx%3Dtest")` => `"?x=test"`
+
+## `$decodeUrl()`
+__Signature:__ `$decodeUrl(str)`
+
+Decodes a Uniform Resource Locator (URL) previously created by encodeUrl.
+
+__Examples__
+
+- `$decodeUrl("https://mozilla.org/?x=%D1%88%D0%B5%D0%BB%D0%BB%D1%8B")` => `"https://mozilla.org/?x=шеллы"`
