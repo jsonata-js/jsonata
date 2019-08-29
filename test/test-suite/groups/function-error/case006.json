@@ -1,6 +1,9 @@
 {
-    "expr": "($msg='My Message'; $error($msg); true)",
+    "expr": "($msg:='My Message'; $error($msg); true)",
     "dataset": "dataset5",
     "bindings": {},
-    "code": "D3137"
+    "error": {
+        "code": "D3137",
+        "message": "My Message"
+    }
 }

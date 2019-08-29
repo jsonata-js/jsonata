@@ -97,11 +97,12 @@ const functions = (() => {
     }
 
     /**
-     * Stingify arguments
+     * Stringify arguments
      * @param {Object} arg - Arguments
+     * @param {boolean} [prettify] - Pretty print the result
      * @returns {String} String from arguments
      */
-    function string(arg) {
+    function string(arg, prettify = false) {
         // undefined inputs always return undefined
         if (typeof arg === 'undefined') {
             return undefined;
@@ -121,11 +122,13 @@ const functions = (() => {
                 value: arg,
                 stack: (new Error()).stack
             };
-        } else
+        } else {
+            var space = prettify ? 2 : 0;
             str = JSON.stringify(arg, function (key, val) {
                 return (typeof val !== 'undefined' && val !== null && val.toPrecision && isNumeric(val)) ? Number(val.toPrecision(15)) :
                     (val && isFunction(val)) ? '' : val;
-            });
+            }, space);
+        }
         return str;
     }
 
@@ -1381,7 +1384,7 @@ const functions = (() => {
 
     /**
      * Helper function to build the arguments to be supplied to the function arg of the
-     * HOFs map, filter, each and sift
+     * HOFs map, filter, each, sift and single
      * @param {function} func - the function to be invoked
      * @param {*} arg1 - the first (required) arg - the value
      * @param {*} arg2 - the second (optional) arg - the position (index or key)
@@ -1449,6 +1452,55 @@ const functions = (() => {
             if (boolean(res)) {
                 result.push(entry);
             }
+        }
+
+        return result;
+    }
+
+    /**
+     * Given an array, find the single element matching a specified condition
+     * Throws an exception if the number of matching elements is not exactly one
+     * @param {Array} [arr] - array to filter
+     * @param {Function} [func] - predicate function
+     * @returns {*} Matching element
+     */
+    function* single(arr, func) { // eslint-disable-line require-yield
+        // undefined inputs always return undefined
+        if (typeof arr === 'undefined') {
+            return undefined;
+        }
+
+        var hasFoundMatch = false;
+        var result;
+
+        for (var i = 0; i < arr.length; i++) {
+            var entry = arr[i];
+            var positiveResult = true;
+            if (typeof func !== 'undefined') {
+                var func_args = hofFuncArgs(func, entry, i, arr);
+                // invoke func
+                var res = yield* func.apply(this, func_args);
+                positiveResult = boolean(res);
+            }
+            if (positiveResult) {
+                if(!hasFoundMatch) {
+                    result = entry;
+                    hasFoundMatch = true;
+                } else {
+                    throw {
+                        stack: (new Error()).stack,
+                        code: "D3138",
+                        index: i
+                    };
+                }
+            }
+        }
+
+        if(!hasFoundMatch) {
+            throw {
+                stack: (new Error()).stack,
+                code: "D3139"
+            };
         }
 
         return result;
@@ -1846,7 +1898,7 @@ const functions = (() => {
         match, contains, replace, split, join,
         formatNumber, formatBase, number, floor, ceil, round, abs, sqrt, power, random,
         boolean, not,
-        map, zip, filter, foldLeft, sift,
+        map, zip, filter, single, foldLeft, sift,
         keys, lookup, append, exists, spread, merge, reverse, each, error, sort, shuffle,
         base64encode, base64decode,  encodeUrlComponent, encodeUrl, decodeUrlComponent, decodeUrl
     };

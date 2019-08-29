@@ -13,7 +13,7 @@ Returns an array containing the keys in the object.  If the argument is an array
 __Signature:__ `$lookup(object, key)`
 
 Returns the value associated with `key` in `object`. If the first argument is an array of objects, then all of the objects in the array are searched, and the values associated with all occurrences of `key` are returned.
-  
+
 
 ## `$spread()`
 __Signature:__ `$spread(object)`
@@ -39,7 +39,7 @@ The `function` parameter will get invoked with two arguments:
 
 `function(value, name)`
 
-where the `value` parameter is the value of each name/value pair in the object and `name` is its name.  The `name` parameter is optional. 
+where the `value` parameter is the value of each name/value pair in the object and `name` is its name.  The `name` parameter is optional.
 
 __Examples__
 
@@ -52,3 +52,8 @@ __Examples__
       "City: Winchester",
       "Postcode: SO21 2JN"
     ]
+
+ ## `$error()`
+__Signature:__`$error(message)`
+
+Deliberately throws an error with an optional `message`

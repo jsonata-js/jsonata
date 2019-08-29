@@ -1,0 +1,6 @@
+{
+    "expr": "$string({  \"string\": \"hello\",  \"number\": 78.8 / 2,  \"null\":null,  \"boolean\": false,  \"function\": $sum,  \"lambda\": function(){true},  \"object\": {    \"str\": \"another\",    \"lambda2\": function($n){$n}  },  \"array\": []}, true)",
+    "dataset": null,
+    "bindings": {},
+    "result": "{\n  \"string\": \"hello\",\n  \"number\": 39.4,\n  \"null\": null,\n  \"boolean\": false,\n  \"function\": \"\",\n  \"lambda\": \"\",\n  \"object\": {\n    \"str\": \"another\",\n    \"lambda2\": \"\"\n  },\n  \"array\": []\n}"
+}

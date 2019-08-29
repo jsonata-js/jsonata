@@ -5,7 +5,7 @@ sidebar_label: String Functions
 ---
 
 ## `$string()`
-__Signature:__ `$string(arg)`
+__Signature:__ `$string(arg, prettify)`
 
 Casts the `arg` parameter to a string using the following casting rules
 
@@ -15,6 +15,8 @@ Casts the `arg` parameter to a string using the following casting rules
    - All other values are converted to a JSON string using the [JSON.stringify](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) function
 
 If `arg` is not specified (i.e. this function is invoked with no arguments), then the context value is used as the value of `arg`.
+
+If `prettify` is true, then "prettified" JSON is produced. i.e One line per field and lines will be indented based on the field depth.
 
 __Examples__
 

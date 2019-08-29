@@ -1,0 +1,6 @@
+{
+    "expr": "$single([0])",
+    "data": {"data": 5},
+    "bindings": {},
+    "result": 0
+}
