@@ -1818,7 +1818,8 @@ var jsonata = (function() {
         "D3136": "The date/time picture string is missing specifiers required to parse the timestamp",
         "D3137": "{{{message}}}",
         "D3138": "The $single() function expected exactly 1 matching result.  Instead it matched more.",
-        "D3139": "The $single() function expected exactly 1 matching result.  Instead it matched 0."
+        "D3139": "The $single() function expected exactly 1 matching result.  Instead it matched 0.",
+        "D3140": "Malformed URL passed to ${{{functionName}}}(): {{value}}"
     };
 
     /**

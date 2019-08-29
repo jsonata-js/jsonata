@@ -591,7 +591,19 @@ const functions = (() => {
             return undefined;
         }
 
-        return encodeURIComponent(str);
+        // Catch URIErrors when URI sequence is malformed
+        var returnVal;
+        try {
+            returnVal = encodeURIComponent(str);
+        } catch (e) {
+            throw {
+                code: "D3140",
+                stack: (new Error()).stack,
+                value: str,
+                functionName: "encodeUrlComponent"
+            };
+        }
+        return returnVal;
     }
 
     /**
@@ -605,7 +617,19 @@ const functions = (() => {
             return undefined;
         }
 
-        return encodeURI(str);
+        // Catch URIErrors when URI sequence is malformed
+        var returnVal;
+        try {
+            returnVal = encodeURI(str);
+        } catch (e) {
+            throw {
+                code: "D3140",
+                stack: (new Error()).stack,
+                value: str,
+                functionName: "encodeUrl"
+            };
+        }
+        return returnVal;
     }
 
     /**
@@ -619,7 +643,19 @@ const functions = (() => {
             return undefined;
         }
 
-        return decodeURIComponent(str);
+        // Catch URIErrors when URI sequence is malformed
+        var returnVal;
+        try {
+            returnVal = decodeURIComponent(str);
+        } catch (e) {
+            throw {
+                code: "D3140",
+                stack: (new Error()).stack,
+                value: str,
+                functionName: "decodeUrlComponent"
+            };
+        }
+        return returnVal;
     }
 
     /**
@@ -633,7 +669,19 @@ const functions = (() => {
             return undefined;
         }
 
-        return decodeURI(str);
+        // Catch URIErrors when URI sequence is malformed
+        var returnVal;
+        try {
+            returnVal = decodeURI(str);
+        } catch (e) {
+            throw {
+                code: "D3140",
+                stack: (new Error()).stack,
+                value: str,
+                functionName: "decodeUrl"
+            };
+        }
+        return returnVal;
     }
 
     /**

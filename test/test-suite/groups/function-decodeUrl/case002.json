@@ -1,0 +1,9 @@
+{
+    "expr": "$decodeUrl('%E0%A4%A')",
+    "dataset": "dataset5",
+    "bindings": {},
+    "error": {
+        "code": "D3140",
+        "message": "Malformed URL passed to $decodeUrl(): \"%E0%A4%A\""
+    }
+}
