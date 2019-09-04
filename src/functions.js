@@ -1594,7 +1594,8 @@ const functions = (() => {
 
         var result;
 
-        if (getFunctionArity(func) !== 2) {
+        var arity = getFunctionArity(func);
+        if (arity < 2) {
             throw {
                 stack: (new Error()).stack,
                 code: "D3050",
@@ -1612,7 +1613,14 @@ const functions = (() => {
         }
 
         while (index < sequence.length) {
-            result = yield* func.apply(this, [result, sequence[index]]);
+            var args = [result, sequence[index]];
+            if (arity >= 3) {
+                args.push(index);
+            }
+            if (arity >= 4) {
+                args.push(sequence);
+            }
+            result = yield* func.apply(this, args);
             index++;
         }
 
