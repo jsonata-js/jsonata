@@ -1,0 +1,12 @@
+(
+ $months := [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+ ];
+ $indexof := λ($array, $value) {
+  $reduce($array, λ($acc, $v, $i) {
+   $v=$value ? $i : $acc
+  })
+ };
+ $indexof($months, 'May')
+)
