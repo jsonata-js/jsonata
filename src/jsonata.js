@@ -1904,7 +1904,7 @@ var jsonata = (function() {
                 timestamp = new Date();
                 exec_env.timestamp = timestamp;
 
-                // if the input is a JSON array, then wrap it in a singleton sequence si it gets treated as a single input
+                // if the input is a JSON array, then wrap it in a singleton sequence so it gets treated as a single input
                 if(Array.isArray(input) && !isSequence(input)) {
                     input = createSequence(input);
                     input.outerWrapper = true;
