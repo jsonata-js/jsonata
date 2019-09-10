@@ -125,7 +125,7 @@ var jsonata = (function() {
         }
 
 
-        if (expr.hasOwnProperty('predicate')) {
+        if (!expr.tuple && expr.hasOwnProperty('predicate')) {
             result = yield * applyPredicates(expr.predicate, result, environment);
 
         }
@@ -175,10 +175,15 @@ var jsonata = (function() {
         }
 
         var resultSequence;
+        var tupleStream = false;
+        var tupleBindings = undefined;
 
         // evaluate each step in turn
         for(var ii = 0; ii < expr.steps.length; ii++) {
             var step = expr.steps[ii];
+            if(step.tuple) {
+                tupleStream = true;
+            }
 
             // if the first step is an explicit array constructor, then just evaluate that (i.e. don't iterate over a context array)
             if(ii === 0 && step.consarray) {
@@ -187,13 +192,53 @@ var jsonata = (function() {
                     resultSequence = createSequence(resultSequence);
                 }
             } else {
-                resultSequence = yield * evaluateStep(step, inputSequence, environment, ii === expr.steps.length - 1);
+                if(tupleBindings === undefined) {
+                    resultSequence = yield* evaluateStep(step, inputSequence, environment, ii === expr.steps.length - 1);
+
+                    if(tupleStream) {
+                        tupleBindings = buildTupleStream(tupleBindings, resultSequence, step.tuple, step.index);
+                    }
+                } else {
+                    // iterate over the input tuple to create an output tuple
+                    var outputStream = createSequence();
+                    for(var ee = 0; ee < tupleBindings.length; ee++) {
+                        var env = createFrameFromTuple(environment, tupleBindings[ee]);
+                        var bindingSequence = yield* evaluateStep(step, inputSequence, env, ii === expr.steps.length - 1);
+                        if(step.tuple) {
+                            // derive the new output tuple stream
+                            for (var bb = 0; bb < bindingSequence.length; bb++) {
+                                var tuple = {};
+                                Object.assign(tuple, tupleBindings[ee]);
+                                if (step.tuple) {
+                                    tuple[step.tuple.value] = bindingSequence[bb];
+                                }
+                                if (step.index) {
+                                    tuple[step.tuple.value] = bb;
+                                }
+                                outputStream.push(tuple);
+                            }
+                        } else {
+                            // tuple stream doesn't change, the result is the resultSequence
+                            outputStream.push(bindingSequence);
+                        }
+                    }
+                    if(step.tuple) {
+                        tupleBindings = outputStream;
+                        if(step.predicate) {
+                            tupleBindings = yield * filterTupleStream(step.predicate, inputSequence, tupleBindings, environment);
+                        }
+                    } else {
+                        resultSequence = outputStream;
+                    }
+                }
             }
 
-            if(typeof resultSequence === 'undefined' || resultSequence.length === 0) {
-                break;
+            if(typeof step.tuple === 'undefined') {
+                if (typeof resultSequence === 'undefined' || resultSequence.length === 0) {
+                    break;
+                }
+                inputSequence = resultSequence;
             }
-            inputSequence = resultSequence;
         }
 
         if(expr.keepSingletonArray) {
@@ -201,6 +246,58 @@ var jsonata = (function() {
         }
 
         return resultSequence;
+    }
+
+    function buildTupleStream(inputStream, bindingSequence, tupleVar, indexVar) {
+        var result = [];
+        if(inputStream === undefined) {
+            for(var ii = 0; ii < bindingSequence.length; ii++) {
+                const tuple = {};
+                if(tupleVar) {
+                    tuple[tupleVar.value] = bindingSequence[ii];
+                }
+                if(indexVar) {
+                    tuple[indexVar.value] = ii;
+                }
+                result.push(tuple);
+            }
+        } else {
+            for(var jj = 0; jj < inputStream.length; jj++) {
+                for(ii = 0; ii < bindingSequence.length; ii++) {
+                    const tuple = {};
+                    Object.assign(tuple, inputStream[jj]);
+                    if(tupleVar) {
+                        tuple[tupleVar.value] = bindingSequence[ii];
+                    }
+                    if(indexVar) {
+                        tuple[indexVar.value] = ii;
+                    }
+                    result.push(tuple);
+                }
+            }
+        }
+        return result;
+    }
+
+    function createFrameFromTuple(environment, tuple) {
+        var frame = createFrame(environment);
+        for(const prop in tuple) {
+            frame.bind(prop, tuple[prop]);
+        }
+        return frame;
+    }
+
+    function* filterTupleStream(predicates, input, tupleStream, environment) {
+        var predicate = predicates[0]; // TODO loop over all of them
+        var results = createSequence();
+        for(var ii = 0; ii < tupleStream.length; ii++) {
+            var env = createFrameFromTuple(environment, tupleStream[ii]);
+            var res = yield* evaluate(predicate, input, env);
+            if(res) {
+                results.push(tupleStream[ii]);
+            }
+        }
+        return results;
     }
 
     /**
@@ -338,7 +435,7 @@ var jsonata = (function() {
                 case '=':
                 case '!=':
                     result = evaluateEqualityExpression(lhs, rhs, op);
-                    break
+                    break;
                 case '<':
                 case '<=':
                 case '>':
