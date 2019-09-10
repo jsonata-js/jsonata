@@ -18,8 +18,8 @@ const parser = (() => {
         '(': 80,
         ')': 0,
         ',': 0,
-        '@': 75,
-        '#': 70,
+        '@': 80,
+        '#': 80,
         ';': 80,
         ':': 80,
         '?': 20,
@@ -782,8 +782,26 @@ const parser = (() => {
             this.rhs = expression(operators[':='] - 1); // subtract 1 from bindingPower for right associative operators
             this.type = "binary";
             return this;
+        });
+
+        // tuple variable bind
+        infix("@", operators['@'], function (left) {
+            this.lhs = left;
+            this.rhs = expression(operators['@']);
+            if(this.rhs.type !== 'variable') {
+                return handleError({
+                    code: "S0212",
+                    stack: (new Error()).stack,
+                    position: this.rhs.position,
+                    token: this.rhs.value
+                });
+            }
+            this.type = "binary";
+            return this;
 
         });
+
+        infix("#"); // tuple position bind
 
         // if/then/else ternary operator ?:
         infix("?", operators['?'], function (left) {
@@ -964,6 +982,14 @@ const parser = (() => {
                             result.lhs = ast_optimize(expr.lhs);
                             result.rhs = ast_optimize(expr.rhs);
                             break;
+                        case '@':
+                            expr.lhs.tuple = expr.rhs;
+                            result = ast_optimize(expr.lhs);
+                            break;
+                        case '#':
+                            expr.lhs.index = expr.rhs;
+                            result = ast_optimize(expr.lhs);
+                            break;
                         case '~>':
                             result = {type: 'apply', value: expr.value, position: expr.position};
                             result.lhs = ast_optimize(expr.lhs);
@@ -1041,6 +1067,12 @@ const parser = (() => {
                         }
                         return part;
                     });
+                    if(expr.tuple) {
+                        result.tuple = expr.tuple;
+                    }
+                    if(expr.index) {
+                        result.index = expr.index;
+                    }
                     // TODO scan the array of expressions to see if any of them assign variables
                     // if so, need to mark the block as one that needs to create a new frame
                     break;

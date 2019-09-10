@@ -1,0 +1,40 @@
+[
+    {
+        "expr-file": "library-joins001.jsonata",
+        "dataset": "library",
+        "bindings": {},
+        "result": [
+            {
+                "title": "Structure and Interpretation of Computer Programs",
+                "customer": "10001"
+            },
+            {
+                "title": "Compilers: Principles, Techniques, and Tools",
+                "customer": "10003"
+            },
+            {
+                "title": "Structure and Interpretation of Computer Programs",
+                "customer": "10003"
+            }
+        ]
+    },
+    {
+        "expr-file": "library-joins002.jsonata",
+        "dataset": "library",
+        "bindings": {},
+        "result": [
+            {
+                "title": "Structure and Interpretation of Computer Programs",
+                "customer": "10001"
+            },
+            {
+                "title": "Compilers: Principles, Techniques, and Tools",
+                "customer": "10003"
+            },
+            {
+                "title": "Structure and Interpretation of Computer Programs",
+                "customer": "10003"
+            }
+        ]
+    }
+]
