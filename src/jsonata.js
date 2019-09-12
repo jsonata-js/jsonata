@@ -124,12 +124,8 @@ var jsonata = (function() {
         }
 
 
-        if (!expr.tuple && expr.hasOwnProperty('predicate')) {
+        if (expr.hasOwnProperty('predicate')) {
             result = yield * applyPredicates(expr.predicate, result, environment);
-
-        }
-        if (expr.hasOwnProperty('group')) {
-            result = yield * evaluateGroupExpression(expr.group, result, environment);
         }
 
         var exitCallback = environment.lookup('__evaluate_exit');
@@ -174,14 +170,14 @@ var jsonata = (function() {
         }
 
         var resultSequence;
-        var tupleStream = false;
+        var isTupleStream = false;
         var tupleBindings = undefined;
 
         // evaluate each step in turn
         for(var ii = 0; ii < expr.steps.length; ii++) {
             var step = expr.steps[ii];
-            if(step.tuple) {
-                tupleStream = true;
+            if(step.tuple || step.index) {
+                isTupleStream = true;
             }
 
             // if the first step is an explicit array constructor, then just evaluate that (i.e. don't iterate over a context array)
@@ -191,44 +187,10 @@ var jsonata = (function() {
                     resultSequence = createSequence(resultSequence);
                 }
             } else {
-                if(tupleBindings === undefined) {
-                    resultSequence = yield* evaluateStep(step, inputSequence, environment, ii === expr.steps.length - 1);
-
-                    if(tupleStream) {
-                        tupleBindings = buildTupleStream(tupleBindings, resultSequence, step.tuple, step.index);
-                    }
+                if(isTupleStream) {
+                    tupleBindings = yield * evaluateTupleStep(step, inputSequence, tupleBindings, environment);
                 } else {
-                    // iterate over the input tuple to create an output tuple
-                    var outputStream = createSequence();
-                    for(var ee = 0; ee < tupleBindings.length; ee++) {
-                        var env = createFrameFromTuple(environment, tupleBindings[ee]);
-                        var bindingSequence = yield* evaluateStep(step, inputSequence, env, ii === expr.steps.length - 1);
-                        if(step.tuple) {
-                            // derive the new output tuple stream
-                            for (var bb = 0; bb < bindingSequence.length; bb++) {
-                                var tuple = {};
-                                Object.assign(tuple, tupleBindings[ee]);
-                                if (step.tuple) {
-                                    tuple[step.tuple.value] = bindingSequence[bb];
-                                }
-                                if (step.index) {
-                                    tuple[step.tuple.value] = bb;
-                                }
-                                outputStream.push(tuple);
-                            }
-                        } else {
-                            // tuple stream doesn't change, the result is the resultSequence
-                            outputStream.push(bindingSequence);
-                        }
-                    }
-                    if(step.tuple) {
-                        tupleBindings = outputStream;
-                        if(step.predicate) {
-                            tupleBindings = yield * filterTupleStream(step.predicate, inputSequence, tupleBindings, environment);
-                        }
-                    } else {
-                        resultSequence = outputStream;
-                    }
+                    resultSequence = yield * evaluateStep(step, inputSequence, environment, ii === expr.steps.length - 1);
                 }
             }
 
@@ -240,42 +202,22 @@ var jsonata = (function() {
             }
         }
 
+        if(isTupleStream) {
+            resultSequence = createSequence();
+            for(ii = 0; ii < tupleBindings.length; ii++) {
+                resultSequence.push(tupleBindings[ii]['@']);
+            }
+        }
+
         if(expr.keepSingletonArray) {
             resultSequence.keepSingleton = true;
         }
 
-        return resultSequence;
-    }
-
-    function buildTupleStream(inputStream, bindingSequence, tupleVar, indexVar) {
-        var result = [];
-        if(inputStream === undefined) {
-            for(var ii = 0; ii < bindingSequence.length; ii++) {
-                const tuple = {};
-                if(tupleVar) {
-                    tuple[tupleVar.value] = bindingSequence[ii];
-                }
-                if(indexVar) {
-                    tuple[indexVar.value] = ii;
-                }
-                result.push(tuple);
-            }
-        } else {
-            for(var jj = 0; jj < inputStream.length; jj++) {
-                for(ii = 0; ii < bindingSequence.length; ii++) {
-                    const tuple = {};
-                    Object.assign(tuple, inputStream[jj]);
-                    if(tupleVar) {
-                        tuple[tupleVar.value] = bindingSequence[ii];
-                    }
-                    if(indexVar) {
-                        tuple[indexVar.value] = ii;
-                    }
-                    result.push(tuple);
-                }
-            }
+        if (expr.hasOwnProperty('group')) {
+            resultSequence = yield * evaluateGroupExpression(expr.group, isTupleStream ? tupleBindings : resultSequence, environment);
         }
-        return result;
+
+        return resultSequence;
     }
 
     function createFrameFromTuple(environment, tuple) {
@@ -284,19 +226,6 @@ var jsonata = (function() {
             frame.bind(prop, tuple[prop]);
         }
         return frame;
-    }
-
-    function* filterTupleStream(predicates, input, tupleStream, environment) {
-        var predicate = predicates[0]; // TODO loop over all of them
-        var results = createSequence();
-        for(var ii = 0; ii < tupleStream.length; ii++) {
-            var env = createFrameFromTuple(environment, tupleStream[ii]);
-            var res = yield* evaluate(predicate, input, env);
-            if(res) {
-                results.push(tupleStream[ii]);
-            }
-        }
-        return results;
     }
 
     /**
@@ -334,6 +263,56 @@ var jsonata = (function() {
         }
 
         return resultSequence;
+    }
+
+    /**
+     * Evaluate a step within a path
+     * @param {Object} expr - JSONata expression
+     * @param {Object} input - Input data to evaluate against
+     * @param {Object} tupleBindings - The tuple stream
+     * @param {Object} environment - Environment
+     * @returns {*} Evaluated input data
+     */
+    function* evaluateTupleStep(expr, input, tupleBindings, environment) {
+        var result = createSequence();
+        result.tupleStream = true;
+        var stepEnv = environment;
+        if(tupleBindings === undefined) {
+            tupleBindings = [{'@': input}];
+        }
+
+        for(var ee = 0; ee < tupleBindings.length; ee++) {
+            stepEnv = createFrameFromTuple(environment, tupleBindings[ee]);
+            if(expr.tuple) {
+                stepEnv.tuple = expr.tuple.value;
+                stepEnv.context = tupleBindings[ee]['@'];
+            }
+            var res = yield* evaluate(expr, tupleBindings[ee]['@'], stepEnv);
+            // res is the binding sequence for the output tuple stream
+            if(typeof res !== 'undefined') {
+                if (!Array.isArray(res)) {
+                    res = [res];
+                }
+                for (var bb = 0; bb < res.length; bb++) {
+                    var tuple = {};
+                    if (tupleBindings[ee] !== null) {
+                        Object.assign(tuple, tupleBindings[ee]);
+                    }
+                    if (expr.tuple) {
+                        tuple[expr.tuple.value] = res[bb];
+                        tuple['@'] = input;
+                    } else {
+                        tuple['@'] = res[bb];
+                    }
+                    if (expr.index) {
+                        tuple[expr.index.value] = bb;
+                    }
+                    result.push(tuple);
+                }
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -386,7 +365,12 @@ var jsonata = (function() {
         var results = createSequence();
         for(var index = 0; index < input.length; index++) {
             var item = input[index];
-            var res = yield * evaluate(predicate, item, environment);
+            var context = item;
+            if(environment.tuple) {
+                environment.bind(environment.tuple, item);
+                context = environment.context;
+            }
+            var res = yield * evaluate(predicate, context, environment);
             if (isNumeric(res)) {
                 res = [res];
             }
@@ -911,6 +895,87 @@ var jsonata = (function() {
 
         return result;
     }
+
+    // /**
+    //  * Evaluate group expression against input data
+    //  * @param {Object} expr - JSONata expression
+    //  * @param {Object} input - Input data to evaluate against
+    //  * @param {Object} environment - Environment
+    //  * @returns {{}} Evaluated input data
+    //  */
+    // function* evaluateGroupExpression(expr, input, environment) {
+    //     var result = {};
+    //     var groups = {};
+    //     // group the input sequence by 'key' expression
+    //     if (!Array.isArray(input)) {
+    //         input = createSequence(input);
+    //     }
+    //
+    //     for(var itemIndex = 0; itemIndex < input.length; itemIndex++) {
+    //         var item = input[itemIndex];
+    //         var env = environment;
+    //         if(input.tupleStream) {
+    //             env = createFrameFromTuple(environment, item);
+    //             item = item['@'];
+    //         }
+    //         for(var pairIndex = 0; pairIndex < expr.lhs.length; pairIndex++) {
+    //             var pair = expr.lhs[pairIndex];
+    //             var key = yield * evaluate(pair[0], item, env);
+    //             // key has to be a string
+    //             if (typeof  key !== 'string') {
+    //                 throw {
+    //                     code: "T1003",
+    //                     stack: (new Error()).stack,
+    //                     position: expr.position,
+    //                     value: key
+    //                 };
+    //             }
+    //             var entry = [{data: item, exprIndex: pairIndex, env: env}];
+    //             if (groups.hasOwnProperty(key)) {
+    //                 // a value already exists in this slot
+    //                 if(groups[key][0].exprIndex !== pairIndex) {
+    //                     // this key has been generated by another expression in this group
+    //                     // when multiple key expressions evaluate to the same key, then error D1009 must be thrown
+    //                     throw {
+    //                         code: "D1009",
+    //                         stack: (new Error()).stack,
+    //                         position: expr.position,
+    //                         value: key
+    //                     };
+    //                 }
+    //
+    //                 // append it as an array
+    //                 groups[key] = fn.append(groups[key], entry);
+    //             } else {
+    //                 groups[key] = entry;
+    //             }
+    //         }
+    //     }
+    //
+    //     // iterate over the groups to evaluate the 'value' expression
+    //     for (key in groups) {
+    //         var entries = groups[key];
+    //         var value = createSequence();
+    //         for(var ii = 0; ii < entries.length; ii++) {
+    //             var entry = entries[ii];
+    //             var val = yield* evaluate(expr.lhs[entry.exprIndex][1], entry.data, entry.env);
+    //             if(typeof val !== 'undefined') {
+    //                 value.push(val);
+    //                 if(val && val.keepSingleton) {
+    //                     value.keepSingleton = true;
+    //                 }
+    //             }
+    //         }
+    //
+    //         if(value.length === 1 && !value.keepSingleton) {
+    //             result[key] = value[0];
+    //         } else if(value.length >= 1) {
+    //             result[key] = value;
+    //         }
+    //     }
+    //
+    //     return result;
+    // }
 
     /**
      * Evaluate range expression against input data
