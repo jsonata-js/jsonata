@@ -798,10 +798,23 @@ const parser = (() => {
             }
             this.type = "binary";
             return this;
-
         });
 
-        infix("#"); // tuple position bind
+        // tuple position bind
+        infix("#", operators['#'], function (left) {
+            this.lhs = left;
+            this.rhs = expression(operators['#']);
+            if(this.rhs.type !== 'variable') {
+                return handleError({
+                    code: "S0212",
+                    stack: (new Error()).stack,
+                    position: this.rhs.position,
+                    token: this.rhs.value
+                });
+            }
+            this.type = "binary";
+            return this;
+        });
 
         // if/then/else ternary operator ?:
         infix("?", operators['?'], function (left) {

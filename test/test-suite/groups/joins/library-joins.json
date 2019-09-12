@@ -36,5 +36,11 @@
                 "customer": "10003"
             }
         ]
+    },
+    {
+        "expr": "library.books#$pos.$[$substring(title,0,3) = 'The'].$pos",
+        "dataset": "library",
+        "bindings": {},
+        "result": [1,2]
     }
 ]
