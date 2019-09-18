@@ -784,7 +784,7 @@ const parser = (() => {
             return this;
         });
 
-        // tuple variable bind
+        // focus variable bind
         infix("@", operators['@'], function (left) {
             this.lhs = left;
             this.rhs = expression(operators['@']);
@@ -800,7 +800,7 @@ const parser = (() => {
             return this;
         });
 
-        // tuple position bind
+        // index (position) variable bind
         infix("#", operators['#'], function (left) {
             this.lhs = left;
             this.rhs = expression(operators['#']);
@@ -942,8 +942,10 @@ const parser = (() => {
                             // RHS is the predicate expr
                             result = ast_optimize(expr.lhs);
                             var step = result;
+                            var type = 'predicate';
                             if (result.type === 'path') {
                                 step = result.steps[result.steps.length - 1];
+                                type = 'stages';
                             }
                             if (typeof step.group !== 'undefined') {
                                 throw {
@@ -952,10 +954,10 @@ const parser = (() => {
                                     position: expr.position
                                 };
                             }
-                            if (typeof step.predicate === 'undefined') {
-                                step.predicate = [];
+                            if (typeof step[type] === 'undefined') {
+                                step[type] = [];
                             }
-                            step.predicate.push(ast_optimize(expr.rhs));
+                            step[type].push({type: 'filter', expr: ast_optimize(expr.rhs), position: expr.position});
                             break;
                         case '{':
                             // group-by
@@ -996,12 +998,28 @@ const parser = (() => {
                             result.rhs = ast_optimize(expr.rhs);
                             break;
                         case '@':
-                            expr.lhs.tuple = expr.rhs;
                             result = ast_optimize(expr.lhs);
+                            step = result;
+                            if (result.type === 'path') {
+                                step = result.steps[result.steps.length - 1];
+                            }
+                            // TODO throw error if there are any predicates defined at this point
+                            step.focus = expr.rhs.value;
+                            step.tuple = true;
                             break;
                         case '#':
-                            expr.lhs.index = expr.rhs;
                             result = ast_optimize(expr.lhs);
+                            step = result;
+                            if (result.type === 'path') {
+                                step = result.steps[result.steps.length - 1];
+                            }
+                            if (typeof step.stages === 'undefined') {
+                                step.index = expr.rhs.value;
+                            } else {
+                                // step.stages[step.stages.length - 1] = {type: 'index', value: expr.rhs.value, position: expr.position};
+                                step.stages.push({type: 'index', value: expr.rhs.value, position: expr.position});
+                            }
+                            step.tuple = true;
                             break;
                         case '~>':
                             result = {type: 'apply', value: expr.value, position: expr.position};
@@ -1080,12 +1098,6 @@ const parser = (() => {
                         }
                         return part;
                     });
-                    if(expr.tuple) {
-                        result.tuple = expr.tuple;
-                    }
-                    if(expr.index) {
-                        result.index = expr.index;
-                    }
                     // TODO scan the array of expressions to see if any of them assign variables
                     // if so, need to mark the block as one that needs to create a new frame
                     break;

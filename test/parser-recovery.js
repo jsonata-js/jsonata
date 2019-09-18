@@ -22,11 +22,15 @@ describe('Invoke parser with valid expression', function() {
                         "value": "Order",
                         "type": "name",
                         "position": 13,
-                        "predicate": [
+                        "stages": [
                             {
-                                "value": 0,
-                                "type": "number",
-                                "position": 15
+                                "expr": {
+                                    "value": 0,
+                                    "type": "number",
+                                    "position": 15
+                                },
+                                "position": 14,
+                                "type": "filter"
                             }
                         ]
                     }
@@ -87,14 +91,17 @@ describe('Invoke parser with incomplete expression', function() {
                         "value": "Account",
                         "type": "name",
                         "position": 7,
-                        "predicate": [
+                        "stages": [
                             {
+                                "expr": {
                                 "type": "error",
                                 "error": {
                                     "code": "S0207",
                                     "position": 8,
                                     "token": "(end)"
-                                }
+                                }                                },
+                                "position": 8,
+                                "type": "filter"
                             }
                         ]
                     }
@@ -136,18 +143,22 @@ describe('Invoke parser with incomplete expression', function() {
                         "value": "Order",
                         "type": "name",
                         "position": 13,
-                        "predicate": [
+                        "stages": [
                             {
-                                "code": "S0211",
-                                "token": ";",
-                                "position": 15,
-                                "remaining": [
-                                    {"value": 0, "type": "number", "position": 16},
-                                    {"type": "operator", "value": "]", "position": 17},
-                                    {"type": "operator", "value": ".", "position": 18},
-                                    {"type": "name", "value": "Product", "position": 25}
-                                ],
-                                "type": "error"
+                                "expr": {
+                                    "code": "S0211",
+                                    "token": ";",
+                                    "position": 15,
+                                    "remaining": [
+                                        {"value": 0, "type": "number", "position": 16},
+                                        {"type": "operator", "value": "]", "position": 17},
+                                        {"type": "operator", "value": ".", "position": 18},
+                                        {"type": "name", "value": "Product", "position": 25}
+                                    ],
+                                    "type": "error"
+                                },
+                                "position": 14,
+                                "type": "filter"
                             }
                         ]
                     }
@@ -202,11 +213,15 @@ describe('Invoke parser with incomplete expression', function() {
                         "value": "Order",
                         "type": "name",
                         "position": 13,
-                        "predicate": [
+                        "stages": [
                             {
-                                "value": 0,
-                                "type": "number",
-                                "position": 15
+                                "expr": {
+                                    "value": 0,
+                                    "type": "number",
+                                    "position": 15
+                                },
+                                "position": 14,
+                                "type": "filter"
                             }
                         ]
                     }
@@ -248,11 +263,15 @@ describe('Invoke parser with incomplete expression', function() {
                         "value": "Order",
                         "type": "name",
                         "position": 13,
-                        "predicate": [
+                        "stages": [
                             {
-                                "value": 0,
-                                "type": "number",
-                                "position": 15
+                                "expr": {
+                                    "value": 0,
+                                    "type": "number",
+                                    "position": 15
+                                },
+                                "position": 14,
+                                "type": "filter"
                             }
                         ]
                     },
@@ -301,9 +320,13 @@ describe('Invoke parser with incomplete expression', function() {
                             "position": 12,
                             "predicate": [
                                 {
-                                    "value": 0,
-                                    "type": "number",
-                                    "position": 14
+                                    "expr": {
+                                        "value": 0,
+                                        "type": "number",
+                                        "position": 14
+                                    },
+                                    "position": 13,
+                                    "type": "filter"
                                 }
                             ]
                         },
@@ -351,12 +374,16 @@ describe('Invoke parser with incomplete expression', function() {
                             "type": "error",
                             "predicate": [
                                 {
-                                    "type": "error",
-                                    "error": {
-                                        "code": "S0207",
-                                        "position": 46,
-                                        "token": "(end)"
-                                    }
+                                    "expr": {
+                                        "type": "error",
+                                        "error": {
+                                            "code": "S0207",
+                                            "position": 46,
+                                            "token": "(end)"
+                                        }
+                                    },
+                                    "position": 39,
+                                    "type": "filter"
                                 }
                             ]
                         }
@@ -370,12 +397,16 @@ describe('Invoke parser with incomplete expression', function() {
                     "position": 38,
                     "predicate": [
                         {
-                            "error": {
-                                "code": "S0207",
-                                "position": 46,
-                                "token": "(end)"
+                            "expr": {
+                                "error": {
+                                    "code": "S0207",
+                                    "position": 46,
+                                    "token": "(end)"
+                                },
+                                "type": "error"
                             },
-                            "type": "error"
+                            "position": 39,
+                            "type": "filter"
                         }
                     ],
                     "remaining": [

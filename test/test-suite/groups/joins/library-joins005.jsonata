@@ -1,0 +1,8 @@
+library.loans@$l#$il.books@$b#$ib[$l.isbn=$b.isbn].customers@$c#$ic[$l.customer=$c.id].{
+  'title': $b.title,
+  'customer': $l.customer,
+  'name': $c.name,
+  'loan-index': $il,
+  'book-index': $ib,
+  'customer-index': $ic
+}
