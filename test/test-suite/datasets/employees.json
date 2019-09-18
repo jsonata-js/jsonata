@@ -1,0 +1,78 @@
+{
+    "Employee": [
+        {
+            "SSN": "496913021",
+            "FirstName": "Fred",
+            "Surname": "Smith"
+        },
+        {
+            "SSN": "496737199",
+            "FirstName": "Darren",
+            "Surname": "Cruse"
+        },
+        {
+            "SSN": "496306525",
+            "FirstName": "Hugh",
+            "Surname": "Jones"
+        }
+    ],
+    "Contact": [
+        {
+            "ssn": "496913021",
+            "Phone": [
+                {
+                    "type": "home",
+                    "number": "0203 544 1234"
+                },
+                {
+                    "type": "office",
+                    "number": "01962 001234"
+                },
+                {
+                    "type": "mobile",
+                    "number": "077 7700 1234"
+                }
+            ]
+        },
+        {
+            "ssn": "496737199",
+            "Phone": [
+                {
+                    "type": "home",
+                    "number": "3146458343"
+                },
+                {
+                    "type": "mobile",
+                    "number": "315 782 9279"
+                }
+            ]
+        },
+        {
+            "ssn": "496306525",
+            "Phone": [
+                {
+                    "type": "home",
+                    "number": "0280 564 6543"
+                }
+            ]
+        },
+        {
+            "ssn": "496306525",
+            "Phone": [
+                {
+                    "type": "office",
+                    "number": "0280 864 8643"
+                }
+            ]
+        },
+        {
+            "ssn": "496306525",
+            "Phone": [
+                {
+                    "type": "mobile",
+                    "number": "07735 853535"
+                }
+            ]
+        }
+    ]
+}
