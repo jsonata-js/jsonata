@@ -104,9 +104,6 @@ var jsonata = (function() {
             case 'apply':
                 result = yield * evaluateApplyExpression(expr, input, environment);
                 break;
-            case 'sort':
-                result = yield * evaluateSortExpression(expr, input, environment);
-                break;
             case 'transform':
                 result = evaluateTransformExpression(expr, input, environment);
                 break;
@@ -262,13 +259,29 @@ var jsonata = (function() {
      * @returns {*} Evaluated input data
      */
     function* evaluateStep(expr, input, environment, lastStep) {
-        var result = createSequence();
+        var result;
+        if(expr.type === 'sort') {
+             result = yield* evaluateSortExpression(expr, input, environment);
+             if(expr.stages) {
+                 result = yield* evaluateStages(expr.stages, result, environment);
+             }
+             return result;
+        }
+
+        result = createSequence();
 
         for(var ii = 0; ii < input.length; ii++) {
             var res = yield * evaluate(expr, input[ii], environment);
             if(expr.stages) {
-                for(var jj = 0; jj < expr.stages.length; jj++) {
-                    res = yield * evaluateFilter(expr.stages[jj].expr, res, environment);
+                //res = yield* evaluateStages(expr.stages, res, environment);
+                for(var ss = 0; ss < expr.stages.length; ss++) {
+                    // TODO this assumes all stages are filters - need to handle index and sort stages
+                    var stage = expr.stages[ss];
+                    switch(stage.type) {
+                        case 'filter':
+                            res = yield* evaluateFilter(stage.expr, res, environment);
+                            break;
+                    }
                 }
             }
             if(typeof res !== 'undefined') {
@@ -295,6 +308,23 @@ var jsonata = (function() {
         return resultSequence;
     }
 
+    function* evaluateStages(stages, input, environment) {
+        var result = input;
+        for(var ss = 0; ss < stages.length; ss++) {
+            // TODO this assumes all stages are filters - need to handle index and sort stages
+            var stage = stages[ss];
+            switch(stage.type) {
+                case 'filter':
+                    result = yield* evaluateFilter(stage.expr, result, environment);
+                    break;
+            }
+        }
+        if(typeof result !== 'undefined' && !Array.isArray(result)) {
+            result = createSequence(result);
+        }
+        return result;
+    }
+
     /**
      * Evaluate a step within a path
      * @param {Object} expr - JSONata expression
@@ -304,7 +334,16 @@ var jsonata = (function() {
      * @returns {*} Evaluated input data
      */
     function* evaluateTupleStep(expr, input, tupleBindings, environment) {
-        var result = createSequence();
+        var result;
+        if(expr.type === 'sort') {
+            result = yield* evaluateSortExpression(expr, tupleBindings, environment);
+            // if(expr.stages) {
+            //     result = yield* evaluateStages(expr.stages, result, environment);
+            // }
+            return result;
+        }
+
+        result = createSequence();
         result.tupleStream = true;
         var stepEnv = environment;
         if(tupleBindings === undefined) {
@@ -1114,19 +1153,33 @@ var jsonata = (function() {
         var result;
 
         // evaluate the lhs, then sort the results in order according to rhs expression
-        var lhs = yield * evaluate(expr.lhs, input, environment);
+        //var lhs = yield * evaluate(expr.lhs, input, environment);
+        var lhs = input;
+        var isTupleSort = input.tupleStream ? true : false;
 
         // sort the lhs array
         // use comparator function
         var comparator = function*(a, b) { // eslint-disable-line require-yield
-            // expr.rhs is an array of order-by in priority order
+            // expr.terms is an array of order-by in priority order
             var comp = 0;
-            for(var index = 0; comp === 0 && index < expr.rhs.length; index++) {
-                var term = expr.rhs[index];
-                //evaluate the rhs expression in the context of a
-                var aa = yield * evaluate(term.expression, a, environment);
-                //evaluate the rhs expression in the context of b
-                var bb = yield * evaluate(term.expression, b, environment);
+            for(var index = 0; comp === 0 && index < expr.terms.length; index++) {
+                var term = expr.terms[index];
+                //evaluate the sort term in the context of a
+                var context = a;
+                var env = environment;
+                if(isTupleSort) {
+                    context = a['@'];
+                    env = createFrameFromTuple(environment, a);
+                }
+                var aa = yield * evaluate(term.expression, context, env);
+                //evaluate the sort term in the context of b
+                context = b;
+                env = environment;
+                if(isTupleSort) {
+                    context = b['@'];
+                    env = createFrameFromTuple(environment, b);
+                }
+                var bb = yield * evaluate(term.expression, context, env);
 
                 // type checks
                 var atype = typeof aa;
