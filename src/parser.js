@@ -790,7 +790,7 @@ const parser = (() => {
             this.rhs = expression(operators['@']);
             if(this.rhs.type !== 'variable') {
                 return handleError({
-                    code: "S0212",
+                    code: "S0212",  // TODO new error code for this
                     stack: (new Error()).stack,
                     position: this.rhs.position,
                     token: this.rhs.value
@@ -806,7 +806,7 @@ const parser = (() => {
             this.rhs = expression(operators['#']);
             if(this.rhs.type !== 'variable') {
                 return handleError({
-                    code: "S0212",
+                    code: "S0212",  // TODO new error code for this
                     stack: (new Error()).stack,
                     position: this.rhs.position,
                     token: this.rhs.value
@@ -983,14 +983,17 @@ const parser = (() => {
                             // order-by
                             // LHS is the array to be ordered
                             // RHS defines the terms
-                            result = {type: 'sort', value: expr.value, position: expr.position, consarray: true};
-                            result.lhs = ast_optimize(expr.lhs);
-                            result.rhs = expr.rhs.map(function (terms) {
+                            result = ast_optimize(expr.lhs);
+                            var tms = expr.rhs.map(function (terms) {
                                 return {
                                     descending: terms.descending,
                                     expression: ast_optimize(terms.expression)
                                 };
                             });
+                            if (result.type !== 'path') {
+                                result = {type: 'path', steps: [result]};
+                            }
+                            result.steps.push({type: 'sort', terms: tms, position: expr.position, consarray: true});
                             break;
                         case ':=':
                             result = {type: 'bind', value: expr.value, position: expr.position};
@@ -1016,7 +1019,6 @@ const parser = (() => {
                             if (typeof step.stages === 'undefined') {
                                 step.index = expr.rhs.value;
                             } else {
-                                // step.stages[step.stages.length - 1] = {type: 'index', value: expr.rhs.value, position: expr.position};
                                 step.stages.push({type: 'index', value: expr.rhs.value, position: expr.position});
                             }
                             step.tuple = true;
