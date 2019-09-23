@@ -110,16 +110,15 @@ var jsonata = (function() {
                 break;
         }
 
-        if(environment.async) {
-            if (typeof result === 'undefined' || result === null || typeof result.then !== 'function') {
-                result = Promise.resolve(result);
-            }
-            if (typeof result.then === 'function' && expr.nextFunction && typeof result[expr.nextFunction] === 'function') {
-                // although this is a 'thenable', it is chaining a different function
-                // so don't yield since yielding will trigger the .then()
-            } else {
-                result = yield result;
-            }
+        if(environment.async &&
+            (typeof result === 'undefined' || result === null || typeof result.then !== 'function')) {
+            result = Promise.resolve(result);
+        }
+        if(environment.async && typeof result.then === 'function' && expr.nextFunction && typeof result[expr.nextFunction] === 'function') {
+            // although this is a 'thenable', it is chaining a different function
+            // so don't yield since yielding will trigger the .then()
+        } else {
+            result = yield result;
         }
 
         if (expr.hasOwnProperty('predicate')) {
@@ -188,9 +187,6 @@ var jsonata = (function() {
             // if the first step is an explicit array constructor, then just evaluate that (i.e. don't iterate over a context array)
             if(ii === 0 && step.consarray) {
                 resultSequence = yield * evaluate(step, inputSequence, environment);
-                if(!Array.isArray(resultSequence)) {
-                    resultSequence = createSequence(resultSequence);
-                }
             } else {
                 if(isTupleStream) {
                     tupleBindings = yield * evaluateTupleStep(step, inputSequence, tupleBindings, environment);
@@ -233,22 +229,6 @@ var jsonata = (function() {
             frame.bind(prop, tuple[prop]);
         }
         return frame;
-    }
-
-    function reduceTupleStream(tupleStream) {
-        if(!Array.isArray(tupleStream)) {
-            return tupleStream;
-        }
-        var result = {};
-        if(tupleStream.length > 0) {
-            Object.assign(result, tupleStream[0]);
-            for(var ii = 1; ii < tupleStream.length; ii++) {
-                for(const prop in tupleStream[ii]) {
-                    result[prop] = fn.append(result[prop], tupleStream[ii][prop]);
-                }
-            }
-        }
-        return result;
     }
 
     /**
@@ -340,9 +320,7 @@ var jsonata = (function() {
                 result.tupleStream = true;
                 for(var ss = 0; ss < sorted.length; ss++) {
                     var tuple = {'@': sorted[ss]};
-                    if(expr.index) {
-                        tuple[expr.index] = ss;
-                    }
+                    tuple[expr.index] = ss;
                     result.push(tuple);
                 }
             }
@@ -963,6 +941,20 @@ var jsonata = (function() {
             }
         }
 
+        return result;
+    }
+
+    function reduceTupleStream(tupleStream) {
+        if(!Array.isArray(tupleStream)) {
+            return tupleStream;
+        }
+        var result = {};
+        Object.assign(result, tupleStream[0]);
+        for(var ii = 1; ii < tupleStream.length; ii++) {
+            for(const prop in tupleStream[ii]) {
+                result[prop] = fn.append(result[prop], tupleStream[ii][prop]);
+            }
+        }
         return result;
     }
 
@@ -1915,6 +1907,8 @@ var jsonata = (function() {
         "S0212": "The left side of := must be a variable name (start with $)",
         "S0213": "The literal value {{value}} cannot be used as a step within a path expression",
         "S0214": "The right side of {{token}} must be a variable name (start with $)",
+        "S0215": "A context variable binding must precede any predicates on a step",
+        "S0216": "A context variable binding must precede the 'order-by' clause on a step",
         "S0301": "Empty regular expressions are not allowed",
         "S0302": "No terminating / in regular expression",
         "S0402": "Choice groups containing parameterized types are not supported",
