@@ -170,5 +170,31 @@
                 "ib2": 2
             }
         ]
+    },
+    {
+        "expr-file": "library-joins008.jsonata",
+        "dataset": "library",
+        "bindings": {},
+        "result": {
+            "title": "Compilers: Principles, Techniques, and Tools",
+            "customer": "10003"
+        }
+    },
+    {
+        "expr-file": "library-joins009.jsonata",
+        "dataset": "library",
+        "bindings": {},
+        "undefinedResult": true
+    },
+    {
+        "expr-file": "library-joins010.jsonata",
+        "dataset": "library",
+        "bindings": {},
+        "result": [
+            {
+                "title": "Compilers: Principles, Techniques, and Tools",
+                "customer": "10003"
+            }
+        ]
     }
 ]

@@ -1,0 +1,17 @@
+[
+    {
+        "expr": "Account.Order@o.Product",
+        "dataset": null,
+        "bindings": {},
+        "code": "S0214",
+        "token": "@"
+    },
+    {
+        "expr": "Account.Order@$o#i.Product",
+        "dataset": null,
+        "bindings": {},
+        "code": "S0214",
+        "token": "#"
+    }
+
+]
