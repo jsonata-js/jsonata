@@ -997,7 +997,7 @@ const parser = (() => {
                             if (result.type !== 'path') {
                                 result = {type: 'path', steps: [result]};
                             }
-                            result.steps.push({type: 'sort', terms: tms, position: expr.position, consarray: true});
+                            result.steps.push({type: 'sort', terms: tms, position: expr.position});
                             break;
                         case ':=':
                             result = {type: 'bind', value: expr.value, position: expr.position};
@@ -1010,7 +1010,23 @@ const parser = (() => {
                             if (result.type === 'path') {
                                 step = result.steps[result.steps.length - 1];
                             }
-                            // TODO throw error if there are any predicates defined at this point
+                            // throw error if there are any predicates defined at this point
+                            // at this point the only type of stages can be predicates
+                            if(typeof step.stages !== 'undefined') {
+                                throw {
+                                    code: "S0215",
+                                    stack: (new Error()).stack,
+                                    position: expr.position
+                                };
+                            }
+                            // also throw if this is applied after an 'order-by' clause
+                            if(step.type === 'sort') {
+                                throw {
+                                    code: "S0216",
+                                    stack: (new Error()).stack,
+                                    position: expr.position
+                                };
+                            }
                             if(expr.keepArray) {
                                 step.keepArray = true;
                             }

@@ -384,8 +384,7 @@ describe('Invoke parser with incomplete expression', function() {
                                     }
                                 }
                             ],
-                            "position": 36,
-                            "consarray": true
+                            "position": 36
                         }
                     ]
                 };
