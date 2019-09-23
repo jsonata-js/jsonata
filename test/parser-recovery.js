@@ -307,11 +307,6 @@ describe('Invoke parser with incomplete expression', function() {
             var expr = jsonata('$equals3lucy[0].UnstructuredAnswers^()[0].Text', { recover: true });
             var ast = expr.ast();
             var expected_ast = {
-                "type": "sort",
-                "value": "^",
-                "position": 36,
-                "consarray": true,
-                "lhs": {
                     "type": "path",
                     "steps": [
                         {
@@ -320,13 +315,13 @@ describe('Invoke parser with incomplete expression', function() {
                             "position": 12,
                             "predicate": [
                                 {
+                                    "type": "filter",
                                     "expr": {
                                         "value": 0,
                                         "type": "number",
                                         "position": 14
                                     },
-                                    "position": 13,
-                                    "type": "filter"
+                                    "position": 13
                                 }
                             ]
                         },
@@ -334,62 +329,66 @@ describe('Invoke parser with incomplete expression', function() {
                             "value": "UnstructuredAnswers",
                             "type": "name",
                             "position": 35
-                        }
-                    ]
-                },
-                "rhs": [
-                    {
-                        "descending": false,
-                        "expression": {
-                            "code": "S0211",
-                            "token": ")",
-                            "position": 38,
-                            "remaining": [
+                        },
+                        {
+                            "type": "sort",
+                            "terms": [
                                 {
-                                    "type": "operator",
-                                    "value": "[",
-                                    "position": 39
-                                },
-                                {
-                                    "type": "number",
-                                    "value": 0,
-                                    "position": 40
-                                },
-                                {
-                                    "type": "operator",
-                                    "value": "]",
-                                    "position": 41
-                                },
-                                {
-                                    "type": "operator",
-                                    "value": ".",
-                                    "position": 42
-                                },
-                                {
-                                    "type": "name",
-                                    "value": "Text",
-                                    "position": 46
+                                    "descending": false,
+                                    "expression": {
+                                        "code": "S0211",
+                                        "token": ")",
+                                        "position": 38,
+                                        "remaining": [
+                                            {
+                                                "type": "operator",
+                                                "value": "[",
+                                                "position": 39
+                                            },
+                                            {
+                                                "type": "number",
+                                                "value": 0,
+                                                "position": 40
+                                            },
+                                            {
+                                                "type": "operator",
+                                                "value": "]",
+                                                "position": 41
+                                            },
+                                            {
+                                                "type": "operator",
+                                                "value": ".",
+                                                "position": 42
+                                            },
+                                            {
+                                                "type": "name",
+                                                "value": "Text",
+                                                "position": 46
+                                            }
+                                        ],
+                                        "type": "error",
+                                        "predicate": [
+                                            {
+                                                "type": "filter",
+                                                "expr": {
+                                                    "type": "error",
+                                                    "error": {
+                                                        "code": "S0207",
+                                                        "position": 46,
+                                                        "token": "(end)"
+                                                    }
+                                                },
+                                                "position": 39
+                                            }
+                                        ]
+                                    }
                                 }
                             ],
-                            "type": "error",
-                            "predicate": [
-                                {
-                                    "expr": {
-                                        "type": "error",
-                                        "error": {
-                                            "code": "S0207",
-                                            "position": 46,
-                                            "token": "(end)"
-                                        }
-                                    },
-                                    "position": 39,
-                                    "type": "filter"
-                                }
-                            ]
+                            "position": 36,
+                            "consarray": true
                         }
-                    }
-                ]
-            };
+                    ]
+                };
             var errors = expr.errors();
             var expected_errors = [
                 {

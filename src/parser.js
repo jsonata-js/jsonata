@@ -790,10 +790,10 @@ const parser = (() => {
             this.rhs = expression(operators['@']);
             if(this.rhs.type !== 'variable') {
                 return handleError({
-                    code: "S0212",  // TODO new error code for this
+                    code: "S0214",
                     stack: (new Error()).stack,
                     position: this.rhs.position,
-                    token: this.rhs.value
+                    token: "@"
                 });
             }
             this.type = "binary";
@@ -806,10 +806,10 @@ const parser = (() => {
             this.rhs = expression(operators['#']);
             if(this.rhs.type !== 'variable') {
                 return handleError({
-                    code: "S0212",  // TODO new error code for this
+                    code: "S0214",
                     stack: (new Error()).stack,
                     position: this.rhs.position,
-                    token: this.rhs.value
+                    token: "#"
                 });
             }
             this.type = "binary";
@@ -901,6 +901,10 @@ const parser = (() => {
                                 result.steps[result.steps.length - 1].nextFunction = rest.procedure.steps[0].value;
                             }
                             if (rest.type !== 'path') {
+                                if(typeof rest.predicate !== 'undefined') {
+                                    rest.stages = rest.predicate;
+                                    delete rest.predicate;
+                                }
                                 rest = {type: 'path', steps: [rest]};
                             }
                             Array.prototype.push.apply(result.steps, rest.steps);
@@ -1007,6 +1011,9 @@ const parser = (() => {
                                 step = result.steps[result.steps.length - 1];
                             }
                             // TODO throw error if there are any predicates defined at this point
+                            if(expr.keepArray) {
+                                step.keepArray = true;
+                            }
                             step.focus = expr.rhs.value;
                             step.tuple = true;
                             break;
