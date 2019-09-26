@@ -21,8 +21,8 @@ It can also be used in its unary form to negate a number
 
 __Examples__
 
-`5 - 2` => `3`
-`- 42` => `-42`
+- `5 - 2` => `3`
+- `- 42` => `-42`
 
 ## `*` (Multiplication)
 

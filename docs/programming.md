@@ -20,11 +20,11 @@ JSONata expressions can be interleaved with comments using 'C' style comment del
     $index := $floor(($x + 1) * 20 + 0.5);
     $join([0..$index].('.')) & 'O' & $join([$index..40].('.'))
   )};
-  
+
   /* Factorial is the product of the integers 1..n */
   $product := function($a, $b) { $a * $b };
   $factorial := function($n) { $n = 0 ? 1 : $reduce([1..$n], $product) };
-  
+
   $sin := function($x){ /* define sine in terms of cosine */
     $cos($x - $pi/2)
   };
@@ -86,7 +86,7 @@ The function is a first-class type, and can be stored in a variable just like an
 
 ### Invoking a function
 
-A function is invoked by following its reference (or definition) by parentheses containing a comma delimited sequence of arguments. 
+A function is invoked by following its reference (or definition) by parentheses containing a comma delimited sequence of arguments.
 
 __Examples__
 
@@ -294,25 +294,33 @@ Function chaining can be used in two ways:
 
 #### Invocation chaining
 
-`value ~> $funcA ~> $funcB` is equivalent to `$funcB($funcA(value))`
+`value ~> $funcA ~> $funcB`\
+is equivalent to\
+`$funcB($funcA(value))`
 
 __Examples__
 
-TDB
-
+- `Customer.Email ~> $substringAfter("@") ~> $substringBefore(".") ~> $uppercase()`
 
 #### Function composition
 
 [Function composition](https://en.wikipedia.org/wiki/Function_composition) is the application of one function to another function
 to produce a third function.
 
-`$funcC := $funcA ~> $funcB`   
-is equivalent to   
+`$funcC := $funcA ~> $funcB`\
+is equivalent to\
 `$funcC := function($arg) { $funcB($funcA($arg)) }`
 
 __Examples__
 
-TDB
+- Create a new function by chaining two existing functions
+  <div class="jsonata-ex">
+    <div>(
+   $normalize := $uppercase ~> $trim;
+   $normalize("   Some   Words   ")
+)</div>
+    <div>"SOME WORDS"</div>
+  </div>
 
 ### Functions as first class values
 
@@ -321,7 +329,15 @@ functions.
 
 __Examples__
 
-TBD
+- Create a new function by chaining two partially evaluated functions
+  <div class="jsonata-ex">
+    <div>(
+  $first5Capitalized := $substring(?, 0, 5) ~> $uppercase(?);
+  $first5Capitalized(Address.City)
+)</div>
+    <div>"WINCH"</div>
+  </div>
+
 
 ### Advanced example - The Y-combinator
 

@@ -36,10 +36,6 @@
         "title": "Contributing to JSONata",
         "sidebar_label": "Community and Contributing"
       },
-      "control-operators": {
-        "title": "Navigation Operators",
-        "sidebar_label": "Navigation Operators"
-      },
       "date-time-functions": {
         "title": "Date/Time functions",
         "sidebar_label": "Date/Time Functions"
@@ -72,9 +68,17 @@
         "title": "Object functions",
         "sidebar_label": "Object Functions"
       },
+      "other-operators": {
+        "title": "Other Operators",
+        "sidebar_label": "Other Operators"
+      },
       "overview": {
         "title": "JSONata Documentation",
         "sidebar_label": "Overview"
+      },
+      "path-operators": {
+        "title": "Path Operators",
+        "sidebar_label": "Path Operators"
       },
       "predicate": {
         "title": "Query refinement using predicate expressions",
