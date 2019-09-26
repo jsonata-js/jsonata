@@ -16,7 +16,7 @@ The [order-by](control-operators#order-by) operator is a convenient syntax that 
 
 ## Grouping
 
-The JSONata [object constructor](construction#object-constructors) syntax allows you to specify an expression for the key in any key/value pair (the value can obviously be an expression too). The key expression must evaluate to a string since this is a restriction on JSON objects.  The key and value expressions are evaluated for each item in the input context (see [processing model](processing#the-jsonata-processing-model)). The result of each key/value expression pair is inserted into the resulting JSON object. 
+The JSONata [object constructor](construction#object-constructors) syntax allows you to specify an expression for the key in any key/value pair (the value can obviously be an expression too). The key expression must evaluate to a string since this is a restriction on JSON objects.  The key and value expressions are evaluated for each item in the input context (see [processing model](processing#the-jsonata-processing-model)). The result of each key/value expression pair is inserted into the resulting JSON object.
 
 If the evaluation of any key expression results in a key that is already in the result object, then the result of its associated value expression will be grouped with the value(s) already associated with that key. Note that the value expressions are not evaluated until all of the grouping has been performed.  This allows for aggregation expressions to be evaluated over the collection of items for each group.
 
@@ -74,6 +74,16 @@ Note in the above example, the value expression grouped all of the prices togeth
 }</div>
   </div>
 
+- The total aggregated value in each group
+  <div class="jsonata-ex">
+    <div>Account.Order.Product{`Product Name`: $sum($.(Price*Quantity))}</div>
+    <div>{
+  "Bowler Hat": 206.7,
+  "Trilby hat": 21.67,
+  "Cloak": 107.99
+}</div>
+  </div>
+
 
 
 ## Aggregation
@@ -95,8 +105,4 @@ __Examples__
   </div>
 
 Other [numeric aggregation functions](aggregation-functions) are available (i.e. average, min, max) and an [aggregator for strings](string-functions#join).  It is also possible to write complex custom aggregators using the [`$reduce()`](higher-order-functions#reduce) higher-order function.
-
-
-
-## worked example (jsonata npm downloads)
 

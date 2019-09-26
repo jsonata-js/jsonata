@@ -15,11 +15,11 @@ Used to override the operator precedence rules.  E.g.
 
 Used to compute complex expressions on a context value
 
-- `Product.(Price * Quantity)` - both Price and Quantity are fields of the Product value
+- `Product.(Price * Quantity)` - both Price and Quantity are properties of the Product object
 
 Used to support 'code blocks' - multiple expressions, separated by semicolons
 
-`(expr1; expr2; expr3)`
+- `(expr1; expr2; expr3)`
 
 Each expression in the block is evaluated _in sequential order_; the result of the last expression is returned from the block.
 
