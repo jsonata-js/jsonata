@@ -981,7 +981,7 @@ var jsonata = (function() {
         var result;
         // if the variable name is empty string, then it refers to context value
         if (expr.value === '') {
-            result = input;
+            result = input && input.outerWrapper ? input[0] : input;
         } else {
             result = environment.lookup(expr.value);
         }
@@ -1787,7 +1787,7 @@ var jsonata = (function() {
         "D3020": "Third argument of split function must evaluate to a positive number",
         "D3030": "Unable to cast value to a number: {{value}}",
         "D3040": "Third argument of match function must evaluate to a positive number",
-        "D3050": "First argument of reduce function must be a function with two arguments",
+        "D3050": "The second argument of reduce function must be a function with at least two arguments",
         "D3060": "The sqrt function cannot be applied to a negative number: {{value}}",
         "D3061": "The power function has resulted in a value that cannot be represented as a JSON number: base={{value}}, exponent={{exp}}",
         "D3070": "The single argument form of the sort function can only be applied to an array of strings or an array of numbers.  Use the second argument to specify a comparison function",
@@ -1903,6 +1903,12 @@ var jsonata = (function() {
                 // the $now() and $millis() functions will return this value - whenever it is called
                 timestamp = new Date();
                 exec_env.timestamp = timestamp;
+
+                // if the input is a JSON array, then wrap it in a singleton sequence so it gets treated as a single input
+                if(Array.isArray(input) && !isSequence(input)) {
+                    input = createSequence(input);
+                    input.outerWrapper = true;
+                }
 
                 var result, it;
                 // if a callback function is supplied, then drive the generator in a promise chain

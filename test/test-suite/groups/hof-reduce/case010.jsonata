@@ -1,0 +1,9 @@
+(
+  $mean := $reduce(?, λ($acc, $v, $i, $arr) {(
+    $total := $acc + $v;
+    $length := $count($arr);
+    $i = $length - 1 ? $total / $length : $total
+  )});
+
+  $mean([7,3,8])
+)
