@@ -125,6 +125,57 @@ const utils = (() => {
         );
     }
 
+    /**
+     * Compares two values for equality
+     * @param {*} lhs first value
+     * @param {*} rhs second value
+     * @returns {boolean} true if they are deep equal
+     */
+    function isDeepEqual(lhs, rhs) {
+        if (lhs === rhs) {
+            return true;
+        }
+        if(typeof lhs === 'object' && typeof rhs === 'object' && lhs !== null && rhs !== null) {
+            if(Array.isArray(lhs) && Array.isArray(rhs)) {
+                // both arrays (or sequences)
+                // must be the same length
+                if(lhs.length !== rhs.length) {
+                    return false;
+                }
+                // must contain same values in same order
+                for(var ii = 0; ii < lhs.length; ii++) {
+                    if(!isDeepEqual(lhs[ii], rhs[ii])) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            // both objects
+            // must have the same set of keys (in any order)
+            var lkeys = Object.getOwnPropertyNames(lhs);
+            var rkeys = Object.getOwnPropertyNames(rhs);
+            if(lkeys.length !== rkeys.length) {
+                return false;
+            }
+            lkeys = lkeys.sort();
+            rkeys = rkeys.sort();
+            for(ii=0; ii < lkeys.length; ii++) {
+                if(lkeys[ii] !== rkeys[ii]) {
+                    return false;
+                }
+            }
+            // must have the same values
+            for(ii=0; ii < lkeys.length; ii++) {
+                var key = lkeys[ii];
+                if(!isDeepEqual(lhs[key], rhs[key])) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
     return {
         isNumeric,
         isArrayOfStrings,
@@ -134,7 +185,8 @@ const utils = (() => {
         isFunction,
         isLambda,
         isIterable,
-        getFunctionArity
+        getFunctionArity,
+        isDeepEqual
     };
 })();
 

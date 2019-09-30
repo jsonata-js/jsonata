@@ -13,10 +13,12 @@ const functions = (() => {
     var isArrayOfStrings = utils.isArrayOfStrings;
     var isArrayOfNumbers = utils.isArrayOfNumbers;
     var createSequence = utils.createSequence;
+    var isSequence = utils.isSequence;
     var isFunction = utils.isFunction;
     var isLambda = utils.isLambda;
     var isIterable = utils.isIterable;
     var getFunctionArity = utils.getFunctionArity;
+    var deepEquals = utils.isDeepEqual;
 
     /**
      * Sum function
@@ -1924,6 +1926,40 @@ const functions = (() => {
     }
 
     /**
+     * Returns the values that appear in a sequence, with duplicates eliminated.
+     * @param {Array} arr - An array or sequence of values
+     * @returns {Array} - sequence of distinct values
+     */
+    function distinct(arr) {
+        // undefined inputs always return undefined
+        if (typeof arr === 'undefined') {
+            return undefined;
+        }
+
+        if(!Array.isArray(arr) || arr.length <= 1) {
+            return arr;
+        }
+
+        var results = isSequence(arr) ? createSequence() : [];
+
+        for(var ii = 0; ii < arr.length; ii++) {
+            var value = arr[ii];
+            // is this value already in the result sequence?
+            var includes = false;
+            for(var jj = 0; jj < results.length; jj++) {
+                if (deepEquals(value, results[jj])) {
+                    includes = true;
+                    break;
+                }
+            }
+            if(!includes) {
+                results.push(value);
+            }
+        }
+        return results;
+    }
+
+    /**
      * Applies a predicate function to each key/value pair in an object, and returns an object containing
      * only the key/value pairs that passed the predicate
      *
@@ -1959,7 +1995,7 @@ const functions = (() => {
         formatNumber, formatBase, number, floor, ceil, round, abs, sqrt, power, random,
         boolean, not,
         map, zip, filter, single, foldLeft, sift,
-        keys, lookup, append, exists, spread, merge, reverse, each, error, sort, shuffle,
+        keys, lookup, append, exists, spread, merge, reverse, each, error, sort, shuffle, distinct,
         base64encode, base64decode,  encodeUrlComponent, encodeUrl, decodeUrlComponent, decodeUrl
     };
 })();
