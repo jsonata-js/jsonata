@@ -530,7 +530,7 @@ const parser = (() => {
         symbol("]");
         symbol("}");
         symbol(".."); // range operator
-        infix("."); // field reference
+        infix("."); // map operator
         infix("+"); // numeric addition
         infix("-"); // numeric subtraction
         infix("*"); // numeric multiplication
@@ -570,6 +570,12 @@ const parser = (() => {
         // descendant wildcard (multi-level)
         prefix('**', function () {
             this.type = "descendant";
+            return this;
+        });
+
+        // parent operator
+        prefix('!', function () {
+            this.type = "parent";
             return this;
         });
 
@@ -1137,6 +1143,9 @@ const parser = (() => {
                     if (expr.keepArray) {
                         result.keepSingletonArray = true;
                     }
+                    break;
+                case 'parent':
+                    result = {type: 'parent', slot: 0};
                     break;
                 case 'string':
                 case 'number':
