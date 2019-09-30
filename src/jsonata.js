@@ -33,6 +33,7 @@ var jsonata = (function() {
     var isLambda = utils.isLambda;
     var isIterable = utils.isIterable;
     var getFunctionArity = utils.getFunctionArity;
+    var isDeepEqual = utils.isDeepEqual;
 
     // Start of Evaluator code
 
@@ -602,7 +603,7 @@ var jsonata = (function() {
 
         switch (op) {
             case '=':
-                result = lhs === rhs;
+                result = isDeepEqual(lhs, rhs);
                 break;
             case '!=':
                 result = (lhs !== rhs);
@@ -1703,6 +1704,7 @@ var jsonata = (function() {
     staticFrame.bind('error', defineFunction(fn.error, '<s?:x>'));
     staticFrame.bind('sort', defineFunction(fn.sort, '<af?:a>'));
     staticFrame.bind('shuffle', defineFunction(fn.shuffle, '<a:a>'));
+    staticFrame.bind('distinct', defineFunction(fn.distinct, '<x:x>'));
     staticFrame.bind('base64encode', defineFunction(fn.base64encode, '<s-:s>'));
     staticFrame.bind('base64decode', defineFunction(fn.base64decode, '<s-:s>'));
     staticFrame.bind('encodeUrlComponent', defineFunction(fn.encodeUrlComponent, '<s-:s>'));

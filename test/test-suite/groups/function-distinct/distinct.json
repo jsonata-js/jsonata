@@ -1,0 +1,81 @@
+[
+    {
+        "expr": "$distinct([1,2,3,4])",
+        "data": null,
+        "bindings": {},
+        "result": [1,2,3,4]
+    },
+    {
+        "expr": "$distinct([1])",
+        "data": null,
+        "bindings": {},
+        "result": [1]
+    },
+    {
+        "expr": "$distinct(nothing)",
+        "data": null,
+        "bindings": {},
+        "undefinedResult": true
+    },
+    {
+        "expr": "$distinct(null)",
+        "data": null,
+        "bindings": {},
+        "result": null
+    },
+    {
+        "expr": "$distinct('hello')",
+        "data": null,
+        "bindings": {},
+        "result": "hello"
+    },
+    {
+        "expr": "$distinct(Account.Order.Product.SKU)",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            "0406654608",
+            "0406634348",
+            "040657863",
+            "0406654603"
+        ]
+    },
+    {
+        "expr": "$distinct(Account.Order.Product.`Product Name`)",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            "Bowler Hat",
+            "Trilby hat",
+            "Cloak"
+        ]
+    },
+    {
+        "expr": "$distinct(Account.Order.Product.Description)",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            {
+                "Colour": "Purple",
+                "Width": 300,
+                "Height": 200,
+                "Depth": 210,
+                "Weight": 0.75
+            },
+            {
+                "Colour": "Orange",
+                "Width": 300,
+                "Height": 200,
+                "Depth": 210,
+                "Weight": 0.6
+            },
+            {
+                "Colour": "Black",
+                "Width": 30,
+                "Height": 20,
+                "Depth": 210,
+                "Weight": 2
+            }
+        ]
+    }
+]
