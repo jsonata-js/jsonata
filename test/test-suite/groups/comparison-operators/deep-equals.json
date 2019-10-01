@@ -1,0 +1,117 @@
+[
+    {
+        "expr": "[1,2,3,4] = [1, 2, 3, 4]",
+        "data": null,
+        "bindings": {},
+        "result": true
+    },
+    {
+        "expr": "[1,2] != [1, 2]",
+        "data": null,
+        "bindings": {},
+        "result": false
+    },
+    {
+        "expr": "[1,2,[3],4] = [1, 2, [3], 4]",
+        "data": null,
+        "bindings": {},
+        "result": true
+    },
+    {
+        "expr": "[1,2,3,4] = [1, 2, [3], 4]",
+        "data": null,
+        "bindings": {},
+        "result": false
+    },
+    {
+        "expr": "[1,2,3,4] = [2, 3, 4]",
+        "data": null,
+        "bindings": {},
+        "result": false
+    },
+    {
+        "expr": "data = [1, 2, 3, 4]",
+        "data": { "data": [1,2,3,4]},
+        "bindings": {},
+        "result": true
+    },
+    {
+        "expr": "data[2] = 3",
+        "data": { "data": [1,2,3,4]},
+        "bindings": {},
+        "result": true
+    },
+    {
+        "expr": "{ 'one': 1, 'two': 2 } = { 'two': 2, 'one': 1 }",
+        "data": {},
+        "bindings": {},
+        "result": true
+    },
+    {
+        "expr": "{ 'one': 1, 'two': 2 } = { 'too': 2, 'one': 1 }",
+        "data": {},
+        "bindings": {},
+        "result": false
+    },
+    {
+        "expr": "{ 'one': 1, 'two': 3 } = { 'two': 2, 'one': 1 }",
+        "data": {},
+        "bindings": {},
+        "result": false
+    },
+    {
+        "expr": "{ 'one': 1, 'two': 2, 'three': 3 } = { 'two': 2, 'one': 1 }",
+        "data": {},
+        "bindings": {},
+        "result": false
+    },
+    {
+        "expr": "two = 2",
+        "data": { "one": 1, "two": 2 },
+        "bindings": {},
+        "result": true
+    },
+    {
+        "expr": "one + one = two",
+        "data": { "one": 1, "two": 2 },
+        "bindings": {},
+        "result": true
+    },
+    {
+        "expr": "null = null",
+        "data": {},
+        "bindings": {},
+        "result": true
+    },
+    {
+        "expr": "null != null",
+        "data": {},
+        "bindings": {},
+        "result": false
+    },
+    {
+        "expr": "null = nothing",
+        "data": {},
+        "bindings": {},
+        "result": false
+    },
+    {
+        "expr": "nothing = nothing",
+        "data": {},
+        "bindings": {},
+        "result": false
+    },
+    {
+        "expr": "Account.Order[0].Product[0].Description = Account.Order[1].Product[0].Description",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": true
+    },
+    {
+        "expr": "Account.Order[0].Product[0] = Account.Order[1].Product[0]",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": false
+    }
+
+]
