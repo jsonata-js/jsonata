@@ -6,6 +6,12 @@
         "result": true
     },
     {
+        "expr": "[1,2] != [1, 2]",
+        "data": null,
+        "bindings": {},
+        "result": false
+    },
+    {
         "expr": "[1,2,[3],4] = [1, 2, [3], 4]",
         "data": null,
         "bindings": {},
@@ -76,6 +82,12 @@
         "data": {},
         "bindings": {},
         "result": true
+    },
+    {
+        "expr": "null != null",
+        "data": {},
+        "bindings": {},
+        "result": false
     },
     {
         "expr": "null = nothing",
