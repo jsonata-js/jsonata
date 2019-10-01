@@ -6,20 +6,20 @@ sidebar_label: Comparison Operators
 
 ## `=` (Equals)
 
-The equality operator returns Boolean `true` if both operands are the same (type and value).  Otherwise it returns `false`.
+The equality operator returns Boolean `true` if both operands are the same (type and value).  Arrays and objects are checked for deep equality.  Arrays must have the same values in the same order. Objects must have the same key/value pairs (order is not relevant).  Otherwise it returns `false`.
 
 __Examples__
 
-- `1+1 = 2` => `true`   
+- `1+1 = 2` => `true`
 - `"Hello" = "World"` => `false`
 
 ## `!=` (Not equals)
 
-The inequality operator returns Boolean `false` if both operands are the same (type and value).  Otherwise it returns `true`.
+The inequality operator returns Boolean `false` if both operands are the same (type and value, deep equality).  Otherwise it returns `true`.
 
 __Examples__
 
-- `1+1 != 3` => `true`   
+- `1+1 != 3` => `true`
 - `"Hello" != "World"` => `true`
 
 ## `>` (Greater than)
@@ -28,7 +28,7 @@ The 'greater than' operator returns Boolean `true` if the LHS is numerically gre
 
 __Examples__
 
-- `22 / 7 > 3` => `true`   
+- `22 / 7 > 3` => `true`
 - `5 > 5` => `false`
 
 ## `<` (Less than)
@@ -37,7 +37,7 @@ The 'less than' operator returns Boolean `true` if the LHS is numerically less t
 
 __Examples__
 
-- `22 / 7 < 3` => `false`   
+- `22 / 7 < 3` => `false`
 - `5 < 5` => `false`
 
 
@@ -47,7 +47,7 @@ The 'greater than or equals' operator returns Boolean `true` if the LHS is numer
 
 __Examples__
 
-- `22 / 7 >= 3` => `true`   
+- `22 / 7 >= 3` => `true`
 - `5 >= 5` => `true`
 
 
@@ -57,7 +57,7 @@ The 'less than or equals' operator returns Boolean `true` if the LHS is numerica
 
 __Examples__
 
-- `22 / 7 <= 3` => `false`   
+- `22 / 7 <= 3` => `false`
 - `5 <= 5` => `true`
 
 ## `in` (Inclusion)
@@ -66,7 +66,7 @@ The array (sequence) inclusion operator returns Boolean `true` if the value of t
 
 __Examples__
 
-- `"world" in ["hello", "world"]` => `true`   
-- `"hello" in "hello"` => `true`   
+- `"world" in ["hello", "world"]` => `true`
+- `"hello" in "hello"` => `true`
 - `library.books["Aho" in authors].title`
 

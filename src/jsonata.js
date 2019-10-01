@@ -606,7 +606,7 @@ var jsonata = (function() {
                 result = isDeepEqual(lhs, rhs);
                 break;
             case '!=':
-                result = (lhs !== rhs);
+                result = !isDeepEqual(lhs, rhs);
                 break;
         }
         return result;
