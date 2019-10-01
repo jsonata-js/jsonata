@@ -4,6 +4,7 @@
     "bindings": {},
     "error": {
         "code": "D3140",
-        "message": "Malformed URL passed to $encodeUrl(): \"\uD800\""
+        "functionName": "encodeUrl",
+        "value": "\uD800"
     }
 }
