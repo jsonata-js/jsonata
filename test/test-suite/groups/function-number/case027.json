@@ -1,0 +1,6 @@
+{
+    "expr": "$number('00')",
+    "dataset": null,
+    "bindings": {},
+    "result": 0
+}

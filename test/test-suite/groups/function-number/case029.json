@@ -1,0 +1,6 @@
+{
+    "expr": "$number('-007')",
+    "dataset": null,
+    "bindings": {},
+    "result": -7
+}

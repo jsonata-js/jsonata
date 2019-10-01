@@ -1196,7 +1196,7 @@ const functions = (() => {
         if (typeof arg === 'number') {
             // already a number
             result = arg;
-        } else if (typeof arg === 'string' && /^-?(0|([1-9][0-9]*))(\.[0-9]+)?([Ee][-+]?[0-9]+)?$/.test(arg) && !isNaN(parseFloat(arg)) && isFinite(arg)) {
+        } else if (typeof arg === 'string' && /^-?[0-9]+(\.[0-9]+)?([Ee][-+]?[0-9]+)?$/.test(arg) && !isNaN(parseFloat(arg)) && isFinite(arg)) {
             result = parseFloat(arg);
         } else if (arg === true) {
             // boolean true casts to 1

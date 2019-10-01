@@ -1,0 +1,6 @@
+{
+    "expr": "$number('000.00123000')",
+    "dataset": null,
+    "bindings": {},
+    "result": 0.00123
+}
