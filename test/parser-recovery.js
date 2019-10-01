@@ -94,12 +94,13 @@ describe('Invoke parser with incomplete expression', function() {
                         "stages": [
                             {
                                 "expr": {
-                                "type": "error",
-                                "error": {
-                                    "code": "S0207",
-                                    "position": 8,
-                                    "token": "(end)"
-                                }                                },
+                                    "type": "error",
+                                    "error": {
+                                        "code": "S0207",
+                                        "position": 8,
+                                        "token": "(end)"
+                                    }
+                                },
                                 "position": 8,
                                 "type": "filter"
                             }
@@ -302,15 +303,15 @@ describe('Invoke parser with incomplete expression', function() {
         });
     });
 
-    describe('$equals3lucy[0].UnstructuredAnswers^()[0].Text', function() {
+    describe('$inputSource[0].UnstructuredAnswers^()[0].Text', function() {
         it('should return ast', function() {
-            var expr = jsonata('$equals3lucy[0].UnstructuredAnswers^()[0].Text', { recover: true });
+            var expr = jsonata('$inputSource[0].UnstructuredAnswers^()[0].Text', { recover: true });
             var ast = expr.ast();
             var expected_ast = {
                     "type": "path",
                     "steps": [
                         {
-                            "value": "equals3lucy",
+                            "value": "inputSource",
                             "type": "variable",
                             "position": 12,
                             "predicate": [
