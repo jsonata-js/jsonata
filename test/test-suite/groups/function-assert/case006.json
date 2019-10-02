@@ -1,5 +1,5 @@
 {
-    "expr": "$assert(true)",
+    "expr": "$assert(false)",
     "dataset": "dataset5",
     "bindings": {},
     "error": {

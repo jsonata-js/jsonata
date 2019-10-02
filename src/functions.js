@@ -1830,7 +1830,7 @@ const functions = (() => {
      * @returns {undefined}
      */
     function assert(condition, message) {
-        if(condition) {
+        if(!condition) {
             throw {
                 code: "D3141",
                 stack: (new Error()).stack,
