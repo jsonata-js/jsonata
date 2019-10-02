@@ -1,0 +1,9 @@
+{
+    "expr": "$assert(Account.Order[0].Product[0].Price < 34, 'Too Expensive')",
+    "dataset": "dataset5",
+    "bindings": {},
+    "error": {
+        "code": "D3141",
+        "message": "Too Expensive"
+    }    
+}

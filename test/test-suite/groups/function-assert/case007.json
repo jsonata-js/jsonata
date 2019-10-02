@@ -1,0 +1,6 @@
+{
+    "expr": "$assert(true)",
+    "dataset": "dataset5",
+    "bindings": {},
+    "undefinedResult": true
+}

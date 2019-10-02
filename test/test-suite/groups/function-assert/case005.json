@@ -1,0 +1,6 @@
+{
+    "expr": "$assert(5)",
+    "dataset": "dataset5",
+    "bindings": {},
+    "code": "T0410"
+}
