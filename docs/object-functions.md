@@ -57,3 +57,8 @@ __Examples__
 __Signature:__`$error(message)`
 
 Deliberately throws an error with an optional `message`
+
+ ## `$assert()`
+__Signature:__`$assert(condition, message)`
+
+If condition is true, the function returns undefined. If the condition is false, an exception is thrown with the message as the message of the exception.

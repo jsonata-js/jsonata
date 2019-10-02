@@ -1,0 +1,9 @@
+{
+    "expr": "$assert(true)",
+    "dataset": "dataset5",
+    "bindings": {},
+    "error": {
+        "code": "D3141",
+        "message": "$assert() statement failed"
+    }
+}

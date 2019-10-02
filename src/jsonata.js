@@ -1702,6 +1702,7 @@ var jsonata = (function() {
     staticFrame.bind('reverse', defineFunction(fn.reverse, '<a:a>'));
     staticFrame.bind('each', defineFunction(fn.each, '<o-f:a>'));
     staticFrame.bind('error', defineFunction(fn.error, '<s?:x>'));
+    staticFrame.bind('assert', defineFunction(fn.assert, '<bs?:x>'));
     staticFrame.bind('sort', defineFunction(fn.sort, '<af?:a>'));
     staticFrame.bind('shuffle', defineFunction(fn.shuffle, '<a:a>'));
     staticFrame.bind('distinct', defineFunction(fn.distinct, '<x:x>'));
@@ -1821,7 +1822,8 @@ var jsonata = (function() {
         "D3137": "{{{message}}}",
         "D3138": "The $single() function expected exactly 1 matching result.  Instead it matched more.",
         "D3139": "The $single() function expected exactly 1 matching result.  Instead it matched 0.",
-        "D3140": "Malformed URL passed to ${{{functionName}}}(): {{value}}"
+        "D3140": "Malformed URL passed to ${{{functionName}}}(): {{value}}",
+        "D3141": "{{{message}}}"
     };
 
     /**

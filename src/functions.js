@@ -1823,6 +1823,25 @@ const functions = (() => {
     }
 
     /**
+     *
+     * @param {boolean} condition - the condition to evaluate
+     * @param {string} [message] - the message to attach to the error
+     * @throws custom error with code 'D3137'
+     * @returns {undefined}
+     */
+    function assert(condition, message) {
+        if(condition) {
+            throw {
+                code: "D3141",
+                stack: (new Error()).stack,
+                message: message || "$assert() statement failed"
+            };
+        }
+
+        return undefined;
+    }
+
+    /**
      * Implements the merge sort (stable) with optional comparator function
      *
      * @param {Array} arr - the array to sort
@@ -1995,7 +2014,7 @@ const functions = (() => {
         formatNumber, formatBase, number, floor, ceil, round, abs, sqrt, power, random,
         boolean, not,
         map, zip, filter, single, foldLeft, sift,
-        keys, lookup, append, exists, spread, merge, reverse, each, error, sort, shuffle, distinct,
+        keys, lookup, append, exists, spread, merge, reverse, each, error, assert, sort, shuffle, distinct,
         base64encode, base64decode,  encodeUrlComponent, encodeUrl, decodeUrlComponent, decodeUrl
     };
 })();
