@@ -185,7 +185,7 @@ const parser = (() => {
                 return create('operator', '~>');
             }
             // test for single char operators
-            if (operators.hasOwnProperty(currentChar)) {
+            if (Object.prototype.hasOwnProperty.call(operators, currentChar)) {
                 position++;
                 return create('operator', currentChar);
             }
@@ -200,7 +200,7 @@ const parser = (() => {
                     if (currentChar === '\\') { // escape sequence
                         position++;
                         currentChar = path.charAt(position);
-                        if (escapes.hasOwnProperty(currentChar)) {
+                        if (Object.prototype.hasOwnProperty.call(escapes, currentChar)) {
                             qstr += escapes[currentChar];
                         } else if (currentChar === 'u') {
                             // \u should be followed by 4 hex digits
@@ -280,7 +280,7 @@ const parser = (() => {
             var ch;
             for (; ;) {
                 ch = path.charAt(i);
-                if (i === length || ' \t\n\r\v'.indexOf(ch) > -1 || operators.hasOwnProperty(ch)) {
+                if (i === length || ' \t\n\r\v'.indexOf(ch) > -1 || Object.prototype.hasOwnProperty.call(operators, ch)) {
                     if (path.charAt(position) === '$') {
                         // variable reference
                         name = path.substring(position + 1, i);
