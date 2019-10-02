@@ -1,3 +1,21 @@
+#### 1.7.0 Milestone Release
+
+- New syntax (`@` operator) to support cross-referencing and complex data joins (issue #333)
+- New syntax (`#` operator) to get current context position in sequence (issue #187)
+- Equality operators (`=`, `!=`) now perform deep object/array comparison
+- New functions
+  - `$error` - Explicitly throw an error with message (issue #167)
+  - `$assert` - Throw error (with message) if assertion evaluates to false (issue #369)
+  - `$single` - Returns the single value in an array (issue #348)
+  - `$encodeUrl`, `$encodeUrlComponent`, `$decodeUrl`, `$decodeUrlComponent` - URL/URI helper functions (issue #103)
+  - `$distinct` - Returns array with duplicate values removed
+- Enhanced functions
+  - `$reduce` - Now works with a 4-argument function parameter (issue #102)
+  - `$number` - Can now cast numeric strings with leading zeros (issue #368)
+  - `$string` - Now has optional second argument to "prettify" objects (issue #334)
+- Minimum node.js runtime v8 (dropped support for v6). Added support for Node 12.
+- Fixed bugs #316, #332, #349
+
 #### 1.6.5 Maintenance Release
 
 - Fix concurrency bug in chain operator (issue #335)
