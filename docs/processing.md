@@ -32,30 +32,34 @@ The sequence flattening rules are as follows:
 
 4. If a sequence contains one or more (sub-)sequences, then the values from the sub-sequence are pulled up to the level of the outer sequence.  A result sequence will never contain child sequences (they are flattened).
 
-__Examples__
 
-TODO
 
-## The path processing pipeline
+## JSONata path processing
 
-TODO (from tech talk ppt)
+The JSONata path expression is a _declarative functional_ language.
 
-## The map/filter/reduce programming paradigm
+__Functional__ because it is based on the map/filter/reduce programming paradigm as supported by popular functional programming languages through the use of higher-order functions.
 
-With references to literature
+__Declarative__ because these higher-order functions are exposed through a lightweight syntax which lets the user focus on the intention of the query (declaration) rather than the programming constructs that control their evaluation.
 
-## Generating sequences
+A path expression is a sequence of one or more of the following functional stages:
 
-From location paths
+Stage | Syntax | Action
+---|---|---
+ __Map__ | seq`.`expr | Evaluates the RHS expression in the context of each item in the input sequence.  Flattens results into result sequence.
+ __Filter__ | seq`[`expr`]` | Filter results from previous stage by applying predicate expression between brackets to each item.
+ __Sort__ | seq`^(`expr`)` | Sorts (re-orders) the input sequence according to the criteria in parentheses.
+ __Index__ | seq`#`$var | Binds a named variable to the current context position (zero offset) in the sequence.
+ __Join__ | seq`@`$var | Binds a named variable to the current current context item in the sequence.  Can only be used directly following a map stage.
+__Reduce__ | seq`{` expr`:`expr`,` expr`:`expr ...`}` | Group and aggregate the input sequence to a single result object as defined by the name/value expressions.  Can only appear as the final stage in a path expression.
 
-From literal array constructor
+In the above table:
 
-With the range operator
-
-## Generic ‘map’ operator
-
-## The ‘filter’ stage
-
-## Aggregating (reduce)
-
-## JSONata syntax built on this model
+- In the 'Syntax' column, 'seq' refers to the input sequence for the current stage, which is the result sequence from the previous stage.
+- The 'Action' column gives a brief outline of the stage's behavior; fuller details are in the [Path Operators](path-operators) reference page.
+- The relative precedence of each operator affects the scope of its influence on the input sequence. Specifically,
+  - The Filter operator binds tighter than the Map operator.  This means, for example, that `books.authors[0]` will select the all of the first authors from _each_ book rather than the first author from all of the books.
+  - The Sort (order-by) operator has the lowest precedence, meaning that the full path to the left of it will be evaluated, and its result sequence will be sorted.
+  - This operator precedence can be overridden by using parentheses.  For example, `(books.authors)[0]` will select the the first author from all of the books (single value).  Note, however, that parentheses also define a scope frame for variables, so any variables that have been bound within the parentheses block including those bound by the `@` and `#` operators will go out of scope at the end of the parens block.
+- The variables bound by the `@` and `#` operators go out of scope at the end of the path expression.
+  - The Reduce stage, if used, will terminate the current path expression.  Although a Map operator can immediately follow this, it will be interpreted as the start of a new path expression, meaning that any previously bound context or index variables will be out of scope.

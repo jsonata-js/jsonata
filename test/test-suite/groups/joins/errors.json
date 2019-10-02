@@ -1,0 +1,28 @@
+[
+    {
+        "expr": "Account.Order@o.Product",
+        "dataset": null,
+        "bindings": {},
+        "code": "S0214",
+        "token": "@"
+    },
+    {
+        "expr": "Account.Order@$o#i.Product",
+        "dataset": null,
+        "bindings": {},
+        "code": "S0214",
+        "token": "#"
+    },
+    {
+        "expr": "Account.Order[1]@$o.Product",
+        "dataset": null,
+        "bindings": {},
+        "code": "S0215"
+    },
+    {
+        "expr": "Account.Order^(>OrderID)@$o.Product.{ 'name':`Product Name`, 'orderid':$o.OrderID } ",
+        "dataset": null,
+        "bindings": {},
+        "code": "S0216"
+    }
+]

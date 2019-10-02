@@ -22,11 +22,15 @@ describe('Invoke parser with valid expression', function() {
                         "value": "Order",
                         "type": "name",
                         "position": 13,
-                        "predicate": [
+                        "stages": [
                             {
-                                "value": 0,
-                                "type": "number",
-                                "position": 15
+                                "expr": {
+                                    "value": 0,
+                                    "type": "number",
+                                    "position": 15
+                                },
+                                "position": 14,
+                                "type": "filter"
                             }
                         ]
                     }
@@ -87,14 +91,18 @@ describe('Invoke parser with incomplete expression', function() {
                         "value": "Account",
                         "type": "name",
                         "position": 7,
-                        "predicate": [
+                        "stages": [
                             {
-                                "type": "error",
-                                "error": {
-                                    "code": "S0207",
-                                    "position": 8,
-                                    "token": "(end)"
-                                }
+                                "expr": {
+                                    "type": "error",
+                                    "error": {
+                                        "code": "S0207",
+                                        "position": 8,
+                                        "token": "(end)"
+                                    }
+                                },
+                                "position": 8,
+                                "type": "filter"
                             }
                         ]
                     }
@@ -136,18 +144,22 @@ describe('Invoke parser with incomplete expression', function() {
                         "value": "Order",
                         "type": "name",
                         "position": 13,
-                        "predicate": [
+                        "stages": [
                             {
-                                "code": "S0211",
-                                "token": ";",
-                                "position": 15,
-                                "remaining": [
-                                    {"value": 0, "type": "number", "position": 16},
-                                    {"type": "operator", "value": "]", "position": 17},
-                                    {"type": "operator", "value": ".", "position": 18},
-                                    {"type": "name", "value": "Product", "position": 25}
-                                ],
-                                "type": "error"
+                                "expr": {
+                                    "code": "S0211",
+                                    "token": ";",
+                                    "position": 15,
+                                    "remaining": [
+                                        {"value": 0, "type": "number", "position": 16},
+                                        {"type": "operator", "value": "]", "position": 17},
+                                        {"type": "operator", "value": ".", "position": 18},
+                                        {"type": "name", "value": "Product", "position": 25}
+                                    ],
+                                    "type": "error"
+                                },
+                                "position": 14,
+                                "type": "filter"
                             }
                         ]
                     }
@@ -202,11 +214,15 @@ describe('Invoke parser with incomplete expression', function() {
                         "value": "Order",
                         "type": "name",
                         "position": 13,
-                        "predicate": [
+                        "stages": [
                             {
-                                "value": 0,
-                                "type": "number",
-                                "position": 15
+                                "expr": {
+                                    "value": 0,
+                                    "type": "number",
+                                    "position": 15
+                                },
+                                "position": 14,
+                                "type": "filter"
                             }
                         ]
                     }
@@ -248,11 +264,15 @@ describe('Invoke parser with incomplete expression', function() {
                         "value": "Order",
                         "type": "name",
                         "position": 13,
-                        "predicate": [
+                        "stages": [
                             {
-                                "value": 0,
-                                "type": "number",
-                                "position": 15
+                                "expr": {
+                                    "value": 0,
+                                    "type": "number",
+                                    "position": 15
+                                },
+                                "position": 14,
+                                "type": "filter"
                             }
                         ]
                     },
@@ -283,27 +303,26 @@ describe('Invoke parser with incomplete expression', function() {
         });
     });
 
-    describe('$equals3lucy[0].UnstructuredAnswers^()[0].Text', function() {
+    describe('$inputSource[0].UnstructuredAnswers^()[0].Text', function() {
         it('should return ast', function() {
-            var expr = jsonata('$equals3lucy[0].UnstructuredAnswers^()[0].Text', { recover: true });
+            var expr = jsonata('$inputSource[0].UnstructuredAnswers^()[0].Text', { recover: true });
             var ast = expr.ast();
             var expected_ast = {
-                "type": "sort",
-                "value": "^",
-                "position": 36,
-                "consarray": true,
-                "lhs": {
                     "type": "path",
                     "steps": [
                         {
-                            "value": "equals3lucy",
+                            "value": "inputSource",
                             "type": "variable",
                             "position": 12,
                             "predicate": [
                                 {
-                                    "value": 0,
-                                    "type": "number",
-                                    "position": 14
+                                    "type": "filter",
+                                    "expr": {
+                                        "value": 0,
+                                        "type": "number",
+                                        "position": 14
+                                    },
+                                    "position": 13
                                 }
                             ]
                         },
@@ -311,58 +330,65 @@ describe('Invoke parser with incomplete expression', function() {
                             "value": "UnstructuredAnswers",
                             "type": "name",
                             "position": 35
-                        }
-                    ]
-                },
-                "rhs": [
-                    {
-                        "descending": false,
-                        "expression": {
-                            "code": "S0211",
-                            "token": ")",
-                            "position": 38,
-                            "remaining": [
+                        },
+                        {
+                            "type": "sort",
+                            "terms": [
                                 {
-                                    "type": "operator",
-                                    "value": "[",
-                                    "position": 39
-                                },
-                                {
-                                    "type": "number",
-                                    "value": 0,
-                                    "position": 40
-                                },
-                                {
-                                    "type": "operator",
-                                    "value": "]",
-                                    "position": 41
-                                },
-                                {
-                                    "type": "operator",
-                                    "value": ".",
-                                    "position": 42
-                                },
-                                {
-                                    "type": "name",
-                                    "value": "Text",
-                                    "position": 46
-                                }
-                            ],
-                            "type": "error",
-                            "predicate": [
-                                {
-                                    "type": "error",
-                                    "error": {
-                                        "code": "S0207",
-                                        "position": 46,
-                                        "token": "(end)"
+                                    "descending": false,
+                                    "expression": {
+                                        "code": "S0211",
+                                        "token": ")",
+                                        "position": 38,
+                                        "remaining": [
+                                            {
+                                                "type": "operator",
+                                                "value": "[",
+                                                "position": 39
+                                            },
+                                            {
+                                                "type": "number",
+                                                "value": 0,
+                                                "position": 40
+                                            },
+                                            {
+                                                "type": "operator",
+                                                "value": "]",
+                                                "position": 41
+                                            },
+                                            {
+                                                "type": "operator",
+                                                "value": ".",
+                                                "position": 42
+                                            },
+                                            {
+                                                "type": "name",
+                                                "value": "Text",
+                                                "position": 46
+                                            }
+                                        ],
+                                        "type": "error",
+                                        "predicate": [
+                                            {
+                                                "type": "filter",
+                                                "expr": {
+                                                    "type": "error",
+                                                    "error": {
+                                                        "code": "S0207",
+                                                        "position": 46,
+                                                        "token": "(end)"
+                                                    }
+                                                },
+                                                "position": 39
+                                            }
+                                        ]
                                     }
                                 }
-                            ]
+                            ],
+                            "position": 36
                         }
-                    }
-                ]
-            };
+                    ]
+                };
             var errors = expr.errors();
             var expected_errors = [
                 {
@@ -370,12 +396,16 @@ describe('Invoke parser with incomplete expression', function() {
                     "position": 38,
                     "predicate": [
                         {
-                            "error": {
-                                "code": "S0207",
-                                "position": 46,
-                                "token": "(end)"
+                            "expr": {
+                                "error": {
+                                    "code": "S0207",
+                                    "position": 46,
+                                    "token": "(end)"
+                                },
+                                "type": "error"
                             },
-                            "type": "error"
+                            "position": 39,
+                            "type": "filter"
                         }
                     ],
                     "remaining": [

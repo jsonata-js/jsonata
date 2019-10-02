@@ -1,0 +1,23 @@
+{
+    "expr": "Account.Order#$o.Product^(ProductID).{ 'Product': `Product Name`, 'Order Index': $o }",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        {
+            "Product": "Cloak",
+            "Order Index": 1
+        },
+        {
+            "Product": "Trilby hat",
+            "Order Index": 0
+        },
+        {
+            "Product": "Bowler Hat",
+            "Order Index": 0
+        },
+        {
+            "Product": "Bowler Hat",
+            "Order Index": 1
+        }
+    ]
+}

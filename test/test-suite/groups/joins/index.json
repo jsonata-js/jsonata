@@ -1,0 +1,106 @@
+[
+    {
+        "expr": "$.$#$pos[$pos<3]",
+        "data": [3,1,4,1,5,9],
+        "bindings": {},
+        "result": [
+            3,
+            1,
+            4
+        ]
+    },
+    {
+        "expr": "$.$#$pos[$pos<3]^($)",
+        "data": [3,1,4,1,5,9],
+        "bindings": {},
+        "result": [
+            1,
+            3,
+            4
+        ]
+    },
+    {
+        "expr": "$.$#$pos[$pos<3]^(>$)",
+        "data": [3,1,4,1,5,9],
+        "bindings": {},
+        "result": [
+            4,
+            3,
+            1
+        ]
+    },
+    {
+        "expr": "$.$^($)#$pos[$pos<3] ",
+        "data": [3,1,4,1,5,9],
+        "bindings": {},
+        "result": [
+            1,
+            1,
+            3
+        ]
+    },
+    {
+        "expr": "$.$#$pos[$pos<3][1]",
+        "data": [3,1,4,1,5,9],
+        "bindings": {},
+        "result": 1
+    },
+    {
+        "expr": "$.$#$pos[$pos<3][1][]",
+        "data": [3,1,4,1,5,9],
+        "bindings": {},
+        "result": [1]
+    },
+    {
+        "expr": "$.$#$pos[$pos<3]^($)[-1]",
+        "data": [3,1,4,1,5,9],
+        "bindings": {},
+        "result": 4
+    },
+    {
+        "expr": "$.$#$pos[][$pos<3]^($)[-1]",
+        "data": [3,1,4,1,5,9],
+        "bindings": {},
+        "result": [4]
+    },
+    {
+        "expr": "$.$#$pos[$pos<3]^($)[-1][]",
+        "data": [3,1,4,1,5,9],
+        "bindings": {},
+        "result": [4]
+    },
+    {
+        "expr": "Account.Order#$o.Product[ProductID=858383].{ 'Product': `Product Name`, 'Order Index': $o }",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            {
+                "Product": "Bowler Hat",
+                "Order Index": 0
+            },
+            {
+                "Product": "Bowler Hat",
+                "Order Index": 1
+            }
+        ]
+    },
+    {
+        "expr": "Account.Order#$i.Missing",
+        "dataset": "dataset5",
+        "bindings": {},
+        "undefinedResult": true
+    },
+    {
+        "expr": "Account.Order#$i.Product{ $string(ProductID): $i }",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": {
+            "345664": 1,
+            "858236": 0,
+            "858383": [
+                0,
+                1
+            ]
+        }
+    }
+]

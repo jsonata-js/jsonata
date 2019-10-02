@@ -1,0 +1,228 @@
+[
+    {
+        "expr": "Employee@$e.(Contact)[ssn = $e.SSN].{ 'name': $e.(FirstName & ' ' & Surname), 'phone': Phone[type='mobile'].number }",
+        "dataset": "employees",
+        "bindings": {},
+        "result": [
+            {
+                "name": "Fred Smith",
+                "phone": "077 7700 1234"
+            },
+            {
+                "name": "Darren Cruse",
+                "phone": "315 782 9279"
+            },
+            {
+                "name": "Hugh Jones"
+            },
+            {
+                "name": "Hugh Jones"
+            },
+            {
+                "name": "Hugh Jones",
+                "phone": "07735 853535"
+            }
+        ]
+    },
+    {
+        "expr": "Employee@$e.(Contact)[ssn = $e.SSN]{ $e.FirstName: Phone[type='mobile'].number }",
+        "dataset": "employees",
+        "bindings": {},
+        "result": {
+            "Fred": "077 7700 1234",
+            "Darren": "315 782 9279",
+            "Hugh": "07735 853535"
+        }
+    },
+    {
+        "expr": "Employee@$e.Contact@$c[$c.ssn = $e.SSN]{ $e.(FirstName & ' ' & Surname): $join($c.Phone.number, ', ') }",
+        "dataset": "employees",
+        "bindings": {},
+        "result": {
+            "Fred Smith": "0203 544 1234, 01962 001234, 077 7700 1234",
+            "Darren Cruse": "3146458343, 315 782 9279",
+            "Hugh Jones": "0280 564 6543, 0280 864 8643, 07735 853535"
+        }
+    },
+    {
+        "expr": "Employee@$e.Contact@$c[$c.ssn = $e.SSN]{ $e.(FirstName & ' ' & Surname): $c.Phone[type != 'home'].number ~> $join(', ') }",
+        "dataset": "employees",
+        "bindings": {},
+        "result": {
+            "Fred Smith": "01962 001234, 077 7700 1234",
+            "Darren Cruse": "315 782 9279",
+            "Hugh Jones": "0280 864 8643, 07735 853535"
+        }
+    },
+    {
+        "expr": "Employee@$e.Contact@$c[$c.ssn = $e.SSN]{ $e.(FirstName & ' ' & Surname): $c.Phone[type != 'home'].number }",
+        "dataset": "employees",
+        "bindings": {},
+        "result": {
+            "Fred Smith": [
+                "01962 001234",
+                "077 7700 1234"
+            ],
+            "Darren Cruse": "315 782 9279",
+            "Hugh Jones": [
+                "0280 864 8643",
+                "07735 853535"
+            ]
+        }
+    },
+    {
+        "expr": "Employee@$e.Contact@$c[$c.ssn = $e.SSN]{ $e.(FirstName & ' ' & Surname): $c.Phone[type != 'home'].number[] }",
+        "dataset": "employees",
+        "bindings": {},
+        "result": {
+            "Fred Smith": [
+                "01962 001234",
+                "077 7700 1234"
+            ],
+            "Darren Cruse": [
+                "315 782 9279"
+            ],
+            "Hugh Jones": [
+                "0280 864 8643",
+                "07735 853535"
+            ]
+        }
+    },
+    {
+        "expr": "Employee@$e.Contact@$c[$c.ssn = $e.SSN]{ $e.FirstName: $c.Phone.number }",
+        "dataset": "employees",
+        "bindings": {},
+        "result": {
+            "Fred": [
+                "0203 544 1234",
+                "01962 001234",
+                "077 7700 1234"
+            ],
+            "Darren": [
+                "3146458343",
+                "315 782 9279"
+            ],
+            "Hugh": [
+                "0280 564 6543",
+                "0280 864 8643",
+                "07735 853535"
+            ]
+        }
+    },
+    {
+        "expr": "Employee@$e^($e.Surname).Contact@$c[$e.SSN=$c.ssn].{ 'name': $e.Surname, 'phone': $c.Phone.number }",
+        "dataset": "employees",
+        "bindings": {},
+        "result": [
+            {
+                "name": "Cruse",
+                "phone": [
+                    "3146458343",
+                    "315 782 9279"
+                ]
+            },
+            {
+                "name": "Jones",
+                "phone": "0280 564 6543"
+            },
+            {
+                "name": "Jones",
+                "phone": "0280 864 8643"
+            },
+            {
+                "name": "Jones",
+                "phone": "07735 853535"
+            },
+            {
+                "name": "Smith",
+                "phone": [
+                    "0203 544 1234",
+                    "01962 001234",
+                    "077 7700 1234"
+                ]
+            }
+        ]
+    },
+    {
+        "expr": "Employee@$e^($e.FirstName).Contact@$c[$e.SSN=$c.ssn].{ 'name': $e.Surname, 'phone': $c.Phone.number }",
+        "dataset": "employees",
+        "bindings": {},
+        "result": [
+            {
+                "name": "Cruse",
+                "phone": [
+                    "3146458343",
+                    "315 782 9279"
+                ]
+            },
+            {
+                "name": "Smith",
+                "phone": [
+                    "0203 544 1234",
+                    "01962 001234",
+                    "077 7700 1234"
+                ]
+            },
+            {
+                "name": "Jones",
+                "phone": "0280 564 6543"
+            },
+            {
+                "name": "Jones",
+                "phone": "0280 864 8643"
+            },
+            {
+                "name": "Jones",
+                "phone": "07735 853535"
+            }
+        ]
+    },
+    {
+        "expr": "Employee@$e.Contact@$c[$e.SSN=$c.ssn]{ $e.Surname: $c.Phone.number^($) }",
+        "dataset": "employees",
+        "bindings": {},
+        "result": {
+            "Smith": [
+                "01962 001234",
+                "0203 544 1234",
+                "077 7700 1234"
+            ],
+            "Cruse": [
+                "3146458343",
+                "315 782 9279"
+            ],
+            "Jones": [
+                "0280 564 6543",
+                "0280 864 8643",
+                "07735 853535"
+            ]
+        }
+    },
+    {
+        "expr": "Employee@$e.Contact@$c[$e.SSN=$c.ssn]{ $e.Surname: $c.Phone.number^(>$) }",
+        "dataset": "employees",
+        "bindings": {},
+        "result": {
+            "Smith": [
+                "077 7700 1234",
+                "0203 544 1234",
+                "01962 001234"
+            ],
+            "Cruse": [
+                "315 782 9279",
+                "3146458343"
+            ],
+            "Jones": [
+                "07735 853535",
+                "0280 864 8643",
+                "0280 564 6543"
+            ]
+        }
+    },
+    {
+        "expr": "$@$i",
+        "data": [1,2,3],
+        "bindings": {},
+        "result": [1,2,3]
+    }
+]

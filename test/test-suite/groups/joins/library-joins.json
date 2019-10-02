@@ -1,0 +1,200 @@
+[
+    {
+        "expr-file": "library-joins001.jsonata",
+        "dataset": "library",
+        "bindings": {},
+        "result": [
+            {
+                "title": "Structure and Interpretation of Computer Programs",
+                "customer": "10001"
+            },
+            {
+                "title": "Compilers: Principles, Techniques, and Tools",
+                "customer": "10003"
+            },
+            {
+                "title": "Structure and Interpretation of Computer Programs",
+                "customer": "10003"
+            }
+        ]
+    },
+    {
+        "expr-file": "library-joins002.jsonata",
+        "dataset": "library",
+        "bindings": {},
+        "result": [
+            {
+                "title": "Structure and Interpretation of Computer Programs",
+                "customer": "10001"
+            },
+            {
+                "title": "Compilers: Principles, Techniques, and Tools",
+                "customer": "10003"
+            },
+            {
+                "title": "Structure and Interpretation of Computer Programs",
+                "customer": "10003"
+            }
+        ]
+    },
+    {
+        "expr": "library.books#$pos.$[$substring(title,0,3) = 'The'].$pos",
+        "dataset": "library",
+        "bindings": {},
+        "result": [1,2]
+    },
+    {
+        "expr-file": "library-joins003.jsonata",
+        "dataset": "library",
+        "bindings": {},
+        "result": [
+            {
+                "title": "Structure and Interpretation of Computer Programs",
+                "customer": "10001",
+                "name": "Joe Doe"
+            },
+            {
+                "title": "Compilers: Principles, Techniques, and Tools",
+                "customer": "10003",
+                "name": "Jason Arthur"
+            },
+            {
+                "title": "Structure and Interpretation of Computer Programs",
+                "customer": "10003",
+                "name": "Jason Arthur"
+            }
+        ]
+    },
+    {
+        "expr-file": "library-joins004.jsonata",
+        "dataset": "library",
+        "bindings": {},
+        "result": [
+            {
+                "title": "Structure and Interpretation of Computer Programs",
+                "customer": "10001",
+                "name": "Joe Doe"
+            },
+            {
+                "title": "Compilers: Principles, Techniques, and Tools",
+                "customer": "10003",
+                "name": "Jason Arthur"
+            },
+            {
+                "title": "Structure and Interpretation of Computer Programs",
+                "customer": "10003",
+                "name": "Jason Arthur"
+            }
+        ]
+    },
+    {
+        "expr-file": "library-joins005.jsonata",
+        "dataset": "library",
+        "bindings": {},
+        "result": [
+            {
+                "title": "Structure and Interpretation of Computer Programs",
+                "customer": "10001",
+                "name": "Joe Doe",
+                "loan-index": 0,
+                "book-index": 0,
+                "customer-index": 0
+            },
+            {
+                "title": "Compilers: Principles, Techniques, and Tools",
+                "customer": "10003",
+                "name": "Jason Arthur",
+                "loan-index": 1,
+                "book-index": 3,
+                "customer-index": 2
+            },
+            {
+                "title": "Structure and Interpretation of Computer Programs",
+                "customer": "10003",
+                "name": "Jason Arthur",
+                "loan-index": 2,
+                "book-index": 0,
+                "customer-index": 2
+            }
+        ]
+    },
+    {
+        "expr-file": "library-joins006.jsonata",
+        "dataset": "library",
+        "bindings": {},
+        "result": [
+            {
+                "customer": "Joe Doe",
+                "return": "2016-12-05"
+            },
+            {
+                "customer": "Fred Bloggs",
+                "return": "2016-10-22"
+            },
+            {
+                "customer": "Jason Arthur",
+                "return": "2016-12-22"
+            }
+        ]
+    },
+    {
+        "expr-file": "library-joins007.jsonata",
+        "dataset": "library",
+        "bindings": {},
+        "result": [
+            {
+                "title": "Structure and Interpretation of Computer Programs",
+                "customer": "10001",
+                "name": "Joe Doe",
+                "loan-index": 0,
+                "book-index": 0,
+                "customer-index": 0,
+                "ib2": 0
+            },
+            {
+                "title": "Compilers: Principles, Techniques, and Tools",
+                "customer": "10003",
+                "name": "Jason Arthur",
+                "loan-index": 1,
+                "book-index": 3,
+                "customer-index": 2,
+                "ib2": 1
+            },
+            {
+                "title": "Structure and Interpretation of Computer Programs",
+                "customer": "10003",
+                "name": "Jason Arthur",
+                "loan-index": 2,
+                "book-index": 0,
+                "customer-index": 2,
+                "ib2": 2
+            }
+        ]
+    },
+    {
+        "expr-file": "library-joins008.jsonata",
+        "dataset": "library",
+        "bindings": {},
+        "result": {
+            "title": "Compilers: Principles, Techniques, and Tools",
+            "customer": "10003"
+        }
+    },
+    {
+        "expr-file": "library-joins009.jsonata",
+        "dataset": "library",
+        "bindings": {},
+        "undefinedResult": true
+    },
+    {
+        "expr-file": "library-joins010.jsonata",
+        "dataset": "library",
+        "bindings": {},
+        "result": [
+            {
+                "title": "Compilers: Principles, Techniques, and Tools",
+                "customer": "10003"
+            }
+        ]
+    }
+]

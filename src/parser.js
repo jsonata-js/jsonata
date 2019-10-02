@@ -18,8 +18,8 @@ const parser = (() => {
         '(': 80,
         ')': 0,
         ',': 0,
-        '@': 75,
-        '#': 70,
+        '@': 80,
+        '#': 80,
         ';': 80,
         ':': 80,
         '?': 20,
@@ -185,7 +185,7 @@ const parser = (() => {
                 return create('operator', '~>');
             }
             // test for single char operators
-            if (operators.hasOwnProperty(currentChar)) {
+            if (Object.prototype.hasOwnProperty.call(operators, currentChar)) {
                 position++;
                 return create('operator', currentChar);
             }
@@ -200,7 +200,7 @@ const parser = (() => {
                     if (currentChar === '\\') { // escape sequence
                         position++;
                         currentChar = path.charAt(position);
-                        if (escapes.hasOwnProperty(currentChar)) {
+                        if (Object.prototype.hasOwnProperty.call(escapes, currentChar)) {
                             qstr += escapes[currentChar];
                         } else if (currentChar === 'u') {
                             // \u should be followed by 4 hex digits
@@ -280,7 +280,7 @@ const parser = (() => {
             var ch;
             for (; ;) {
                 ch = path.charAt(i);
-                if (i === length || ' \t\n\r\v'.indexOf(ch) > -1 || operators.hasOwnProperty(ch)) {
+                if (i === length || ' \t\n\r\v'.indexOf(ch) > -1 || Object.prototype.hasOwnProperty.call(operators, ch)) {
                     if (path.charAt(position) === '$') {
                         // variable reference
                         name = path.substring(position + 1, i);
@@ -782,7 +782,38 @@ const parser = (() => {
             this.rhs = expression(operators[':='] - 1); // subtract 1 from bindingPower for right associative operators
             this.type = "binary";
             return this;
+        });
 
+        // focus variable bind
+        infix("@", operators['@'], function (left) {
+            this.lhs = left;
+            this.rhs = expression(operators['@']);
+            if(this.rhs.type !== 'variable') {
+                return handleError({
+                    code: "S0214",
+                    stack: (new Error()).stack,
+                    position: this.rhs.position,
+                    token: "@"
+                });
+            }
+            this.type = "binary";
+            return this;
+        });
+
+        // index (position) variable bind
+        infix("#", operators['#'], function (left) {
+            this.lhs = left;
+            this.rhs = expression(operators['#']);
+            if(this.rhs.type !== 'variable') {
+                return handleError({
+                    code: "S0214",
+                    stack: (new Error()).stack,
+                    position: this.rhs.position,
+                    token: "#"
+                });
+            }
+            this.type = "binary";
+            return this;
         });
 
         // if/then/else ternary operator ?:
@@ -870,6 +901,10 @@ const parser = (() => {
                                 result.steps[result.steps.length - 1].nextFunction = rest.procedure.steps[0].value;
                             }
                             if (rest.type !== 'path') {
+                                if(typeof rest.predicate !== 'undefined') {
+                                    rest.stages = rest.predicate;
+                                    delete rest.predicate;
+                                }
                                 rest = {type: 'path', steps: [rest]};
                             }
                             Array.prototype.push.apply(result.steps, rest.steps);
@@ -911,8 +946,10 @@ const parser = (() => {
                             // RHS is the predicate expr
                             result = ast_optimize(expr.lhs);
                             var step = result;
+                            var type = 'predicate';
                             if (result.type === 'path') {
                                 step = result.steps[result.steps.length - 1];
+                                type = 'stages';
                             }
                             if (typeof step.group !== 'undefined') {
                                 throw {
@@ -921,10 +958,10 @@ const parser = (() => {
                                     position: expr.position
                                 };
                             }
-                            if (typeof step.predicate === 'undefined') {
-                                step.predicate = [];
+                            if (typeof step[type] === 'undefined') {
+                                step[type] = [];
                             }
-                            step.predicate.push(ast_optimize(expr.rhs));
+                            step[type].push({type: 'filter', expr: ast_optimize(expr.rhs), position: expr.position});
                             break;
                         case '{':
                             // group-by
@@ -950,19 +987,64 @@ const parser = (() => {
                             // order-by
                             // LHS is the array to be ordered
                             // RHS defines the terms
-                            result = {type: 'sort', value: expr.value, position: expr.position, consarray: true};
-                            result.lhs = ast_optimize(expr.lhs);
-                            result.rhs = expr.rhs.map(function (terms) {
+                            result = ast_optimize(expr.lhs);
+                            var tms = expr.rhs.map(function (terms) {
                                 return {
                                     descending: terms.descending,
                                     expression: ast_optimize(terms.expression)
                                 };
                             });
+                            if (result.type !== 'path') {
+                                result = {type: 'path', steps: [result]};
+                            }
+                            result.steps.push({type: 'sort', terms: tms, position: expr.position});
                             break;
                         case ':=':
                             result = {type: 'bind', value: expr.value, position: expr.position};
                             result.lhs = ast_optimize(expr.lhs);
                             result.rhs = ast_optimize(expr.rhs);
+                            break;
+                        case '@':
+                            result = ast_optimize(expr.lhs);
+                            step = result;
+                            if (result.type === 'path') {
+                                step = result.steps[result.steps.length - 1];
+                            }
+                            // throw error if there are any predicates defined at this point
+                            // at this point the only type of stages can be predicates
+                            if(typeof step.stages !== 'undefined') {
+                                throw {
+                                    code: "S0215",
+                                    stack: (new Error()).stack,
+                                    position: expr.position
+                                };
+                            }
+                            // also throw if this is applied after an 'order-by' clause
+                            if(step.type === 'sort') {
+                                throw {
+                                    code: "S0216",
+                                    stack: (new Error()).stack,
+                                    position: expr.position
+                                };
+                            }
+                            if(expr.keepArray) {
+                                step.keepArray = true;
+                            }
+                            step.focus = expr.rhs.value;
+                            step.tuple = true;
+                            break;
+                        case '#':
+                            result = ast_optimize(expr.lhs);
+                            step = result;
+                            if (result.type === 'path') {
+                                step = result.steps[result.steps.length - 1];
+                            }
+                            if (typeof step.stages === 'undefined') {
+                                step.index = expr.rhs.value;
+                            } else {
+                                step.stages.push({type: 'index', value: expr.rhs.value, position: expr.position});
+                            }
+                            step.tuple = true;
                             break;
                         case '~>':
                             result = {type: 'apply', value: expr.value, position: expr.position};

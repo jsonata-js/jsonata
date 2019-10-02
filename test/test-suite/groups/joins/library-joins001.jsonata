@@ -1,0 +1,4 @@
+library.loans@$l.books@$b[$l.isbn=$b.isbn].{
+  'title': $b.title,
+  'customer': $l.customer
+}
