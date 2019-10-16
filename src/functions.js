@@ -1842,6 +1842,39 @@ const functions = (() => {
     }
 
     /**
+     *
+     * @param {*} [value] - the input to which the type will be checked
+     * @returns {string} - the type of the input
+     */
+    function typeOf(value) {
+        if (value === undefined) {
+            return undefined;
+        }
+
+        if (value === null) {
+            return 'null';
+        }
+
+        if (isNumeric(value)) {
+            return 'number';
+        }
+
+        if(['string', 'boolean'].includes(typeof value)) {
+            return typeof value;
+        }
+
+        if(Array.isArray(value)) {
+            return 'array';
+        }
+
+        if(isFunction(value)) {
+            return 'function';
+        }
+
+        return 'object';
+    }
+
+    /**
      * Implements the merge sort (stable) with optional comparator function
      *
      * @param {Array} arr - the array to sort
@@ -2014,7 +2047,7 @@ const functions = (() => {
         formatNumber, formatBase, number, floor, ceil, round, abs, sqrt, power, random,
         boolean, not,
         map, zip, filter, single, foldLeft, sift,
-        keys, lookup, append, exists, spread, merge, reverse, each, error, assert, sort, shuffle, distinct,
+        keys, lookup, append, exists, spread, merge, reverse, each, error, assert, typeOf, sort, shuffle, distinct,
         base64encode, base64decode,  encodeUrlComponent, encodeUrl, decodeUrlComponent, decodeUrl
     };
 })();
