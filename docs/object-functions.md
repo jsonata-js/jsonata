@@ -62,3 +62,18 @@ Deliberately throws an error with an optional `message`
 __Signature:__`$assert(condition, message)`
 
 If condition is true, the function returns undefined. If the condition is false, an exception is thrown with the message as the message of the exception.
+
+ ## `$typeOf()`
+__Signature:__`$typeOf(value)`
+
+Evaluates the type of `value` and returns one of the following strings:
+* `"null"`
+* `"number"`
+* `"string"`
+* `"boolean"`
+* `"array"`
+* `"object"`
+* `"function"`
+Returns (non-string) `undefined` when `value` is `undefined`.
+
+
