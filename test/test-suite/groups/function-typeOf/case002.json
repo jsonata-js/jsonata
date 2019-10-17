@@ -1,0 +1,6 @@
+{
+    "expr": "($var:= null; $type($var))",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": "null" 
+}

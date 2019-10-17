@@ -1,0 +1,6 @@
+{
+    "expr": "($var:= ['a','b']; $type($var))",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": "array" 
+}

@@ -1,0 +1,6 @@
+{
+    "expr": "($var:= '123'; $type($var))",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": "string" 
+}

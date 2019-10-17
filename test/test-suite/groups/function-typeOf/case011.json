@@ -1,0 +1,6 @@
+{
+    "expr": "($var:= (λ($v, $i, $a) {$v.price = $max($a.price)}); $type($var))",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": "function" 
+}

@@ -53,12 +53,27 @@ __Examples__
       "Postcode: SO21 2JN"
     ]
 
- ## `$error()`
+## `$error()`
 __Signature:__`$error(message)`
 
 Deliberately throws an error with an optional `message`
 
- ## `$assert()`
+## `$assert()`
 __Signature:__`$assert(condition, message)`
 
 If condition is true, the function returns undefined. If the condition is false, an exception is thrown with the message as the message of the exception.
+
+## `$type()`
+__Signature:__`$type(value)`
+
+Evaluates the type of `value` and returns one of the following strings:
+* `"null"`
+* `"number"`
+* `"string"`
+* `"boolean"`
+* `"array"`
+* `"object"`
+* `"function"`
+Returns (non-string) `undefined` when `value` is `undefined`.
+
+
