@@ -1846,7 +1846,7 @@ const functions = (() => {
      * @param {*} [value] - the input to which the type will be checked
      * @returns {string} - the type of the input
      */
-    function typeOf(value) {
+    function type(value) {
         if (value === undefined) {
             return undefined;
         }
@@ -1859,8 +1859,12 @@ const functions = (() => {
             return 'number';
         }
 
-        if(['string', 'boolean'].includes(typeof value)) {
-            return typeof value;
+        if (typeof value === 'string') {
+            return 'string';
+        }
+
+        if (typeof value === 'boolean') {
+            return 'boolean';
         }
 
         if(Array.isArray(value)) {
@@ -2047,7 +2051,7 @@ const functions = (() => {
         formatNumber, formatBase, number, floor, ceil, round, abs, sqrt, power, random,
         boolean, not,
         map, zip, filter, single, foldLeft, sift,
-        keys, lookup, append, exists, spread, merge, reverse, each, error, assert, typeOf, sort, shuffle, distinct,
+        keys, lookup, append, exists, spread, merge, reverse, each, error, assert, type, sort, shuffle, distinct,
         base64encode, base64decode,  encodeUrlComponent, encodeUrl, decodeUrlComponent, decodeUrl
     };
 })();

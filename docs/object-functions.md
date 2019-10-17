@@ -63,8 +63,8 @@ __Signature:__`$assert(condition, message)`
 
 If condition is true, the function returns undefined. If the condition is false, an exception is thrown with the message as the message of the exception.
 
-## `$typeOf()`
-__Signature:__`$typeOf(value)`
+## `$type()`
+__Signature:__`$type(value)`
 
 Evaluates the type of `value` and returns one of the following strings:
 * `"null"`

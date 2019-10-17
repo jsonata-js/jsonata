@@ -1,5 +1,5 @@
 {
-    "expr": "($var:= null; $typeOf($var))",
+    "expr": "($var:= null; $type($var))",
     "dataset": "dataset5",
     "bindings": {},
     "result": "null" 

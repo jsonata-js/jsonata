@@ -1,5 +1,5 @@
 {
-    "expr": "($var:= true; $typeOf($var))",
+    "expr": "($var:= true; $type($var))",
     "dataset": "dataset5",
     "bindings": {},
     "result": "boolean" 

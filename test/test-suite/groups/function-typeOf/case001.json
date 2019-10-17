@@ -1,5 +1,5 @@
 {
-    "expr": "($var:= undefined; $typeOf($var))",
+    "expr": "($var:= undefined; $type($var))",
     "dataset": "dataset5",
     "bindings": {},
     "undefinedResult": true

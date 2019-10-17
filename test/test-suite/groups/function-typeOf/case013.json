@@ -1,5 +1,5 @@
 {
-    "expr": "($var:= {\"foo\":\"bar\"}; $typeOf($var))",
+    "expr": "($var:= {\"foo\":\"bar\"}; $type($var))",
     "dataset": "dataset5",
     "bindings": {},
     "result": "object" 

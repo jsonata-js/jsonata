@@ -1,5 +1,5 @@
 {
-    "expr": "($var:= function(){true}; $typeOf($var))",
+    "expr": "($var:= function(){true}; $type($var))",
     "dataset": "dataset5",
     "bindings": {},
     "result": "function" 
