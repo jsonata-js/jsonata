@@ -880,6 +880,28 @@ const parser = (() => {
             return result;
         };
 
+        var seekParent = function (node, slot) {
+            switch (node.type) {
+                case 'name':
+                case 'wildcard':
+                    node.ancestor = slot;
+                    node.tuple = true;
+                    break;
+                case 'block':
+                    // look in last expression in the block
+                    if(node.expressions.length > 0) {
+                        node.tuple = true;
+                        seekParent(node.expressions[node.expressions.length - 1], slot);
+                    }
+                    break;
+                case 'path':
+                    // last step in path
+                    node.tuple = true;
+                    seekParent(node.steps[node.steps.length - 1], slot);
+                    break;
+            }
+        };
+
         // post-parse stage
         // the purpose of this is flatten the parts of the AST representing location paths,
         // converting them to arrays of steps which in turn may contain arrays of predicates.
@@ -945,6 +967,18 @@ const parser = (() => {
                             if (laststep.type === 'unary' && laststep.value === '[') {
                                 laststep.consarray = true;
                             }
+                            // resolve ancestry
+                            if(firststep.type === 'parent') {
+                                var nextstep = result.steps[1];
+                                if(nextstep.type === 'parent') {
+                                    firststep.slot += nextstep.slot;
+                                    result.steps.splice(1, 1);
+                                }
+                                result.seekingParent = firststep.slot;
+                            }
+                            if(typeof laststep.seekingParent !== 'undefined') {
+                                seekParent(result.steps[result.steps.length - 2], laststep.seekingParent);
+                            }
                             break;
                         case '[':
                             // predicated step
@@ -967,7 +1001,11 @@ const parser = (() => {
                             if (typeof step[type] === 'undefined') {
                                 step[type] = [];
                             }
-                            step[type].push({type: 'filter', expr: ast_optimize(expr.rhs), position: expr.position});
+                            var predicate = ast_optimize(expr.rhs);
+                            if(typeof predicate.seekingParent !== 'undefined') {
+                                seekParent(step, predicate.seekingParent);
+                            }
+                            step[type].push({type: 'filter', expr: predicate, position: expr.position});
                             break;
                         case '{':
                             // group-by
@@ -1067,6 +1105,12 @@ const parser = (() => {
                             result = {type: expr.type, value: expr.value, position: expr.position};
                             result.lhs = ast_optimize(expr.lhs);
                             result.rhs = ast_optimize(expr.rhs);
+                            if(typeof result.lhs.seekingParent !== 'undefined') {
+                                result.seekingParent = result.lhs.seekingParent;
+                            }
+                            if(typeof result.rhs.seekingParent !== 'undefined') {
+                                result.seekingParent = result.rhs.seekingParent;
+                            }
                     }
                     break;
                 case 'unary':
@@ -1074,12 +1118,24 @@ const parser = (() => {
                     if (expr.value === '[') {
                         // array constructor - process each item
                         result.expressions = expr.expressions.map(function (item) {
-                            return ast_optimize(item);
+                            var value = ast_optimize(item);
+                            if(typeof value.seekingParent !== 'undefined') {
+                                result.seekingParent = value.seekingParent;
+                            }
+                            return value;
                         });
                     } else if (expr.value === '{') {
                         // object constructor - process each pair
                         result.lhs = expr.lhs.map(function (pair) {
-                            return [ast_optimize(pair[0]), ast_optimize(pair[1])];
+                            var key = ast_optimize(pair[0]);
+                            if(typeof key.seekingParent !== 'undefined') {
+                                result.seekingParent = key.seekingParent;
+                            }
+                            var value = ast_optimize(pair[1]);
+                            if(typeof value.seekingParent !== 'undefined') {
+                                result.seekingParent = value.seekingParent;
+                            }
+                            return [key, value];
                         });
                     } else {
                         // all other unary expressions - just process the expression
@@ -1130,6 +1186,9 @@ const parser = (() => {
                     // array of expressions - process each one
                     result.expressions = expr.expressions.map(function (item) {
                         var part = ast_optimize(item);
+                        if(typeof part.seekingParent !== 'undefined') {
+                            result.seekingParent = part.seekingParent;
+                        }
                         if (part.consarray || (part.type === 'path' && part.steps[0].consarray)) {
                             result.consarray = true;
                         }
@@ -1145,7 +1204,7 @@ const parser = (() => {
                     }
                     break;
                 case 'parent':
-                    result = {type: 'parent', slot: 0};
+                    result = {type: 'parent', slot: 1};
                     break;
                 case 'string':
                 case 'number':
