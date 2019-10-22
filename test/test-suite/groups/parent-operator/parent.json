@@ -1,0 +1,281 @@
+[
+    {
+        "expr-file": "parent000.jsonata",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            {
+                "order": "order103",
+                "Product": "Bowler Hat",
+                "Weight": 0.75
+            },
+            {
+                "order": "order103",
+                "Product": "Trilby hat",
+                "Weight": 0.6
+            },
+            {
+                "order": "order104",
+                "Product": "Bowler Hat",
+                "Weight": 0.75
+            },
+            {
+                "order": "order104",
+                "Product": "Cloak",
+                "Weight": 2
+            }
+        ]
+    },
+    {
+        "expr-file": "parent001.jsonata",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            {
+                "order": "order103",
+                "Product": "Bowler Hat",
+                "Weight": 0.75
+            },
+            {
+                "order": "order103",
+                "Product": "Trilby hat",
+                "Weight": 0.6
+            },
+            {
+                "order": "order104",
+                "Product": "Bowler Hat",
+                "Weight": 0.75
+            },
+            {
+                "order": "order104",
+                "Product": "Cloak",
+                "Weight": 2
+            }
+        ]
+    },
+    {
+        "expr": "Account.Order.Product.[`Product Name`, !.OrderID]",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            "Bowler Hat",
+            "order103",
+            "Trilby hat",
+            "order103",
+            "Bowler Hat",
+            "order104",
+            "Cloak",
+            "order104"
+        ]
+    },
+    {
+        "expr": "Account.Order.Product.{ `Product Name`: [Quantity, !.OrderID] }",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            {
+                "Bowler Hat": [ 2, "order103" ]
+            },
+            {
+                "Trilby hat": [ 1, "order103" ]
+            },
+            {
+                "Bowler Hat": [ 4, "order104" ]
+            },
+            {
+                "Cloak": [ 1, "order104" ]
+            }
+        ]
+    },
+    {
+        "expr": "Account.Order.Product.{ `Product Name`: [Quantity, (!.OrderID)] }",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            {
+                "Bowler Hat": [ 2, "order103" ]
+            },
+            {
+                "Trilby hat": [ 1, "order103" ]
+            },
+            {
+                "Bowler Hat": [ 4, "order104" ]
+            },
+            {
+                "Cloak": [ 1, "order104" ]
+            }
+        ]
+    },
+    {
+        "expr": "Account.Order.Product[!.OrderID='order104'].SKU",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            "040657863",
+            "0406654603"
+        ]
+    },
+    {
+        "expr": "(Account.Order.Product)[!.OrderID='order104'].SKU",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            "040657863",
+            "0406654603"
+        ]
+    },
+    {
+        "expr": "Account.Order.Product.{ !.OrderID: Price * Quantity }",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            {
+                "order103": 68.9
+            },
+            {
+                "order103": 21.67
+            },
+            {
+                "order104": 137.8
+            },
+            {
+                "order104": 107.99
+            }
+        ]
+    },
+    {
+        "expr-file": "parent002.jsonata",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            {
+                "Product": "Bowler Hat",
+                "Order": "order103",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Trilby hat",
+                "Order": "order103",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Bowler Hat",
+                "Order": "order104",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Cloak",
+                "Order": "order104",
+                "Account": "Firefly"
+            }
+        ]
+    },
+    {
+        "expr-file": "parent003.jsonata",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            {
+                "Product": "Bowler Hat",
+                "Order": "order103",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Trilby hat",
+                "Order": "order103",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Bowler Hat",
+                "Order": "order104",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Cloak",
+                "Order": "order104",
+                "Account": "Firefly"
+            }
+        ]
+    },
+    {
+        "expr-file": "parent004.jsonata",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            {
+                "Product": "Bowler Hat",
+                "Order": "order103",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Trilby hat",
+                "Order": "order103",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Bowler Hat",
+                "Order": "order104",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Cloak",
+                "Order": "order104",
+                "Account": "Firefly"
+            }
+        ]
+    },
+    {
+        "expr-file": "parent005.jsonata",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            {
+                "Product": "Bowler Hat",
+                "Order": "order103",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Trilby hat",
+                "Order": "order103",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Bowler Hat",
+                "Order": "order104",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Cloak",
+                "Order": "order104",
+                "Account": "Firefly"
+            }
+        ]
+    },
+    {
+        "expr-file": "parent006.jsonata",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            {
+                "Product": "Bowler Hat",
+                "Order": "order103",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Trilby hat",
+                "Order": "order103",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Bowler Hat",
+                "Order": "order104",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Cloak",
+                "Order": "order104",
+                "Account": "Firefly"
+            }
+        ]
+    }
+]

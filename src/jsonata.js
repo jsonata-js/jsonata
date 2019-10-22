@@ -78,6 +78,9 @@ var jsonata = (function() {
             case 'descendant':
                 result = evaluateDescendants(expr, input, environment);
                 break;
+            case 'parent':
+                result = environment.lookup('!');
+                break;
             case 'condition':
                 result = yield * evaluateCondition(expr, input, environment);
                 break;
@@ -121,13 +124,13 @@ var jsonata = (function() {
             result = yield result;
         }
 
-        if (expr.hasOwnProperty('predicate')) {
+        if (Object.prototype.hasOwnProperty.call(expr, 'predicate')) {
             for(var ii = 0; ii < expr.predicate.length; ii++) {
                 result = yield * evaluateFilter(expr.predicate[ii].expr, result, environment);
             }
         }
 
-        if (expr.type !== 'path' && expr.hasOwnProperty('group')) {
+        if (expr.type !== 'path' && Object.prototype.hasOwnProperty.call(expr, 'group')) {
             result = yield * evaluateGroupExpression(expr.group, result, environment);
         }
 
@@ -204,9 +207,14 @@ var jsonata = (function() {
         }
 
         if(isTupleStream) {
-            resultSequence = createSequence();
-            for(ii = 0; ii < tupleBindings.length; ii++) {
-                resultSequence.push(tupleBindings[ii]['@']);
+            if(expr.tuple) {
+                // tuple stream is carrying ancestry information - keep this
+                resultSequence = tupleBindings;
+            } else {
+                resultSequence = createSequence();
+                for (ii = 0; ii < tupleBindings.length; ii++) {
+                    resultSequence.push(tupleBindings[ii]['@']);
+                }
             }
         }
 
@@ -340,22 +348,26 @@ var jsonata = (function() {
             var res = yield* evaluate(expr, tupleBindings[ee]['@'], stepEnv);
             // res is the binding sequence for the output tuple stream
             if(typeof res !== 'undefined') {
-                if (!Array.isArray(res)) {
-                    res = [res];
-                }
-                for (var bb = 0; bb < res.length; bb++) {
-                    tuple = {};
-                    Object.assign(tuple, tupleBindings[ee]);
-                    if (expr.focus) {
-                        tuple[expr.focus] = res[bb];
-                        tuple['@'] = input;
-                    } else {
-                        tuple['@'] = res[bb];
+                if(res.tupleStream) {
+                    result = res;
+                } else {
+                    if (!Array.isArray(res)) {
+                        res = [res];
                     }
-                    if(expr.index) {
-                        tuple[expr.index] = bb;
+                    for (var bb = 0; bb < res.length; bb++) {
+                        tuple = {};
+                        Object.assign(tuple, tupleBindings[ee]);
+                        if (expr.focus) {
+                            tuple[expr.focus] = res[bb];
+                            tuple['@'] = input;
+                        } else {
+                            tuple['@'] = res[bb];
+                        }
+                        if (expr.index) {
+                            tuple[expr.index] = bb;
+                        }
+                        result.push(tuple);
                     }
-                    result.push(tuple);
                 }
             }
         }
@@ -550,7 +562,47 @@ var jsonata = (function() {
      */
     function evaluateName(expr, input, environment) {
         // lookup the 'name' item in the input
-        return fn.lookup(input, expr.value);
+        //return fn.lookup(input, expr.value);
+        var result;
+        if (Array.isArray(input)) {
+            result = createSequence();
+            for(var ii = 0; ii < input.length; ii++) {
+                var res =  evaluateName(expr, input[ii], environment);
+                if (typeof res !== 'undefined') {
+                    if (Array.isArray(res)) {
+                        result.push(...res);
+                    } else {
+                        result.push(res);
+                    }
+                }
+            }
+        } else if (input !== null && typeof input === 'object') {
+            res = input[expr.value];
+            if(typeof expr.ancestor !== 'undefined') {
+                result = createSequence();
+                result.tupleStream = true;
+                if(!Array.isArray(res)) {
+                    res = [res];
+                }
+                for(var jj = 0; jj < res.length; jj++) {
+                    result.push({
+                        '@': res[jj],
+                        '!': input
+                    });
+                }
+            } else {
+                result = res;
+            }
+        }
+        if(typeof expr.ancestor !== 'undefined') {
+            if (!Array.isArray(result)) {
+                result = createSequence(result);
+            }
+            if(!result.tupleStream) {
+                result.tupleStream = true;
+            }
+        }
+        return result;
     }
 
     /**
@@ -1803,7 +1855,10 @@ var jsonata = (function() {
                 return value;
             },
             timestamp: enclosingEnvironment ? enclosingEnvironment.timestamp : null,
-            async: enclosingEnvironment ? enclosingEnvironment.async : false
+            async: enclosingEnvironment ? enclosingEnvironment.async : false,
+            global: enclosingEnvironment ? enclosingEnvironment.global : {
+                ancestry: [ null ]
+            }
         };
     }
 
