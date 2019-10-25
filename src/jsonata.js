@@ -163,9 +163,7 @@ var jsonata = (function() {
         // expr is an array of steps
         // if the first step is a variable reference ($...), including root reference ($$),
         //   then the path is absolute rather than relative
-        if (expr.steps[0].type === 'variable') {
-            inputSequence = createSequence(input);  // dummy singleton sequence for first (absolute) step
-        } else if (Array.isArray(input)) {
+        if (Array.isArray(input) && expr.steps[0].type !== 'variable') {
             inputSequence = input;
         } else {
             // if input is not an array, make it so
@@ -334,7 +332,7 @@ var jsonata = (function() {
         result.tupleStream = true;
         var stepEnv = environment;
         if(tupleBindings === undefined) {
-            tupleBindings = [{'@': input}];
+            tupleBindings = input.map(item => { return {'@': item} });
         }
 
         for(var ee = 0; ee < tupleBindings.length; ee++) {

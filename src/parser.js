@@ -1012,7 +1012,7 @@ const parser = (() => {
                             }
                             // throw error if there are any predicates defined at this point
                             // at this point the only type of stages can be predicates
-                            if(typeof step.stages !== 'undefined') {
+                            if(typeof step.stages !== 'undefined' || typeof step.predicate !== 'undefined') {
                                 throw {
                                     code: "S0215",
                                     stack: (new Error()).stack,
@@ -1038,6 +1038,12 @@ const parser = (() => {
                             step = result;
                             if (result.type === 'path') {
                                 step = result.steps[result.steps.length - 1];
+                            } else {
+                                result = {type: 'path', steps: [result]};
+                                if (typeof step.predicate !== 'undefined') {
+                                    step.stages = step.predicate;
+                                    delete step.predicate;
+                                }
                             }
                             if (typeof step.stages === 'undefined') {
                                 step.index = expr.rhs.value;
