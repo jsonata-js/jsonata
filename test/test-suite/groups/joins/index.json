@@ -1,16 +1,34 @@
 [
     {
+        "expr": "$#$pos[$pos<3]",
+        "data": [3,1,4,1,5,9],
+        "bindings": {},
+        "result": [
+            3,
+            1,
+            4
+        ]
+    },
+    {
+        "expr": "$#$pos[$pos<3] = $[[0..2]]",
+        "data": [3,1,4,1,5,9],
+        "bindings": {},
+        "result": true
+    },
+    {
         "expr": "$.$#$pos[$pos<3]",
         "data": [3,1,4,1,5,9],
         "bindings": {},
-        "result": [
-            3,
-            1,
-            4
-        ]
+        "result": [3,1,4,1,5,9]
     },
     {
-        "expr": "$.$#$pos[$pos<3]^($)",
+        "expr": "$.$#$pos[$pos<3] = $.$[[0..2]]",
+        "data": [3,1,4,1,5,9],
+        "bindings": {},
+        "result": true
+    },
+    {
+        "expr": "$#$pos[$pos<3]^($)",
         "data": [3,1,4,1,5,9],
         "bindings": {},
         "result": [
@@ -20,7 +38,7 @@
         ]
     },
     {
-        "expr": "$.$#$pos[$pos<3]^(>$)",
+        "expr": "$#$pos[$pos<3]^(>$)",
         "data": [3,1,4,1,5,9],
         "bindings": {},
         "result": [
@@ -30,7 +48,7 @@
         ]
     },
     {
-        "expr": "$.$^($)#$pos[$pos<3] ",
+        "expr": "$^($)#$pos[$pos<3] ",
         "data": [3,1,4,1,5,9],
         "bindings": {},
         "result": [
@@ -40,34 +58,40 @@
         ]
     },
     {
-        "expr": "$.$#$pos[$pos<3][1]",
+        "expr": "$#$pos[$pos<3][1]",
         "data": [3,1,4,1,5,9],
         "bindings": {},
         "result": 1
     },
     {
-        "expr": "$.$#$pos[$pos<3][1][]",
+        "expr": "$#$pos[$pos<3][1][]",
         "data": [3,1,4,1,5,9],
         "bindings": {},
         "result": [1]
     },
     {
-        "expr": "$.$#$pos[$pos<3]^($)[-1]",
+        "expr": "$#$pos[$pos<3]^($)[-1]",
         "data": [3,1,4,1,5,9],
         "bindings": {},
         "result": 4
     },
     {
-        "expr": "$.$#$pos[][$pos<3]^($)[-1]",
+        "expr": "$#$pos[][$pos<3]^($)[-1]",
         "data": [3,1,4,1,5,9],
         "bindings": {},
         "result": [4]
     },
     {
-        "expr": "$.$#$pos[$pos<3]^($)[-1][]",
+        "expr": "$#$pos[$pos<3]^($)[-1][]",
         "data": [3,1,4,1,5,9],
         "bindings": {},
         "result": [4]
+    },
+    {
+        "expr": "$[[1..4]]#$pos[$pos>=2]",
+        "data": [3,1,4,1,5,9],
+        "bindings": {},
+        "result": [1,5]
     },
     {
         "expr": "Account.Order#$o.Product[ProductID=858383].{ 'Product': `Product Name`, 'Order Index': $o }",
