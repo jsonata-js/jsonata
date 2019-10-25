@@ -79,7 +79,7 @@ var jsonata = (function() {
                 result = evaluateDescendants(expr, input, environment);
                 break;
             case 'parent':
-                result = environment.lookup('!');
+                result = environment.lookup(expr.slot.label);
                 break;
             case 'condition':
                 result = yield * evaluateCondition(expr, input, environment);
@@ -139,7 +139,7 @@ var jsonata = (function() {
             exitCallback(expr, input, environment, result);
         }
 
-        if(result && isSequence(result)) {
+        if(result && isSequence(result) && !result.tupleStream) {
             if(expr.keepArray) {
                 result.keepSingleton = true;
             }
@@ -348,15 +348,15 @@ var jsonata = (function() {
             var res = yield* evaluate(expr, tupleBindings[ee]['@'], stepEnv);
             // res is the binding sequence for the output tuple stream
             if(typeof res !== 'undefined') {
-                if(res.tupleStream) {
-                    result = res;
-                } else {
-                    if (!Array.isArray(res)) {
-                        res = [res];
-                    }
-                    for (var bb = 0; bb < res.length; bb++) {
-                        tuple = {};
-                        Object.assign(tuple, tupleBindings[ee]);
+                if (!Array.isArray(res)) {
+                    res = [res];
+                }
+                for (var bb = 0; bb < res.length; bb++) {
+                    tuple = {};
+                    Object.assign(tuple, tupleBindings[ee]);
+                    if(res.tupleStream) {
+                        Object.assign(tuple, res[bb]);
+                    } else {
                         if (expr.focus) {
                             tuple[expr.focus] = res[bb];
                             tuple['@'] = input;
@@ -366,8 +366,11 @@ var jsonata = (function() {
                         if (expr.index) {
                             tuple[expr.index] = bb;
                         }
-                        result.push(tuple);
+                        if (expr.ancestor) {
+                            tuple[expr.ancestor.label] = tupleBindings[ee]['@'];
+                        }
                     }
+                    result.push(tuple);
                 }
             }
         }
@@ -562,47 +565,7 @@ var jsonata = (function() {
      */
     function evaluateName(expr, input, environment) {
         // lookup the 'name' item in the input
-        //return fn.lookup(input, expr.value);
-        var result;
-        if (Array.isArray(input)) {
-            result = createSequence();
-            for(var ii = 0; ii < input.length; ii++) {
-                var res =  evaluateName(expr, input[ii], environment);
-                if (typeof res !== 'undefined') {
-                    if (Array.isArray(res)) {
-                        result.push(...res);
-                    } else {
-                        result.push(res);
-                    }
-                }
-            }
-        } else if (input !== null && typeof input === 'object') {
-            res = input[expr.value];
-            if(typeof expr.ancestor !== 'undefined') {
-                result = createSequence();
-                result.tupleStream = true;
-                if(!Array.isArray(res)) {
-                    res = [res];
-                }
-                for(var jj = 0; jj < res.length; jj++) {
-                    result.push({
-                        '@': res[jj],
-                        '!': input
-                    });
-                }
-            } else {
-                result = res;
-            }
-        }
-        if(typeof expr.ancestor !== 'undefined') {
-            if (!Array.isArray(result)) {
-                result = createSequence(result);
-            }
-            if(!result.tupleStream) {
-                result.tupleStream = true;
-            }
-        }
-        return result;
+        return fn.lookup(input, expr.value);
     }
 
     /**

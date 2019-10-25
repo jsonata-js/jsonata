@@ -880,25 +880,62 @@ const parser = (() => {
             return result;
         };
 
+        var ancestorLabel = 0;
+        var ancestorIndex = 0;
+        var ancestry = [];
+
         var seekParent = function (node, slot) {
             switch (node.type) {
                 case 'name':
                 case 'wildcard':
-                    node.ancestor = slot;
-                    node.tuple = true;
+                    if(slot.level === 1) {
+                        if (typeof node.ancestor === 'undefined') {
+                            node.ancestor = slot;
+                        } else {
+                            // reuse the existing label
+                            ancestry[slot.index].slot.label = node.ancestor.label;
+                            node.ancestor = slot;
+                        }
+                        node.tuple = true;
+                    }
+                    slot.level--;
+                    break;
+                case 'parent':
+                    slot.level++;
                     break;
                 case 'block':
                     // look in last expression in the block
                     if(node.expressions.length > 0) {
                         node.tuple = true;
-                        seekParent(node.expressions[node.expressions.length - 1], slot);
+                        slot = seekParent(node.expressions[node.expressions.length - 1], slot);
                     }
                     break;
                 case 'path':
                     // last step in path
                     node.tuple = true;
-                    seekParent(node.steps[node.steps.length - 1], slot);
+                    var index = node.steps.length - 1;
+                    slot = seekParent(node.steps[index--], slot);
+                    while (slot.level > 0 && index >= 0) {
+                        // check previous steps
+                        slot = seekParent(node.steps[index--], slot);
+                    }
                     break;
+                default:
+                    // TODO throw up - can't derive ancestor
+                    throw {
+                        message: 'cant derive ancestor'
+                    };
+            }
+            return slot;
+        };
+
+        var pushAncestry = function(result, value) {
+            if(typeof value.seekingParent !== 'undefined') {
+                if(typeof result.seekingParent === 'undefined') {
+                    result.seekingParent = value.seekingParent;
+                } else {
+                    Array.prototype.push.apply(result.seekingParent, value.seekingParent);
+                }
             }
         };
 
@@ -913,11 +950,14 @@ const parser = (() => {
                     switch (expr.value) {
                         case '.':
                             var lstep = ast_optimize(expr.lhs);
-                            result = {type: 'path', steps: []};
+
                             if (lstep.type === 'path') {
-                                Array.prototype.push.apply(result.steps, lstep.steps);
+                                result = lstep;
                             } else {
-                                result.steps = [lstep];
+                                result = {type: 'path', steps: [lstep]};
+                            }
+                            if(lstep.type === 'parent') {
+                                result.seekingParent = [lstep.slot];
                             }
                             var rest = ast_optimize(expr.rhs);
                             if (rest.type === 'function' &&
@@ -928,6 +968,9 @@ const parser = (() => {
                                 // next function in chain of functions - will override a thenable
                                 result.steps[result.steps.length - 1].nextFunction = rest.procedure.steps[0].value;
                             }
+                            // if (rest.type === 'parent') {
+                            //     result.steps[result.steps.length - 1].seekingParent = rest.slot;
+                            // }
                             if (rest.type !== 'path') {
                                 if(typeof rest.predicate !== 'undefined') {
                                     rest.stages = rest.predicate;
@@ -968,16 +1011,25 @@ const parser = (() => {
                                 laststep.consarray = true;
                             }
                             // resolve ancestry
-                            if(firststep.type === 'parent') {
-                                var nextstep = result.steps[1];
-                                if(nextstep.type === 'parent') {
-                                    firststep.slot += nextstep.slot;
-                                    result.steps.splice(1, 1);
+                            if(typeof laststep.seekingParent !== 'undefined' || laststep.type === 'parent') {
+                                var slots =  laststep.type === 'parent' ? [laststep.slot] : laststep.seekingParent;
+                                for(var is = 0; is < slots.length; is++) {
+                                    var slot = slots[is];
+                                    var index = result.steps.length - 2;
+                                    slot = seekParent(result.steps[index--], slot);
+                                    while (slot.level > 0) {
+                                        if (index < 0) {
+                                            if(typeof result.seekingParent === 'undefined') {
+                                                result.seekingParent = [slot];
+                                            } else {
+                                                result.seekingParent.push(slot);
+                                            }
+                                            break;
+                                        }
+                                        // try previous step
+                                        slot = seekParent(result.steps[index--], slot);
+                                    }
                                 }
-                                result.seekingParent = firststep.slot;
-                            }
-                            if(typeof laststep.seekingParent !== 'undefined') {
-                                seekParent(result.steps[result.steps.length - 2], laststep.seekingParent);
                             }
                             break;
                         case '[':
@@ -1003,7 +1055,7 @@ const parser = (() => {
                             }
                             var predicate = ast_optimize(expr.rhs);
                             if(typeof predicate.seekingParent !== 'undefined') {
-                                seekParent(step, predicate.seekingParent);
+                                seekParent(step, predicate.seekingParent[0]); //TODO cope with arrays of these
                             }
                             step[type].push({type: 'filter', expr: predicate, position: expr.position});
                             break;
@@ -1105,12 +1157,8 @@ const parser = (() => {
                             result = {type: expr.type, value: expr.value, position: expr.position};
                             result.lhs = ast_optimize(expr.lhs);
                             result.rhs = ast_optimize(expr.rhs);
-                            if(typeof result.lhs.seekingParent !== 'undefined') {
-                                result.seekingParent = result.lhs.seekingParent;
-                            }
-                            if(typeof result.rhs.seekingParent !== 'undefined') {
-                                result.seekingParent = result.rhs.seekingParent;
-                            }
+                            pushAncestry(result, result.lhs);
+                            pushAncestry(result, result.rhs);
                     }
                     break;
                 case 'unary':
@@ -1119,22 +1167,16 @@ const parser = (() => {
                         // array constructor - process each item
                         result.expressions = expr.expressions.map(function (item) {
                             var value = ast_optimize(item);
-                            if(typeof value.seekingParent !== 'undefined') {
-                                result.seekingParent = value.seekingParent;
-                            }
+                            pushAncestry(result, value);
                             return value;
                         });
                     } else if (expr.value === '{') {
                         // object constructor - process each pair
                         result.lhs = expr.lhs.map(function (pair) {
                             var key = ast_optimize(pair[0]);
-                            if(typeof key.seekingParent !== 'undefined') {
-                                result.seekingParent = key.seekingParent;
-                            }
+                            pushAncestry(result, key);
                             var value = ast_optimize(pair[1]);
-                            if(typeof value.seekingParent !== 'undefined') {
-                                result.seekingParent = value.seekingParent;
-                            }
+                            pushAncestry(result, value);
                             return [key, value];
                         });
                     } else {
@@ -1144,6 +1186,8 @@ const parser = (() => {
                         if (expr.value === '-' && result.expression.type === 'number') {
                             result = result.expression;
                             result.value = -result.value;
+                        } else {
+                            pushAncestry(result, result.expression);
                         }
                     }
                     break;
@@ -1187,7 +1231,11 @@ const parser = (() => {
                     result.expressions = expr.expressions.map(function (item) {
                         var part = ast_optimize(item);
                         if(typeof part.seekingParent !== 'undefined') {
-                            result.seekingParent = part.seekingParent;
+                            if(typeof result.seekingParent === 'undefined') {
+                                result.seekingParent = part.seekingParent;
+                            } else {
+                                Array.prototype.push.apply(result.seekingParent, part.seekingParent);
+                            }
                         }
                         if (part.consarray || (part.type === 'path' && part.steps[0].consarray)) {
                             result.consarray = true;
@@ -1204,7 +1252,8 @@ const parser = (() => {
                     }
                     break;
                 case 'parent':
-                    result = {type: 'parent', slot: 1};
+                    result = {type: 'parent', slot: { label: '!' + ancestorLabel++, level: 1, index: ancestorIndex++ } };
+                    ancestry.push(result);
                     break;
                 case 'string':
                 case 'number':
