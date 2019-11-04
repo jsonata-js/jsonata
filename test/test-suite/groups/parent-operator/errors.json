@@ -1,0 +1,20 @@
+[
+    {
+        "expr": "{'hello': 'world'}.! ",
+        "data": null,
+        "bindings": {},
+        "code": "S0217"
+    },
+    {
+        "expr": "!",
+        "dataset": "library",
+        "bindings": {},
+        "code": "S0217"
+    },
+    {
+        "expr": "library.loans.!.!.!",
+        "dataset": "library",
+        "bindings": {},
+        "code": "S0217"
+    }
+]

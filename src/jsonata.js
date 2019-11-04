@@ -359,7 +359,7 @@ var jsonata = (function() {
                     } else {
                         if (expr.focus) {
                             tuple[expr.focus] = res[bb];
-                            tuple['@'] = input;
+                            tuple['@'] = tupleBindings[ee]['@'];
                         } else {
                             tuple['@'] = res[bb];
                         }
@@ -1927,6 +1927,7 @@ var jsonata = (function() {
         "S0214": "The right side of {{token}} must be a variable name (start with $)",
         "S0215": "A context variable binding must precede any predicates on a step",
         "S0216": "A context variable binding must precede the 'order-by' clause on a step",
+        "S0217": "The object representing the 'parent' cannot be derived from this expression",
         "S0301": "Empty regular expressions are not allowed",
         "S0302": "No terminating / in regular expression",
         "S0402": "Choice groups containing parameterized types are not supported",
