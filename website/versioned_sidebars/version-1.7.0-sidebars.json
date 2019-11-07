@@ -1,0 +1,42 @@
+{
+  "version-1.7.0-docs": {
+    "Getting Started": [
+      "version-1.7.0-overview",
+      "version-1.7.0-using-nodejs",
+      "version-1.7.0-using-browser"
+    ],
+    "Language Guide": [
+      "version-1.7.0-simple",
+      "version-1.7.0-predicate",
+      "version-1.7.0-expressions",
+      "version-1.7.0-construction",
+      "version-1.7.0-composition",
+      "version-1.7.0-sorting-grouping",
+      "version-1.7.0-processing",
+      "version-1.7.0-programming",
+      "version-1.7.0-regex",
+      "version-1.7.0-date-time"
+    ],
+    "Operators": [
+      "version-1.7.0-path-operators",
+      "version-1.7.0-numeric-operators",
+      "version-1.7.0-comparison-operators",
+      "version-1.7.0-boolean-operators",
+      "version-1.7.0-other-operators"
+    ],
+    "Function Library": [
+      "version-1.7.0-string-functions",
+      "version-1.7.0-numeric-functions",
+      "version-1.7.0-aggregation-functions",
+      "version-1.7.0-boolean-functions",
+      "version-1.7.0-array-functions",
+      "version-1.7.0-object-functions",
+      "version-1.7.0-date-time-functions",
+      "version-1.7.0-higher-order-functions"
+    ],
+    "Extending JSONata": [
+      "version-1.7.0-embedding-extending",
+      "version-1.7.0-contributing"
+    ]
+  }
+}
