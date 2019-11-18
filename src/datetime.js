@@ -1030,6 +1030,12 @@ const dateTime = (function () {
                         }
                         return parseInt(digits);
                     };
+                    break;
+                case formats.SEQUENCE:
+                    throw {
+                        code: 'D3130',
+                        value: formatSpec.token
+                    };
             }
 
         }

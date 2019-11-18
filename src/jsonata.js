@@ -1970,7 +1970,7 @@ var jsonata = (function() {
         "D3110": "The argument of the toMillis function must be an ISO 8601 formatted timestamp. Given {{value}}",
         "D3120": "Syntax error in expression passed to function eval: {{value}}",
         "D3121": "Dynamic error evaluating the expression passed to function eval: {{value}}",
-        "D3130": "Formatting an integer as a sequence starting with {{value}} is not supported by this implementation",
+        "D3130": "Formatting or parsing an integer as a sequence starting with {{value}} is not supported by this implementation",
         "D3131": "In a decimal digit pattern, all digits must be from the same decimal group",
         "D3132": "Unknown component specifier {{value}} in date/time picture string",
         "D3133": "The 'name' modifier can only be applied to months and days in the date/time picture string, not {{value}}",
