@@ -478,5 +478,13 @@
         "expr": "$parseInteger('FZPH', 'A')",
         "data": {},
         "result": 123456
+    },
+    {
+        "function": "#parseInteger",
+        "category": "errors",
+        "description": "unsupported picture string",
+        "expr": "$parseInteger('50', '#')",
+        "data": {},
+        "code": "D3130"
     }
 ]
