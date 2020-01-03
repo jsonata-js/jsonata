@@ -205,7 +205,7 @@ If `str` is not specified, then the context value is used as the value of `str`.
 
 The `pattern` parameter can either be a string or a regular expression (regex).  If it is a string, it specifies the substring(s) within `str` which should be replaced.  If it is a regex, its is used to find .
 
-The `replacement` parameter can either be a string or a function.  If it is a string, it specifies the sequence of characters that replace the substring(s) that are matched by `pattern`.  If `pattern` is a regex, then the `replacement` string can refer to the characters that were matched by the regex as well as any of the captured groups using a `S` followed by a number `N`:
+The `replacement` parameter can either be a string or a function.  If it is a string, it specifies the sequence of characters that replace the substring(s) that are matched by `pattern`.  If `pattern` is a regex, then the `replacement` string can refer to the characters that were matched by the regex as well as any of the captured groups using a `$` followed by a number `N`:
 
 - If `N = 0`, then it is replaced by substring matched by the regex as a whole.
 - If `N > 0`, then it is replaced by the substring captured by the Nth parenthesised group in the regex.
