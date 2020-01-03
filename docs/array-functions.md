@@ -17,7 +17,7 @@ __Examples__
 ## `$append()`
 __Signature:__ `$append(array1, array2)`
 
-Returns and array containing the values in `array1` followed by the values in `array2`.  If either parameter is not an array, then it is treated as a singleton array containing that value.
+Returns an array containing the values in `array1` followed by the values in `array2`.  If either parameter is not an array, then it is treated as a singleton array containing that value.
 
 __Examples__
 - `$append([1,2,3], [4,5,6])` => `[1,2,3,4,5,6]`
