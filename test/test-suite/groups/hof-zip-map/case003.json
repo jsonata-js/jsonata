@@ -1,5 +1,5 @@
 {
-    "expr": "(  $data := {    \"one\": 1,    \"two\": 5  };  $data[].$zip(one, two) ~> $map($sum)) ",
+    "expr": "(  $data := {    \"one\": 1,    \"two\": 5  };  $data.$zip(one, two) ~> $map($sum)) ",
     "data": null,
     "bindings": {},
     "result": 6
