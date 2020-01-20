@@ -1,0 +1,40 @@
+[
+    {
+        "expr": "$.[value,epochSeconds]",
+        "data": [
+            {"epochSeconds":1578381600,"value": 3},
+            {"epochSeconds":1578381700,"value": 5}
+        ],
+        "result": [
+            [3, 1578381600],
+            [5, 1578381700]
+        ]
+    },
+    {
+        "expr": "$.[value,epochSeconds]",
+        "data": [
+            {"epochSeconds":1578381600,"value": 3}
+        ],
+        "result": [3, 1578381600]
+    },
+    {
+        "expr": "$.[value,epochSeconds][]",
+        "data": [
+            {"epochSeconds":1578381600,"value": 3},
+            {"epochSeconds":1578381700,"value": 5}
+        ],
+        "result": [
+            [3, 1578381600],
+            [5, 1578381700]
+        ]
+    },
+    {
+        "expr": "$.[value,epochSeconds][]",
+        "data": [
+            {"epochSeconds":1578381600,"value": 3}
+        ],
+        "result": [
+            [3, 1578381600]
+        ]
+    }
+]

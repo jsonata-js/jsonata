@@ -219,6 +219,9 @@ var jsonata = (function() {
         }
 
         if(expr.keepSingletonArray) {
+            if(!isSequence(resultSequence)) {
+                resultSequence = createSequence(resultSequence);
+            }
             resultSequence.keepSingleton = true;
         }
 
