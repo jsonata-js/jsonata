@@ -21,6 +21,7 @@ At a minimum, please include:
  - Version of `jsonata` - either release number if you downloaded a zip, or the first few lines of `git log` if you are cloning the repository directly.
  - Version of Node.js (`node -v`), or browser vendor and version.
 
+
 ## Feature requests
 
 tba
@@ -41,6 +42,14 @@ Signed-off-by: John Doe <john.doe@hisdomain.com>
 
 ### Coding standards
 
-Please ensure you follow the coding standards used through-out the existing code base. Coding standards are checked by ESLint. 100% test coverage must be maintained at all times. Run the following command to check coding rules and test coverage:
+Please ensure you follow the coding standards used through-out the existing code base. Coding standards are checked by ESLint. 100% test coverage must be maintained at all times.
 
- - npm t
+## Running tests
+
+Tests are written using Mocha and can be run directly via NPM.
+
+```
+npm test
+```
+
+> *Timezones* There are a number of tests that test date functionality. In order for these tests to pass they need to be run in GMT time. (Since Jan 1 in GMT is still Dec 31 in any timezone further west). The workaround is to update your system clock to be in GMT while you are running tests.
