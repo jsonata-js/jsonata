@@ -1,5 +1,5 @@
 (Account.Order).(Product).{
   'Product': `Product Name`,
-  'Order': !.OrderID,
-  'Account': !.!.`Account Name`
+  'Order': %.OrderID,
+  'Account': %.%.`Account Name`
 }

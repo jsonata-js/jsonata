@@ -78,6 +78,36 @@ The key/value pairs between the curly braces determine the groupings (by evaluat
 See [Grouping and Aggregation](sorting-grouping#grouping) for more details.
 
 
+## `*` (Wildcard)
+
+This wildcard selects the values of all the properties of the context object.  It can be used in a path expression in place of a property name, but it cannot be combined with other characters like a glob pattern.  The order of these values in the result sequence is implementation dependent.
+See [Wildcards](predicate#wildcards) for examples.
+
+## `**` (Descendants)
+
+This wildcard recursively selects the values of all the properties of the context object, and the properties of any objects contained within these values as it descends the hierarchy.
+See [Navigate arbitrary depths](predicate#navigate-arbitrary-depths).
+
+## `%` (Parent)
+
+This will select the 'parent' of the current context value.  Here, we define 'parent' to be the enclosing object which has the property representing the context value.
+
+This is the only operation which searches 'backwards' in the input data structure. It is implemented by static analysis of the expression at [compile time](https://docs.jsonata.org/embedding-extending#jsonatastr) and can only be used within expressions that navigate through that target parent value in the first place.
+If, for any reason, the parent location cannot be determined, then a static error (S0217) is thrown.
+
+__Example__
+
+```
+Account.Order.Product.{
+  'Product': `Product Name`,
+  'Order': %.OrderID,
+  'Account': %.%.`Account Name`
+}
+```
+This returns an array of objects for each product in each order in each account.  Information from the enclosing Order and Account objects can be accessed using the parent operator.
+The repeated combination of `%.%.` is used to access the grandparent and higher ancestors.
+
+
 ## `#` (Positional variable binding)
 
 This can be used to determine at which position in the sequence the current context item is.  It can be used following any map, filter or order-by stage in the path.

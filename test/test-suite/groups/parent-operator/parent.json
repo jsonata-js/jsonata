@@ -54,7 +54,7 @@
         ]
     },
     {
-        "expr": "Account.Order.Product.[`Product Name`, !.OrderID]",
+        "expr": "Account.Order.Product.[`Product Name`, %.OrderID]",
         "dataset": "dataset5",
         "bindings": {},
         "result": [
@@ -69,7 +69,7 @@
         ]
     },
     {
-        "expr": "Account.Order.Product.{ `Product Name`: [Quantity, !.OrderID] }",
+        "expr": "Account.Order.Product.{ `Product Name`: [Quantity, %.OrderID] }",
         "dataset": "dataset5",
         "bindings": {},
         "result": [
@@ -88,7 +88,7 @@
         ]
     },
     {
-        "expr": "Account.Order.Product.{ `Product Name`: [Quantity, (!.OrderID)] }",
+        "expr": "Account.Order.Product.{ `Product Name`: [Quantity, (%.OrderID)] }",
         "dataset": "dataset5",
         "bindings": {},
         "result": [
@@ -107,7 +107,7 @@
         ]
     },
     {
-        "expr": "Account.Order.Product[!.OrderID='order104'].SKU",
+        "expr": "Account.Order.Product[%.OrderID='order104'].SKU",
         "dataset": "dataset5",
         "bindings": {},
         "result": [
@@ -116,7 +116,7 @@
         ]
     },
     {
-        "expr": "Account.Order.Product[!.!.`Account Name`='Firefly'].SKU",
+        "expr": "Account.Order.Product[%.%.`Account Name`='Firefly'].SKU",
         "dataset": "dataset5",
         "bindings": {},
         "result": [
@@ -127,7 +127,7 @@
         ]
     },
     {
-        "expr": "Account.Order.Product.Price[!.!.OrderID='order103']",
+        "expr": "Account.Order.Product.Price[%.%.OrderID='order103']",
         "dataset": "dataset5",
         "bindings": {},
         "result": [
@@ -136,7 +136,7 @@
         ]
     },
     {
-        "expr": "Account.Order.Product.Price.![!.OrderID='order103'].SKU",
+        "expr": "Account.Order.Product.Price.%[%.OrderID='order103'].SKU",
         "dataset": "dataset5",
         "bindings": {},
         "result": [
@@ -145,7 +145,7 @@
         ]
     },
     {
-        "expr": "Account.Order.Product[!.OrderID='order104'][!.!.`Account Name`='Firefly'].SKU",
+        "expr": "Account.Order.Product[%.OrderID='order104'][%.%.`Account Name`='Firefly'].SKU",
         "dataset": "dataset5",
         "bindings": {},
         "result": [
@@ -154,7 +154,7 @@
         ]
     },
     {
-        "expr": "(Account.Order.Product)[!.OrderID='order104'].SKU",
+        "expr": "(Account.Order.Product)[%.OrderID='order104'].SKU",
         "dataset": "dataset5",
         "bindings": {},
         "result": [
@@ -163,7 +163,7 @@
         ]
     },
     {
-        "expr": "Account.Order.Product.{ !.OrderID: Price * Quantity }",
+        "expr": "Account.Order.Product.{ %.OrderID: Price * Quantity }",
         "dataset": "dataset5",
         "bindings": {},
         "result": [
@@ -182,7 +182,7 @@
         ]
     },
     {
-        "expr": "Account.Order.().!",
+        "expr": "Account.Order.().%",
         "dataset": "dataset5",
         "bindings": {},
         "undefinedResult": true
@@ -323,7 +323,7 @@
         ]
     },
     {
-        "expr": "Account.Order.Product.SKU^(!.Price)",
+        "expr": "Account.Order.Product.SKU^(%.Price)",
         "dataset": "dataset5",
         "bindings": {},
         "result": [
@@ -334,7 +334,7 @@
         ]
     },
     {
-        "expr": "Account.Order.Product.SKU^(!.Price, >!.!.OrderID)",
+        "expr": "Account.Order.Product.SKU^(%.Price, >%.%.OrderID)",
         "dataset": "dataset5",
         "bindings": {},
         "result": [
@@ -345,7 +345,7 @@
         ]
     },
     {
-        "expr": "Account.Order.Product.Description.{ 'Colour': Colour, 'Total': !.Price * !.Quantity }",
+        "expr": "Account.Order.Product.Description.{ 'Colour': Colour, 'Total': %.Price * %.Quantity }",
         "dataset": "dataset5",
         "bindings": {},
         "result": [
@@ -368,7 +368,7 @@
         ]
     },
     {
-        "expr": "Account.Order.Product.Description.{ 'Item': Colour & ' ' & !.`Product Name`, 'Discounted': (!.!.OrderID = 'order103') ? !.Price / 2 : !.Price }",
+        "expr": "Account.Order.Product.Description.{ 'Item': Colour & ' ' & %.`Product Name`, 'Discounted': (%.%.OrderID = 'order103') ? %.Price / 2 : %.Price }",
         "dataset": "dataset5",
         "bindings": {},
         "result": [
@@ -391,7 +391,7 @@
         ]
     },
     {
-        "expr": "Account.Order.Product.( $parent := !; !.OrderID )",
+        "expr": "Account.Order.Product.( $parent := %; %.OrderID )",
         "dataset": "dataset5",
         "bindings": {},
         "result": [
@@ -402,7 +402,7 @@
         ]
     },
     {
-        "expr": "Account.Order.Product.( $parent := !; $parent.OrderID )",
+        "expr": "Account.Order.Product.( $parent := %; $parent.OrderID )",
         "dataset": "dataset5",
         "bindings": {},
         "result": [
@@ -413,7 +413,7 @@
         ]
     },
     {
-        "expr": "library.loans@$L.books@$B[$L.isbn=$B.isbn].{ 'book': $B.title, 'parent': $keys(!) }",
+        "expr": "library.loans@$L.books@$B[$L.isbn=$B.isbn].{ 'book': $B.title, 'parent': $keys(%) }",
         "dataset": "library",
         "bindings": {},
         "result": [
@@ -444,7 +444,7 @@
         ]
     },
     {
-        "expr": "library.loans@$L.books@$B[$L.isbn=$B.isbn].customers[id=$L.customer].{ 'book': $B.title, 'customer': name, 'parent': $keys(!) }",
+        "expr": "library.loans@$L.books@$B[$L.isbn=$B.isbn].customers[id=$L.customer].{ 'book': $B.title, 'customer': name, 'parent': $keys(%) }",
         "dataset": "library",
         "bindings": {},
         "result": [
@@ -478,7 +478,7 @@
         ]
     },
     {
-        "expr": "library.loans@$L.books@$B[$L.isbn=$B.isbn].customers[id=$L.customer].{ 'book': $B.title, 'customer': name, 'parent': $keys(!.!) }",
+        "expr": "library.loans@$L.books@$B[$L.isbn=$B.isbn].customers[id=$L.customer].{ 'book': $B.title, 'customer': name, 'parent': $keys(%.%) }",
         "dataset": "library",
         "bindings": {},
         "result": [
@@ -512,7 +512,7 @@
         ]
     },
     {
-        "expr": "library.loans@$L.books@$B[$L.isbn=$B.isbn].customers@$C[$C.id=$L.customer].{ 'book': $B.title, 'customer': $C.name, 'grandparent': $keys(!.!) }",
+        "expr": "library.loans@$L.books@$B[$L.isbn=$B.isbn].customers@$C[$C.id=$L.customer].{ 'book': $B.title, 'customer': $C.name, 'grandparent': $keys(%.%) }",
         "dataset": "library",
         "bindings": {},
         "result": [

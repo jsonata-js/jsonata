@@ -574,7 +574,7 @@ const parser = (() => {
         });
 
         // parent operator
-        prefix('!', function () {
+        prefix('%', function () {
             this.type = "parent";
             return this;
         });
