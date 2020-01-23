@@ -12,9 +12,87 @@
         "code": "S0217"
     },
     {
+        "expr": "%()",
+        "dataset": "library",
+        "bindings": {},
+        "code": "T1006"
+    },
+    {
+        "expr": "%(1)",
+        "dataset": "library",
+        "bindings": {},
+        "code": "T1006"
+    },
+    {
+        "expr": "%%",
+        "dataset": "library",
+        "bindings": {},
+        "code": "S0207"
+    },
+    {
+        "expr": "(%)",
+        "dataset": "library",
+        "bindings": {},
+        "code": "S0217"
+    },
+    {
+        "expr": "(%%)",
+        "dataset": "library",
+        "bindings": {},
+        "code": "S0211"
+    },
+    {
+        "expr": "library.loans.%%",
+        "dataset": "library",
+        "bindings": {},
+        "code": "S0207"
+    },
+    {
+        "expr": "$.%",
+        "dataset": "library",
+        "bindings": {},
+        "code": "S0217"
+    },
+    {
+        "expr": "$$.%",
+        "dataset": "library",
+        "bindings": {},
+        "code": "S0217"
+    },
+    {
         "expr": "library.loans.%.%.%",
         "dataset": "library",
         "bindings": {},
         "code": "S0217"
+    },
+    {
+        "expr": "library.%%%",
+        "dataset": "library",
+        "bindings": {},
+        "code": "S0217"
+    },
+    {
+        "expr": "library.(%%%)",
+        "dataset": "library",
+        "bindings": {},
+        "code": "T2001"
+    },
+    {
+        "expr": "library.(%% %)",
+        "dataset": "library",
+        "bindings": {},
+        "code": "T2001"
+    },
+    {
+        "expr": "library.(% %%)",
+        "dataset": "library",
+        "bindings": {},
+        "code": "T2001"
+    },
+    {
+        "expr": "library.(% % %)",
+        "dataset": "library",
+        "bindings": {},
+        "code": "T2001"
     }
 ]
