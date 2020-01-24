@@ -530,7 +530,7 @@ const parser = (() => {
         symbol("]");
         symbol("}");
         symbol(".."); // range operator
-        infix("."); // field reference
+        infix("."); // map operator
         infix("+"); // numeric addition
         infix("-"); // numeric subtraction
         infix("*"); // numeric multiplication
@@ -570,6 +570,12 @@ const parser = (() => {
         // descendant wildcard (multi-level)
         prefix('**', function () {
             this.type = "descendant";
+            return this;
+        });
+
+        // parent operator
+        prefix('%', function () {
+            this.type = "parent";
             return this;
         });
 
@@ -848,7 +854,7 @@ const parser = (() => {
         // if they make a tail call.  If so, it is replaced by a thunk which will
         // be invoked by the trampoline loop during function application.
         // This enables tail-recursive functions to be written without growing the stack
-        var tail_call_optimize = function (expr) {
+        var tailCallOptimize = function (expr) {
             var result;
             if (expr.type === 'function' && !expr.predicate) {
                 var thunk = {type: 'lambda', thunk: true, arguments: [], position: expr.position};
@@ -856,16 +862,16 @@ const parser = (() => {
                 result = thunk;
             } else if (expr.type === 'condition') {
                 // analyse both branches
-                expr.then = tail_call_optimize(expr.then);
+                expr.then = tailCallOptimize(expr.then);
                 if (typeof expr.else !== 'undefined') {
-                    expr.else = tail_call_optimize(expr.else);
+                    expr.else = tailCallOptimize(expr.else);
                 }
                 result = expr;
             } else if (expr.type === 'block') {
                 // only the last expression in the block
                 var length = expr.expressions.length;
                 if (length > 0) {
-                    expr.expressions[length - 1] = tail_call_optimize(expr.expressions[length - 1]);
+                    expr.expressions[length - 1] = tailCallOptimize(expr.expressions[length - 1]);
                 }
                 result = expr;
             } else {
@@ -874,24 +880,124 @@ const parser = (() => {
             return result;
         };
 
+        var ancestorLabel = 0;
+        var ancestorIndex = 0;
+        var ancestry = [];
+
+        var seekParent = function (node, slot) {
+            switch (node.type) {
+                case 'name':
+                case 'wildcard':
+                    slot.level--;
+                    if(slot.level === 0) {
+                        if (typeof node.ancestor === 'undefined') {
+                            node.ancestor = slot;
+                        } else {
+                            // reuse the existing label
+                            ancestry[slot.index].slot.label = node.ancestor.label;
+                            node.ancestor = slot;
+                        }
+                        node.tuple = true;
+                    }
+                    break;
+                case 'parent':
+                    slot.level++;
+                    break;
+                case 'block':
+                    // look in last expression in the block
+                    if(node.expressions.length > 0) {
+                        node.tuple = true;
+                        slot = seekParent(node.expressions[node.expressions.length - 1], slot);
+                    }
+                    break;
+                case 'path':
+                    // last step in path
+                    node.tuple = true;
+                    var index = node.steps.length - 1;
+                    slot = seekParent(node.steps[index--], slot);
+                    while (slot.level > 0 && index >= 0) {
+                        // check previous steps
+                        slot = seekParent(node.steps[index--], slot);
+                    }
+                    break;
+                default:
+                    // error - can't derive ancestor
+                    throw {
+                        code: "S0217",
+                        token: node.type,
+                        position: node.position
+                    };
+            }
+            return slot;
+        };
+
+        var pushAncestry = function(result, value) {
+            if(typeof value.seekingParent !== 'undefined' || value.type === 'parent') {
+                var slots = (typeof value.seekingParent !== 'undefined') ? value.seekingParent : [];
+                if (value.type === 'parent') {
+                    slots.push(value.slot);
+                }
+                if(typeof result.seekingParent === 'undefined') {
+                    result.seekingParent = slots;
+                } else {
+                    Array.prototype.push.apply(result.seekingParent, slots);
+                }
+            }
+        };
+
+        var resolveAncestry = function(path) {
+            var index = path.steps.length - 1;
+            var laststep = path.steps[index];
+            var slots = (typeof laststep.seekingParent !== 'undefined') ? laststep.seekingParent : [];
+            if (laststep.type === 'parent') {
+                slots.push(laststep.slot);
+            }
+            for(var is = 0; is < slots.length; is++) {
+                var slot = slots[is];
+                index = path.steps.length - 2;
+                while (slot.level > 0) {
+                    if (index < 0) {
+                        if(typeof path.seekingParent === 'undefined') {
+                            path.seekingParent = [slot];
+                        } else {
+                            path.seekingParent.push(slot);
+                        }
+                        break;
+                    }
+                    // try previous step
+                    var step = path.steps[index--];
+                    // multiple contiguous steps that bind the focus should be skipped
+                    while(index >= 0 && step.focus && path.steps[index].focus) {
+                        step = path.steps[index--];
+                    }
+                    slot = seekParent(step, slot);
+                }
+            }
+        };
+
         // post-parse stage
-        // the purpose of this is flatten the parts of the AST representing location paths,
+        // the purpose of this is to add as much semantic value to the parse tree as possible
+        // in order to simplify the work of the evaluator.
+        // This includes flattening the parts of the AST representing location paths,
         // converting them to arrays of steps which in turn may contain arrays of predicates.
         // following this, nodes containing '.' and '[' should be eliminated from the AST.
-        var ast_optimize = function (expr) {
+        var processAST = function (expr) {
             var result;
             switch (expr.type) {
                 case 'binary':
                     switch (expr.value) {
                         case '.':
-                            var lstep = ast_optimize(expr.lhs);
-                            result = {type: 'path', steps: []};
+                            var lstep = processAST(expr.lhs);
+
                             if (lstep.type === 'path') {
-                                Array.prototype.push.apply(result.steps, lstep.steps);
+                                result = lstep;
                             } else {
-                                result.steps = [lstep];
+                                result = {type: 'path', steps: [lstep]};
                             }
-                            var rest = ast_optimize(expr.rhs);
+                            if(lstep.type === 'parent') {
+                                result.seekingParent = [lstep.slot];
+                            }
+                            var rest = processAST(expr.rhs);
                             if (rest.type === 'function' &&
                                 rest.procedure.type === 'path' &&
                                 rest.procedure.steps.length === 1 &&
@@ -900,14 +1006,15 @@ const parser = (() => {
                                 // next function in chain of functions - will override a thenable
                                 result.steps[result.steps.length - 1].nextFunction = rest.procedure.steps[0].value;
                             }
-                            if (rest.type !== 'path') {
+                            if (rest.type === 'path') {
+                                Array.prototype.push.apply(result.steps, rest.steps);
+                            } else {
                                 if(typeof rest.predicate !== 'undefined') {
                                     rest.stages = rest.predicate;
                                     delete rest.predicate;
                                 }
-                                rest = {type: 'path', steps: [rest]};
+                                result.steps.push(rest);
                             }
-                            Array.prototype.push.apply(result.steps, rest.steps);
                             // any steps within a path that are string literals, should be changed to 'name'
                             result.steps.filter(function (step) {
                                 if (step.type === 'number' || step.type === 'value') {
@@ -939,12 +1046,13 @@ const parser = (() => {
                             if (laststep.type === 'unary' && laststep.value === '[') {
                                 laststep.consarray = true;
                             }
+                            resolveAncestry(result);
                             break;
                         case '[':
                             // predicated step
                             // LHS is a step or a predicated step
                             // RHS is the predicate expr
-                            result = ast_optimize(expr.lhs);
+                            result = processAST(expr.lhs);
                             var step = result;
                             var type = 'predicate';
                             if (result.type === 'path') {
@@ -961,13 +1069,24 @@ const parser = (() => {
                             if (typeof step[type] === 'undefined') {
                                 step[type] = [];
                             }
-                            step[type].push({type: 'filter', expr: ast_optimize(expr.rhs), position: expr.position});
+                            var predicate = processAST(expr.rhs);
+                            if(typeof predicate.seekingParent !== 'undefined') {
+                                predicate.seekingParent.forEach(slot => {
+                                    if(slot.level === 1) {
+                                        seekParent(step, slot);
+                                    } else {
+                                        slot.level--;
+                                    }
+                                });
+                                pushAncestry(step, predicate);
+                            }
+                            step[type].push({type: 'filter', expr: predicate, position: expr.position});
                             break;
                         case '{':
                             // group-by
                             // LHS is a step or a predicated step
                             // RHS is the object constructor expr
-                            result = ast_optimize(expr.lhs);
+                            result = processAST(expr.lhs);
                             if (typeof result.group !== 'undefined') {
                                 throw {
                                     code: "S0210",
@@ -978,7 +1097,7 @@ const parser = (() => {
                             // object constructor - process each pair
                             result.group = {
                                 lhs: expr.rhs.map(function (pair) {
-                                    return [ast_optimize(pair[0]), ast_optimize(pair[1])];
+                                    return [processAST(pair[0]), processAST(pair[1])];
                                 }),
                                 position: expr.position
                             };
@@ -987,25 +1106,30 @@ const parser = (() => {
                             // order-by
                             // LHS is the array to be ordered
                             // RHS defines the terms
-                            result = ast_optimize(expr.lhs);
-                            var tms = expr.rhs.map(function (terms) {
-                                return {
-                                    descending: terms.descending,
-                                    expression: ast_optimize(terms.expression)
-                                };
-                            });
+                            result = processAST(expr.lhs);
                             if (result.type !== 'path') {
                                 result = {type: 'path', steps: [result]};
                             }
-                            result.steps.push({type: 'sort', terms: tms, position: expr.position});
+                            var sortStep = {type: 'sort', position: expr.position};
+                            sortStep.terms = expr.rhs.map(function (terms) {
+                                var expression = processAST(terms.expression);
+                                pushAncestry(sortStep, expression);
+                                return {
+                                    descending: terms.descending,
+                                    expression: expression
+                                };
+                            });
+                            result.steps.push(sortStep);
+                            resolveAncestry(result);
                             break;
                         case ':=':
                             result = {type: 'bind', value: expr.value, position: expr.position};
-                            result.lhs = ast_optimize(expr.lhs);
-                            result.rhs = ast_optimize(expr.rhs);
+                            result.lhs = processAST(expr.lhs);
+                            result.rhs = processAST(expr.rhs);
+                            pushAncestry(result, result.rhs);
                             break;
                         case '@':
-                            result = ast_optimize(expr.lhs);
+                            result = processAST(expr.lhs);
                             step = result;
                             if (result.type === 'path') {
                                 step = result.steps[result.steps.length - 1];
@@ -1034,7 +1158,7 @@ const parser = (() => {
                             step.tuple = true;
                             break;
                         case '#':
-                            result = ast_optimize(expr.lhs);
+                            result = processAST(expr.lhs);
                             step = result;
                             if (result.type === 'path') {
                                 step = result.steps[result.steps.length - 1];
@@ -1054,13 +1178,15 @@ const parser = (() => {
                             break;
                         case '~>':
                             result = {type: 'apply', value: expr.value, position: expr.position};
-                            result.lhs = ast_optimize(expr.lhs);
-                            result.rhs = ast_optimize(expr.rhs);
+                            result.lhs = processAST(expr.lhs);
+                            result.rhs = processAST(expr.rhs);
                             break;
                         default:
                             result = {type: expr.type, value: expr.value, position: expr.position};
-                            result.lhs = ast_optimize(expr.lhs);
-                            result.rhs = ast_optimize(expr.rhs);
+                            result.lhs = processAST(expr.lhs);
+                            result.rhs = processAST(expr.rhs);
+                            pushAncestry(result, result.lhs);
+                            pushAncestry(result, result.rhs);
                     }
                     break;
                 case 'unary':
@@ -1068,20 +1194,28 @@ const parser = (() => {
                     if (expr.value === '[') {
                         // array constructor - process each item
                         result.expressions = expr.expressions.map(function (item) {
-                            return ast_optimize(item);
+                            var value = processAST(item);
+                            pushAncestry(result, value);
+                            return value;
                         });
                     } else if (expr.value === '{') {
                         // object constructor - process each pair
                         result.lhs = expr.lhs.map(function (pair) {
-                            return [ast_optimize(pair[0]), ast_optimize(pair[1])];
+                            var key = processAST(pair[0]);
+                            pushAncestry(result, key);
+                            var value = processAST(pair[1]);
+                            pushAncestry(result, value);
+                            return [key, value];
                         });
                     } else {
                         // all other unary expressions - just process the expression
-                        result.expression = ast_optimize(expr.expression);
+                        result.expression = processAST(expr.expression);
                         // if unary minus on a number, then pre-process
                         if (expr.value === '-' && result.expression.type === 'number') {
                             result = result.expression;
                             result.value = -result.value;
+                        } else {
+                            pushAncestry(result, result.expression);
                         }
                     }
                     break;
@@ -1089,9 +1223,11 @@ const parser = (() => {
                 case 'partial':
                     result = {type: expr.type, name: expr.name, value: expr.value, position: expr.position};
                     result.arguments = expr.arguments.map(function (arg) {
-                        return ast_optimize(arg);
+                        var argAST = processAST(arg);
+                        pushAncestry(result, argAST);
+                        return argAST;
                     });
-                    result.procedure = ast_optimize(expr.procedure);
+                    result.procedure = processAST(expr.procedure);
                     break;
                 case 'lambda':
                     result = {
@@ -1100,30 +1236,34 @@ const parser = (() => {
                         signature: expr.signature,
                         position: expr.position
                     };
-                    var body = ast_optimize(expr.body);
-                    result.body = tail_call_optimize(body);
+                    var body = processAST(expr.body);
+                    result.body = tailCallOptimize(body);
                     break;
                 case 'condition':
                     result = {type: expr.type, position: expr.position};
-                    result.condition = ast_optimize(expr.condition);
-                    result.then = ast_optimize(expr.then);
+                    result.condition = processAST(expr.condition);
+                    pushAncestry(result, result.condition);
+                    result.then = processAST(expr.then);
+                    pushAncestry(result, result.then);
                     if (typeof expr.else !== 'undefined') {
-                        result.else = ast_optimize(expr.else);
+                        result.else = processAST(expr.else);
+                        pushAncestry(result, result.else);
                     }
                     break;
                 case 'transform':
                     result = {type: expr.type, position: expr.position};
-                    result.pattern = ast_optimize(expr.pattern);
-                    result.update = ast_optimize(expr.update);
+                    result.pattern = processAST(expr.pattern);
+                    result.update = processAST(expr.update);
                     if (typeof expr.delete !== 'undefined') {
-                        result.delete = ast_optimize(expr.delete);
+                        result.delete = processAST(expr.delete);
                     }
                     break;
                 case 'block':
                     result = {type: expr.type, position: expr.position};
                     // array of expressions - process each one
                     result.expressions = expr.expressions.map(function (item) {
-                        var part = ast_optimize(item);
+                        var part = processAST(item);
+                        pushAncestry(result, part);
                         if (part.consarray || (part.type === 'path' && part.steps[0].consarray)) {
                             result.consarray = true;
                         }
@@ -1138,6 +1278,10 @@ const parser = (() => {
                         result.keepSingletonArray = true;
                     }
                     break;
+                case 'parent':
+                    result = {type: 'parent', slot: { label: '!' + ancestorLabel++, level: 1, index: ancestorIndex++ } };
+                    ancestry.push(result);
+                    break;
                 case 'string':
                 case 'number':
                 case 'value':
@@ -1151,7 +1295,7 @@ const parser = (() => {
                     // the tokens 'and' and 'or' might have been used as a name rather than an operator
                     if (expr.value === 'and' || expr.value === 'or' || expr.value === 'in') {
                         expr.type = 'name';
-                        result = ast_optimize(expr);
+                        result = processAST(expr);
                     } else /* istanbul ignore else */ if (expr.value === '?') {
                         // partial application
                         result = expr;
@@ -1167,7 +1311,7 @@ const parser = (() => {
                 case 'error':
                     result = expr;
                     if (expr.lhs) {
-                        result = ast_optimize(expr.lhs);
+                        result = processAST(expr.lhs);
                     }
                     break;
                 default:
@@ -1208,7 +1352,16 @@ const parser = (() => {
             };
             handleError(err);
         }
-        expr = ast_optimize(expr);
+        expr = processAST(expr);
+
+        if(expr.type === 'parent' || typeof expr.seekingParent !== 'undefined') {
+            // error - trying to derive ancestor at top level
+            throw {
+                code: "S0217",
+                token: expr.type,
+                position: expr.position
+            };
+        }
 
         if (errors.length > 0) {
             expr.errors = errors;

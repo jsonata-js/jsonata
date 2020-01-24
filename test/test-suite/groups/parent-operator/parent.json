@@ -1,0 +1,536 @@
+[
+    {
+        "expr-file": "parent000.jsonata",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            {
+                "order": "order103",
+                "Product": "Bowler Hat",
+                "Weight": 0.75
+            },
+            {
+                "order": "order103",
+                "Product": "Trilby hat",
+                "Weight": 0.6
+            },
+            {
+                "order": "order104",
+                "Product": "Bowler Hat",
+                "Weight": 0.75
+            },
+            {
+                "order": "order104",
+                "Product": "Cloak",
+                "Weight": 2
+            }
+        ]
+    },
+    {
+        "expr-file": "parent001.jsonata",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            {
+                "order": "order103",
+                "Product": "Bowler Hat",
+                "Weight": 0.75
+            },
+            {
+                "order": "order103",
+                "Product": "Trilby hat",
+                "Weight": 0.6
+            },
+            {
+                "order": "order104",
+                "Product": "Bowler Hat",
+                "Weight": 0.75
+            },
+            {
+                "order": "order104",
+                "Product": "Cloak",
+                "Weight": 2
+            }
+        ]
+    },
+    {
+        "expr": "Account.Order.Product.[`Product Name`, %.OrderID]",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            "Bowler Hat",
+            "order103",
+            "Trilby hat",
+            "order103",
+            "Bowler Hat",
+            "order104",
+            "Cloak",
+            "order104"
+        ]
+    },
+    {
+        "expr": "Account.Order.Product.{ `Product Name`: [Quantity, %.OrderID] }",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            {
+                "Bowler Hat": [ 2, "order103" ]
+            },
+            {
+                "Trilby hat": [ 1, "order103" ]
+            },
+            {
+                "Bowler Hat": [ 4, "order104" ]
+            },
+            {
+                "Cloak": [ 1, "order104" ]
+            }
+        ]
+    },
+    {
+        "expr": "Account.Order.Product.{ `Product Name`: [Quantity, (%.OrderID)] }",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            {
+                "Bowler Hat": [ 2, "order103" ]
+            },
+            {
+                "Trilby hat": [ 1, "order103" ]
+            },
+            {
+                "Bowler Hat": [ 4, "order104" ]
+            },
+            {
+                "Cloak": [ 1, "order104" ]
+            }
+        ]
+    },
+    {
+        "expr": "Account.Order.Product[%.OrderID='order104'].SKU",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            "040657863",
+            "0406654603"
+        ]
+    },
+    {
+        "expr": "Account.Order.Product[%.%.`Account Name`='Firefly'].SKU",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            "0406654608",
+            "0406634348",
+            "040657863",
+            "0406654603"
+        ]
+    },
+    {
+        "expr": "Account.Order.Product.Price[%.%.OrderID='order103']",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            34.45,
+            21.67
+        ]
+    },
+    {
+        "expr": "Account.Order.Product.Price.%[%.OrderID='order103'].SKU",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            "0406654608",
+            "0406634348"
+        ]
+    },
+    {
+        "expr": "Account.Order.Product[%.OrderID='order104'][%.%.`Account Name`='Firefly'].SKU",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            "040657863",
+            "0406654603"
+        ]
+    },
+    {
+        "expr": "(Account.Order.Product)[%.OrderID='order104'].SKU",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            "040657863",
+            "0406654603"
+        ]
+    },
+    {
+        "expr": "Account.Order.Product.{ %.OrderID: Price * Quantity }",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            {
+                "order103": 68.9
+            },
+            {
+                "order103": 21.67
+            },
+            {
+                "order104": 137.8
+            },
+            {
+                "order104": 107.99
+            }
+        ]
+    },
+    {
+        "expr": "Account.Order.().%",
+        "dataset": "dataset5",
+        "bindings": {},
+        "undefinedResult": true
+    },
+    {
+        "expr-file": "parent002.jsonata",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            {
+                "Product": "Bowler Hat",
+                "Order": "order103",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Trilby hat",
+                "Order": "order103",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Bowler Hat",
+                "Order": "order104",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Cloak",
+                "Order": "order104",
+                "Account": "Firefly"
+            }
+        ]
+    },
+    {
+        "expr-file": "parent003.jsonata",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            {
+                "Product": "Bowler Hat",
+                "Order": "order103",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Trilby hat",
+                "Order": "order103",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Bowler Hat",
+                "Order": "order104",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Cloak",
+                "Order": "order104",
+                "Account": "Firefly"
+            }
+        ]
+    },
+    {
+        "expr-file": "parent004.jsonata",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            {
+                "Product": "Bowler Hat",
+                "Order": "order103",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Trilby hat",
+                "Order": "order103",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Bowler Hat",
+                "Order": "order104",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Cloak",
+                "Order": "order104",
+                "Account": "Firefly"
+            }
+        ]
+    },
+    {
+        "expr-file": "parent005.jsonata",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            {
+                "Product": "Bowler Hat",
+                "Order": "order103",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Trilby hat",
+                "Order": "order103",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Bowler Hat",
+                "Order": "order104",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Cloak",
+                "Order": "order104",
+                "Account": "Firefly"
+            }
+        ]
+    },
+    {
+        "expr-file": "parent006.jsonata",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            {
+                "Product": "Bowler Hat",
+                "Order": "order103",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Trilby hat",
+                "Order": "order103",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Bowler Hat",
+                "Order": "order104",
+                "Account": "Firefly"
+            },
+            {
+                "Product": "Cloak",
+                "Order": "order104",
+                "Account": "Firefly"
+            }
+        ]
+    },
+    {
+        "expr": "Account.Order.Product.SKU^(%.Price)",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            "0406634348",
+            "0406654608",
+            "040657863",
+            "0406654603"
+        ]
+    },
+    {
+        "expr": "Account.Order.Product.SKU^(%.Price, >%.%.OrderID)",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            "0406634348",
+            "040657863",
+            "0406654608",
+            "0406654603"
+        ]
+    },
+    {
+        "expr": "Account.Order.Product.Description.{ 'Colour': Colour, 'Total': %.Price * %.Quantity }",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            {
+                "Colour": "Purple",
+                "Total": 68.9
+            },
+            {
+                "Colour": "Orange",
+                "Total": 21.67
+            },
+            {
+                "Colour": "Purple",
+                "Total": 137.8
+            },
+            {
+                "Colour": "Black",
+                "Total": 107.99
+            }
+        ]
+    },
+    {
+        "expr": "Account.Order.Product.Description.{ 'Item': Colour & ' ' & %.`Product Name`, 'Discounted': (%.%.OrderID = 'order103') ? %.Price / 2 : %.Price }",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            {
+                "Item": "Purple Bowler Hat",
+                "Discounted": 17.225
+            },
+            {
+                "Item": "Orange Trilby hat",
+                "Discounted": 10.835
+            },
+            {
+                "Item": "Purple Bowler Hat",
+                "Discounted": 34.45
+            },
+            {
+                "Item": "Black Cloak",
+                "Discounted": 107.99
+            }
+        ]
+    },
+    {
+        "expr": "Account.Order.Product.( $parent := %; %.OrderID )",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            "order103",
+            "order103",
+            "order104",
+            "order104"
+        ]
+    },
+    {
+        "expr": "Account.Order.Product.( $parent := %; $parent.OrderID )",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            "order103",
+            "order103",
+            "order104",
+            "order104"
+        ]
+    },
+    {
+        "expr": "library.loans@$L.books@$B[$L.isbn=$B.isbn].{ 'book': $B.title, 'parent': $keys(%) }",
+        "dataset": "library",
+        "bindings": {},
+        "result": [
+            {
+                "book": "Structure and Interpretation of Computer Programs",
+                "parent": [
+                    "books",
+                    "loans",
+                    "customers"
+                ]
+            },
+            {
+                "book": "Compilers: Principles, Techniques, and Tools",
+                "parent": [
+                    "books",
+                    "loans",
+                    "customers"
+                ]
+            },
+            {
+                "book": "Structure and Interpretation of Computer Programs",
+                "parent": [
+                    "books",
+                    "loans",
+                    "customers"
+                ]
+            }
+        ]
+    },
+    {
+        "expr": "library.loans@$L.books@$B[$L.isbn=$B.isbn].customers[id=$L.customer].{ 'book': $B.title, 'customer': name, 'parent': $keys(%) }",
+        "dataset": "library",
+        "bindings": {},
+        "result": [
+            {
+                "book": "Structure and Interpretation of Computer Programs",
+                "customer": "Joe Doe",
+                "parent": [
+                    "books",
+                    "loans",
+                    "customers"
+                ]
+            },
+            {
+                "book": "Compilers: Principles, Techniques, and Tools",
+                "customer": "Jason Arthur",
+                "parent": [
+                    "books",
+                    "loans",
+                    "customers"
+                ]
+            },
+            {
+                "book": "Structure and Interpretation of Computer Programs",
+                "customer": "Jason Arthur",
+                "parent": [
+                    "books",
+                    "loans",
+                    "customers"
+                ]
+            }
+        ]
+    },
+    {
+        "expr": "library.loans@$L.books@$B[$L.isbn=$B.isbn].customers[id=$L.customer].{ 'book': $B.title, 'customer': name, 'parent': $keys(%.%) }",
+        "dataset": "library",
+        "bindings": {},
+        "result": [
+            {
+                "book": "Structure and Interpretation of Computer Programs",
+                "customer": "Joe Doe",
+                "parent": [
+                    "books",
+                    "loans",
+                    "customers"
+                ]
+            },
+            {
+                "book": "Compilers: Principles, Techniques, and Tools",
+                "customer": "Jason Arthur",
+                "parent": [
+                    "books",
+                    "loans",
+                    "customers"
+                ]
+            },
+            {
+                "book": "Structure and Interpretation of Computer Programs",
+                "customer": "Jason Arthur",
+                "parent": [
+                    "books",
+                    "loans",
+                    "customers"
+                ]
+            }
+        ]
+    },
+    {
+        "expr": "library.loans@$L.books@$B[$L.isbn=$B.isbn].customers@$C[$C.id=$L.customer].{ 'book': $B.title, 'customer': $C.name, 'grandparent': $keys(%.%) }",
+        "dataset": "library",
+        "bindings": {},
+        "result": [
+            {
+                "book": "Structure and Interpretation of Computer Programs",
+                "customer": "Joe Doe",
+                "grandparent": "library"
+            },
+            {
+                "book": "Compilers: Principles, Techniques, and Tools",
+                "customer": "Jason Arthur",
+                "grandparent": "library"
+            },
+            {
+                "book": "Structure and Interpretation of Computer Programs",
+                "customer": "Jason Arthur",
+                "grandparent": "library"
+            }
+        ]
+    }
+]

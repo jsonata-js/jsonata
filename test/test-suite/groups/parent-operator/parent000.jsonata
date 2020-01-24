@@ -1,0 +1,5 @@
+Account.Order.Product.{
+  "order": %.OrderID,
+  "Product": `Product Name`,
+  "Weight": Description.Weight
+}

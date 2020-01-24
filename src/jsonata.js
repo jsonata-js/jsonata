@@ -78,6 +78,9 @@ var jsonata = (function() {
             case 'descendant':
                 result = evaluateDescendants(expr, input, environment);
                 break;
+            case 'parent':
+                result = environment.lookup(expr.slot.label);
+                break;
             case 'condition':
                 result = yield * evaluateCondition(expr, input, environment);
                 break;
@@ -121,13 +124,13 @@ var jsonata = (function() {
             result = yield result;
         }
 
-        if (expr.hasOwnProperty('predicate')) {
+        if (Object.prototype.hasOwnProperty.call(expr, 'predicate')) {
             for(var ii = 0; ii < expr.predicate.length; ii++) {
                 result = yield * evaluateFilter(expr.predicate[ii].expr, result, environment);
             }
         }
 
-        if (expr.type !== 'path' && expr.hasOwnProperty('group')) {
+        if (expr.type !== 'path' && Object.prototype.hasOwnProperty.call(expr, 'group')) {
             result = yield * evaluateGroupExpression(expr.group, result, environment);
         }
 
@@ -136,7 +139,7 @@ var jsonata = (function() {
             exitCallback(expr, input, environment, result);
         }
 
-        if(result && isSequence(result)) {
+        if(result && isSequence(result) && !result.tupleStream) {
             if(expr.keepArray) {
                 result.keepSingleton = true;
             }
@@ -204,9 +207,14 @@ var jsonata = (function() {
         }
 
         if(isTupleStream) {
-            resultSequence = createSequence();
-            for(ii = 0; ii < tupleBindings.length; ii++) {
-                resultSequence.push(tupleBindings[ii]['@']);
+            if(expr.tuple) {
+                // tuple stream is carrying ancestry information - keep this
+                resultSequence = tupleBindings;
+            } else {
+                resultSequence = createSequence();
+                for (ii = 0; ii < tupleBindings.length; ii++) {
+                    resultSequence.push(tupleBindings[ii]['@']);
+                }
             }
         }
 
@@ -346,14 +354,21 @@ var jsonata = (function() {
                 for (var bb = 0; bb < res.length; bb++) {
                     tuple = {};
                     Object.assign(tuple, tupleBindings[ee]);
-                    if (expr.focus) {
-                        tuple[expr.focus] = res[bb];
-                        tuple['@'] = input;
+                    if(res.tupleStream) {
+                        Object.assign(tuple, res[bb]);
                     } else {
-                        tuple['@'] = res[bb];
-                    }
-                    if(expr.index) {
-                        tuple[expr.index] = bb;
+                        if (expr.focus) {
+                            tuple[expr.focus] = res[bb];
+                            tuple['@'] = tupleBindings[ee]['@'];
+                        } else {
+                            tuple['@'] = res[bb];
+                        }
+                        if (expr.index) {
+                            tuple[expr.index] = bb;
+                        }
+                        if (expr.ancestor) {
+                            tuple[expr.ancestor.label] = tupleBindings[ee]['@'];
+                        }
                     }
                     result.push(tuple);
                 }
@@ -1803,7 +1818,10 @@ var jsonata = (function() {
                 return value;
             },
             timestamp: enclosingEnvironment ? enclosingEnvironment.timestamp : null,
-            async: enclosingEnvironment ? enclosingEnvironment.async : false
+            async: enclosingEnvironment ? enclosingEnvironment.async : false,
+            global: enclosingEnvironment ? enclosingEnvironment.global : {
+                ancestry: [ null ]
+            }
         };
     }
 
@@ -1909,6 +1927,7 @@ var jsonata = (function() {
         "S0214": "The right side of {{token}} must be a variable name (start with $)",
         "S0215": "A context variable binding must precede any predicates on a step",
         "S0216": "A context variable binding must precede the 'order-by' clause on a step",
+        "S0217": "The object representing the 'parent' cannot be derived from this expression",
         "S0301": "Empty regular expressions are not allowed",
         "S0302": "No terminating / in regular expression",
         "S0402": "Choice groups containing parameterized types are not supported",
