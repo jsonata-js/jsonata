@@ -1317,7 +1317,9 @@ var jsonata = (function() {
                                 };
                             }
                             for (var jj = 0; jj < deletions.length; jj++) {
-                                delete match[deletions[jj]];
+                                if(typeof match === 'object' && match !== null) {
+                                    delete match[deletions[jj]];
+                                }
                             }
                         }
                     }
