@@ -1,0 +1,12 @@
+{
+    "expr": "$ ~> | ** ['hi'] | {'hello': hi}, ['hi'] |",
+    "data": {
+        "hi": "world",
+        "bye": null
+    },
+    "bindings": {},
+    "result": {
+        "hello": "world",
+        "bye": null
+    }
+}
