@@ -226,6 +226,14 @@
       "version-1.7.0/version-1.7.0-using-nodejs": {
         "title": "Using JSONata in a Node application",
         "sidebar_label": "In NodeJS"
+      },
+      "version-1.8.0/version-1.8.0-object-functions": {
+        "title": "Object functions",
+        "sidebar_label": "Object Functions"
+      },
+      "version-1.8.0/version-1.8.0-path-operators": {
+        "title": "Path Operators",
+        "sidebar_label": "Path Operators"
       }
     },
     "links": {
