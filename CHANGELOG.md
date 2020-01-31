@@ -1,3 +1,10 @@
+#### 1.8.0 Milestone Release
+
+- New syntax (`%` parent operator) to select the parent of the current context value (issue #299)
+- New function `$type` to return the data type of the argument (issue #208)
+- Added versioning to the documentation site (issue #385)
+- Fixed bugs #382, #387, #396, #399
+
 #### 1.7.0 Milestone Release
 
 - New syntax (`@` operator) to support cross-referencing and complex data joins (issue #333)
