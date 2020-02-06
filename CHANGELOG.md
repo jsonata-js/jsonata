@@ -1,3 +1,7 @@
+#### 1.8.1 Maintenance Release
+
+- Fix bug in timezone handling for ISO week date formats (issue #403)
+
 #### 1.8.0 Milestone Release
 
 - New syntax (`%` parent operator) to select the parent of the current context value (issue #299)
