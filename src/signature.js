@@ -172,6 +172,12 @@ const signature = (() => {
                     case 'object':
                         if (value === null) {
                             symbol = 'l';
+                        } else if (value instanceof Number) {
+                            symbol = 'n';
+                        } else if (value instanceof String) {
+                            symbol = 's';
+                        } else if (value instanceof Boolean) {
+                            symbol = 'b';
                         } else if (Array.isArray(value)) {
                             symbol = 'a';
                         } else {

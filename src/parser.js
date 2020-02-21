@@ -314,7 +314,11 @@ const parser = (() => {
             }
         };
 
-        return next;
+        var pos = function() {
+            return position;
+        };
+
+        return {next, pos};
     };
 
     // This parser implements the 'Top down operator precedence' algorithm developed by Vaughan R Pratt; http://dl.acm.org/citation.cfm?id=512931.
@@ -333,10 +337,10 @@ const parser = (() => {
             if (node.id !== '(end)') {
                 remaining.push({type: node.type, value: node.value, position: node.position});
             }
-            var nxt = lexer();
+            var nxt = lexer.next();
             while (nxt !== null) {
                 remaining.push(nxt);
-                nxt = lexer();
+                nxt = lexer.next();
             }
             return remaining;
         };
@@ -411,7 +415,7 @@ const parser = (() => {
                 };
                 return handleError(err);
             }
-            var next_token = lexer(infix);
+            var next_token = lexer.next(infix);
             if (next_token === null) {
                 node = symbol_table["(end)"];
                 node.position = source.length;
@@ -978,6 +982,17 @@ const parser = (() => {
             }
         };
 
+        var getSpan = function(start, end, soffset, eoffset) {
+            const span = {};
+            if(start.span) {
+                span.start = start.span.start + (soffset || 0);
+            }
+            if(end.span) {
+                span.end = end.span.end + (eoffset || 0);
+            }
+            return span;
+        };
+
         // post-parse stage
         // the purpose of this is to add as much semantic value to the parse tree as possible
         // in order to simplify the work of the evaluator.
@@ -1050,6 +1065,7 @@ const parser = (() => {
                             if (laststep.type === 'unary' && laststep.value === '[') {
                                 laststep.consarray = true;
                             }
+                            result.span = getSpan(firststep, laststep);
                             resolveAncestry(result);
                             break;
                         case '[':
@@ -1085,6 +1101,9 @@ const parser = (() => {
                                 pushAncestry(step, predicate);
                             }
                             step[type].push({type: 'filter', expr: predicate, position: expr.position});
+                            if(step.span && predicate.span) {
+                                step.span.end = predicate.span.end + 1;
+                            }
                             break;
                         case '{':
                             // group-by
@@ -1173,10 +1192,12 @@ const parser = (() => {
                         case '~>':
                             result = {type: 'apply', value: expr.value, position: expr.position};
                             result.operands = expr.operands.map(op => processAST(op));
+                            result.span = getSpan(result.operands[0], result.operands[1]);
                             break;
                         default:
                             result = {type: expr.type, value: expr.value, position: expr.position};
                             result.operands = expr.operands.map(item => pushAncestry(result, processAST(item)));
+                            result.span = getSpan(result.operands[0], result.operands[1]);
                     }
                     break;
                 case 'unary':
@@ -1222,6 +1243,10 @@ const parser = (() => {
                         }
                         return part;
                     });
+                    var len = result.operands.length;
+                    if(len > 0) {
+                        result.span = getSpan(result.operands[0], result.operands[len - 1], -1, 1);
+                    }
                     // TODO scan the array of expressions to see if any of them assign variables
                     // if so, need to mark the block as one that needs to create a new frame
                     break;
@@ -1230,19 +1255,39 @@ const parser = (() => {
                     if (expr.keepArray) {
                         result.keepSingletonArray = true;
                     }
+                    var start = expr.position - expr.value.length;
+                    var end = expr.position;
+                    expr.span = { start, end };
+                    result.span = { start, end };
                     break;
                 case 'parent':
                     result = {type: 'parent', slot: { label: '!' + ancestorLabel++, level: 1, index: ancestorIndex++ } };
                     ancestry.push(result);
                     break;
                 case 'string':
+                    result = expr;
+                    result.span = {
+                        start: expr.position - expr.value.length - 2,
+                        end: expr.position
+                    };
+                    break;
+                case 'variable':
+                    result = expr;
+                    result.span = {
+                        start: expr.position - expr.value.length - 1,
+                        end: expr.position
+                    };
+                    break;
                 case 'number':
                 case 'value':
                 case 'wildcard':
                 case 'descendant':
-                case 'variable':
                 case 'regex':
                     result = expr;
+                    result.span = {
+                        start: expr.position - (expr.value === null ? 4 : expr.value.length),
+                        end: expr.position
+                    };
                     break;
                 case 'operator':
                     // the tokens 'and' and 'or' might have been used as a name rather than an operator

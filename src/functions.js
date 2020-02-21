@@ -10,6 +10,7 @@ const functions = (() => {
     'use strict';
 
     var isNumeric = utils.isNumeric;
+    var isString = utils.isString;
     var isArrayOfStrings = utils.isArrayOfStrings;
     var isArrayOfNumbers = utils.isArrayOfNumbers;
     var createSequence = utils.createSequence;
@@ -113,7 +114,7 @@ const functions = (() => {
 
         var str;
 
-        if (typeof arg === 'string') {
+        if (typeof arg === 'string' || arg instanceof String) {
             // already a string
             str = arg;
         } else if (isFunction(arg)) {
@@ -1197,10 +1198,10 @@ const functions = (() => {
             return undefined;
         }
 
-        if (typeof arg === 'number') {
+        if (isNumeric(arg)) {
             // already a number
             result = arg;
-        } else if (typeof arg === 'string' && /^-?[0-9]+(\.[0-9]+)?([Ee][-+]?[0-9]+)?$/.test(arg) && !isNaN(parseFloat(arg)) && isFinite(arg)) {
+        } else if (isString(arg) && /^-?[0-9]+(\.[0-9]+)?([Ee][-+]?[0-9]+)?$/.test(arg) && !isNaN(parseFloat(arg)) && isFinite(arg)) {
             result = parseFloat(arg);
         } else if (arg === true) {
             // boolean true casts to 1
@@ -1409,7 +1410,7 @@ const functions = (() => {
                 });
                 result = trues.length > 0;
             }
-        } else if (typeof arg === 'string') {
+        } else if (isString(arg)) {
             if (arg.length > 0) {
                 result = true;
             }
@@ -1417,12 +1418,14 @@ const functions = (() => {
             if (arg !== 0) {
                 result = true;
             }
+        } else if (typeof arg === 'boolean' || arg instanceof Boolean) {
+            if(arg.valueOf() === true) {
+                result = true;
+            }
         } else if (arg !== null && typeof arg === 'object') {
             if (Object.keys(arg).length > 0) {
                 result = true;
             }
-        } else if (typeof arg === 'boolean' && arg === true) {
-            result = true;
         }
         return result;
     }

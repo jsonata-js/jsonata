@@ -25,6 +25,7 @@ var jsonata = (function() {
     'use strict';
 
     var isNumeric = utils.isNumeric;
+    var isString = utils.isString;
     var isArrayOfStrings = utils.isArrayOfStrings;
     var isArrayOfNumbers = utils.isArrayOfNumbers;
     var createSequence = utils.createSequence;
@@ -122,6 +123,17 @@ var jsonata = (function() {
                 // so don't yield since yielding will trigger the .then()
             } else {
                 result = yield result;
+            }
+        }
+
+        //console.log("pos=" + expr.position + ", result=" + result);
+        //console.log(result);
+        if(environment.debug) {
+            result = yield {
+                expr: expr,
+                input: input,
+                environment: environment,
+                result: result
             }
         }
 
@@ -761,8 +773,8 @@ var jsonata = (function() {
         var ltype = typeof lhs;
         var rtype = typeof rhs;
 
-        var lcomparable = (ltype === 'undefined' || ltype === 'string' || ltype === 'number');
-        var rcomparable = (rtype === 'undefined' || rtype === 'string' || rtype === 'number');
+        var lcomparable = (ltype === 'undefined' || ltype === 'string' || ltype === 'number' || lhs instanceof String || lhs instanceof Number);
+        var rcomparable = (rtype === 'undefined' || rtype === 'string' || rtype === 'number' || rhs instanceof String || rhs instanceof Number);
 
         // if either aa or bb are not comparable (string or numeric) values, then throw an error
         if (!lcomparable || !rcomparable) {
@@ -911,7 +923,7 @@ var jsonata = (function() {
                 const keyExpr = expr.operands[pairIndex];
                 var key = yield * evaluate(keyExpr, reduce ? item['@'] : item, env);
                 // key has to be a string
-                if (typeof  key !== 'string') {
+                if (!isString(key)) {
                     throw {
                         code: "T1003",
                         stack: (new Error()).stack,
@@ -984,14 +996,14 @@ var jsonata = (function() {
     function evaluateRangeExpression(lhs, rhs) {
         var result;
 
-        if (typeof lhs !== 'undefined' && !Number.isInteger(lhs)) {
+        if (typeof lhs !== 'undefined' && !(isNumeric(lhs) && Math.floor(lhs) == lhs)) {
             throw {
                 code: "T2003",
                 stack: (new Error()).stack,
                 value: lhs
             };
         }
-        if (typeof rhs !== 'undefined' && !Number.isInteger(rhs)) {
+        if (typeof rhs !== 'undefined' && !(isNumeric(rhs) && Math.floor(rhs) == rhs)) {
             throw {
                 code: "T2004",
                 stack: (new Error()).stack,
@@ -1826,6 +1838,7 @@ var jsonata = (function() {
             },
             timestamp: enclosingEnvironment ? enclosingEnvironment.timestamp : null,
             async: enclosingEnvironment ? enclosingEnvironment.async : false,
+            debug: enclosingEnvironment ? enclosingEnvironment.debug : false,
             global: enclosingEnvironment ? enclosingEnvironment.global : {
                 ancestry: [ null ]
             }
@@ -2129,6 +2142,77 @@ var jsonata = (function() {
                         throw err;
                     }
                 }
+            },
+            debug: function (input, bindings) {
+                // throw if the expression compiled with syntax errors
+                if(typeof errors !== 'undefined') {
+                    var err = {
+                        code: 'S0500',
+                        position: 0
+                    };
+                    populateMessage(err); // possible side-effects on `err`
+                    throw err;
+                }
+
+                if (typeof bindings !== 'undefined') {
+                    var exec_env;
+                    // the variable bindings have been passed in - create a frame to hold these
+                    exec_env = createFrame(environment);
+                    for (var v in bindings) {
+                        exec_env.bind(v, bindings[v]);
+                    }
+                } else {
+                    exec_env = environment;
+                }
+                // put the input document into the environment as the root object
+                exec_env.bind('$', input);
+
+                // capture the timestamp and put it in the execution environment
+                // the $now() and $millis() functions will return this value - whenever it is called
+                timestamp = new Date();
+                exec_env.timestamp = timestamp;
+
+                // if the input is a JSON array, then wrap it in a singleton sequence so it gets treated as a single input
+                if(Array.isArray(input) && !isSequence(input)) {
+                    input = createSequence(input);
+                    input.outerWrapper = true;
+                }
+
+                let it, result;
+                exec_env.debug = true;
+                try {
+                    it = evaluate(ast, input, exec_env);
+                    result = it.next();
+                } catch (err) {
+                    // insert error message into structure
+                    populateMessage(err); // possible side-effects on `err`
+                    throw err;
+                }
+
+                return {
+                    step: function(val) {
+                        if(result.done) {
+                            return;
+                        }
+                        try {
+                            if(arguments.length === 0) {
+                                val = result.value.result;
+                            }
+                            result = it.next(val);
+                        } catch (err) {
+                            // insert error message into structure
+                            populateMessage(err); // possible side-effects on `err`
+                            throw err;
+                        }
+                        return result.value;
+                    },
+                    value: function() {
+                        return result.value;
+                    },
+                    done: function() {
+                        return result.done;
+                    }
+                };
             },
             assign: function (name, value) {
                 environment.bind(name, value);

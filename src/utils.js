@@ -14,7 +14,7 @@ const utils = (() => {
      */
     function isNumeric(n) {
         var isNum = false;
-        if(typeof n === 'number') {
+        if(typeof n === 'number' || n instanceof Number) {
             isNum = !isNaN(n);
             if (isNum && !isFinite(n)) {
                 throw {
@@ -28,6 +28,16 @@ const utils = (() => {
     }
 
     /**
+     * Check if value is a finite number
+     * @param {string} n - number to evaluate
+     * @returns {boolean} True if n is a finite number
+     */
+    function isString(n) {
+        return (typeof n === 'string' || n instanceof String);
+    }
+
+
+    /**
      * Returns true if the arg is an array of strings
      * @param {*} arg - the item to test
      * @returns {boolean} True if arg is an array of strings
@@ -36,7 +46,7 @@ const utils = (() => {
         var result = false;
         /* istanbul ignore else */
         if(Array.isArray(arg)) {
-            result = (arg.filter(function(item){return typeof item !== 'string';}).length === 0);
+            result = (arg.filter(function(item){return !isString(item);}).length === 0);
         }
         return result;
     }
@@ -135,6 +145,21 @@ const utils = (() => {
         if (lhs === rhs) {
             return true;
         }
+        if (lhs instanceof String) {
+            lhs = lhs.toString();
+        }
+        if (rhs instanceof String) {
+            rhs = rhs.toString();
+        }
+        if (lhs instanceof Number) {
+            lhs = lhs.valueOf();
+        }
+        if (rhs instanceof Number) {
+            rhs = rhs.valueOf();
+        }
+        if (lhs === rhs) {
+            return true;
+        }
         if(typeof lhs === 'object' && typeof rhs === 'object' && lhs !== null && rhs !== null) {
             if(Array.isArray(lhs) && Array.isArray(rhs)) {
                 // both arrays (or sequences)
@@ -191,6 +216,7 @@ const utils = (() => {
 
     return {
         isNumeric,
+        isString,
         isArrayOfStrings,
         isArrayOfNumbers,
         createSequence,
