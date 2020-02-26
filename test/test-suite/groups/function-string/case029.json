@@ -1,0 +1,6 @@
+{
+    "expr": "$string()",
+    "data": [4, true],
+    "bindings": {},
+    "result": "[4,true]"
+}

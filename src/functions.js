@@ -126,6 +126,9 @@ const functions = (() => {
             };
         } else {
             var space = prettify ? 2 : 0;
+            if(Array.isArray(arg) && arg.outerWrapper) {
+                arg = arg[0];
+            }
             str = JSON.stringify(arg, function (key, val) {
                 return (typeof val !== 'undefined' && val !== null && val.toPrecision && isNumeric(val)) ? Number(val.toPrecision(15)) :
                     (val && isFunction(val)) ? '' : val;
