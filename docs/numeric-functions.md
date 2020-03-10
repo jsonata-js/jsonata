@@ -87,7 +87,7 @@ If `base` is not specified (i.e. this function is invoked with one argument), th
 An error is thrown if the values of `base` and `exponent` lead to a value that cannot be represented as a JSON number (e.g. Infinity, complex numbers).
 
 __Examples__  
-- `$power(2, 8)` => `8`  
+- `$power(2, 8)` => `256`  
 - `$power(2, 0.5)` => `1.414213562373`  
 - `$power(2, -2)` => `0.25`  
 
