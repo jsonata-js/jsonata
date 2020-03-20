@@ -1,0 +1,28 @@
+{
+    "expr": "$map($, $match(?, /^(\\w*\\s\\w*)/)).match",
+    "data": [
+        "Felicia Saunders",
+        "Jimmy Schultz",
+        "Dolores Figueroa",
+        "Craig Moreno",
+        "Lindsey Hall",
+        "Bonnie Russell",
+        "Kristin Stewart",
+        "Owen Reid",
+        "Brenda Sherman",
+        "Dwayne Baldwin"
+    ],
+    "bindings": {},
+    "result": [
+        "Felicia Saunders",
+        "Jimmy Schultz",
+        "Dolores Figueroa",
+        "Craig Moreno",
+        "Lindsey Hall",
+        "Bonnie Russell",
+        "Kristin Stewart",
+        "Owen Reid",
+        "Brenda Sherman",
+        "Dwayne Baldwin"
+    ]
+}

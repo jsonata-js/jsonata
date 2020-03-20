@@ -1089,8 +1089,9 @@ var jsonata = (function() {
      */
     function evaluateRegex(expr) {
         var re = new RegExp(expr.value);
-        var closure = function(str) {
+        var closure = function(str, fromIndex) {
             var result;
+            re.lastIndex = fromIndex || 0;
             var match = re.exec(str);
             if(match !== null) {
                 result = {
@@ -1108,7 +1109,7 @@ var jsonata = (function() {
                     if(re.lastIndex >= str.length) {
                         return undefined;
                     } else {
-                        var next = closure(str);
+                        var next = closure(str, re.lastIndex);
                         if(next && next.match === '') {
                             // matches zero length string; this will never progress
                             throw {
