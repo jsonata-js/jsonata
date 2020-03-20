@@ -93,7 +93,7 @@ const utils = (() => {
     function getFunctionArity(func) {
         var arity = typeof func.arity === 'number' ? func.arity :
             typeof func.implementation === 'function' ? func.implementation.length :
-                typeof func.length === 'number' ? func.length : func.arguments.length;
+                typeof func.length === 'number' ? func.length : func.operands.length;
         return arity;
     }
 

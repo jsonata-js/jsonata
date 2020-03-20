@@ -490,8 +490,7 @@ const parser = (() => {
             var bindingPower = bp || operators[id];
             var s = symbol(id, bindingPower);
             s.led = led || function (left) {
-                this.lhs = left;
-                this.rhs = expression(bindingPower);
+                this.operands = [left, expression(bindingPower)];
                 this.type = "binary";
                 return this;
             };
@@ -512,7 +511,7 @@ const parser = (() => {
         var prefix = function (id, nud) {
             var s = symbol(id);
             s.nud = nud || function () {
-                this.expression = expression(70);
+                this.operands = [expression(70)];
                 this.type = "unary";
                 return this;
             };
@@ -584,16 +583,16 @@ const parser = (() => {
             // left is is what we are trying to invoke
             this.procedure = left;
             this.type = 'function';
-            this.arguments = [];
+            this.operands = [];
             if (node.id !== ')') {
                 for (; ;) {
                     if (node.type === 'operator' && node.id === '?') {
                         // partial function application
                         this.type = 'partial';
-                        this.arguments.push(node);
+                        this.operands.push(node);
                         advance('?');
                     } else {
-                        this.arguments.push(expression(0));
+                        this.operands.push(expression(0));
                     }
                     if (node.id !== ',') break;
                     advance(',');
@@ -603,7 +602,7 @@ const parser = (() => {
             // if the name of the function is 'function' or λ, then this is function definition (lambda function)
             if (left.type === 'name' && (left.value === 'function' || left.value === '\u03BB')) {
                 // all of the args must be VARIABLE tokens
-                this.arguments.forEach(function (arg, index) {
+                this.operands.forEach(function (arg, index) {
                     if (arg.type !== 'variable') {
                         return handleError({
                             code: "S0208",
@@ -648,9 +647,9 @@ const parser = (() => {
 
         // parenthesis - block expression
         prefix("(", function () {
-            var expressions = [];
+            var operands = [];
             while (node.id !== ")") {
-                expressions.push(expression(0));
+                operands.push(expression(0));
                 if (node.id !== ";") {
                     break;
                 }
@@ -658,7 +657,7 @@ const parser = (() => {
             }
             advance(")", true);
             this.type = 'block';
-            this.expressions = expressions;
+            this.operands = operands;
             return this;
         });
 
@@ -670,9 +669,9 @@ const parser = (() => {
                     var item = expression(0);
                     if (node.id === "..") {
                         // range operator
-                        var range = {type: "binary", value: "..", position: node.position, lhs: item};
+                        var range = {type: "binary", value: "..", position: node.position, operands: [item]};
                         advance("..");
-                        range.rhs = expression(0);
+                        range.operands.push(expression(0)); // rhs
                         item = range;
                     }
                     a.push(item);
@@ -683,7 +682,7 @@ const parser = (() => {
                 }
             }
             advance("]", true);
-            this.expressions = a;
+            this.operands = a;
             this.type = "unary";
             return this;
         });
@@ -744,10 +743,9 @@ const parser = (() => {
             var a = [];
             if (node.id !== "}") {
                 for (; ;) {
-                    var n = expression(0);
+                    a.push(expression(0));
                     advance(":");
-                    var v = expression(0);
-                    a.push([n, v]); // holds an array of name/value expression pairs
+                    a.push(expression(0));
                     if (node.id !== ",") {
                         break;
                     }
@@ -757,12 +755,12 @@ const parser = (() => {
             advance("}", true);
             if (typeof left === 'undefined') {
                 // NUD - unary prefix form
-                this.lhs = a;
+                this.operands = a;
                 this.type = "unary";
             } else {
                 // LED - binary infix form
                 this.lhs = left;
-                this.rhs = a;
+                this.operands = a;
                 this.type = 'binary';
             }
             return this;
@@ -784,9 +782,11 @@ const parser = (() => {
                     token: left.value
                 });
             }
-            this.lhs = left;
-            this.rhs = expression(operators[':='] - 1); // subtract 1 from bindingPower for right associative operators
-            this.type = "binary";
+            this.operands = [
+                left,
+                expression(operators[':='] - 1) // subtract 1 from bindingPower for right associative operators
+            ];
+            this.type = "bind";
             return this;
         });
 
@@ -825,12 +825,14 @@ const parser = (() => {
         // if/then/else ternary operator ?:
         infix("?", operators['?'], function (left) {
             this.type = 'condition';
-            this.condition = left;
-            this.then = expression(0);
+            this.operands = [
+                left,          // condition
+                expression(0)  // then clause
+            ];
             if (node.id === ':') {
-                // else condition
+                // else clause
                 advance(":");
-                this.else = expression(0);
+                this.operands.push(expression(0));
             }
             return this;
         });
@@ -838,12 +840,12 @@ const parser = (() => {
         // object transformer
         prefix("|", function () {
             this.type = 'transform';
-            this.pattern = expression(0);
+            this.operands = [expression(0)];       // pattern
             advance('|');
-            this.update = expression(0);
+            this.operands.push(expression(0));     // update
             if (node.id === ',') {
                 advance(',');
-                this.delete = expression(0);
+                this.operands.push(expression(0)); // delete
             }
             advance('|');
             return this;
@@ -857,21 +859,21 @@ const parser = (() => {
         var tailCallOptimize = function (expr) {
             var result;
             if (expr.type === 'function' && !expr.predicate) {
-                var thunk = {type: 'lambda', thunk: true, arguments: [], position: expr.position};
+                var thunk = {type: 'lambda', thunk: true, operands: [], position: expr.position};
                 thunk.body = expr;
                 result = thunk;
             } else if (expr.type === 'condition') {
                 // analyse both branches
-                expr.then = tailCallOptimize(expr.then);
-                if (typeof expr.else !== 'undefined') {
-                    expr.else = tailCallOptimize(expr.else);
+                expr.operands[1] = tailCallOptimize(expr.operands[1]);
+                if (typeof expr.operands[2] !== 'undefined') {
+                    expr.operands[2] = tailCallOptimize(expr.operands[2]);
                 }
                 result = expr;
             } else if (expr.type === 'block') {
                 // only the last expression in the block
-                var length = expr.expressions.length;
+                var length = expr.operands.length;
                 if (length > 0) {
-                    expr.expressions[length - 1] = tailCallOptimize(expr.expressions[length - 1]);
+                    expr.operands[length - 1] = tailCallOptimize(expr.operands[length - 1]);
                 }
                 result = expr;
             } else {
@@ -905,9 +907,9 @@ const parser = (() => {
                     break;
                 case 'block':
                     // look in last expression in the block
-                    if(node.expressions.length > 0) {
+                    if(node.operands.length > 0) {
                         node.tuple = true;
-                        slot = seekParent(node.expressions[node.expressions.length - 1], slot);
+                        slot = seekParent(node.operands[node.operands.length - 1], slot);
                     }
                     break;
                 case 'path':
@@ -943,6 +945,7 @@ const parser = (() => {
                     Array.prototype.push.apply(result.seekingParent, slots);
                 }
             }
+            return value;
         };
 
         var resolveAncestry = function(path) {
@@ -985,9 +988,10 @@ const parser = (() => {
             var result;
             switch (expr.type) {
                 case 'binary':
+                case 'bind':
                     switch (expr.value) {
                         case '.':
-                            var lstep = processAST(expr.lhs);
+                            var lstep = processAST(expr.operands[0]); // lhs
 
                             if (lstep.type === 'path') {
                                 result = lstep;
@@ -997,7 +1001,7 @@ const parser = (() => {
                             if(lstep.type === 'parent') {
                                 result.seekingParent = [lstep.slot];
                             }
-                            var rest = processAST(expr.rhs);
+                            var rest = processAST(expr.operands[1]); // rhs
                             if (rest.type === 'function' &&
                                 rest.procedure.type === 'path' &&
                                 rest.procedure.steps.length === 1 &&
@@ -1096,9 +1100,7 @@ const parser = (() => {
                             }
                             // object constructor - process each pair
                             result.group = {
-                                lhs: expr.rhs.map(function (pair) {
-                                    return [processAST(pair[0]), processAST(pair[1])];
-                                }),
+                                operands: expr.operands.map(op => processAST(op)),
                                 position: expr.position
                             };
                             break;
@@ -1112,21 +1114,13 @@ const parser = (() => {
                             }
                             var sortStep = {type: 'sort', position: expr.position};
                             sortStep.terms = expr.rhs.map(function (terms) {
-                                var expression = processAST(terms.expression);
-                                pushAncestry(sortStep, expression);
                                 return {
                                     descending: terms.descending,
-                                    expression: expression
+                                    expression: pushAncestry(sortStep, processAST(terms.expression))
                                 };
                             });
                             result.steps.push(sortStep);
                             resolveAncestry(result);
-                            break;
-                        case ':=':
-                            result = {type: 'bind', value: expr.value, position: expr.position};
-                            result.lhs = processAST(expr.lhs);
-                            result.rhs = processAST(expr.rhs);
-                            pushAncestry(result, result.rhs);
                             break;
                         case '@':
                             result = processAST(expr.lhs);
@@ -1178,92 +1172,51 @@ const parser = (() => {
                             break;
                         case '~>':
                             result = {type: 'apply', value: expr.value, position: expr.position};
-                            result.lhs = processAST(expr.lhs);
-                            result.rhs = processAST(expr.rhs);
+                            result.operands = expr.operands.map(op => processAST(op));
                             break;
                         default:
                             result = {type: expr.type, value: expr.value, position: expr.position};
-                            result.lhs = processAST(expr.lhs);
-                            result.rhs = processAST(expr.rhs);
-                            pushAncestry(result, result.lhs);
-                            pushAncestry(result, result.rhs);
+                            result.operands = expr.operands.map(item => pushAncestry(result, processAST(item)));
                     }
                     break;
                 case 'unary':
                     result = {type: expr.type, value: expr.value, position: expr.position};
-                    if (expr.value === '[') {
-                        // array constructor - process each item
-                        result.expressions = expr.expressions.map(function (item) {
-                            var value = processAST(item);
-                            pushAncestry(result, value);
-                            return value;
-                        });
-                    } else if (expr.value === '{') {
-                        // object constructor - process each pair
-                        result.lhs = expr.lhs.map(function (pair) {
-                            var key = processAST(pair[0]);
-                            pushAncestry(result, key);
-                            var value = processAST(pair[1]);
-                            pushAncestry(result, value);
-                            return [key, value];
-                        });
-                    } else {
-                        // all other unary expressions - just process the expression
-                        result.expression = processAST(expr.expression);
-                        // if unary minus on a number, then pre-process
-                        if (expr.value === '-' && result.expression.type === 'number') {
-                            result = result.expression;
-                            result.value = -result.value;
-                        } else {
-                            pushAncestry(result, result.expression);
-                        }
+                    result.operands = expr.operands.map(op => {
+                        var postop = processAST(op);
+                        pushAncestry(result, postop);
+                        return postop;
+                    });
+                    // if unary minus on a number, then pre-process
+                    if (expr.value === '-' && result.operands[0].type === 'number') {
+                        result = result.operands[0];
+                        result.value = -result.value;
                     }
                     break;
                 case 'function':
                 case 'partial':
                     result = {type: expr.type, name: expr.name, value: expr.value, position: expr.position};
-                    result.arguments = expr.arguments.map(function (arg) {
-                        var argAST = processAST(arg);
-                        pushAncestry(result, argAST);
-                        return argAST;
-                    });
+                    result.operands = expr.operands.map(item => pushAncestry(result, processAST(item)));
                     result.procedure = processAST(expr.procedure);
                     break;
                 case 'lambda':
                     result = {
                         type: expr.type,
-                        arguments: expr.arguments,
+                        operands: expr.operands,
                         signature: expr.signature,
-                        position: expr.position
+                        position: expr.position,
+                        body: tailCallOptimize(processAST(expr.body))
                     };
-                    var body = processAST(expr.body);
-                    result.body = tailCallOptimize(body);
                     break;
                 case 'condition':
-                    result = {type: expr.type, position: expr.position};
-                    result.condition = processAST(expr.condition);
-                    pushAncestry(result, result.condition);
-                    result.then = processAST(expr.then);
-                    pushAncestry(result, result.then);
-                    if (typeof expr.else !== 'undefined') {
-                        result.else = processAST(expr.else);
-                        pushAncestry(result, result.else);
-                    }
-                    break;
                 case 'transform':
                     result = {type: expr.type, position: expr.position};
-                    result.pattern = processAST(expr.pattern);
-                    result.update = processAST(expr.update);
-                    if (typeof expr.delete !== 'undefined') {
-                        result.delete = processAST(expr.delete);
-                    }
+                    result.operands = expr.operands.map(item => pushAncestry(result, processAST(item)));
                     break;
                 case 'block':
                     result = {type: expr.type, position: expr.position};
-                    // array of expressions - process each one
-                    result.expressions = expr.expressions.map(function (item) {
-                        var part = processAST(item);
-                        pushAncestry(result, part);
+                    // array of operands - process each one
+                    result.operands = expr.operands.map(function (item) {
+                        var part = pushAncestry(result, processAST(item));
                         if (part.consarray || (part.type === 'path' && part.steps[0].consarray)) {
                             result.consarray = true;
                         }
