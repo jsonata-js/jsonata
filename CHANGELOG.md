@@ -1,3 +1,8 @@
+#### 1.8.2 Maintenance Release
+
+- Fix bug with regex usage in partially applied functions (issue #427)
+- Fix regression when the $string() function is applied to a top-level array (PR #429)
+
 #### 1.8.1 Maintenance Release
 
 - Fix bug in timezone handling for ISO week date formats (issue #403)
