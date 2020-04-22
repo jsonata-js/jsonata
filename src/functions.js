@@ -1433,6 +1433,11 @@ const functions = (() => {
      * @returns {boolean} - NOT arg
      */
     function not(arg) {
+        // undefined inputs always return undefined
+        if (typeof arg === 'undefined') {
+            return undefined;
+        }
+
         return !boolean(arg);
     }
 

@@ -2,5 +2,5 @@
     "expr": "λ($arg)<b:b>{$not($arg)}(foo)",
     "dataset": null,
     "bindings": {},
-    "result": true
+    "undefinedResult": true
 }

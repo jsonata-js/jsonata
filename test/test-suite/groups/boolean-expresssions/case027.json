@@ -1,0 +1,6 @@
+{
+    "expr": "$not(nothing)",
+    "data": {},
+    "bindings": {},
+    "undefinedResult": true
+}
