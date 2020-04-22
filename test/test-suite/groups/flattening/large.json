@@ -1,0 +1,16 @@
+[
+    {
+        "expr": "( $data := { 'number': [1..2e5].$string() }; $values := $data.number; $count($values) )",
+        "data": null,
+        "result": 200000,
+        "timelimit": 10000,
+        "depth": 10
+    },
+    {
+        "expr": "( $data := { 'number': [1..2e5].$string() }; $values := $lookup($data, 'number'); $count($values) )",
+        "data": null,
+        "result": 200000,
+        "timelimit": 10000,
+        "depth": 10
+    }
+]
