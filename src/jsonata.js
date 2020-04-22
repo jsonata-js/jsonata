@@ -283,7 +283,7 @@ var jsonata = (function() {
                     resultSequence.push(res);
                 } else {
                     // res is a sequence - flatten it into the parent sequence
-                    Array.prototype.push.apply(resultSequence, res);
+                    res.forEach(val => resultSequence.push(val));
                 }
             });
         }

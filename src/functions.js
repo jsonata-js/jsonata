@@ -1671,7 +1671,7 @@ const functions = (() => {
                 var res =  lookup(input[ii], key);
                 if (typeof res !== 'undefined') {
                     if (Array.isArray(res)) {
-                        result.push(...res);
+                        res.forEach(val => result.push(val));
                     } else {
                         result.push(res);
                     }
