@@ -1,3 +1,9 @@
+#### 1.8.3 Maintenance Release
+
+- Remove incomplete polyfill for `Array.from()` (issue #432)
+- Fix `$not` to return empty sequence for missing inputs (issue #433)
+- Fix RangeError (stack overflow) when querying very large objects (issue #434)
+
 #### 1.8.2 Maintenance Release
 
 - Fix bug with regex usage in partially applied functions (issue #427)
