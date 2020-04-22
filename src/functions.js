@@ -19,6 +19,7 @@ const functions = (() => {
     var isIterable = utils.isIterable;
     var getFunctionArity = utils.getFunctionArity;
     var deepEquals = utils.isDeepEqual;
+    var stringToArray = utils.stringToArray;
 
     /**
      * Sum function
@@ -150,7 +151,7 @@ const functions = (() => {
             return undefined;
         }
 
-        var strArray = Array.from(str);
+        var strArray = stringToArray(str);
         var strLength = strArray.length;
 
         if (strLength + start < 0) {
@@ -247,7 +248,7 @@ const functions = (() => {
             return undefined;
         }
 
-        return Array.from(str).length;
+        return stringToArray(str).length;
     }
 
     /**

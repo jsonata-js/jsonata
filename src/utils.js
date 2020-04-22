@@ -176,6 +176,19 @@ const utils = (() => {
         return false;
     }
 
+    /**
+     * converts a string to an array of characters
+     * @param {string} str - the input string
+     * @returns {Array} - the array of characters
+     */
+    function stringToArray(str) {
+        var arr = [];
+        for (let char of str) {
+            arr.push(char);
+        }
+        return arr;
+    }
+
     return {
         isNumeric,
         isArrayOfStrings,
@@ -186,7 +199,8 @@ const utils = (() => {
         isLambda,
         isIterable,
         getFunctionArity,
-        isDeepEqual
+        isDeepEqual,
+        stringToArray
     };
 })();
 

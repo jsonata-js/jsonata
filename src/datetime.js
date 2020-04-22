@@ -4,6 +4,8 @@
  *   This project is licensed under the MIT License, see LICENSE
  */
 
+const utils = require('./utils');
+
 /**
  * DateTime formatting and parsing functions
  * Implements the xpath-functions format-date-time specification
@@ -11,6 +13,8 @@
  */
 const dateTime = (function () {
     'use strict';
+
+    const stringToArray = utils.stringToArray;
 
     const few = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
         'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
@@ -270,7 +274,7 @@ const dateTime = (function () {
                     formattedInteger = padding + formattedInteger;
                 }
                 if (format.zeroCode !== 0x30) {
-                    formattedInteger = Array.from(formattedInteger).map(code => {
+                    formattedInteger = stringToArray(formattedInteger).map(code => {
                         return String.fromCodePoint(code.codePointAt(0) + format.zeroCode - 0x30);
                     }).join('');
                 }
@@ -371,7 +375,7 @@ const dateTime = (function () {
                 let optionalDigits = 0;
                 let groupingSeparators = [];
                 let separatorPosition = 0;
-                const formatCodepoints = Array.from(primaryFormat, c => c.codePointAt(0)).reverse(); // reverse the array to determine positions of grouping-separator-signs
+                const formatCodepoints = stringToArray(primaryFormat).map(c => c.codePointAt(0)).reverse(); // reverse the array to determine positions of grouping-separator-signs
                 formatCodepoints.forEach((codePoint) => {
                     // step though each char in the picture to determine the digit group
                     let digit = false;
@@ -813,7 +817,7 @@ const dateTime = (function () {
         return componentValue;
     };
 
-    const iso8601Spec = analyseDateTimePicture('[Y0001]-[M01]-[D01]T[H01]:[m01]:[s01].[f001][Z01:01t]');
+    let iso8601Spec = null;
 
     /**
      * formats the date/time as specified by the XPath fn:format-dateTime function
@@ -907,6 +911,9 @@ const dateTime = (function () {
         let formatSpec;
         if(typeof picture === 'undefined') {
             // default to ISO 8601 format
+            if (iso8601Spec === null) {
+                iso8601Spec = analyseDateTimePicture('[Y0001]-[M01]-[D01]T[H01]:[m01]:[s01].[f001][Z01:01t]');
+            }
             formatSpec = iso8601Spec;
         } else {
             formatSpec = analyseDateTimePicture(picture);
