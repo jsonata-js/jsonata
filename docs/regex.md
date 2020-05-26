@@ -55,9 +55,9 @@ This returns the following JSONata object (JSON, but also with a function proper
 
 ```
 {
-  "match": "plan",
-  "start": 9,
-  "end": 13,
+  "match": "man",
+  "start": 2,
+  "end": 4,
   "groups": [],
   "next": "<native function>#0"
 }
