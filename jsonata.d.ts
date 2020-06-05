@@ -9,6 +9,9 @@ declare namespace jsonata {
     type: string;
     value: any;
     position: number;
+    arguments: {type: string, steps: ExprNode[]}[];
+    name?: string;
+    procedure: ExprNode;
   }
 
   interface JsonataError extends Error {
