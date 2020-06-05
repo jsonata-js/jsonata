@@ -9,7 +9,7 @@ declare namespace jsonata {
     type: string;
     value: any;
     position: number;
-    arguments: {type: string, steps: ExprNode[]}[];
+    arguments: {type: string, steps: ExprNode[]}[] | ExprNode[];
     name?: string;
     procedure: ExprNode;
   }
