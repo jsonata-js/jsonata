@@ -7,11 +7,12 @@ declare namespace jsonata {
 
   interface ExprNode {
     type: string;
-    value: any;
-    position: number;
-    arguments: {type: string, steps: ExprNode[]}[] | ExprNode[];
+    value?: any;
+    position?: number;
+    arguments?: ExprNode[];
     name?: string;
-    procedure: ExprNode;
+    procedure?: ExprNode;
+    steps?: ExprNode[];
   }
 
   interface JsonataError extends Error {
