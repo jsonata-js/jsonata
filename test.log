@@ -1,0 +1,61 @@
+
+> jsonata@1.8.3 pretest /Users/laukikragji/Documents/Git/Personal/jsonata
+> npm run lint
+
+
+> jsonata@1.8.3 lint /Users/laukikragji/Documents/Git/Personal/jsonata
+> eslint src
+
+
+> jsonata@1.8.3 test /Users/laukikragji/Documents/Git/Personal/jsonata
+> npm run mocha
+
+
+> jsonata@1.8.3 mocha /Users/laukikragji/Documents/Git/Personal/jsonata
+> node ./node_modules/istanbul/lib/cli.js cover --report cobertura --report html ./node_modules/mocha/bin/_mocha -- "test/**/*.js"
+
+
+
+  Invoke JSONata with continuation callback
+    Get bit value form valid bit index
+      ✓ should return valid result
+    Get bit value form invalid bit index
+      ✓ should return error rejected
+
+> jsonata@1.8.3 posttest /Users/laukikragji/Documents/Git/Personal/jsonata
+> npm run check-coverage && npm run browserify && npm run minify && npm run build-es5
+
+
+> jsonata@1.8.3 check-coverage /Users/laukikragji/Documents/Git/Personal/jsonata
+> istanbul check-coverage -statement 100 -branch 100 -function 100 -line 100
+
+
+> jsonata@1.8.3 browserify /Users/laukikragji/Documents/Git/Personal/jsonata
+> browserify src/jsonata.js --outfile jsonata.js --standalone jsonata
+
+
+> jsonata@1.8.3 minify /Users/laukikragji/Documents/Git/Personal/jsonata
+> uglifyjs jsonata.js -o jsonata.min.js --compress --mangle
+
+
+> jsonata@1.8.3 build-es5 /Users/laukikragji/Documents/Git/Personal/jsonata
+> npm run mkdir-dist && npm run regenerator && npm run browserify-es5 && npm run minify-es5
+
+
+> jsonata@1.8.3 mkdir-dist /Users/laukikragji/Documents/Git/Personal/jsonata
+> mkdirp ./dist
+
+
+> jsonata@1.8.3 regenerator /Users/laukikragji/Documents/Git/Personal/jsonata
+> babel src --out-dir dist --presets=@babel/env
+
+Successfully compiled 6 files with Babel (2228ms).
+
+> jsonata@1.8.3 browserify-es5 /Users/laukikragji/Documents/Git/Personal/jsonata
+> regenerator --include-runtime polyfill.js > jsonata-es5.js; browserify dist/jsonata.js --standalone jsonata >> jsonata-es5.js
+
+[36mbuilt Module("polyfill")[0m
+
+> jsonata@1.8.3 minify-es5 /Users/laukikragji/Documents/Git/Personal/jsonata
+> uglifyjs jsonata-es5.js -o jsonata-es5.min.js --compress --mangle
+

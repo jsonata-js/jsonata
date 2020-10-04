@@ -35,6 +35,7 @@ declare namespace jsonata {
   interface Expression {
     evaluate(input: any, bindings?: Record<string, any>): any;
     evaluate(input: any, bindings: Record<string, any> | undefined, callback: (err: JsonataError, resp: any) => void): void;
+    evaluate(input: any, bindings: Record<string, any> | undefined, callback: (err: JsonataError, resp: any) => void, continuationCallback: () => Promise<boolean>): void;
     assign(name: string, value: any): void;
     registerFunction(name: string, implementation: (this: Focus, ...args: any[]) => any, signature?: string): void;
     ast(): ExprNode;

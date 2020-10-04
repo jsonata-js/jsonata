@@ -2006,7 +2006,8 @@ var jsonata = (function() {
         "D3138": "The $single() function expected exactly 1 matching result.  Instead it matched more.",
         "D3139": "The $single() function expected exactly 1 matching result.  Instead it matched 0.",
         "D3140": "Malformed URL passed to ${{{functionName}}}(): {{value}}",
-        "D3141": "{{{message}}}"
+        "D3141": "{{{message}}}",
+        "U2020": "Operation Cancelled"
     };
 
     /**
@@ -2062,7 +2063,7 @@ var jsonata = (function() {
         }, '<:n>'));
 
         return {
-            evaluate: function (input, bindings, callback) {
+            evaluate: function (input, bindings, callback, continuationCallback = function(){return Promise.resolve(true)}) {
                 // throw if the expression compiled with syntax errors
                 if(typeof errors !== 'undefined') {
                     var err = {
@@ -2110,7 +2111,16 @@ var jsonata = (function() {
                         if (result.done) {
                             callback(null, result.value);
                         } else {
-                            result.value.then(thenHandler).catch(catchHandler);
+                            continuationCallback().then((proceed) => {
+                                if (proceed === true) {
+                                    result.value.then(thenHandler).catch(catchHandler);
+                                }
+                                else {
+                                    var err = { code: 'U2020' };
+                                    populateMessage(err);
+                                    callback(err, null);
+                                }
+                            }).catch(catchHandler);
                         }
                     };
                     it = evaluate(ast, input, exec_env);

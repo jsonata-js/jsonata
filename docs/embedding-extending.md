@@ -80,6 +80,30 @@ console.log("Started");
 // Prints "Started", then "Finished with 19"
 ```
 
+If `continuationCallback()` is supplied, `expression.evaluate()` returns `undefined`, the expression is run asynchronously calling continuationCallback after every step which should resolve to true else it will cancel the execution and the `Error` in `callback` will reflect as operation cancelled.
+
+```javascript
+let stepCounter = 0;
+async function continueExecution() {
+    stepCounter++;
+    return stepCounter<1000; //PREVENT INFINITE LOOPS
+}
+function completion(err, results) {
+    if (err) {
+        console.error(err);
+        return;
+    }
+    console.log(`Completed in ${stepCounter} steps with result:${results}`);
+}
+const getBit = jsonata(`($x:= λ($c,$n,$b){ $c=$b?$n%2:$x($c+1,$floor($n/2),$b)};$x(0,number,bitIndex))`);
+
+getBit.evaluate({ "number": 10000000, "bitIndex": 0 }, undefined, completion, continueExecution); //NORMAL
+// Prints Completed in 17 steps with result:0
+
+getBit.evaluate({ "number": 10000000, "bitIndex": -1 }, undefined, completion, continueExecution); //INFINITE LOOP
+// Prints { code: 'U2020', message: 'Operation cancelled.' }
+```
+
 ### expression.assign(name, value)
 
 Permanently binds a value to a name in the expression, similar to how `bindings` worked above. Modifies `expression` in place and returns `undefined`. Useful in a JSONata expression factory.
