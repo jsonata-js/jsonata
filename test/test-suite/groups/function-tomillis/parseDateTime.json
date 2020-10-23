@@ -326,5 +326,45 @@
         "expr": "$toMillis('2018-32-5', '[X]-[W]-[F1]')",
         "data": {},
         "code": "D3136"
+    },
+    {
+        "function": "#toMillis",
+        "category": "timezones",
+        "description": "should parse a date containing timezones",
+        "expr": "$toMillis('2020-09-09 08:00:00 +02:00', '[Y0001]-[M01]-[D01] [H01]:[m01]:[s01] [Z]') ~> $fromMillis() ",
+        "data": {},
+        "result": "2020-09-09T06:00:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "timezones",
+        "description": "should parse a date containing timezones",
+        "expr": "$toMillis('2020-09-09 08:00:00 GMT-05:00', '[Y0001]-[M01]-[D01] [H01]:[m01]:[s01] [z]') ~> $fromMillis() ",
+        "data": {},
+        "result": "2020-09-09T13:00:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "timezones",
+        "description": "should parse a date containing timezones",
+        "expr": "$toMillis('2020-09-09 12:00:00 +05:30', '[Y0001]-[M01]-[D01] [H01]:[m01]:[s01] [Z]') ~> $fromMillis() ",
+        "data": {},
+        "result": "2020-09-09T06:30:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "timezones",
+        "description": "should parse a date containing timezones",
+        "expr": "$toMillis('2020-09-09 12:00:00 GMT-5', '[Y0001]-[M01]-[D01] [H01]:[m01]:[s01] [z01]') ~> $fromMillis() ",
+        "data": {},
+        "result": "2020-09-09T17:00:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "timezones",
+        "description": "should parse a date containing timezones",
+        "expr": "$toMillis('2020-09-09 12:00:00 +0530', '[Y0001]-[M01]-[D01] [H01]:[m01]:[s01] [Z0001]') ~> $fromMillis() ",
+        "data": {},
+        "result": "2020-09-09T06:30:00.000Z"
     }
 ]

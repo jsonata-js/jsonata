@@ -947,6 +947,41 @@ const dateTime = (function () {
                 var res = {};
                 if (part.type === 'literal') {
                     res.regex = part.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                } else if (part.component === 'Z' || part.component === 'z') {
+                    // timezone
+                    let separator;
+                    if (!Array.isArray(part.integerFormat.groupingSeparators)) {
+                        separator = part.integerFormat.groupingSeparators;
+                    }
+                    res.regex = '';
+                    if (part.component === 'z') {
+                        res.regex = 'GMT';
+                    }
+                    res.regex += '[-+][0-9]+';
+                    if (separator) {
+                        res.regex += separator.character + '[0-9]+';
+                    }
+                    res.parse = function(value) {
+                        if (part.component === 'z') {
+                            value = value.substring(3); // remove the leading GMT
+                        }
+                        let offsetHours = 0, offsetMinutes = 0;
+                        if (separator) {
+                            offsetHours = Number.parseInt(value.substring(0, value.indexOf(separator.character)));
+                            offsetMinutes = Number.parseInt(value.substring(value.indexOf(separator.character) + 1));
+                        } else {
+                            // depends on number of digits
+                            const numdigits = value.length - 1;
+                            if (numdigits <= 2) {
+                                // just hour offset
+                                offsetHours = Number.parseInt(value);
+                            } else {
+                                offsetHours = Number.parseInt(value.substring(0, 3));
+                                offsetMinutes = Number.parseInt(value.substring(3));
+                            }
+                        }
+                        return offsetHours * 60 + offsetMinutes;
+                    };
                 } else if (part.integerFormat) {
                     res = generateRegex(part.integerFormat);
                 } else {
@@ -1240,6 +1275,10 @@ const dateTime = (function () {
             }
 
             var millis = Date.UTC(components.Y, components.M, components.D, components.H, components.m, components.s, components.f);
+            if(components.Z || components.z) {
+                // adjust for timezone
+                millis -= (components.Z || components.z) * 60 * 1000;
+            }
             return millis;
         }
     }
