@@ -1759,6 +1759,11 @@ var jsonata = (function() {
         var input = this.input;
         if(typeof focus !== 'undefined') {
             input = focus;
+            // if the input is a JSON array, then wrap it in a singleton sequence so it gets treated as a single input
+            if(Array.isArray(input) && !isSequence(input)) {
+                input = createSequence(input);
+                input.outerWrapper = true;
+            }
         }
 
         try {

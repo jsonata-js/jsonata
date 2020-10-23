@@ -1,0 +1,34 @@
+[
+    {
+        "expr": "$eval(\"{ 'test': 1 }\", [])",
+        "data": {},
+        "bindings": {},
+        "result": {
+            "test": 1
+        }
+    },
+    {
+        "expr": "$eval(\"{ 'test': 1 }\")",
+        "data": [],
+        "bindings": {},
+        "result": {
+            "test": 1
+        }
+    },
+    {
+        "expr": "$eval(\"{ 'test': 1 }\", [1,2,3])",
+        "data": [],
+        "bindings": {},
+        "result": {
+            "test": 1
+        }
+    },
+    {
+        "expr": "$eval(\"{ 'test': 1 }\")",
+        "data": [1,2,3],
+        "bindings": {},
+        "result": {
+            "test": 1
+        }
+    }
+]
