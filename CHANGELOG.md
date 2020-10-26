@@ -1,3 +1,8 @@
+#### 1.8.4 Maintenance Release
+
+- Fix bug in `$eval` when second arg is an empty array (issue #463)
+- Fix bug in `toMillis()` parsing timezones (issue #477)
+
 #### 1.8.3 Maintenance Release
 
 - Remove incomplete polyfill for `Array.from()` (issue #432)
