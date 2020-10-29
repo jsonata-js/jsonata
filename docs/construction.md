@@ -16,7 +16,7 @@ Array constructors can also be used within location paths for making multiple se
 
 __Examples__
 
-- The four emails addresses are returned in a flat array.
+- The four email addresses are returned in a flat array.
   <div class="jsonata-ex">
     <div>Email.address</div>
     <div>[
