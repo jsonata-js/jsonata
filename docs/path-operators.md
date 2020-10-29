@@ -56,7 +56,7 @@ To sort in descending order, the sort expression must be preceded by the `>` sym
 
 `Account.Order.Product^(>Price)`
 
-sorts all of the products into order of decreasing price.  The `<` symbol can be used explicitly indicate ascending order, although that is the default behaviour.
+sorts all of the products into order of decreasing price.  The `<` symbol can be used to explicitly indicate ascending order, although that is the default behaviour.
 
 Secondary (and more) sort expressions can be specified by separating them with commas (`,`).  The secondary expression will be used to determine order if the primary expression ranks two values the same.  For example,
 
