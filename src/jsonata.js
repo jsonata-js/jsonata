@@ -1088,7 +1088,7 @@ var jsonata = (function() {
      * @returns {Function} Higher order function representing prepared regex
      */
     function evaluateRegex(expr) {
-        var re = new RegExp(expr.value);
+        var re = new jsonata.RegexEngine(expr.value);
         var closure = function(str, fromIndex) {
             var result;
             re.lastIndex = fromIndex || 0;
@@ -2041,7 +2041,9 @@ var jsonata = (function() {
     /**
      * JSONata
      * @param {Object} expr - JSONata expression
-     * @param {boolean} options - recover: attempt to recover on parse error
+     * @param {Object} options
+     * @param {boolean} options.recover: attempt to recover on parse error
+     * @param {Function} options.RegexEngine: RegEx class constructor to use
      * @returns {{evaluate: evaluate, assign: assign}} Evaluated expression
      */
     function jsonata(expr, options) {
@@ -2065,6 +2067,12 @@ var jsonata = (function() {
         environment.bind('millis', defineFunction(function() {
             return timestamp.getTime();
         }, '<:n>'));
+
+        if(options && options.RegexEngine) {
+            jsonata.RegexEngine = options.RegexEngine;
+        } else {
+            jsonata.RegexEngine = RegExp;
+        }
 
         return {
             evaluate: function (input, bindings, callback) {
