@@ -62,7 +62,7 @@ const siteConfig = {
   */
 
   // This copyright info is used in /core/Footer.js and blog RSS/Atom feeds.
-  copyright: `Copyright © 2018 JSONata.org`,
+  copyright: `Copyright © 2021 JSONata.org`,
 
   highlight: {
     // Highlight.js theme to use for syntax highlighting in code blocks.
