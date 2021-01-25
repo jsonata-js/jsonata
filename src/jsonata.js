@@ -945,8 +945,8 @@ var jsonata = (function() {
         }
 
         // iterate over the groups to evaluate the 'value' expression
-        for (key in groups) {
-            entry = groups[key];
+        let workers = Object.keys(groups).map((key)=>{
+            let entry = groups[key];
             var context = entry.data;
             var env = environment;
             if (reduce) {
@@ -955,7 +955,11 @@ var jsonata = (function() {
                 delete tuple['@'];
                 env = createFrameFromTuple(environment, tuple);
             }
-            var value = yield * evaluate(expr.lhs[entry.exprIndex][1], context, env);
+            return [key,evaluate(expr.lhs[entry.exprIndex][1], context, env)];
+        });
+
+        for (let [key,getValue] of workers) {
+            var value = yield * getValue;
             if(typeof value !== 'undefined') {
                 result[key] = value;
             }
