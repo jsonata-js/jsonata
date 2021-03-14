@@ -1,0 +1,8 @@
+{
+    "description": "will not evaluate rhs (which would error) because lhs is true",
+    "expr": "foo = '' or $number(foo) = 0",
+    "data": {
+        "foo":""
+    },
+    "result": true
+}
