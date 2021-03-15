@@ -1,0 +1,8 @@
+{
+    "description": "will not evaluate rhs (which would error) because lhs is false",
+    "expr": "$type(data) = 'number' and data > 10",
+    "data": {
+        "data":"15"
+    },
+    "result": false
+}

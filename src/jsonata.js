@@ -457,9 +457,21 @@ var jsonata = (function() {
     function * evaluateBinary(expr, input, environment) {
         var result;
         var lhs = yield * evaluate(expr.lhs, input, environment);
-        var rhs = yield * evaluate(expr.rhs, input, environment);
         var op = expr.value;
 
+        //defer evaluation of RHS to allow short-circuiting
+        var evalrhs = function*(){return yield * evaluate(expr.rhs, input, environment);};
+        if (op === "and" || op === "or") {
+            try {
+                return yield * evaluateBooleanExpression(lhs, evalrhs, op);
+            } catch(err) {
+                err.position = expr.position;
+                err.token = op;
+                throw err;
+            }
+        }
+
+        var rhs = yield * evalrhs();
         try {
             switch (op) {
                 case '+':
@@ -481,10 +493,6 @@ var jsonata = (function() {
                     break;
                 case '&':
                     result = evaluateStringConcat(lhs, rhs);
-                    break;
-                case 'and':
-                case 'or':
-                    result = evaluateBooleanExpression(lhs, rhs, op);
                     break;
                 case '..':
                     result = evaluateRangeExpression(lhs, rhs);
@@ -836,33 +844,29 @@ var jsonata = (function() {
     /**
      * Evaluate boolean expression against input data
      * @param {Object} lhs - LHS value
-     * @param {Object} rhs - RHS value
+     * @param {Function} evalrhs - function to evaluate RHS value
      * @param {Object} op - opcode
      * @returns {*} Result
      */
-    function evaluateBooleanExpression(lhs, rhs, op) {
+    function * evaluateBooleanExpression(lhs, evalrhs, op) {
         var result;
 
-        var lBool = fn.boolean(lhs);
-        var rBool = fn.boolean(rhs);
-
-        if (typeof  lBool === 'undefined') {
-            lBool = false;
-        }
-
-        if (typeof  rBool === 'undefined') {
-            rBool = false;
-        }
+        var lBool = boolize(lhs);
 
         switch (op) {
             case 'and':
-                result = lBool && rBool;
+                result = lBool && boolize(yield * evalrhs());
                 break;
             case 'or':
-                result = lBool || rBool;
+                result = lBool || boolize(yield * evalrhs());
                 break;
         }
         return result;
+    }
+
+    function boolize(value) {
+        var booledValue = fn.boolean(value);
+        return typeof booledValue === 'undefined' ? false : booledValue;
     }
 
     /**

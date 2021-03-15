@@ -1,0 +1,8 @@
+{
+    "description": "throws error on right side of boolean expression (for CC of a catch)",
+    "expr": "$type(age) = 'number' or $number(age) > 0",
+    "data": {
+        "age":"33 1/2"
+    },
+    "code": "D3030"
+}
