@@ -539,9 +539,9 @@ var jsonata = (function() {
             case '[':
                 // array constructor - evaluate each item
                 result = [];
-                for(var ii = 0; ii < expr.expressions.length; ii++) {
-                    var item = expr.expressions[ii];
-                    var value = yield * evaluate(item, input, environment);
+                let generators = expr.expressions.map(item=>[item,evaluate(item, input, environment)]);
+                for(let [item,generator] of generators) {
+                    var value = yield * generator;
                     if (typeof value !== 'undefined') {
                         if(item.value === '[') {
                             result.push(value);
@@ -945,7 +945,7 @@ var jsonata = (function() {
         }
 
         // iterate over the groups to evaluate the 'value' expression
-        let workers = Object.keys(groups).map((key)=>{
+        let generators = Object.keys(groups).map((key)=>{
             let entry = groups[key];
             var context = entry.data;
             var env = environment;
@@ -958,8 +958,8 @@ var jsonata = (function() {
             return [key,evaluate(expr.lhs[entry.exprIndex][1], context, env)];
         });
 
-        for (let [key,getValue] of workers) {
-            var value = yield * getValue;
+        for (let [key,generator] of generators) {
+            var value = yield * generator;
             if(typeof value !== 'undefined') {
                 result[key] = value;
             }
