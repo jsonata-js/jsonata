@@ -260,13 +260,18 @@ var jsonata = (function() {
 
         result = createSequence();
 
-        for(var ii = 0; ii < input.length; ii++) {
-            var res = yield * evaluate(expr, input[ii], environment);
-            if(expr.stages) {
-                for(var ss = 0; ss < expr.stages.length; ss++) {
-                    res = yield* evaluateFilter(expr.stages[ss].expr, res, environment);
+        let generators = input.map(inputPart=>evaluate(expr, inputPart, environment))
+            .map(generator=>(function*(){
+                let res = yield * generator;
+                if(expr.stages) {
+                    for(let ss = 0; ss < expr.stages.length; ss++) {
+                        res = yield* evaluateFilter(expr.stages[ss].expr, res, environment);
+                    }
                 }
-            }
+                return res;
+            })());     
+        for(let generator of generators) {
+            var res = yield * generator;
             if(typeof res !== 'undefined') {
                 result.push(res);
             }
