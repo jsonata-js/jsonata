@@ -4,17 +4,12 @@ var jsonata = require('../src/jsonata');
 var request = require('request');
 //var assert = require('assert');
 var chai = require("chai");
-var expect = chai.expect;
 var chaiAsPromised = require("chai-as-promised");
 chai.use(chaiAsPromised);
+var expect = chai.expect;
 
-var jsonataPromise = function(expr, data, bindings) {
-    return new Promise(function(resolve, reject) {
-        expr.evaluate(data, bindings, function(error, response) {
-            if(error) reject(error);
-            resolve(response);
-        });
-    });
+var jsonataPromise = async function(expr, data, bindings) {
+    return await expr.evaluate(data, bindings);
 };
 
 var httpget = function(url) {
@@ -31,7 +26,7 @@ var httpget = function(url) {
 
 describe('Invoke JSONata with callback', function() {
     describe('Make HTTP request', function() {
-        it('should return promise to results', function() {
+        it('should return promise to results', async function() {
             var expr = jsonata('$httpget("https://api.npmjs.org/downloads/range/2016-09-01:2017-03-31/jsonata").downloads{ $substring(day, 0, 7): $sum(downloads) }');
             expr.assign('httpget', httpget);
             return expect(jsonataPromise(expr)).to.eventually.deep.equal({
@@ -103,11 +98,11 @@ describe('Evaluate concurrent expressions with callbacks', function() {
             }
         };
 
-        expr.evaluate({"payload":1}, {}, function(err,result) {
+        expr.evaluate({"payload":1}, {}).then(function(result, error) {
             expect(result).to.equal('goat');
             partDone();
         });
-        expr.evaluate({"payload":2}, {}, function(err,result) {
+        expr.evaluate({"payload":2}, {}).then(function(result, error) {
             expect(result).to.equal('cheese');
             partDone();
         });

@@ -3,6 +3,8 @@
 var jsonata = require('../src/jsonata');
 var assert = require('assert');
 var chai = require("chai");
+var chaiAsPromised = require("chai-as-promised");
+chai.use(chaiAsPromised);
 var expect = chai.expect;
 
 describe('Invoke parser with valid expression', function() {
@@ -465,12 +467,11 @@ describe('Invoke parser with incomplete expression', function() {
 
     describe('An expression with syntax error should not be executable', function() {
         describe('Account.', function() {
-            it('should return ast', function() {
+            it('should return ast', async function() {
                 var expr = jsonata('Account.', { recover: true });
-                expect(function () {
-                    expr.evaluate({});
-                }).to.throw()
-                    .to.deep.contain({position: 0, code: 'S0500'});
+                expect(expr.evaluate({}))
+                    .to.eventually.be.rejected
+                    .deep.contain({position: 0, code: 'S0500'});
             });
         });
     });

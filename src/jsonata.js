@@ -31,7 +31,7 @@ var jsonata = (function() {
     var isSequence = utils.isSequence;
     var isFunction = utils.isFunction;
     var isLambda = utils.isLambda;
-    var isIterable = utils.isIterable;
+    var isPromise = utils.isPromise;
     var getFunctionArity = utils.getFunctionArity;
     var isDeepEqual = utils.isDeepEqual;
 
@@ -46,7 +46,7 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function* evaluate(expr, input, environment) {
+    async function evaluate(expr, input, environment) {
         var result;
 
         var entryCallback = environment.lookup('__evaluate_entry');
@@ -56,13 +56,13 @@ var jsonata = (function() {
 
         switch (expr.type) {
             case 'path':
-                result = yield * evaluatePath(expr, input, environment);
+                result = await evaluatePath(expr, input, environment);
                 break;
             case 'binary':
-                result = yield * evaluateBinary(expr, input, environment);
+                result = await evaluateBinary(expr, input, environment);
                 break;
             case 'unary':
-                result = yield * evaluateUnary(expr, input, environment);
+                result = await evaluateUnary(expr, input, environment);
                 break;
             case 'name':
                 result = evaluateName(expr, input, environment);
@@ -82,19 +82,19 @@ var jsonata = (function() {
                 result = environment.lookup(expr.slot.label);
                 break;
             case 'condition':
-                result = yield * evaluateCondition(expr, input, environment);
+                result = await evaluateCondition(expr, input, environment);
                 break;
             case 'block':
-                result = yield * evaluateBlock(expr, input, environment);
+                result = await evaluateBlock(expr, input, environment);
                 break;
             case 'bind':
-                result = yield * evaluateBindExpression(expr, input, environment);
+                result = await evaluateBindExpression(expr, input, environment);
                 break;
             case 'regex':
                 result = evaluateRegex(expr, input, environment);
                 break;
             case 'function':
-                result = yield * evaluateFunction(expr, input, environment);
+                result = await evaluateFunction(expr, input, environment);
                 break;
             case 'variable':
                 result = evaluateVariable(expr, input, environment);
@@ -103,35 +103,36 @@ var jsonata = (function() {
                 result = evaluateLambda(expr, input, environment);
                 break;
             case 'partial':
-                result = yield * evaluatePartialApplication(expr, input, environment);
+                result = await evaluatePartialApplication(expr, input, environment);
                 break;
             case 'apply':
-                result = yield * evaluateApplyExpression(expr, input, environment);
+                result = await evaluateApplyExpression(expr, input, environment);
                 break;
             case 'transform':
                 result = evaluateTransformExpression(expr, input, environment);
                 break;
         }
 
+        /*
         if(environment.async &&
             (typeof result === 'undefined' || result === null || typeof result.then !== 'function')) {
             result = Promise.resolve(result);
         }
         if(environment.async && typeof result.then === 'function' && expr.nextFunction && typeof result[expr.nextFunction] === 'function') {
             // although this is a 'thenable', it is chaining a different function
-            // so don't yield since yielding will trigger the .then()
+            // so don't await since awaiting will trigger the .then()
         } else {
-            result = yield result;
-        }
+            result = await result;
+        }*/
 
         if (Object.prototype.hasOwnProperty.call(expr, 'predicate')) {
             for(var ii = 0; ii < expr.predicate.length; ii++) {
-                result = yield * evaluateFilter(expr.predicate[ii].expr, result, environment);
+                result = await evaluateFilter(expr.predicate[ii].expr, result, environment);
             }
         }
 
         if (expr.type !== 'path' && Object.prototype.hasOwnProperty.call(expr, 'group')) {
-            result = yield * evaluateGroupExpression(expr.group, result, environment);
+            result = await evaluateGroupExpression(expr.group, result, environment);
         }
 
         var exitCallback = environment.lookup('__evaluate_exit');
@@ -161,7 +162,7 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function* evaluatePath(expr, input, environment) {
+    async function evaluatePath(expr, input, environment) {
         var inputSequence;
         // expr is an array of steps
         // if the first step is a variable reference ($...), including root reference ($$),
@@ -187,12 +188,12 @@ var jsonata = (function() {
 
             // if the first step is an explicit array constructor, then just evaluate that (i.e. don't iterate over a context array)
             if(ii === 0 && step.consarray) {
-                resultSequence = yield * evaluate(step, inputSequence, environment);
+                resultSequence = await evaluate(step, inputSequence, environment);
             } else {
                 if(isTupleStream) {
-                    tupleBindings = yield * evaluateTupleStep(step, inputSequence, tupleBindings, environment);
+                    tupleBindings = await evaluateTupleStep(step, inputSequence, tupleBindings, environment);
                 } else {
-                    resultSequence = yield * evaluateStep(step, inputSequence, environment, ii === expr.steps.length - 1);
+                    resultSequence = await evaluateStep(step, inputSequence, environment, ii === expr.steps.length - 1);
                 }
             }
 
@@ -226,7 +227,7 @@ var jsonata = (function() {
         }
 
         if (expr.hasOwnProperty('group')) {
-            resultSequence = yield* evaluateGroupExpression(expr.group, isTupleStream ? tupleBindings : resultSequence, environment)
+            resultSequence = await evaluateGroupExpression(expr.group, isTupleStream ? tupleBindings : resultSequence, environment)
         }
 
         return resultSequence;
@@ -248,30 +249,33 @@ var jsonata = (function() {
      * @param {boolean} lastStep - flag the last step in a path
      * @returns {*} Evaluated input data
      */
-    function* evaluateStep(expr, input, environment, lastStep) {
+    async function evaluateStep(expr, input, environment, lastStep) {
         var result;
         if(expr.type === 'sort') {
-             result = yield* evaluateSortExpression(expr, input, environment);
+             result = await evaluateSortExpression(expr, input, environment);
              if(expr.stages) {
-                 result = yield* evaluateStages(expr.stages, result, environment);
+                 result = await evaluateStages(expr.stages, result, environment);
              }
              return result;
         }
 
         result = createSequence();
-
         let generators = input.map(inputPart=>evaluate(expr, inputPart, environment))
-            .map(generator=>(function*(){
-                let res = yield * generator;
+            .map(generator=>(async function(){
+                let res = await generator;
                 if(expr.stages) {
                     for(let ss = 0; ss < expr.stages.length; ss++) {
-                        res = yield* evaluateFilter(expr.stages[ss].expr, res, environment);
+                        res = await evaluateFilter(expr.stages[ss].expr, res, environment);
                     }
                 }
                 return res;
-            })());     
+            }));     
         for(let generator of generators) {
-            var res = yield * generator;
+            try {
+                var res = await generator();
+            } catch(err) {
+                throw err 
+            }
             if(typeof res !== 'undefined') {
                 result.push(res);
             }
@@ -296,13 +300,13 @@ var jsonata = (function() {
         return resultSequence;
     }
 
-    function* evaluateStages(stages, input, environment) {
+    async function evaluateStages(stages, input, environment) {
         var result = input;
         for(var ss = 0; ss < stages.length; ss++) {
             var stage = stages[ss];
             switch(stage.type) {
                 case 'filter':
-                    result = yield * evaluateFilter(stage.expr, result, environment);
+                    result = await evaluateFilter(stage.expr, result, environment);
                     break;
                 case 'index':
                     for(var ee = 0; ee < result.length; ee++) {
@@ -323,13 +327,13 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function* evaluateTupleStep(expr, input, tupleBindings, environment) {
+    async function evaluateTupleStep(expr, input, tupleBindings, environment) {
         var result;
         if(expr.type === 'sort') {
             if(tupleBindings) {
-                result = yield* evaluateSortExpression(expr, tupleBindings, environment);
+                result = await evaluateSortExpression(expr, tupleBindings, environment);
             } else {
-                var sorted = yield* evaluateSortExpression(expr, input, environment);
+                var sorted = await evaluateSortExpression(expr, input, environment);
                 result = createSequence();
                 result.tupleStream = true;
                 for(var ss = 0; ss < sorted.length; ss++) {
@@ -339,7 +343,7 @@ var jsonata = (function() {
                 }
             }
             if(expr.stages) {
-                result = yield* evaluateStages(expr.stages, result, environment);
+                result = await evaluateStages(expr.stages, result, environment);
             }
             return result;
         }
@@ -353,7 +357,7 @@ var jsonata = (function() {
 
         for(var ee = 0; ee < tupleBindings.length; ee++) {
             stepEnv = createFrameFromTuple(environment, tupleBindings[ee]);
-            var res = yield* evaluate(expr, tupleBindings[ee]['@'], stepEnv);
+            var res = await evaluate(expr, tupleBindings[ee]['@'], stepEnv);
             // res is the binding sequence for the output tuple stream
             if(typeof res !== 'undefined') {
                 if (!Array.isArray(res)) {
@@ -384,7 +388,7 @@ var jsonata = (function() {
         }
 
         if(expr.stages) {
-            result = yield * evaluateStages(expr.stages, result, environment);
+            result = await evaluateStages(expr.stages, result, environment);
         }
 
         return result;
@@ -397,7 +401,7 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Result after applying predicates
      */
-    function* evaluateFilter(predicate, input, environment) {
+    async function evaluateFilter(predicate, input, environment) {
         var results = createSequence();
         if( input && input.tupleStream) {
             results.tupleStream = true;
@@ -428,7 +432,7 @@ var jsonata = (function() {
                     context = item['@'];
                     env = createFrameFromTuple(environment, item);
                 }
-                var res = yield* evaluate(predicate, context, env);
+                var res = await evaluate(predicate, context, env);
                 if (isNumeric(res)) {
                     res = [res];
                 }
@@ -459,16 +463,16 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function * evaluateBinary(expr, input, environment) {
+    async function evaluateBinary(expr, input, environment) {
         var result;
-        var lhs = yield * evaluate(expr.lhs, input, environment);
+        var lhs = await evaluate(expr.lhs, input, environment);
         var op = expr.value;
 
         //defer evaluation of RHS to allow short-circuiting
-        var evalrhs = function*(){return yield * evaluate(expr.rhs, input, environment);};
+        var evalrhs = async function(){return await evaluate(expr.rhs, input, environment);};
         if (op === "and" || op === "or") {
             try {
-                return yield * evaluateBooleanExpression(lhs, evalrhs, op);
+                return await evaluateBooleanExpression(lhs, evalrhs, op);
             } catch(err) {
                 err.position = expr.position;
                 err.token = op;
@@ -476,7 +480,7 @@ var jsonata = (function() {
             }
         }
 
-        var rhs = yield * evalrhs();
+        var rhs = await evalrhs();
         try {
             switch (op) {
                 case '+':
@@ -521,12 +525,12 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function* evaluateUnary(expr, input, environment) {
+    async function evaluateUnary(expr, input, environment) {
         var result;
 
         switch (expr.value) {
             case '-':
-                result = yield * evaluate(expr.expression, input, environment);
+                result = await evaluate(expr.expression, input, environment);
                 if(typeof result === 'undefined') {
                     result = undefined;
                 } else if (isNumeric(result)) {
@@ -546,7 +550,7 @@ var jsonata = (function() {
                 result = [];
                 let generators = expr.expressions.map(item=>[item,evaluate(item, input, environment)]);
                 for(let [item,generator] of generators) {
-                    var value = yield * generator;
+                    var value = await generator;
                     if (typeof value !== 'undefined') {
                         if(item.value === '[') {
                             result.push(value);
@@ -565,7 +569,7 @@ var jsonata = (function() {
                 break;
             case '{':
                 // object constructor - apply grouping
-                result = yield * evaluateGroupExpression(expr, input, environment);
+                result = await evaluateGroupExpression(expr, input, environment);
                 break;
 
         }
@@ -853,17 +857,17 @@ var jsonata = (function() {
      * @param {Object} op - opcode
      * @returns {*} Result
      */
-    function * evaluateBooleanExpression(lhs, evalrhs, op) {
+    async function evaluateBooleanExpression(lhs, evalrhs, op) {
         var result;
 
         var lBool = boolize(lhs);
 
         switch (op) {
             case 'and':
-                result = lBool && boolize(yield * evalrhs());
+                result = lBool && boolize(await evalrhs());
                 break;
             case 'or':
-                result = lBool || boolize(yield * evalrhs());
+                result = lBool || boolize(await evalrhs());
                 break;
         }
         return result;
@@ -903,7 +907,7 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {{}} Evaluated input data
      */
-    function* evaluateGroupExpression(expr, input, environment) {
+    async function evaluateGroupExpression(expr, input, environment) {
         var result = {};
         var groups = {};
         var reduce = input && input.tupleStream ? true : false;
@@ -917,7 +921,7 @@ var jsonata = (function() {
             var env = reduce ? createFrameFromTuple(environment, item) : environment;
             for(var pairIndex = 0; pairIndex < expr.lhs.length; pairIndex++) {
                 var pair = expr.lhs[pairIndex];
-                var key = yield * evaluate(pair[0], reduce ? item['@'] : item, env);
+                var key = await evaluate(pair[0], reduce ? item['@'] : item, env);
                 // key has to be a string
                 if (typeof  key !== 'string') {
                     throw {
@@ -964,7 +968,7 @@ var jsonata = (function() {
         });
 
         for (let [key,generator] of generators) {
-            var value = yield * generator;
+            var value = await generator;
             if(typeof value !== 'undefined') {
                 result[key] = value;
             }
@@ -1048,10 +1052,10 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function* evaluateBindExpression(expr, input, environment) {
+    async function evaluateBindExpression(expr, input, environment) {
         // The RHS is the expression to evaluate
         // The LHS is the name of the variable to bind to - should be a VARIABLE token (enforced by parser)
-        var value = yield * evaluate(expr.rhs, input, environment);
+        var value = await evaluate(expr.rhs, input, environment);
         environment.bind(expr.lhs.value, value);
         return value;
     }
@@ -1063,13 +1067,13 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function* evaluateCondition(expr, input, environment) {
+    async function evaluateCondition(expr, input, environment) {
         var result;
-        var condition = yield * evaluate(expr.condition, input, environment);
+        var condition = await evaluate(expr.condition, input, environment);
         if (fn.boolean(condition)) {
-            result = yield * evaluate(expr.then, input, environment);
+            result = await evaluate(expr.then, input, environment);
         } else if (typeof expr.else !== 'undefined') {
-            result = yield * evaluate(expr.else, input, environment);
+            result = await evaluate(expr.else, input, environment);
         }
         return result;
     }
@@ -1081,7 +1085,7 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function* evaluateBlock(expr, input, environment) {
+    async function evaluateBlock(expr, input, environment) {
         var result;
         // create a new frame to limit the scope of variable assignments
         // TODO, only do this if the post-parse stage has flagged this as required
@@ -1089,7 +1093,7 @@ var jsonata = (function() {
         // invoke each expression in turn
         // only return the result of the last one
         for(var ii = 0; ii < expr.expressions.length; ii++) {
-            result = yield * evaluate(expr.expressions[ii], input, frame);
+            result = await evaluate(expr.expressions[ii], input, frame);
         }
 
         return result;
@@ -1168,17 +1172,17 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Ordered sequence
      */
-    function* evaluateSortExpression(expr, input, environment) {
+    async function evaluateSortExpression(expr, input, environment) {
         var result;
 
         // evaluate the lhs, then sort the results in order according to rhs expression
-        //var lhs = yield * evaluate(expr.lhs, input, environment);
+        //var lhs = await evaluate(expr.lhs, input, environment);
         var lhs = input;
         var isTupleSort = input.tupleStream ? true : false;
 
         // sort the lhs array
         // use comparator function
-        var comparator = function*(a, b) { // eslint-disable-line require-yield
+        var comparator = async function(a, b) { // eslint-disable-line 
             // expr.terms is an array of order-by in priority order
             var comp = 0;
             for(var index = 0; comp === 0 && index < expr.terms.length; index++) {
@@ -1190,7 +1194,7 @@ var jsonata = (function() {
                     context = a['@'];
                     env = createFrameFromTuple(environment, a);
                 }
-                var aa = yield * evaluate(term.expression, context, env);
+                var aa = await evaluate(term.expression, context, env);
                 //evaluate the sort term in the context of b
                 context = b;
                 env = environment;
@@ -1198,7 +1202,7 @@ var jsonata = (function() {
                     context = b['@'];
                     env = createFrameFromTuple(environment, b);
                 }
-                var bb = yield * evaluate(term.expression, context, env);
+                var bb = await evaluate(term.expression, context, env);
 
                 // type checks
                 var atype = typeof aa;
@@ -1255,7 +1259,7 @@ var jsonata = (function() {
             input: input
         };
         // the `focus` is passed in as the `this` for the invoked function
-        result = yield * fn.sort.apply(focus, [lhs, comparator]);
+        result = await fn.sort.apply(focus, [lhs, comparator]);
 
         return result;
     }
@@ -1269,7 +1273,7 @@ var jsonata = (function() {
      */
     function evaluateTransformExpression(expr, input, environment) {
         // create a function to implement the transform definition
-        var transformer = function*(obj) { // signature <(oa):o>
+        var transformer = async function(obj) { // signature <(oa):o>
             // undefined inputs always return undefined
             if(typeof obj === 'undefined') {
                 return undefined;
@@ -1285,8 +1289,8 @@ var jsonata = (function() {
                     position: expr.position
                 };
             }
-            var result = yield * apply(cloneFunction, [obj], null, environment);
-            var matches = yield * evaluate(expr.pattern, result, environment);
+            var result = await apply(cloneFunction, [obj], null, environment);
+            var matches = await evaluate(expr.pattern, result, environment);
             if(typeof matches !== 'undefined') {
                 if(!Array.isArray(matches)) {
                     matches = [matches];
@@ -1294,7 +1298,7 @@ var jsonata = (function() {
                 for(var ii = 0; ii < matches.length; ii++) {
                     var match = matches[ii];
                     // evaluate the update value for each match
-                    var update = yield * evaluate(expr.update, match, environment);
+                    var update = await evaluate(expr.update, match, environment);
                     // update must be an object
                     var updateType = typeof update;
                     if(updateType !== 'undefined') {
@@ -1315,7 +1319,7 @@ var jsonata = (function() {
 
                     // delete, if specified, must be an array of strings (or single string)
                     if(typeof expr.delete !== 'undefined') {
-                        var deletions = yield * evaluate(expr.delete, match, environment);
+                        var deletions = await evaluate(expr.delete, match, environment);
                         if(typeof deletions !== 'undefined') {
                             var val = deletions;
                             if (!Array.isArray(deletions)) {
@@ -1355,16 +1359,16 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function* evaluateApplyExpression(expr, input, environment) {
+    async function evaluateApplyExpression(expr, input, environment) {
         var result;
 
 
-        var lhs = yield * evaluate(expr.lhs, input, environment);
+        var lhs = await evaluate(expr.lhs, input, environment);
         if(expr.rhs.type === 'function') {
             // this is a function _invocation_; invoke it with lhs expression as the first argument
-            result = yield * evaluateFunction(expr.rhs, input, environment, { context: lhs });
+            result = await evaluateFunction(expr.rhs, input, environment, { context: lhs });
         } else {
-            var func = yield * evaluate(expr.rhs, input, environment);
+            var func = await evaluate(expr.rhs, input, environment);
 
             if(!isFunction(func)) {
                 throw {
@@ -1378,10 +1382,10 @@ var jsonata = (function() {
             if(isFunction(lhs)) {
                 // this is function chaining (func1 ~> func2)
                 // λ($f, $g) { λ($x){ $g($f($x)) } }
-                var chain = yield * evaluate(chainAST, null, environment);
-                result = yield * apply(chain, [lhs, func], null, environment);
+                var chain = await evaluate(chainAST, null, environment);
+                result = await apply(chain, [lhs, func], null, environment);
             } else {
-                result = yield * apply(func, [lhs], null, environment);
+                result = await apply(func, [lhs], null, environment);
             }
 
         }
@@ -1396,14 +1400,14 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function* evaluateFunction(expr, input, environment, applyto) {
+    async function evaluateFunction(expr, input, environment, applyto) {
         var result;
 
         // create the procedure
         // can't assume that expr.procedure is a lambda type directly
         // could be an expression that evaluates to a function (e.g. variable reference, parens expr etc.
         // evaluate it generically first, then check that it is a function.  Throw error if not.
-        var proc = yield * evaluate(expr.procedure, input, environment);
+        var proc = await evaluate(expr.procedure, input, environment);
 
         if (typeof proc === 'undefined' && expr.procedure.type === 'path' && environment.lookup(expr.procedure.steps[0].value)) {
             // help the user out here if they simply forgot the leading $
@@ -1421,12 +1425,12 @@ var jsonata = (function() {
         }
         // eager evaluation - evaluate the arguments
         for (var jj = 0; jj < expr.arguments.length; jj++) {
-            const arg = yield* evaluate(expr.arguments[jj], input, environment);
+            const arg = await evaluate(expr.arguments[jj], input, environment);
             if(isFunction(arg)) {
                 // wrap this in a closure
-                const closure = function* (...params) {
+                const closure = async function (...params) {
                     // invoke func
-                    return yield * apply(arg, params, null, environment);
+                    return await apply(arg, params, null, environment);
                 };
                 closure.arity = getFunctionArity(arg);
                 evaluatedArgs.push(closure);
@@ -1441,7 +1445,7 @@ var jsonata = (function() {
                 proc.token = procName;
                 proc.position = expr.position;
             }
-            result = yield * apply(proc, evaluatedArgs, input, environment);
+            result = await apply(proc, evaluatedArgs, input, environment);
         } catch (err) {
             if(!err.position) {
                 // add the position field to the error
@@ -1464,24 +1468,24 @@ var jsonata = (function() {
      * @param {Object} environment - environment
      * @returns {*} Result of procedure
      */
-    function* apply(proc, args, input, environment) {
+    async function apply(proc, args, input, environment) {
         var result;
-        result = yield * applyInner(proc, args, input, environment);
+        result = await applyInner(proc, args, input, environment);
         while(isLambda(result) && result.thunk === true) {
             // trampoline loop - this gets invoked as a result of tail-call optimization
             // the function returned a tail-call thunk
             // unpack it, evaluate its arguments, and apply the tail call
-            var next = yield * evaluate(result.body.procedure, result.input, result.environment);
+            var next = await evaluate(result.body.procedure, result.input, result.environment);
             if(result.body.procedure.type === 'variable') {
                 next.token = result.body.procedure.value;
             }
             next.position = result.body.procedure.position;
             var evaluatedArgs = [];
             for(var ii = 0; ii < result.body.arguments.length; ii++) {
-                evaluatedArgs.push(yield * evaluate(result.body.arguments[ii], result.input, result.environment));
+                evaluatedArgs.push(await evaluate(result.body.arguments[ii], result.input, result.environment));
             }
 
-            result = yield * applyInner(next, evaluatedArgs, input, environment);
+            result = await applyInner(next, evaluatedArgs, input, environment);
         }
         return result;
     }
@@ -1494,16 +1498,17 @@ var jsonata = (function() {
      * @param {Object} environment - environment
      * @returns {*} Result of procedure
      */
-    function* applyInner(proc, args, input, environment) {
+    async function applyInner(proc, args, input, environment) {
         var result;
         try {
+            //console.dir(args)
             var validatedArgs = args;
             if (proc) {
                 validatedArgs = validateArguments(proc.signature, args, input);
             }
 
             if (isLambda(proc)) {
-                result = yield* applyProcedure(proc, validatedArgs);
+                result = await applyProcedure(proc, validatedArgs);
             } else if (proc && proc._jsonata_function === true) {
                 var focus = {
                     environment: environment,
@@ -1513,18 +1518,18 @@ var jsonata = (function() {
                 result = proc.implementation.apply(focus, validatedArgs);
                 // `proc.implementation` might be a generator function
                 // and `result` might be a generator - if so, yield
-                if (isIterable(result)) {
-                    result = yield* result;
+                if (isPromise(result)) {
+                    result = await result;
                 }
             } else if (typeof proc === 'function') {
                 // typically these are functions that are returned by the invocation of plugin functions
                 // the `input` is being passed in as the `this` for the invoked function
                 // this is so that functions that return objects containing functions can chain
-                // e.g. $func().next().next()
+                // e.g. await (await $func())
                 result = proc.apply(input, validatedArgs);
                 /* istanbul ignore next */
-                if (isIterable(result)) {
-                    result = yield* result;
+                if (isPromise(result)) {
+                    result = await result;
                 }
             } else {
                 throw {
@@ -1564,8 +1569,8 @@ var jsonata = (function() {
         if(expr.thunk === true) {
             procedure.thunk = true;
         }
-        procedure.apply = function*(self, args) {
-            return yield * apply(procedure, args, input, self.environment);
+        procedure.apply = async function(self, args) {
+            return await apply(procedure, args, input, !!self ? self.environment : environment);
         };
         return procedure;
     }
@@ -1577,7 +1582,7 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
-    function* evaluatePartialApplication(expr, input, environment) {
+    async function evaluatePartialApplication(expr, input, environment) {
         // partially apply a function
         var result;
         // evaluate the arguments
@@ -1587,11 +1592,11 @@ var jsonata = (function() {
             if (arg.type === 'operator' && arg.value === '?') {
                 evaluatedArgs.push(arg);
             } else {
-                evaluatedArgs.push(yield * evaluate(arg, input, environment));
+                evaluatedArgs.push(await evaluate(arg, input, environment));
             }
         }
         // lookup the procedure
-        var proc = yield * evaluate(expr.procedure, input, environment);
+        var proc = await evaluate(expr.procedure, input, environment);
         if (typeof proc === 'undefined' && expr.procedure.type === 'path' && environment.lookup(expr.procedure.steps[0].value)) {
             // help the user out here if they simply forgot the leading $
             throw {
@@ -1640,7 +1645,7 @@ var jsonata = (function() {
      * @param {Array} args - Arguments
      * @returns {*} Result of procedure
      */
-    function* applyProcedure(proc, args) {
+    async function applyProcedure(proc, args) {
         var result;
         var env = createFrame(proc.environment);
         proc.arguments.forEach(function (param, index) {
@@ -1648,9 +1653,9 @@ var jsonata = (function() {
         });
         if (typeof proc.body === 'function') {
             // this is a lambda that wraps a native function - generated by partially evaluating a native
-            result = yield * applyNativeFunction(proc.body, env);
+            result = await applyNativeFunction(proc.body, env);
         } else {
-            result = yield * evaluate(proc.body, proc.input, env);
+            result = await evaluate(proc.body, proc.input, env);
         }
         return result;
     }
@@ -1712,7 +1717,7 @@ var jsonata = (function() {
      * @param {Object} env - Environment
      * @returns {*} Result of applying native function
      */
-    function* applyNativeFunction(proc, env) {
+    async function applyNativeFunction(proc, env) {
         var sigArgs = getNativeFunctionArguments(proc);
         // generate the array of arguments for invoking the function - look them up in the environment
         var args = sigArgs.map(function (sigArg) {
@@ -1723,8 +1728,8 @@ var jsonata = (function() {
             environment: env
         };
         var result = proc.apply(focus, args);
-        if(isIterable(result)) {
-            result = yield * result;
+        if(isPromise(result)) {
+            result = await result;
         }
         return result;
     }
@@ -1764,7 +1769,7 @@ var jsonata = (function() {
      * @param {string} expr - expression to evaluate
      * @returns {*} - result of evaluating the expression
      */
-    function* functionEval(expr, focus) {
+    async function functionEval(expr, focus) {
         // undefined inputs always return undefined
         if(typeof expr === 'undefined') {
             return undefined;
@@ -1792,7 +1797,7 @@ var jsonata = (function() {
             };
         }
         try {
-            var result = yield* evaluate(ast, input, this.environment);
+            var result = await evaluate(ast, input, this.environment);
         } catch(err) {
             // error evaluating the expression passed to $eval
             populateMessage(err);
@@ -2088,7 +2093,7 @@ var jsonata = (function() {
         }
 
         return {
-            evaluate: function (input, bindings, callback) {
+            evaluate: async function (input, bindings, callback) {
                 // throw if the expression compiled with syntax errors
                 if(typeof errors !== 'undefined') {
                     var err = {
@@ -2124,38 +2129,23 @@ var jsonata = (function() {
                 }
 
                 var result, it;
-                // if a callback function is supplied, then drive the generator in a promise chain
-                if(typeof callback === 'function') {
-                    exec_env.async = true;
-                    var catchHandler = function (err) {
-                        populateMessage(err); // possible side-effects on `err`
-                        callback(err, null);
-                    };
-                    var thenHandler = function (response) {
-                        result = it.next(response);
-                        if (result.done) {
-                            callback(null, result.value);
-                        } else {
-                            result.value.then(thenHandler).catch(catchHandler);
-                        }
-                    };
-                    it = evaluate(ast, input, exec_env);
-                    result = it.next();
-                    result.value.then(thenHandler).catch(catchHandler);
-                } else {
-                    // no callback function - drive the generator to completion synchronously
-                    try {
-                        it = evaluate(ast, input, exec_env);
-                        result = it.next();
-                        while (!result.done) {
-                            result = it.next(result.value);
-                        }
-                        return result.value;
-                    } catch (err) {
-                        // insert error message into structure
-                        populateMessage(err); // possible side-effects on `err`
-                        throw err;
+                try {
+                    it = await evaluate(ast, input, exec_env);
+                    /*result = it._next();
+                    while (!result.done) {
+                        result = it._next(result.value);
                     }
+                    return result.value;
+                    */
+                    // backwards-compatibility:
+                    return !!callback ? it
+                        .then(res => callback(undefined, res))
+                        .catch(err => callback(err, undefined)) 
+                    : it;
+                } catch (err) {
+                    // insert error message into structure
+                    populateMessage(err); // possible side-effects on `err`
+                    throw err;
                 }
             },
             assign: function (name, value) {

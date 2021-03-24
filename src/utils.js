@@ -126,6 +126,19 @@ const utils = (() => {
     }
 
     /**
+     * @param {Object} arg - expression to test
+     * @returns {boolean} - true if it is a promise
+     */
+    function isPromise(arg) {
+        return (
+            typeof arg === 'object' &&
+            arg !== null &&
+            'then' in arg &&
+            typeof arg.then === 'function'
+        );
+    }
+
+    /**
      * Compares two values for equality
      * @param {*} lhs first value
      * @param {*} rhs second value
@@ -198,6 +211,7 @@ const utils = (() => {
         isFunction,
         isLambda,
         isIterable,
+        isPromise,
         getFunctionArity,
         isDeepEqual,
         stringToArray

@@ -2,5 +2,9 @@
   // Rules ammendments
   "rules": {
     "strict": ["error", "global"],
+  },
+
+  "parserOptions": {
+    "ecmaVersion": 2018
   }
 }
