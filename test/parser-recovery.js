@@ -467,11 +467,11 @@ describe('Invoke parser with incomplete expression', function() {
 
     describe('An expression with syntax error should not be executable', function() {
         describe('Account.', function() {
-            it('should return ast', async function() {
+            it('should return ast', function() {
                 var expr = jsonata('Account.', { recover: true });
-                expect(expr.evaluate({}))
-                    .to.eventually.be.rejected
-                    .deep.contain({position: 0, code: 'S0500'});
+                return expect(expr.evaluate({}))
+                    .to.be.rejected
+                    .to.eventually.deep.contain({position: 0, code: 'S0500'});
             });
         });
     });

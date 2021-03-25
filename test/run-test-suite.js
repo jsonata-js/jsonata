@@ -43,7 +43,6 @@ describe("JSONata Test Suite", () => {
     // Iterate over all groups of tests
     groups.forEach(group => {
         let filenames = fs.readdirSync(path.join(__dirname, "test-suite", "groups", group)).filter((name) => name.endsWith(".json"));
-        filenames = filenames.filter(x => !x.endsWith("large.json"))// FIXME
         // Read JSON file containing all cases for this group
         let cases = [];
         filenames.forEach(name => {
@@ -62,7 +61,7 @@ describe("JSONata Test Suite", () => {
                 cases.push(spec);
             }
         });
-        describe("Group: " + group, async () => {
+        describe("Group: " + group, () => {
             // Iterate over all cases
             for (let i = 0; i < cases.length; i++) {
                 // Extract the current test case of interest
@@ -74,7 +73,7 @@ describe("JSONata Test Suite", () => {
                 }
 
                 // Create a test based on the data in this testcase
-                it(testcase.description+": "+testcase.expr, async function() {
+                it(testcase.description+": "+testcase.expr, function() {
                     var expr;
                     // Start by trying to compile the expression associated with this test case
                     try {
@@ -103,7 +102,7 @@ describe("JSONata Test Suite", () => {
                         }
                     }
                     // If we managed to compile the expression...
-                    if (expr) {
+                    if (expr && testcase.depth === undefined) {
                         // Load the input data set.  First, check to see if the test case defines its own input
                         // data (testcase.data).  If not, then look for a dataset number.  If it is -1, then that
                         // means there is no data (so use undefined).  If there is a dataset number, look up the
@@ -115,25 +114,25 @@ describe("JSONata Test Suite", () => {
                             // First is that we have an undefined result.  So, check
                             // to see if the result we get from evaluation is undefined
                             let result = expr.evaluate(dataset, testcase.bindings);
-                            expect(result).to.eventually.deep.equal(undefined);
+                            return expect(result).to.eventually.deep.equal(undefined);
                         } else if ("result" in testcase) {
                             // Second is that a (defined) result was provided.  In this case,
                             // we do a deep equality check against the expected result.
                             let result = expr.evaluate(dataset, testcase.bindings);
-                            expect(result).to.eventually.deep.equal(testcase.result);
+                            return expect(result).to.eventually.deep.equal(testcase.result);
                         } else if ("error" in testcase) {
                             // If an error was expected,
                             // we do a deep equality check against the expected error structure.
-                            expect(expr.evaluate(dataset, testcase.bindings))
+                            return expect(expr.evaluate(dataset, testcase.bindings))
                                 .to.be.rejected
-                                .to.deep.contain(testcase.error);
+                                .to.eventually.deep.contain(testcase.error);
                         } else if ("code" in testcase) {
                             // Finally, if a `code` field was specified, we expected the
                             // evaluation to fail and include the specified code in the
                             // thrown exception.
-                            expect(expr.evaluate(dataset, testcase.bindings))
+                            return expect(expr.evaluate(dataset, testcase.bindings))
                                 .to.be.rejected
-                                .to.deep.contain({ code: testcase.code });
+                                .to.eventually.deep.contain({ code: testcase.code });
                         } else {
                             // If we get here, it means there is something wrong with
                             // the test case data because there was nothing to check.
@@ -159,7 +158,7 @@ function timeboxExpression(expr, timeout, maxDepth) {
     var time = Date.now();
 
     var checkRunnaway = function() {
-        if (depth > maxDepth) {
+        if (maxDepth > 0 && depth > maxDepth) {
             // stack too deep
             throw {
                 message:
@@ -179,11 +178,13 @@ function timeboxExpression(expr, timeout, maxDepth) {
     };
 
     // register callbacks
-    expr.assign("__evaluate_entry", function() {
+    expr.assign("__evaluate_entry", function(expr, input, env) {
+        if (env.isParallelCall) return
         depth++;
         checkRunnaway();
     });
-    expr.assign("__evaluate_exit", function() {
+    expr.assign("__evaluate_exit", function(expr, input, env) {
+        if (env.isParallelCall) return
         depth--;
         checkRunnaway();
     });
@@ -209,8 +210,3 @@ function resolveDataset(datasets, testcase) {
     }
     throw new Error("Unable to find dataset "+testcase.dataset+" among known datasets, are you sure the datasets directory has a file named "+testcase.dataset+".json?");
 }
-
-process.on('unhandledRejection', error => {
-  console.dir(error);
-  console.log(error.stack)
-});

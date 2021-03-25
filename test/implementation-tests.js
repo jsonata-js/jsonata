@@ -506,10 +506,7 @@ describe("Tests that bind Javascript functions", () => {
     });
 
     describe('User defined higher-order functions', () => {
-        var myfunc = function*(arr, fn) {
-            const val = yield * fn(arr);
-            return 2 * val;
-        };
+        var myfunc = async (arr, fn) => 2 * await fn(arr);
 
         var startsWith = function(str) {
             // returns a function that returns true if its argument starts with the string `str`
@@ -521,17 +518,13 @@ describe("Tests that bind Javascript functions", () => {
         it('should be able to invoke a built-in function passed as an argument', async () => {
             var expr = jsonata("$myfunc([1,2,3], $sum)");
             expr.registerFunction('myfunc', myfunc);
-            var result = await expr.evaluate();
-            var expected = 12;
-            expect(result).to.deep.equal(expected);
+            expect(await expr.evaluate()).to.deep.equal(12);
         });
 
         it('should be able to invoke a lambda function passed as an argument', async () => {
             var expr = jsonata("$myfunc([1,2,3], λ($arr) { $arr[1] + $arr[2] })");
             expr.registerFunction('myfunc', myfunc);
-            var result = await expr.evaluate();
-            var expected = 10;
-            expect(result).to.deep.equal(expected);
+            expect(await expr.evaluate()).to.deep.equal(10);
         });
 
         it('should be able to invoke a user-defined function passed as an argument', async () => {
@@ -540,9 +533,7 @@ describe("Tests that bind Javascript functions", () => {
             expr.registerFunction('myfunc2', (arr) => {
                 return 2 * arr[1];
             });
-            var result = await expr.evaluate();
-            var expected = 8;
-            expect(result).to.deep.equal(expected);
+            expect(await expr.evaluate()).to.deep.equal(8);
         });
 
         it('should be able to return a function from a user-defined function', async () => {
@@ -552,11 +543,21 @@ describe("Tests that bind Javascript functions", () => {
               [$startsWithHello("Hello, Bob"), $startsWithHello("Goodbye, Bill")]
             )`);
             expr.registerFunction('startsWith', startsWith);
-            var result = await expr.evaluate();
-            var expected = [true, false];
-            expect(result).to.deep.equal(expected);
+            expect(await expr.evaluate()).to.deep.equal([true, false]);
         })
+    });
 
+    describe('User defined higher-order generator functions', () => {
+        var myfunc = function*(arr, fn) {
+            const val = yield* fn(arr); // FIXME: THIS WILL FAIL SINCE fn IS ASYNC!
+            return 2 * val;
+        };
+
+        it('should be able to invoke a built-in function passed as an argument', async () => {
+            var expr = jsonata("$myfunc([1,2,3], $sum)");
+            expr.registerFunction('myfunc', myfunc);
+            expect(await expr.evaluate()).to.deep.equal(12);
+        });
     });
 });
 
@@ -635,19 +636,23 @@ describe("Tests that are specific to a Javascript runtime", () => {
     });
 
     describe("empty regex", function() {
-        it("should throw error", async function() {
-            var expr = jsonata("//");
-            expect(expr.evaluate())
-                .to.eventually.be.rejected
+        it("should throw error", function() {
+            expect(function() {
+                var expr = jsonata("//");
+                expr.evaluate();
+            })
+                .to.throw()
                 .to.deep.contain({ position: 1, code: "S0301" });
         });
     });
 
     describe("empty regex", function() {
-        it("should throw error", async function() {
-            var expr = jsonata("/");
-            expect(expr.evaluate())
-                .to.eventually.be.rejected
+        it("should throw error", function() {
+            expect(function() {
+                var expr = jsonata("/");
+                expr.evaluate();
+            })
+                .to.throw()
                 .to.deep.contain({ position: 1, code: "S0302" });
         });
     });

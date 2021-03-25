@@ -31,6 +31,8 @@ var jsonata = (function() {
     var isSequence = utils.isSequence;
     var isFunction = utils.isFunction;
     var isLambda = utils.isLambda;
+    var isIterable = utils.isIterable;
+    var isAsyncIterable = utils.isAsyncIterable;
     var isPromise = utils.isPromise;
     var getFunctionArity = utils.getFunctionArity;
     var isDeepEqual = utils.isDeepEqual;
@@ -260,22 +262,16 @@ var jsonata = (function() {
         }
 
         result = createSequence();
-        let generators = input.map(inputPart=>evaluate(expr, inputPart, environment))
-            .map(generator=>(async function(){
-                let res = await generator;
-                if(expr.stages) {
-                    for(let ss = 0; ss < expr.stages.length; ss++) {
-                        res = await evaluateFilter(expr.stages[ss].expr, res, environment);
-                    }
-                }
-                return res;
-            }));     
+        let generators = await Promise.all(input
+            .map(async inputPart => await evaluate(expr, inputPart, environment)))  
         for(let generator of generators) {
-            try {
-                var res = await generator();
-            } catch(err) {
-                throw err 
+            let res = generator
+            if(expr.stages) {
+                for(let ss = 0; ss < expr.stages.length; ss++) {
+                    res = await evaluateFilter(expr.stages[ss].expr, res, environment);
+                }
             }
+
             if(typeof res !== 'undefined') {
                 result.push(res);
             }
@@ -469,7 +465,7 @@ var jsonata = (function() {
         var op = expr.value;
 
         //defer evaluation of RHS to allow short-circuiting
-        var evalrhs = async function(){return await evaluate(expr.rhs, input, environment);};
+        var evalrhs = async () => await evaluate(expr.rhs, input, environment);
         if (op === "and" || op === "or") {
             try {
                 return await evaluateBooleanExpression(lhs, evalrhs, op);
@@ -548,9 +544,10 @@ var jsonata = (function() {
             case '[':
                 // array constructor - evaluate each item
                 result = [];
-                let generators = expr.expressions.map(item=>[item,evaluate(item, input, environment)]);
-                for(let [item,generator] of generators) {
-                    var value = await generator;
+                let generators = await Promise.all(expr.expressions
+                    .map(async item => [item, await evaluate(item, input, environment)]));
+                for(let generator of generators) {
+                    var [item, value] = generator;
                     if (typeof value !== 'undefined') {
                         if(item.value === '[') {
                             result.push(value);
@@ -954,7 +951,7 @@ var jsonata = (function() {
         }
 
         // iterate over the groups to evaluate the 'value' expression
-        let generators = Object.keys(groups).map((key)=>{
+        let generators = await Promise.all(Object.keys(groups).map(async (key) => {
             let entry = groups[key];
             var context = entry.data;
             var env = environment;
@@ -964,11 +961,11 @@ var jsonata = (function() {
                 delete tuple['@'];
                 env = createFrameFromTuple(environment, tuple);
             }
-            return [key,evaluate(expr.lhs[entry.exprIndex][1], context, env)];
-        });
+            return [key, await evaluate(expr.lhs[entry.exprIndex][1], context, env)];
+        }));
 
-        for (let [key,generator] of generators) {
-            var value = await generator;
+        for (let generator of generators) {
+            var [key, value] = await generator;
             if(typeof value !== 'undefined') {
                 result[key] = value;
             }
@@ -1484,7 +1481,6 @@ var jsonata = (function() {
             for(var ii = 0; ii < result.body.arguments.length; ii++) {
                 evaluatedArgs.push(await evaluate(result.body.arguments[ii], result.input, result.environment));
             }
-
             result = await applyInner(next, evaluatedArgs, input, environment);
         }
         return result;
@@ -1501,12 +1497,12 @@ var jsonata = (function() {
     async function applyInner(proc, args, input, environment) {
         var result;
         try {
-            //console.dir(args)
             var validatedArgs = args;
             if (proc) {
                 validatedArgs = validateArguments(proc.signature, args, input);
             }
 
+            //console.dir({ proc, args })
             if (isLambda(proc)) {
                 result = await applyProcedure(proc, validatedArgs);
             } else if (proc && proc._jsonata_function === true) {
@@ -1518,6 +1514,13 @@ var jsonata = (function() {
                 result = proc.implementation.apply(focus, validatedArgs);
                 // `proc.implementation` might be a generator function
                 // and `result` might be a generator - if so, yield
+
+                if (isAsyncIterable(result)) {
+                    result = (await result.next()).value
+                }
+                if (isIterable(result)) {
+                    result = /*yield*/ result.next().value;
+                }
                 if (isPromise(result)) {
                     result = await result;
                 }
@@ -1527,7 +1530,13 @@ var jsonata = (function() {
                 // this is so that functions that return objects containing functions can chain
                 // e.g. await (await $func())
                 result = proc.apply(input, validatedArgs);
-                /* istanbul ignore next */
+
+                if (isAsyncIterable(result)) {
+                    result = (await result.next()).value
+                }
+                if (isIterable(result)) {
+                    result = /*yield*/ result.next().value;
+                }
                 if (isPromise(result)) {
                     result = await result;
                 }
@@ -1730,6 +1739,9 @@ var jsonata = (function() {
         var result = proc.apply(focus, args);
         if(isPromise(result)) {
             result = await result;
+        }
+        if (isIterable(result)) {
+            result = /*yield*/ result.next();
         }
         return result;
     }
@@ -2131,13 +2143,7 @@ var jsonata = (function() {
                 var result, it;
                 try {
                     it = await evaluate(ast, input, exec_env);
-                    /*result = it._next();
-                    while (!result.done) {
-                        result = it._next(result.value);
-                    }
-                    return result.value;
-                    */
-                    // backwards-compatibility:
+                    // for backwards-compatibility:
                     return !!callback ? it
                         .then(res => callback(undefined, res))
                         .catch(err => callback(err, undefined)) 
@@ -2163,8 +2169,6 @@ var jsonata = (function() {
             }
         };
     }
-
-    jsonata.parser = parser; // TODO remove this in a future release - use ast() instead
 
     return jsonata;
 

@@ -107,19 +107,32 @@ const utils = (() => {
     }
 
     // istanbul ignore next
-    var $Symbol = typeof Symbol === "function" ? Symbol : {};
+    const iteratorSymbol = (typeof Symbol === "function" ? Symbol : {}).iterator || "@@iterator";
     // istanbul ignore next
-    var iteratorSymbol = $Symbol.iterator || "@@iterator";
+    const asyncIteratorSymbol = (typeof Symbol === "function" ? Symbol : {}).asyncIterator || "@@asyncIterator";
 
     /**
      * @param {Object} arg - expression to test
-     * @returns {boolean} - true if it is iterable
+     * @returns {boolean} - true if it is iterable or asyncIterable
      */
     function isIterable(arg) {
         return (
             typeof arg === 'object' &&
             arg !== null &&
             iteratorSymbol in arg &&
+            'next' in arg &&
+            typeof arg.next === 'function'
+        );
+    }
+    /**
+     * @param {Object} arg - expression to test
+     * @returns {boolean} - true if it is iterable or asyncIterable
+     */
+    function isAsyncIterable(arg) {
+        return (
+            typeof arg === 'object' &&
+            arg !== null &&
+            asyncIteratorSymbol in arg &&
             'next' in arg &&
             typeof arg.next === 'function'
         );
@@ -211,6 +224,7 @@ const utils = (() => {
         isFunction,
         isLambda,
         isIterable,
+        isAsyncIterable,
         isPromise,
         getFunctionArity,
         isDeepEqual,
