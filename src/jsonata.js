@@ -53,7 +53,9 @@ var jsonata = (function() {
 
         var entryCallback = environment.lookup('__evaluate_entry');
         if(entryCallback) {
-            entryCallback(expr, input, environment);
+            // env.isParallelCall will be true if this evaluation 
+            // was not the first parallel execution from a .map()
+            await entryCallback(expr, input, environment);
         }
 
         switch (expr.type) {
@@ -115,18 +117,6 @@ var jsonata = (function() {
                 break;
         }
 
-        /*
-        if(environment.async &&
-            (typeof result === 'undefined' || result === null || typeof result.then !== 'function')) {
-            result = Promise.resolve(result);
-        }
-        if(environment.async && typeof result.then === 'function' && expr.nextFunction && typeof result[expr.nextFunction] === 'function') {
-            // although this is a 'thenable', it is chaining a different function
-            // so don't await since awaiting will trigger the .then()
-        } else {
-            result = await result;
-        }*/
-
         if (Object.prototype.hasOwnProperty.call(expr, 'predicate')) {
             for(var ii = 0; ii < expr.predicate.length; ii++) {
                 result = await evaluateFilter(expr.predicate[ii].expr, result, environment);
@@ -139,7 +129,9 @@ var jsonata = (function() {
 
         var exitCallback = environment.lookup('__evaluate_exit');
         if(exitCallback) {
-            exitCallback(expr, input, environment, result);
+            // env.isParallelCall will be true if this evaluation 
+            // was not the first parallel execution from a .map()
+            await exitCallback(expr, input, environment, result);
         }
 
         if(result && isSequence(result) && !result.tupleStream) {
@@ -263,7 +255,10 @@ var jsonata = (function() {
 
         result = createSequence();
         let generators = await Promise.all(input
-            .map(async inputPart => await evaluate(expr, inputPart, environment)))  
+            .map(async (inputPart, idx) => {
+                environment.isParallelCall = idx > 0
+                return await evaluate(expr, inputPart, environment)
+            }))  
         for(let generator of generators) {
             let res = generator
             if(expr.stages) {
@@ -545,7 +540,10 @@ var jsonata = (function() {
                 // array constructor - evaluate each item
                 result = [];
                 let generators = await Promise.all(expr.expressions
-                    .map(async item => [item, await evaluate(item, input, environment)]));
+                    .map(async (item, idx) => {
+                        environment.isParallelCall = idx > 0
+                        return [item, await evaluate(item, input, environment)]
+                    }));
                 for(let generator of generators) {
                     var [item, value] = generator;
                     if (typeof value !== 'undefined') {
@@ -951,7 +949,7 @@ var jsonata = (function() {
         }
 
         // iterate over the groups to evaluate the 'value' expression
-        let generators = await Promise.all(Object.keys(groups).map(async (key) => {
+        let generators = await Promise.all(Object.keys(groups).map(async (key, idx) => {
             let entry = groups[key];
             var context = entry.data;
             var env = environment;
@@ -961,6 +959,7 @@ var jsonata = (function() {
                 delete tuple['@'];
                 env = createFrameFromTuple(environment, tuple);
             }
+            environment.isParallelCall = idx > 0
             return [key, await evaluate(expr.lhs[entry.exprIndex][1], context, env)];
         }));
 
@@ -1502,7 +1501,6 @@ var jsonata = (function() {
                 validatedArgs = validateArguments(proc.signature, args, input);
             }
 
-            //console.dir({ proc, args })
             if (isLambda(proc)) {
                 result = await applyProcedure(proc, validatedArgs);
             } else if (proc && proc._jsonata_function === true) {
@@ -1860,6 +1858,7 @@ var jsonata = (function() {
             },
             timestamp: enclosingEnvironment ? enclosingEnvironment.timestamp : null,
             async: enclosingEnvironment ? enclosingEnvironment.async : false,
+            isParallelCall: enclosingEnvironment ? enclosingEnvironment.isParallelCall : false,
             global: enclosingEnvironment ? enclosingEnvironment.global : {
                 ancestry: [ null ]
             }

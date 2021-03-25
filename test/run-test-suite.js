@@ -102,7 +102,7 @@ describe("JSONata Test Suite", () => {
                         }
                     }
                     // If we managed to compile the expression...
-                    if (expr && testcase.depth === undefined) {
+                    if (expr) {
                         // Load the input data set.  First, check to see if the test case defines its own input
                         // data (testcase.data).  If not, then look for a dataset number.  If it is -1, then that
                         // means there is no data (so use undefined).  If there is a dataset number, look up the
