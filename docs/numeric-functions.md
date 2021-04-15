@@ -29,7 +29,7 @@ If `number` is not specified (i.e. this function is invoked with no arguments), 
 
 __Examples__  
 - `$abs(5)` => `5`  
-- `$abs(-5)` => `-5`
+- `$abs(-5)` => `5`
 
 ## `$floor()`
 __Signature:__ `$floor(number)`
