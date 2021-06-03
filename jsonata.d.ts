@@ -13,6 +13,10 @@ declare namespace jsonata {
     name?: string;
     procedure?: ExprNode;
     steps?: ExprNode[];
+    expressions?: ExprNode[];
+    stages?: ExprNode[];
+    lhs?: ExprNode;
+    rhs?: ExprNode;
   }
 
   interface JsonataError extends Error {
