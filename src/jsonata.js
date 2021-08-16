@@ -219,7 +219,8 @@ var jsonata = (function() {
         }
 
         if(expr.keepSingletonArray) {
-            if(!isSequence(resultSequence)) {
+            // if the array is explicitly constructed in the expression and marked to promote singleton sequences to array
+            if(Array.isArray(resultSequence) && resultSequence.cons && !resultSequence.sequence) {
                 resultSequence = createSequence(resultSequence);
             }
             resultSequence.keepSingleton = true;

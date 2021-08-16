@@ -1,0 +1,68 @@
+[
+    {
+        "expr": "$.[value,epochSeconds][]",
+        "data": [
+            {
+                "epochSeconds": 1578381600,
+                "value": 3
+            },
+            {
+                "epochSeconds": 1578381700,
+                "value": 5
+            }
+        ],
+        "bindings": {},
+        "result": [
+            [3, 1578381600],
+            [5, 1578381700]
+        ]
+    },
+    {
+        "expr": "$.[value,epochSeconds][]",
+        "data": [
+            {
+                "epochSeconds": 1578381600,
+                "value": 3
+            }
+        ],
+        "bindings": {},
+        "result": [
+            [3, 1578381600]
+        ]
+    },
+    {
+        "expr": "$.[value,epochSeconds]",
+        "data": [
+            {
+                "epochSeconds": 1578381600,
+                "value": 3
+            }
+        ],
+        "bindings": {},
+        "result": [3, 1578381600]
+    },
+    {
+        "expr": "singleArray",
+        "data": {
+            "singleArray": [{"foo":"bar"}]
+        },
+        "bindings": {},
+        "result": [
+            {
+                "foo": "bar"
+            }
+        ]
+    },
+    {
+        "expr": "singleArray[]",
+        "data": {
+            "singleArray": [{"foo":"bar"}]
+        },
+        "bindings": {},
+        "result": [
+            {
+                "foo": "bar"
+            }
+        ]
+    }
+]
