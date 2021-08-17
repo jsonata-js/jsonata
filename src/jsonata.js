@@ -907,6 +907,10 @@ var jsonata = (function() {
         if (!Array.isArray(input)) {
             input = createSequence(input);
         }
+        // if the array is empty, add an undefined entry to enable literal JSON object to be generated
+        if (input.length === 0) {
+            input.push(undefined);
+        }
 
         for(var itemIndex = 0; itemIndex < input.length; itemIndex++) {
             var item = input[itemIndex];
