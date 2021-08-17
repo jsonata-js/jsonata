@@ -1,0 +1,42 @@
+[
+    {
+        "expr": "{'fgFoo:0:hausnummer': {'type': 'de.example.api.PossibleValuesList', 'value': [{'label': '', 'value': ''}] }}",
+        "data": [],
+        "result": {
+            "fgFoo:0:hausnummer": {
+                "type": "de.example.api.PossibleValuesList",
+                "value": [{"label": "", "value": ""}]
+            }
+        }
+    },
+    {
+        "expr": "{'fgFoo:0:hausnummer': {'type': 'de.example.api.PossibleValuesList', 'value': [{'label': '', 'value': ''}] }}",
+        "data": [[]],
+        "result": {
+            "fgFoo:0:hausnummer": {
+                "type": "de.example.api.PossibleValuesList",
+                "value": [{"label": "", "value": ""}]
+            }
+        }
+    },
+    {
+        "expr": "{'fgFoo:0:hausnummer': {'type': 'de.example.api.PossibleValuesList', 'value': [{'label': '', 'value': ''}] }}",
+        "data": [[[]]],
+        "result": {
+            "fgFoo:0:hausnummer": {
+                "type": "de.example.api.PossibleValuesList",
+                "value": [{"label": "", "value": ""}]
+            }
+        }
+    },
+    {
+        "expr": "{'fgFoo:0:hausnummer': {'type': 'de.example.api.PossibleValuesList', 'value': [{'label': '', 'value': ''}] }}",
+        "data": {},
+        "result": {
+            "fgFoo:0:hausnummer": {
+                "type": "de.example.api.PossibleValuesList",
+                "value": [{"label": "", "value": ""}]
+            }
+        }
+    }
+]
