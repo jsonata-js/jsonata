@@ -597,6 +597,9 @@ var jsonata = (function() {
      */
     function evaluateWildcard(expr, input) {
         var results = createSequence();
+        if (Array.isArray(input) && input.outerWrapper && input.length > 0) {
+            input = input[0];
+        }
         if (input !== null && typeof input === 'object') {
             Object.keys(input).forEach(function (key) {
                 var value = input[key];
