@@ -1,3 +1,9 @@
+#### 1.8.5 Maintenance Release
+
+- Fix regression with singleton sequence of array type (issue #462)
+- Correctly handle empty array input to group expression (issue #527)
+- Fix bug with outer array when evaluating wildcard (issue #495)
+
 #### 1.8.4 Maintenance Release
 
 - Fix bug in `$eval` when second arg is an empty array (issue #463)
