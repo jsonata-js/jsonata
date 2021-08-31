@@ -48,5 +48,6 @@ function parseArgs() {
 }
 
 const { expression, object } = parseArgs();
+const result = jsonata(expression).evaluate(object);
 // eslint-disable-next-line no-console
-console.log(jsonata(expression).evaluate(object));
+console.log(JSON.stringify(result, null, 2));
