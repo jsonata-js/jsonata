@@ -1,8 +1,8 @@
 language: node_js
 node_js:
+- '16'
+- '14'
 - '12'
-- '10'
-- '8'
 after_success:
 - npm run coveralls
 jobs:
@@ -17,7 +17,7 @@ jobs:
     - cd website && npm install && GIT_USER="${GH_NAME}" npm run publish-gh-pages
   - stage: npm release
     if: branch = master AND repo = jsonata-js/jsonata
-    node_js: '10'
+    node_js: '14'
     script: echo "Deploying to npm..."
     deploy:
       provider: npm
