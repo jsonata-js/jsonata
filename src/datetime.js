@@ -612,7 +612,7 @@ const dateTime = (function () {
                             def.integerFormat.mandatoryDigits = def.width.min;
                         }
                     }
-                    if (def.component === 'Y') {
+                    if ('YMD'.indexOf(def.component) !== -1) {
                         // §9.8.4.4
                         def.n = -1;
                         if (def.width && def.width.max !== undefined) {
