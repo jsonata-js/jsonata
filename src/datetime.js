@@ -1025,8 +1025,12 @@ const dateTime = (function () {
                 return res;
             });
         } else { // type === 'integer'
+            // MYTODO
+            // It seems that _formatInteger accounts for mandatoryDigits but here it does not
+            // Note, syntax based on https://www.w3.org/TR/xpath-functions-31/#date-time-examples
             matcher.type = 'integer';
             const isUpper = formatSpec.case === tcase.UPPER;
+            const mandatoryDigits = formatSpec.mandatoryDigits && formatSpec.mandatoryDigits > 0 ? formatSpec.mandatoryDigits.toString() : '+';
             switch (formatSpec.primary) {
                 case formats.LETTERS:
                     matcher.regex = isUpper ? '[A-Z]+' : '[a-z]+';
@@ -1047,7 +1051,7 @@ const dateTime = (function () {
                     };
                     break;
                 case formats.DECIMAL:
-                    matcher.regex = '[0-9]+';
+                    matcher.regex = `[0-9]{${mandatoryDigits}}`;
                     if (formatSpec.ordinal) {
                         // ordinals
                         matcher.regex += '(?:th|st|nd|rd)';
