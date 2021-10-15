@@ -1028,7 +1028,7 @@ const dateTime = (function () {
         } else { // type === 'integer'
             matcher.type = 'integer';
             const isUpper = formatSpec.case === tcase.UPPER;
-            const occurrences = formatSpec.n && formatSpec.n > 1 ? `{${formatSpec.n}}` : '+';
+            const occurrences = formatSpec.n && formatSpec.n > 0 ? `{${formatSpec.n}}` : '+';
             switch (formatSpec.primary) {
                 case formats.LETTERS:
                     matcher.regex = isUpper ? '[A-Z]+' : '[a-z]+';
