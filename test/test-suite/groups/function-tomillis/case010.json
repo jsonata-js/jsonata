@@ -1,5 +1,5 @@
 {
-    "expr": "$toMillis(\"201802\", \"[Y1111][M11]\")",
+    "expr": "$toMillis(\"201802\", \"[Y0001][M01]\")",
     "dataset": "dataset5",
     "bindings": {},
     "result": 1517443200000
