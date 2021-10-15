@@ -1,0 +1,6 @@
+{
+    "expr": "$toMillis(\"201802\", \"[Y,*-4][M01]\")",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": 1517443200000
+}
