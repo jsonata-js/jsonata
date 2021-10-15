@@ -983,6 +983,7 @@ const dateTime = (function () {
                         return offsetHours * 60 + offsetMinutes;
                     };
                 } else if (part.integerFormat) {
+                    part.integerFormat.n = part.n;
                     res = generateRegex(part.integerFormat);
                 } else {
                     // must be a month or day name
@@ -1030,7 +1031,11 @@ const dateTime = (function () {
             // Note, syntax based on https://www.w3.org/TR/xpath-functions-31/#date-time-examples
             matcher.type = 'integer';
             const isUpper = formatSpec.case === tcase.UPPER;
-            const occurrences = formatSpec.mandatoryDigits && formatSpec.mandatoryDigits > 0 ? `{${formatSpec.mandatoryDigits}}` : '+';
+            // const mandatoryDigits = formatSpec.mandatoryDigits && formatSpec.mandatoryDigits > 0 ? formatSpec.mandatoryDigits : 0;
+            // const optionalDigits = formatSpec.optionalDigits && formatSpec.optionalDigits > 0 ? formatSpec.optionalDigits : 0;
+            // const totalDigits = mandatoryDigits + optionalDigits;
+            // eslint-disable-next-line no-unused-vars
+            const occurrences = formatSpec.n && formatSpec.n > 1 ? `{${formatSpec.n}}` : '+';
             switch (formatSpec.primary) {
                 case formats.LETTERS:
                     matcher.regex = isUpper ? '[A-Z]+' : '[a-z]+';
