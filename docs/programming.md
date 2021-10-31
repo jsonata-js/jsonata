@@ -48,7 +48,29 @@ The expression `predicate` is evaluated.  If its effective boolean value (see de
 
 __Examples__
 
-TBD
+<div class="jsonata-ex">
+  <div>Account.Order.Product.{
+    `Product Name`: $.Price > 100 ? "Premium" : "Basic"
+}</div>
+  <div>[
+  {
+    "Bowler Hat": "Basic"
+  },
+  {
+    "Trilby hat": "Basic"
+  },
+  {
+    "Bowler Hat": "Basic"
+  },
+  {
+    "Cloak": "Premium"
+  }
+]</div>
+</div>
+
+
+
+
 
 ## Variables
 
