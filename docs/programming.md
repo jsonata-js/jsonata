@@ -68,10 +68,6 @@ __Examples__
 ]</div>
 </div>
 
-
-
-
-
 ## Variables
 
 Any name that starts with a dollar '$' is a variable.  A variable is a named reference to a value.  The value can be one of any type in the language's [type system](processing#the-jsonata-type-system).
