@@ -922,7 +922,7 @@ var jsonata = (function() {
                 var pair = expr.lhs[pairIndex];
                 var key = yield * evaluate(pair[0], reduce ? item['@'] : item, env);
                 // key has to be a string
-                if (typeof  key !== 'string') {
+                if (typeof  key !== 'string' && key !== undefined) {
                     throw {
                         code: "T1003",
                         stack: (new Error()).stack,
@@ -930,6 +930,7 @@ var jsonata = (function() {
                         value: key
                     };
                 }
+
                 var entry = {data: item, exprIndex: pairIndex};
                 if (groups.hasOwnProperty(key)) {
                     // a value already exists in this slot
@@ -964,7 +965,7 @@ var jsonata = (function() {
                 env = createFrameFromTuple(environment, tuple);
             }
             var value = yield * evaluate(expr.lhs[entry.exprIndex][1], context, env);
-            if(typeof value !== 'undefined') {
+            if(typeof value !== 'undefined' && key !== 'undefined') {
                 result[key] = value;
             }
         }
