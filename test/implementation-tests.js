@@ -847,17 +847,6 @@ describe("Tests that include infinite recursion", () => {
     });
 });
 
-describe("Tests converting an empty array", () => {
-    // When converting an empty array of API response to an object with JSONata
-    // the library should return an empty object instead of throwing an error
-    // https://github.com/jsonata-js/jsonata/issues/547.
-    it('should return empty object', () => {
-        var expr = jsonata("$${id:{'label':label,'value':value}}");
-        var result = expr.evaluate([]);
-        expect(result).to.deep.equal({});
-    });
-});
-
 /**
  * Protect the process/browser from a runnaway expression
  * i.e. Infinite loop (tail recursion), or excessive stack growth
