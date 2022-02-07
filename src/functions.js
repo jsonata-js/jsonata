@@ -581,7 +581,7 @@ const functions = (() => {
                 // Simply doing `new Buffer` at this point causes Browserify to pull
                 // in the entire Buffer browser library, which is large and unnecessary.
                 // Using `global.Buffer` defeats this.
-                return new global.Buffer(str, 'base64').toString('binary');
+                return new global.Buffer.from(str, 'base64').toString('binary'); // eslint-disable-line new-cap
             };
         return atob(str);
     }
