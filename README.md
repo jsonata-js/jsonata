@@ -64,7 +64,6 @@ In a browser:
 - JSONata [documentation](http://docs.jsonata.org/)
 - [JavaScript API](http://docs.jsonata.org/embedding-extending)
 - [Intro talk](https://www.youtube.com/watch?v=TDWf6R8aqDo) at London Node User Group
-- JSONata [tech talk](https://www.youtube.com/watch?v=ZRtlkIj0uDY) 
 
 ## Contributing
 
