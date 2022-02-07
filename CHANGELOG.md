@@ -1,3 +1,9 @@
+#### 1.8.6 Maintenance Release
+
+- Fix bug in date/time picture string. Width formatting is not respected without a separator (issue #546)
+- Fix error when converting empty array to an object (issue #547)
+- Fix Buffer deprecation warning (PR #560)
+
 #### 1.8.5 Maintenance Release
 
 - Fix regression with singleton sequence of array type (issue #462)
