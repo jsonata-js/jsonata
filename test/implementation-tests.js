@@ -347,7 +347,7 @@ describe("Tests that bind Javascript functions", () => {
                 expr.evaluate({});
             })
                 .to.throw(DOMException)
-                .to.deep.contain({ message: 'Here is my message', position: 12, token: 'throwDomEx' });
+                .to.deep.contain({ message: 'Here is my message', position: 11, token: 'throwDomEx' });
         });
     });
 
@@ -557,7 +557,7 @@ describe("Tests that bind Javascript functions", () => {
             var result = expr.evaluate();
             var expected = [true, false];
             expect(result).to.deep.equal(expected);
-        })
+        });
 
     });
 });
@@ -736,7 +736,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
                     expr.evaluate();
                 })
                     .to.throw()
-                    .to.deep.contain({ position: 7, code: "D3040", token: "match", index: 3, value: -3 });
+                    .to.deep.contain({ position: 6, code: "D3040", token: "match", index: 3, value: -3 });
             });
         });
 
@@ -747,7 +747,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
                     expr.evaluate();
                 })
                     .to.throw()
-                    .to.deep.contain({ position: 7, code: "T0410", token: "match", index: 3, value: null });
+                    .to.deep.contain({ position: 6, code: "T0410", token: "match", index: 3, value: null });
             });
         });
 
@@ -758,7 +758,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
                     expr.evaluate();
                 })
                     .to.throw()
-                    .to.deep.contain({ position: 7, code: "T0410", token: "match", index: 3, value: "2" });
+                    .to.deep.contain({ position: 6, code: "T0410", token: "match", index: 3, value: "2" });
             });
         });
 
@@ -769,7 +769,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
                     expr.evaluate();
                 })
                     .to.throw()
-                    .to.deep.contain({ position: 7, code: "T0410", token: "match", index: 2, value: "ab" });
+                    .to.deep.contain({ position: 6, code: "T0410", token: "match", index: 2, value: "ab" });
             });
         });
 
@@ -780,7 +780,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
                     expr.evaluate();
                 })
                     .to.throw()
-                    .to.deep.contain({ position: 7, code: "T0410", token: "match", index: 2, value: true });
+                    .to.deep.contain({ position: 6, code: "T0410", token: "match", index: 2, value: true });
             });
         });
 
@@ -791,7 +791,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
                     expr.evaluate();
                 })
                     .to.throw()
-                    .to.deep.contain({ position: 7, code: "T0410", token: "match", index: 1, value: 12345 });
+                    .to.deep.contain({ position: 6, code: "T0410", token: "match", index: 1, value: 12345 });
             });
         });
 
@@ -802,7 +802,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
                     expr.evaluate();
                 })
                     .to.throw()
-                    .to.deep.contain({ position: 7, code: "T0410", token: "match", index: 1 });
+                    .to.deep.contain({ position: 6, code: "T0410", token: "match", index: 1 });
             });
         });
     });
@@ -829,7 +829,7 @@ describe("Tests that include infinite recursion", () => {
                 expr.evaluate();
             })
                 .to.throw()
-                .to.deep.contain({ token: "inf", position: 32, code: "U1001" });
+                .to.deep.contain({ token: "inf", position: 31, code: "U1001" });
         });
     });
 
