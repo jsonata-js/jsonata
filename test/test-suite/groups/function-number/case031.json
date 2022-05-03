@@ -1,0 +1,6 @@
+{
+    "expr": "$number('0x12')",
+    "dataset": null,
+    "bindings": {},
+    "result": 18
+}
