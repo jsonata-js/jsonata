@@ -1202,6 +1202,8 @@ const functions = (() => {
             result = arg;
         } else if (typeof arg === 'string' && /^-?[0-9]+(\.[0-9]+)?([Ee][-+]?[0-9]+)?$/.test(arg) && !isNaN(parseFloat(arg)) && isFinite(arg)) {
             result = parseFloat(arg);
+        } else if (typeof arg === 'string' && /^(0[xX][0-9A-Fa-f]+)|(0[oO][0-7]+)|(0[bB][0-1]+)$/.test(arg)) {
+            result = Number(arg);
         } else if (arg === true) {
             // boolean true casts to 1
             result = 1;
