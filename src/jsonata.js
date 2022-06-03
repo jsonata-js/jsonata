@@ -1412,7 +1412,7 @@ var jsonata = (function() {
             throw {
                 code: "T1005",
                 stack: (new Error()).stack,
-                position: expr.position,
+                position: expr.position - 1,
                 token: expr.procedure.steps[0].value
             };
         }
@@ -1447,7 +1447,7 @@ var jsonata = (function() {
         } catch (err) {
             if(!err.position) {
                 // add the position field to the error
-                err.position = expr.position;
+                err.position = expr.position - 1;
             }
             if (!err.token) {
                 // and the function identifier
@@ -1539,7 +1539,7 @@ var jsonata = (function() {
                 if (typeof err.token == 'undefined' && typeof proc.token !== 'undefined') {
                     err.token = proc.token;
                 }
-                err.position = proc.position;
+                err.position = proc.position - 1;
             }
             throw err;
         }
