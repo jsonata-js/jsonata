@@ -1,5 +1,5 @@
 {
-  "name": "jsonata",
+  "name": "@stedi/jsonata",
   "version": "2.0.1",
   "description": "JSON query and transformation language",
   "module": "jsonata.js",
@@ -8,7 +8,11 @@
   "homepage": "http://jsonata.org/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jsonata-js/jsonata.git"
+    "url": "git+https://github.com/Stedi/jsonata.git"
+  },
+  "author": "transformers@stedi.com",
+  "bugs": {
+    "url": "https://github.com/Stedi/jsonata/issues"
   },
   "scripts": {
     "pretest": "npm run lint",
@@ -55,6 +59,9 @@
     "regenerator": "^0.14.4",
     "request": "^2.88.2",
     "uglify-es": "^3.3.10"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
   },
   "engines": {
     "node": ">= 8"
