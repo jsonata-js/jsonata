@@ -1,0 +1,15 @@
+{
+  "expr": "{    \"item\": $map([1, 2], function($number, $index) { { \"number\": $number, \"index\": $index } }).{\"foo\": \"bar\"}}",
+  "data": [1,2,3,4,5],
+  "bindings": {},
+  "result": {
+    "item": [
+      {
+        "foo": "bar"
+      },
+      {
+        "foo": "bar"
+      }
+    ]
+  }
+}
