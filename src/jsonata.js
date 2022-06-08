@@ -34,6 +34,7 @@ var jsonata = (function() {
     var isIterable = utils.isIterable;
     var getFunctionArity = utils.getFunctionArity;
     var isDeepEqual = utils.isDeepEqual;
+    var isArrayOfPrimitives = utils.isArrayOfPrimitives;
 
     // Start of Evaluator code
 
@@ -905,7 +906,7 @@ var jsonata = (function() {
     function* evaluateGroupExpression(expr, input, environment) {
         var result = {};
         var groups = {};
-        var reduce = input && input.tupleStream ? true : false;
+        var reduce = input && (input.tupleStream || input.outerWrapper && Array.isArray(input[0]) && isArrayOfPrimitives(input[0]));
         // group the input sequence by 'key' expression
         if (!Array.isArray(input)) {
             input = createSequence(input);

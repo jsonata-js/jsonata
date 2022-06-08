@@ -42,6 +42,20 @@ const utils = (() => {
     }
 
     /**
+     * Returns true if the arg is an array of primitives
+     * @param {*} arg - the item to test
+     * @returns {boolean} True if arg is an array of primitives
+     */
+    function isArrayOfPrimitives(arg) {
+        var result = false;
+        /* istanbul ignore else */
+        if(Array.isArray(arg)) {
+            result = arg.every(item => item !== null && typeof item !== "object" && typeof item !== "function");
+        }
+        return result;
+    }
+
+    /**
      * Returns true if the arg is an array of numbers
      * @param {*} arg - the item to test
      * @returns {boolean} True if arg is an array of numbers
@@ -200,7 +214,8 @@ const utils = (() => {
         isIterable,
         getFunctionArity,
         isDeepEqual,
-        stringToArray
+        stringToArray,
+        isArrayOfPrimitives
     };
 })();
 
