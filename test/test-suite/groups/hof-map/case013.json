@@ -1,0 +1,13 @@
+{
+  "expr": "$filter([1, 2, 3], function($number) { $number > 1 }).{\"foo\": true}",
+  "data": [1, 2, 3, 4, 5],
+  "bindings": {},
+  "result": [
+      {
+        "foo": true
+      },
+      {
+        "foo": true
+      }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "expr": "{\"item\": $filter([1, 2, 3], function($number) { $number > 1 }).{\"foo\": true}}",
+  "data": [1,2,3,4,5],
+  "bindings": {},
+  "result": {
+    "item": [
+      {
+        "foo": true
+      },
+      {
+        "foo": true
+      }
+    ]
+  }
+}
