@@ -107,9 +107,9 @@ const utils = (() => {
     }
 
     // istanbul ignore next
-    var $Symbol = typeof Symbol === "function" ? Symbol : {};
+    const iteratorSymbol = (typeof Symbol === "function" ? Symbol : {}).iterator || "@@iterator";
     // istanbul ignore next
-    var iteratorSymbol = $Symbol.iterator || "@@iterator";
+    const asyncIteratorSymbol = (typeof Symbol === "function" ? Symbol : {}).asyncIterator || "@@asyncIterator";
 
     /**
      * @param {Object} arg - expression to test
@@ -177,6 +177,33 @@ const utils = (() => {
     }
 
     /**
+     * @param {Object} arg - expression to test
+     * @returns {boolean} - true if it is iterable or asyncIterable
+     */
+    function isAsyncIterable(arg) {
+        return (
+            typeof arg === 'object' &&
+                arg !== null &&
+                asyncIteratorSymbol in arg &&
+                'next' in arg &&
+                typeof arg.next === 'function'
+        );
+    }
+
+    /**
+     * @param {Object} arg - expression to test
+     * @returns {boolean} - true if it is a promise
+     */
+    function isPromise(arg) {
+        return (
+            typeof arg === 'object' &&
+                arg !== null &&
+                'then' in arg &&
+                typeof arg.then === 'function'
+        );
+    }
+
+    /**
      * converts a string to an array of characters
      * @param {string} str - the input string
      * @returns {Array} - the array of characters
@@ -200,7 +227,9 @@ const utils = (() => {
         isIterable,
         getFunctionArity,
         isDeepEqual,
-        stringToArray
+        stringToArray,
+        isAsyncIterable,
+        isPromise
     };
 })();
 
