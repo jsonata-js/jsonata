@@ -1,6 +1,13 @@
 {
   // This is a set of basic and sensible rules that should not change except at major ESLint versions
-  "extends": "eslint:recommended",
+  "extends": [
+    "eslint:recommended",
+    "plugin:promise/recommended"
+  ],
+
+  "parserOptions": {
+    "ecmaVersion": 2018
+  },
 
   // Environments that we run in
   "env": {
@@ -12,7 +19,8 @@
 
   // Extra plugins required
   "plugins": [
-    "ideal" // for tabs in file
+    "ideal", // for tabs in file
+    "promise"
   ],
 
   // Additional rules
