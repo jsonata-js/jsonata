@@ -10,6 +10,7 @@ __Signature:__ `$number(arg)`
 Casts the `arg` parameter to a number using the following casting rules
    - Numbers are unchanged
    - Strings that contain a sequence of characters that represent a legal JSON number are converted to that number
+   - Hexadecimal numbers start with `0x`, Octal numbers with `0o`, binary numbers with `0b`
    - Boolean `true` casts to `1`, Boolean `false` casts to `0`
    - All other values cause an error to be thrown.
 
@@ -17,6 +18,7 @@ If `arg` is not specified (i.e. this function is invoked with no arguments), the
 
 __Examples__  
 - `$number("5")` => `5`  
+- `$number("0x12")` => `0x18`  
 - `["1", "2", "3", "4", "5"].$number()` => `[1, 2, 3, 4, 5]`
 
 
