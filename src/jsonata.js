@@ -1178,7 +1178,7 @@ var jsonata = (function() {
 
         // sort the lhs array
         // use comparator function
-        var comparator = async function(a, b) { 
+        var comparator = async function(a, b) {
             // expr.terms is an array of order-by in priority order
             var comp = 0;
             for(var index = 0; comp === 0 && index < expr.terms.length; index++) {
@@ -1513,6 +1513,9 @@ var jsonata = (function() {
                 result = proc.implementation.apply(focus, validatedArgs);
                 // `proc.implementation` might be a generator function
                 // and `result` might be a generator - if so, yield
+                if (isAsyncIterable(result)) {
+                    result = (await result.next()).value
+                }
                 if (isIterable(result)) {
                     result = result.next().value;
                 }

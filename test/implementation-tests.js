@@ -315,14 +315,14 @@ describe("Tests that bind Javascript functions", () => {
     // causing an unrelated `TypeError` to be thrown instead
     describe("function throws a `DOMException` with a read-only `message` property", function() {
         /**
-         * `DOMException` is not available in our testing environment. Additionally, we can't
-         * just import the `domexception` module since it doesn't work on Node.js v4, which
-         * we still support. So, here's a fake skeleton implementation which has the relevant
-         * qualities we need to reproduce the bug, most importantly a read-only `message`
-         * property
-         * @param {string} message - Error message
-         * @constructor
-         */
+          * `DOMException` is not available in our testing environment. Additionally, we can't
+          * just import the `domexception` module since it doesn't work on Node.js v4, which
+          * we still support. So, here's a fake skeleton implementation which has the relevant
+          * qualities we need to reproduce the bug, most importantly a read-only `message`
+          * property
+          * @param {string} message - Error message
+          * @constructor
+          */
         function DOMException (message) {
             Object.defineProperty(this, "message", {
                 get() {
@@ -429,10 +429,10 @@ describe("Tests that bind Javascript functions", () => {
         it("should return result object", async function() {
             var expr = jsonata(
                 "(" +
-                    "  $firstn := $substr(?, 0, ?);" +
-                    "  $first5 := $firstn(?, 5);" +
-                    '  $first5("Hello World")' +
-                    ")"
+                     "  $firstn := $substr(?, 0, ?);" +
+                     "  $first5 := $firstn(?, 5);" +
+                     '  $first5("Hello World")' +
+                     ")"
             );
             expr.assign("substr", function(str, start, len) {
                 return str.substr(start, len);
@@ -545,10 +545,10 @@ describe("Tests that bind Javascript functions", () => {
 
         it('should be able to return a function from a user-defined function', async () => {
             var expr = jsonata(`
-            (
-              $startsWithHello := $startsWith("Hello");
-              [$startsWithHello("Hello, Bob"), $startsWithHello("Goodbye, Bill")]
-            )`);
+             (
+               $startsWithHello := $startsWith("Hello");
+               [$startsWithHello("Hello, Bob"), $startsWithHello("Goodbye, Bill")]
+             )`);
             expr.registerFunction('startsWith', startsWith);
             var result = await expr.evaluate();
             var expected = [true, false];
@@ -965,13 +965,13 @@ describe("Tests that include infinite recursion", () => {
 });
 
 /**
- * Protect the process/browser from a runnaway expression
- * i.e. Infinite loop (tail recursion), or excessive stack growth
- *
- * @param {Object} expr - expression to protect
- * @param {Number} timeout - max time in ms
- * @param {Number} maxDepth - max stack depth
- */
+  * Protect the process/browser from a runnaway expression
+  * i.e. Infinite loop (tail recursion), or excessive stack growth
+  *
+  * @param {Object} expr - expression to protect
+  * @param {Number} timeout - max time in ms
+  * @param {Number} maxDepth - max stack depth
+  */
 function timeboxExpression(expr, timeout, maxDepth) {
     var depth = 0;
     var time = Date.now();
@@ -981,7 +981,7 @@ function timeboxExpression(expr, timeout, maxDepth) {
             // stack too deep
             throw {
                 message:
-                    "Stack overflow error: Check for non-terminating recursive function.  Consider rewriting as tail-recursive.",
+                     "Stack overflow error: Check for non-terminating recursive function.  Consider rewriting as tail-recursive.",
                 stack: new Error().stack,
                 code: "U1001"
             };
