@@ -1,5 +1,5 @@
 {
-    "expr": "$map([1, 2], function($number, $index) { $number }).{\"foo\": true}",
+    "expr": "$map([1, 2], function($number) { $number }).{\"foo\": true}",
     "data": [1, 2, 3, 4, 5],
     "bindings": {},
     "result": [

@@ -1,14 +1,14 @@
 {
-  "expr": "{    \"item\": $map([1, 2], function($number, $index) { { \"number\": $number, \"index\": $index } }).{\"foo\": \"bar\"}}",
+  "expr": "{\"item\": $map([1, 2], function($number) { $number }).{\"foo\": true}}",
   "data": [1,2,3,4,5],
   "bindings": {},
   "result": {
     "item": [
       {
-        "foo": "bar"
+        "foo": true
       },
       {
-        "foo": "bar"
+        "foo": true
       }
     ]
   }
