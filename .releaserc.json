@@ -5,7 +5,8 @@
       "prerelease": true,
       "range": "1.8.x",
       "channel": "fast"
-    }
+    },
+    {"name": "master"}
   ],
   "plugins": [
     "@semantic-release/commit-analyzer",
