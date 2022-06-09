@@ -121,6 +121,7 @@ const utils = (() => {
             arg !== null &&
             iteratorSymbol in arg &&
             'next' in arg &&
+            // istanbul ignore next
             typeof arg.next === 'function'
         );
     }
@@ -185,7 +186,9 @@ const utils = (() => {
             typeof arg === 'object' &&
                 arg !== null &&
                 asyncIteratorSymbol in arg &&
+                // istanbul ignore next
                 'next' in arg &&
+                // istanbul ignore next
                 typeof arg.next === 'function'
         );
     }
