@@ -119,6 +119,7 @@ const utils = (() => {
             arg !== null &&
             iteratorSymbol in arg &&
             'next' in arg &&
+            // istanbul ignore next
             typeof arg.next === 'function'
         );
     }
