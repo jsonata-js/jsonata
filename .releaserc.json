@@ -1,0 +1,14 @@
+{
+  "branches": [
+    {
+      "name": "stedi-main",
+      "prerelease": true,
+      "range": "1.8.x",
+      "channel": "fast"
+    }
+  ],
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/npm"
+  ]
+}
