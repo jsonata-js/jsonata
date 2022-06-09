@@ -31,7 +31,8 @@
     "cover": "istanbul cover _mocha",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
     "minify": "uglifyjs jsonata.js -o jsonata.min.js --compress --mangle",
-    "minify-es5": "uglifyjs jsonata-es5.js -o jsonata-es5.min.js --compress --mangle"
+    "minify-es5": "uglifyjs jsonata-es5.js -o jsonata-es5.min.js --compress --mangle",
+    "release": "semantic-release"
   },
   "license": "MIT",
   "keywords": [
