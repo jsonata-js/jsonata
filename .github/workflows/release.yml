@@ -16,16 +16,7 @@ jobs:
       - run: npm i
         env:
           GITHUB_TOKEN: ${{secrets.PUBLIC_PACKAGE_GITHUB_TOKEN}}
-      - run: npm run test
-      # - uses: crazy-max/ghaction-import-gpg@v3
-      #   with:
-      #     gpg-private-key: ${{secrets.STEDI_ENGINEERING_PUBLIC_REPO_GPG_PRIVATE_KEY}}
-      #     passphrase: ${{secrets.STEDI_ENGINEERING_PUBLIC_REPO_GPG_PASSPHRASE}}
-      #     git-user-signingkey: true
-      #     git-commit-gpgsign: true
-      #   id: import_gpg
-      # - run: 'echo "email: ${{ steps.import_gpg.outputs.email }}"'
-      #   env: {}
+      - run: npm run test #test command builds JSONata in its posttest script
       - run: npm run release
         env:
           GIT_AUTHOR_NAME: ${{steps.import_gpg.outputs.name}}
