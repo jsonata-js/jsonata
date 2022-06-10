@@ -6,7 +6,10 @@
       "range": "1.8.x",
       "channel": "fast"
     },
-    {"name": "master"}
+    {
+      "name": "master",
+      "release": true
+    }
   ],
   "plugins": [
     "@semantic-release/commit-analyzer",
