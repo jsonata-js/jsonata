@@ -4,7 +4,6 @@
  *   This project is licensed under the MIT License, see LICENSE
  */
 
-const { isPromise } = require('./utils');
 var utils = require('./utils');
 
 const functions = (() => {
@@ -17,6 +16,7 @@ const functions = (() => {
     var isSequence = utils.isSequence;
     var isFunction = utils.isFunction;
     var isLambda = utils.isLambda;
+    var isPromise = utils.isPromise;
     var getFunctionArity = utils.getFunctionArity;
     var deepEquals = utils.isDeepEqual;
     var stringToArray = utils.stringToArray;

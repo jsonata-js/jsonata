@@ -2144,7 +2144,7 @@ var jsonata = (function() {
                 try {
                     it = await evaluate(ast, input, exec_env);
                     // for backwards-compatibility:
-                    return !!callback ? it
+                    return !!callback && it.then ? it
                         .then(res => callback(undefined, res))
                         .catch(err => callback(err, undefined)) 
                     : it;
