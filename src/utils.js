@@ -107,9 +107,9 @@ const utils = (() => {
     }
 
     // istanbul ignore next
-    const iteratorSymbol = (typeof Symbol === "function" ? Symbol : {}).iterator || "@@iterator";
+    var iteratorSymbol = (typeof Symbol === "function" ? Symbol : {}).iterator || "@@iterator";
     // istanbul ignore next
-    const asyncIteratorSymbol = (typeof Symbol === "function" ? Symbol : {}).asyncIterator || "@@asyncIterator";
+    var asyncIteratorSymbol = (typeof Symbol === "function" ? Symbol : {}).asyncIterator || "@@asyncIterator";
 
     /**
      * @param {Object} arg - expression to test

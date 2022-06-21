@@ -1579,7 +1579,7 @@ var jsonata = (function() {
         }
         procedure.apply = async function(self, args) {
             return await apply(procedure, args, input, !!self ? self.environment : environment);
-        }
+        };
         return procedure;
     }
 
