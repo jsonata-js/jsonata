@@ -1736,8 +1736,11 @@ var jsonata = (function() {
             environment: env
         };
         var result = proc.apply(focus, args);
-        if(isIterable(result)) {
+        if (isPromise(result)) {
             result = await result;
+        }
+        if (isIterable(result)) {
+            result = result.next();
         }
         return result;
     }
