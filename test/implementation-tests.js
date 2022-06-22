@@ -554,7 +554,24 @@ describe("Tests that bind Javascript functions", () => {
             var expected = [true, false];
             expect(result).to.deep.equal(expected);
         });
+    });
 
+    describe('User defined higher-order generator functions', () => {
+        var myfunc = function*(arr, fn) {
+            const val = yield* fn(arr);
+            return 2 * val;
+        };
+
+        // FIXME:
+        it('a higher-order generator function will not work', async () => {
+            var expr = jsonata("$myfunc([1,2,3], $sum)");
+            expr.registerFunction('myfunc', myfunc);
+            try {
+                await expr.evaluate();
+            } catch (e) {
+                expect(e.message).to.equal("yield* (intermediate value)(intermediate value) is not iterable");
+            }
+        });
     });
 });
 
