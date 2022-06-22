@@ -556,6 +556,44 @@ describe("Tests that bind Javascript functions", () => {
         });
     });
 
+    describe('User defined generator function', () => {
+        var myAddFunc = function*(val) {
+            yield val + 10;
+        };
+
+        var myArrayFunc = function *() {
+            yield [1,2,3];
+        };
+
+        it('should be able to invoke a generator function returning a simple value', async () => {
+            var expr = jsonata("$myAddFunc(1)");
+            expr.registerFunction('myAddFunc', myAddFunc);
+
+            var result = await expr.evaluate();
+
+            expect(result).to.equal(11);
+        });
+
+        it('should be able to invoke a generator function and map over its return value', async () => {
+            var expr = jsonata("$myArrayFunc().{\"foo\": \"bar\"}");
+            expr.registerFunction('myArrayFunc', myArrayFunc);
+
+            var result = await expr.evaluate();
+
+            expect(result).to.deep.equal([
+                {
+                    "foo": "bar"
+                },
+                {
+                    "foo": "bar"
+                },
+                {
+                    "foo": "bar"
+                }
+            ]);
+        });
+    });
+
     describe('User defined higher-order generator functions', () => {
         var myfunc = function*(arr, fn) {
             const val = yield* fn(arr);
