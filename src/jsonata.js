@@ -32,7 +32,6 @@ var jsonata = (function() {
     var isFunction = utils.isFunction;
     var isLambda = utils.isLambda;
     var isIterable = utils.isIterable;
-    var isAsyncIterable = utils.isAsyncIterable;
     var isPromise = utils.isPromise;
     var getFunctionArity = utils.getFunctionArity;
     var isDeepEqual = utils.isDeepEqual;
@@ -1514,9 +1513,6 @@ var jsonata = (function() {
                 result = proc.implementation.apply(focus, validatedArgs);
                 // `proc.implementation` might be a generator function
                 // and `result` might be a generator - if so, yield
-                if (isAsyncIterable(result)) {
-                    result = (await result.next()).value
-                }
                 if (isIterable(result)) {
                     result = result.next().value;
                 }
@@ -1529,10 +1525,6 @@ var jsonata = (function() {
                 // this is so that functions that return objects containing functions can chain
                 // e.g. await (await $func())
                 result = proc.apply(input, validatedArgs);
-                /* istanbul ignore next */
-                if (isAsyncIterable(result)) {
-                    result = (await result.next()).value
-                }
                 if (isIterable(result)) {
                     result = result.next().value;
                 }
