@@ -7,6 +7,17 @@ var expect = chai.expect;
 var chaiAsPromised = require("chai-as-promised");
 chai.use(chaiAsPromised);
 
+var jsonataWithCallback = function(expr, data, bindings) {
+    return expr.evaluate(data, bindings, function(error, response) {
+        if(error) {
+            // eslint-disable-next-line no-console
+            console.error(error);
+            return;
+        }
+        return response;
+    });
+};
+
 var httpget = function(url) {
     return new Promise(function(resolve, reject) {
         request(url, function(error, response, body) {
@@ -24,7 +35,7 @@ describe('Invoke JSONata with callback', function() {
         it('should return promise to results', function() {
             var expr = jsonata('$httpget("https://api.npmjs.org/downloads/range/2016-09-01:2017-03-31/jsonata").downloads{ $substring(day, 0, 7): $sum(downloads) }');
             expr.assign('httpget', httpget);
-            return expect(expr.evaluate()).to.eventually.deep.equal({
+            return expect(jsonataWithCallback(expr)).to.eventually.deep.equal({
                 '2016-09': 205,
                 '2016-10': 1266,
                 '2016-11': 2783,
@@ -42,8 +53,7 @@ describe('Invoke JSONata with callback - errors', function() {
         it('should throw', function() {
             var expr = jsonata('5 + $httpget("htttttps://api.npmjs.org/downloads/range/2016-09-01:2017-03-31/jsonata")');
             expr.assign('httpget', httpget);
-            return expect(expr.evaluate()).to.be.rejected;
-            //              .to.deep.contain({position: 7, code: 'T0410', token: 'count', index: 2});;
+            return expect(jsonataWithCallback(expr)).to.be.rejected;
         });
 
     });
@@ -52,8 +62,7 @@ describe('Invoke JSONata with callback - errors', function() {
         it('should throw', function() {
             var expr = jsonata('$httpget("htttttps://api.npmjs.org/downloads/range/2016-09-01:2017-03-31/jsonata").downloads{ $substring(day, 0, 7): $sum(downloads) }');
             expr.assign('httpget', httpget);
-            return expect(expr.evaluate()).to.be.rejected;
-            //              .to.deep.contain({position: 7, code: 'T0410', token: 'count', index: 2});;
+            return expect(jsonataWithCallback(expr)).to.be.rejected;
         });
     });
 });
@@ -62,22 +71,22 @@ describe('Invoke JSONata with callback - return values', function() {
     it('should handle an undefined value', function() {
         var data = { value: undefined };
         var expr = jsonata('value');
-        return expect(expr.evaluate(data)).to.eventually.equal(undefined);
+        return expect(jsonataWithCallback(expr, data)).to.eventually.equal(undefined);
     });
     it('should handle a null value', function() {
         var data = { value: null };
         var expr = jsonata('value');
-        return expect(expr.evaluate(data)).to.eventually.equal(null);
+        return expect(jsonataWithCallback(expr, data)).to.eventually.equal(null);
     });
     it('should handle a value', function() {
         var data = { value: 'hello' };
         var expr = jsonata('value');
-        return expect(expr.evaluate(data)).to.eventually.equal('hello');
+        return expect(jsonataWithCallback(expr, data)).to.eventually.equal('hello');
     });
     it('should handle a promise', function() {
         var data = { value: Promise.resolve('hello') };
         var expr = jsonata('value');
-        return expect(expr.evaluate(data)).to.eventually.equal('hello');
+        return expect(jsonataWithCallback(expr, data)).to.eventually.equal('hello');
     });
 });
 

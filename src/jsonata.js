@@ -2132,14 +2132,13 @@ var jsonata = (function() {
                     input.outerWrapper = true;
                 }
 
-                var result, it;
+                var it;
                 try {
                     it = await evaluate(ast, input, exec_env);
-                    // for backwards-compatibility:
-                    return !!callback && it.then ? it
-                        .then(res => callback(undefined, res))
-                        .catch(err => callback(err, undefined)) 
-                    : it;
+                    if (typeof callback === "function") {
+                        callback(null, it);
+                    }
+                    return it;
                 } catch (err) {
                     // insert error message into structure
                     populateMessage(err); // possible side-effects on `err`
