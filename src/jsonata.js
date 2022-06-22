@@ -1525,9 +1525,6 @@ var jsonata = (function() {
                 // this is so that functions that return objects containing functions can chain
                 // e.g. await (await $func())
                 result = proc.apply(input, validatedArgs);
-                if (isIterable(result)) {
-                    result = result.next().value;
-                }
                 if (isPromise(result)) {
                     result = await result;
                 }
@@ -1730,9 +1727,6 @@ var jsonata = (function() {
         var result = proc.apply(focus, args);
         if (isPromise(result)) {
             result = await result;
-        }
-        if (isIterable(result)) {
-            result = result.next();
         }
         return result;
     }
