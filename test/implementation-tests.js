@@ -565,6 +565,37 @@ describe("Tests that bind Javascript functions", () => {
             yield [1,2,3];
         };
 
+        var myObjectFunc = function* () {
+            yield {
+                downloads: [
+                    {
+                        downloads: 1,
+                        day: "2016-09-01",
+                    },
+                    {
+                        downloads: 2,
+                        day: "2016-09-02",
+                    },
+                    {
+                        downloads: 3,
+                        day: "2016-09-03",
+                    },
+                    {
+                        downloads: 1453,
+                        day: "2017-03-10",
+                    },
+                    {
+                        downloads: 1194,
+                        day: "2017-03-11",
+                    },
+                    {
+                        downloads: 988,
+                        day: "2017-03-12",
+                    },
+                ],
+            };
+        };
+
         it('should be able to invoke a generator function returning a simple value', async () => {
             var expr = jsonata("$myAddFunc(1)");
             expr.registerFunction('myAddFunc', myAddFunc);
@@ -574,7 +605,7 @@ describe("Tests that bind Javascript functions", () => {
             expect(result).to.equal(11);
         });
 
-        it('should be able to invoke a generator function and map over its return value', async () => {
+        it('should be able to invoke a generator function and map over its return array value', async () => {
             var expr = jsonata("$myArrayFunc().{\"foo\": \"bar\"}");
             expr.registerFunction('myArrayFunc', myArrayFunc);
 
@@ -591,6 +622,15 @@ describe("Tests that bind Javascript functions", () => {
                     "foo": "bar"
                 }
             ]);
+        });
+
+        it('should be able to invoke a generator function and map over its return object value', async () => {
+            var expr = jsonata("$myObjectFunc().downloads{ $substring(day, 0, 7): $sum(downloads) }");
+            expr.registerFunction('myObjectFunc', myObjectFunc);
+
+            var result = await expr.evaluate();
+
+            expect(result).to.deep.equal({ '2016-09': 6, '2017-03': 3635 });
         });
     });
 
