@@ -346,7 +346,7 @@ const functions = (() => {
 
         var result;
 
-        if (typeof token === 'string') {
+        if (typeof token === 'string' || !token) {
             result = (str.indexOf(token) !== -1);
         } else {
             var matches = await evaluateMatcher(token, str);
