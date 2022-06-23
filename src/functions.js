@@ -348,7 +348,7 @@ const functions = (() => {
 
         if (typeof token === 'string') {
             result = (str.indexOf(token) !== -1);
-        } else {
+        } else if (typeof token === "function") {
             var matches = await evaluateMatcher(token, str);
             result = (typeof matches !== 'undefined');
         }
