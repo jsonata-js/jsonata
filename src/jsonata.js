@@ -32,7 +32,6 @@ var jsonata = (function() {
     var isFunction = utils.isFunction;
     var isLambda = utils.isLambda;
     var isIterable = utils.isIterable;
-    var isAsyncIterable = utils.isAsyncIterable;
     var isPromise = utils.isPromise;
     var getFunctionArity = utils.getFunctionArity;
     var isDeepEqual = utils.isDeepEqual;
@@ -1514,9 +1513,6 @@ var jsonata = (function() {
                 result = proc.implementation.apply(focus, validatedArgs);
                 // `proc.implementation` might be a generator function
                 // and `result` might be a generator - if so, yield
-                if (isAsyncIterable(result)) {
-                    result = (await result.next()).value
-                }
                 if (isIterable(result)) {
                     result = result.next().value;
                 }
@@ -1529,13 +1525,6 @@ var jsonata = (function() {
                 // this is so that functions that return objects containing functions can chain
                 // e.g. await (await $func())
                 result = proc.apply(input, validatedArgs);
-                /* istanbul ignore next */
-                if (isAsyncIterable(result)) {
-                    result = (await result.next()).value
-                }
-                if (isIterable(result)) {
-                    result = result.next().value;
-                }
                 if (isPromise(result)) {
                     result = await result;
                 }
@@ -1579,7 +1568,7 @@ var jsonata = (function() {
         }
         procedure.apply = async function(self, args) {
             return await apply(procedure, args, input, !!self ? self.environment : environment);
-        }
+        };
         return procedure;
     }
 
@@ -1736,7 +1725,7 @@ var jsonata = (function() {
             environment: env
         };
         var result = proc.apply(focus, args);
-        if(isIterable(result)) {
+        if (isPromise(result)) {
             result = await result;
         }
         return result;
@@ -2137,14 +2126,13 @@ var jsonata = (function() {
                     input.outerWrapper = true;
                 }
 
-                var result, it;
+                var it;
                 try {
                     it = await evaluate(ast, input, exec_env);
-                    // for backwards-compatibility:
-                    return !!callback ? it
-                        .then(res => callback(undefined, res))
-                        .catch(err => callback(err, undefined)) 
-                    : it;
+                    if (typeof callback === "function") {
+                        callback(null, it);
+                    }
+                    return it;
                 } catch (err) {
                     // insert error message into structure
                     populateMessage(err); // possible side-effects on `err`

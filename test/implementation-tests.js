@@ -554,7 +554,102 @@ describe("Tests that bind Javascript functions", () => {
             var expected = [true, false];
             expect(result).to.deep.equal(expected);
         });
+    });
 
+    describe('User defined generator function', () => {
+        var myAddFunc = function*(val) {
+            yield val + 10;
+        };
+
+        var myArrayFunc = function *() {
+            yield [1,2,3];
+        };
+
+        var myObjectFunc = function* () {
+            yield {
+                downloads: [
+                    {
+                        downloads: 1,
+                        day: "2016-09-01",
+                    },
+                    {
+                        downloads: 2,
+                        day: "2016-09-02",
+                    },
+                    {
+                        downloads: 3,
+                        day: "2016-09-03",
+                    },
+                    {
+                        downloads: 1453,
+                        day: "2017-03-10",
+                    },
+                    {
+                        downloads: 1194,
+                        day: "2017-03-11",
+                    },
+                    {
+                        downloads: 988,
+                        day: "2017-03-12",
+                    },
+                ],
+            };
+        };
+
+        it('should be able to invoke a generator function returning a simple value', async () => {
+            var expr = jsonata("$myAddFunc(1)");
+            expr.registerFunction('myAddFunc', myAddFunc);
+
+            var result = await expr.evaluate();
+
+            expect(result).to.equal(11);
+        });
+
+        it('should be able to invoke a generator function and map over its return array value', async () => {
+            var expr = jsonata("$myArrayFunc().{\"foo\": \"bar\"}");
+            expr.registerFunction('myArrayFunc', myArrayFunc);
+
+            var result = await expr.evaluate();
+
+            expect(result).to.deep.equal([
+                {
+                    "foo": "bar"
+                },
+                {
+                    "foo": "bar"
+                },
+                {
+                    "foo": "bar"
+                }
+            ]);
+        });
+
+        it('should be able to invoke a generator function and map over its return object value', async () => {
+            var expr = jsonata("$myObjectFunc().downloads{ $substring(day, 0, 7): $sum(downloads) }");
+            expr.registerFunction('myObjectFunc', myObjectFunc);
+
+            var result = await expr.evaluate();
+
+            expect(result).to.deep.equal({ '2016-09': 6, '2017-03': 3635 });
+        });
+    });
+
+    describe('User defined higher-order generator functions', () => {
+        var myfunc = function*(arr, fn) {
+            const val = yield* fn(arr);
+            return 2 * val;
+        };
+
+        // FIXME:
+        it('a higher-order generator function will not work', async () => {
+            var expr = jsonata("$myfunc([1,2,3], $sum)");
+            expr.registerFunction('myfunc', myfunc);
+            try {
+                await expr.evaluate();
+            } catch (e) {
+                expect(e.message).to.equal("yield* (intermediate value)(intermediate value) is not iterable");
+            }
+        });
     });
 });
 
