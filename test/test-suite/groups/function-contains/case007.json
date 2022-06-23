@@ -1,0 +1,6 @@
+{
+  "expr": "$contains(\"Hello World\", undefined)",
+  "dataset": null,
+  "bindings": {},
+  "undefinedResult": true
+}
