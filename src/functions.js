@@ -4,7 +4,6 @@
  *   This project is licensed under the MIT License, see LICENSE
  */
 
-const { isPromise } = require('./utils');
 var utils = require('./utils');
 
 const functions = (() => {

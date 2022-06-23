@@ -1513,9 +1513,6 @@ var jsonata = (function() {
                 result = proc.implementation.apply(focus, validatedArgs);
                 // `proc.implementation` might be a generator function
                 // and `result` might be a generator - if so, yield
-                if (isAsyncIterable(result)) {
-                    result = (await result.next()).value
-                }
                 if (isIterable(result)) {
                     result = result.next().value;
                 }
