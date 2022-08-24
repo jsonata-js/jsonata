@@ -557,8 +557,36 @@ describe("Tests that bind Javascript functions", () => {
             var result = expr.evaluate();
             var expected = [true, false];
             expect(result).to.deep.equal(expected);
-        })
+        });
+    });
+});
 
+describe("Tests that bind variables", () => {
+    describe("Provide variable to JSONata evaluation", function() {
+        it("should return bound variable number", function() {
+            var expr = jsonata("$myVariable");
+            var myVariable = { "foo": "bar" };
+            var result = expr.evaluate(testdata2, { myVariable });
+            expect(result).to.deep.equal({ "foo": "bar" });
+        });
+
+        it("should not mutate bound variable on success", function() {
+            var expr = jsonata("$myVariable");
+            var myVariable = { "foo": "bar" };
+            expr.evaluate(testdata2, { myVariable });
+            expect(myVariable).to.deep.equal({ "foo": "bar" });
+        });
+
+        it("should not mutate bound variable on failure", function() {
+            var expr = jsonata("$myVariable()");
+            var myVariable = { "foo": "bar" };
+            try {
+                expr.evaluate(testdata2, { myVariable });
+            } catch (e) {
+                // ignore the evaluation error
+            }
+            expect(myVariable).to.deep.equal({ "foo": "bar" });
+        });
     });
 });
 
