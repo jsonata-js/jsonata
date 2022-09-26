@@ -1,0 +1,1033 @@
+{
+    "expr": "{\"items\": items#$i.{\"foo\": \"bar\",\"label\": $$.items[$i].label & \" \" & $$.items[text!=\"\" and text!=\"test\"][$i].text}}",
+    "dataset": "items",
+    "bindings": {},
+    "result": {
+      "items": [
+        {
+          "foo": "bar",
+          "label": "label_0 text_0"
+        },
+        {
+          "foo": "bar",
+          "label": "label_1 text_1"
+        },
+        {
+          "foo": "bar",
+          "label": "label_2 text_2"
+        },
+        {
+          "foo": "bar",
+          "label": "label_3 text_3"
+        },
+        {
+          "foo": "bar",
+          "label": "label_4 text_4"
+        },
+        {
+          "foo": "bar",
+          "label": "label_5 text_5"
+        },
+        {
+          "foo": "bar",
+          "label": "label_6 text_6"
+        },
+        {
+          "foo": "bar",
+          "label": "label_7 text_7"
+        },
+        {
+          "foo": "bar",
+          "label": "label_8 text_8"
+        },
+        {
+          "foo": "bar",
+          "label": "label_9 text_9"
+        },
+        {
+          "foo": "bar",
+          "label": "label_10 text_10"
+        },
+        {
+          "foo": "bar",
+          "label": "label_11 text_11"
+        },
+        {
+          "foo": "bar",
+          "label": "label_12 text_12"
+        },
+        {
+          "foo": "bar",
+          "label": "label_13 text_13"
+        },
+        {
+          "foo": "bar",
+          "label": "label_14 text_14"
+        },
+        {
+          "foo": "bar",
+          "label": "label_15 text_15"
+        },
+        {
+          "foo": "bar",
+          "label": "label_16 text_16"
+        },
+        {
+          "foo": "bar",
+          "label": "label_17 text_17"
+        },
+        {
+          "foo": "bar",
+          "label": "label_18 text_18"
+        },
+        {
+          "foo": "bar",
+          "label": "label_19 text_19"
+        },
+        {
+          "foo": "bar",
+          "label": "label_20 text_20"
+        },
+        {
+          "foo": "bar",
+          "label": "label_21 text_21"
+        },
+        {
+          "foo": "bar",
+          "label": "label_22 text_22"
+        },
+        {
+          "foo": "bar",
+          "label": "label_23 text_23"
+        },
+        {
+          "foo": "bar",
+          "label": "label_24 text_24"
+        },
+        {
+          "foo": "bar",
+          "label": "label_25 text_25"
+        },
+        {
+          "foo": "bar",
+          "label": "label_26 text_26"
+        },
+        {
+          "foo": "bar",
+          "label": "label_27 text_27"
+        },
+        {
+          "foo": "bar",
+          "label": "label_28 text_28"
+        },
+        {
+          "foo": "bar",
+          "label": "label_29 text_29"
+        },
+        {
+          "foo": "bar",
+          "label": "label_30 text_30"
+        },
+        {
+          "foo": "bar",
+          "label": "label_31 text_31"
+        },
+        {
+          "foo": "bar",
+          "label": "label_32 text_32"
+        },
+        {
+          "foo": "bar",
+          "label": "label_33 text_33"
+        },
+        {
+          "foo": "bar",
+          "label": "label_34 text_34"
+        },
+        {
+          "foo": "bar",
+          "label": "label_35 text_35"
+        },
+        {
+          "foo": "bar",
+          "label": "label_36 text_36"
+        },
+        {
+          "foo": "bar",
+          "label": "label_37 text_37"
+        },
+        {
+          "foo": "bar",
+          "label": "label_38 text_38"
+        },
+        {
+          "foo": "bar",
+          "label": "label_39 text_39"
+        },
+        {
+          "foo": "bar",
+          "label": "label_40 text_40"
+        },
+        {
+          "foo": "bar",
+          "label": "label_41 text_41"
+        },
+        {
+          "foo": "bar",
+          "label": "label_42 text_42"
+        },
+        {
+          "foo": "bar",
+          "label": "label_43 text_43"
+        },
+        {
+          "foo": "bar",
+          "label": "label_44 text_44"
+        },
+        {
+          "foo": "bar",
+          "label": "label_45 text_45"
+        },
+        {
+          "foo": "bar",
+          "label": "label_46 text_46"
+        },
+        {
+          "foo": "bar",
+          "label": "label_47 text_47"
+        },
+        {
+          "foo": "bar",
+          "label": "label_48 text_48"
+        },
+        {
+          "foo": "bar",
+          "label": "label_49 text_49"
+        },
+        {
+          "foo": "bar",
+          "label": "label_50 text_50"
+        },
+        {
+          "foo": "bar",
+          "label": "label_51 text_51"
+        },
+        {
+          "foo": "bar",
+          "label": "label_52 text_52"
+        },
+        {
+          "foo": "bar",
+          "label": "label_53 text_53"
+        },
+        {
+          "foo": "bar",
+          "label": "label_54 text_54"
+        },
+        {
+          "foo": "bar",
+          "label": "label_55 text_55"
+        },
+        {
+          "foo": "bar",
+          "label": "label_56 text_56"
+        },
+        {
+          "foo": "bar",
+          "label": "label_57 text_57"
+        },
+        {
+          "foo": "bar",
+          "label": "label_58 text_58"
+        },
+        {
+          "foo": "bar",
+          "label": "label_59 text_59"
+        },
+        {
+          "foo": "bar",
+          "label": "label_60 text_60"
+        },
+        {
+          "foo": "bar",
+          "label": "label_61 text_61"
+        },
+        {
+          "foo": "bar",
+          "label": "label_62 text_62"
+        },
+        {
+          "foo": "bar",
+          "label": "label_63 text_63"
+        },
+        {
+          "foo": "bar",
+          "label": "label_64 text_64"
+        },
+        {
+          "foo": "bar",
+          "label": "label_65 text_65"
+        },
+        {
+          "foo": "bar",
+          "label": "label_66 text_66"
+        },
+        {
+          "foo": "bar",
+          "label": "label_67 text_67"
+        },
+        {
+          "foo": "bar",
+          "label": "label_68 text_68"
+        },
+        {
+          "foo": "bar",
+          "label": "label_69 text_69"
+        },
+        {
+          "foo": "bar",
+          "label": "label_70 text_70"
+        },
+        {
+          "foo": "bar",
+          "label": "label_71 text_71"
+        },
+        {
+          "foo": "bar",
+          "label": "label_72 text_72"
+        },
+        {
+          "foo": "bar",
+          "label": "label_73 text_73"
+        },
+        {
+          "foo": "bar",
+          "label": "label_74 text_74"
+        },
+        {
+          "foo": "bar",
+          "label": "label_75 text_75"
+        },
+        {
+          "foo": "bar",
+          "label": "label_76 text_76"
+        },
+        {
+          "foo": "bar",
+          "label": "label_77 text_77"
+        },
+        {
+          "foo": "bar",
+          "label": "label_78 text_78"
+        },
+        {
+          "foo": "bar",
+          "label": "label_79 text_79"
+        },
+        {
+          "foo": "bar",
+          "label": "label_80 text_80"
+        },
+        {
+          "foo": "bar",
+          "label": "label_81 text_81"
+        },
+        {
+          "foo": "bar",
+          "label": "label_82 text_82"
+        },
+        {
+          "foo": "bar",
+          "label": "label_83 text_83"
+        },
+        {
+          "foo": "bar",
+          "label": "label_84 text_84"
+        },
+        {
+          "foo": "bar",
+          "label": "label_85 text_85"
+        },
+        {
+          "foo": "bar",
+          "label": "label_86 text_86"
+        },
+        {
+          "foo": "bar",
+          "label": "label_87 text_87"
+        },
+        {
+          "foo": "bar",
+          "label": "label_88 text_88"
+        },
+        {
+          "foo": "bar",
+          "label": "label_89 text_89"
+        },
+        {
+          "foo": "bar",
+          "label": "label_90 text_90"
+        },
+        {
+          "foo": "bar",
+          "label": "label_91 text_91"
+        },
+        {
+          "foo": "bar",
+          "label": "label_92 text_92"
+        },
+        {
+          "foo": "bar",
+          "label": "label_93 text_93"
+        },
+        {
+          "foo": "bar",
+          "label": "label_94 text_94"
+        },
+        {
+          "foo": "bar",
+          "label": "label_95 text_95"
+        },
+        {
+          "foo": "bar",
+          "label": "label_96 text_96"
+        },
+        {
+          "foo": "bar",
+          "label": "label_97 text_97"
+        },
+        {
+          "foo": "bar",
+          "label": "label_98 text_98"
+        },
+        {
+          "foo": "bar",
+          "label": "label_99 text_99"
+        },
+        {
+          "foo": "bar",
+          "label": "label_100 text_100"
+        },
+        {
+          "foo": "bar",
+          "label": "label_101 text_101"
+        },
+        {
+          "foo": "bar",
+          "label": "label_102 text_102"
+        },
+        {
+          "foo": "bar",
+          "label": "label_103 text_103"
+        },
+        {
+          "foo": "bar",
+          "label": "label_104 text_104"
+        },
+        {
+          "foo": "bar",
+          "label": "label_105 text_105"
+        },
+        {
+          "foo": "bar",
+          "label": "label_106 text_106"
+        },
+        {
+          "foo": "bar",
+          "label": "label_107 text_107"
+        },
+        {
+          "foo": "bar",
+          "label": "label_108 text_108"
+        },
+        {
+          "foo": "bar",
+          "label": "label_109 text_109"
+        },
+        {
+          "foo": "bar",
+          "label": "label_110 text_110"
+        },
+        {
+          "foo": "bar",
+          "label": "label_111 text_111"
+        },
+        {
+          "foo": "bar",
+          "label": "label_112 text_112"
+        },
+        {
+          "foo": "bar",
+          "label": "label_113 text_113"
+        },
+        {
+          "foo": "bar",
+          "label": "label_114 text_114"
+        },
+        {
+          "foo": "bar",
+          "label": "label_115 text_115"
+        },
+        {
+          "foo": "bar",
+          "label": "label_116 text_116"
+        },
+        {
+          "foo": "bar",
+          "label": "label_117 text_117"
+        },
+        {
+          "foo": "bar",
+          "label": "label_118 text_118"
+        },
+        {
+          "foo": "bar",
+          "label": "label_119 text_119"
+        },
+        {
+          "foo": "bar",
+          "label": "label_120 text_120"
+        },
+        {
+          "foo": "bar",
+          "label": "label_121 text_121"
+        },
+        {
+          "foo": "bar",
+          "label": "label_122 text_122"
+        },
+        {
+          "foo": "bar",
+          "label": "label_123 text_123"
+        },
+        {
+          "foo": "bar",
+          "label": "label_124 text_124"
+        },
+        {
+          "foo": "bar",
+          "label": "label_125 text_125"
+        },
+        {
+          "foo": "bar",
+          "label": "label_126 text_126"
+        },
+        {
+          "foo": "bar",
+          "label": "label_127 text_127"
+        },
+        {
+          "foo": "bar",
+          "label": "label_128 text_128"
+        },
+        {
+          "foo": "bar",
+          "label": "label_129 text_129"
+        },
+        {
+          "foo": "bar",
+          "label": "label_130 text_130"
+        },
+        {
+          "foo": "bar",
+          "label": "label_131 text_131"
+        },
+        {
+          "foo": "bar",
+          "label": "label_132 text_132"
+        },
+        {
+          "foo": "bar",
+          "label": "label_133 text_133"
+        },
+        {
+          "foo": "bar",
+          "label": "label_134 text_134"
+        },
+        {
+          "foo": "bar",
+          "label": "label_135 text_135"
+        },
+        {
+          "foo": "bar",
+          "label": "label_136 text_136"
+        },
+        {
+          "foo": "bar",
+          "label": "label_137 text_137"
+        },
+        {
+          "foo": "bar",
+          "label": "label_138 text_138"
+        },
+        {
+          "foo": "bar",
+          "label": "label_139 text_139"
+        },
+        {
+          "foo": "bar",
+          "label": "label_140 text_140"
+        },
+        {
+          "foo": "bar",
+          "label": "label_141 text_141"
+        },
+        {
+          "foo": "bar",
+          "label": "label_142 text_142"
+        },
+        {
+          "foo": "bar",
+          "label": "label_143 text_143"
+        },
+        {
+          "foo": "bar",
+          "label": "label_144 text_144"
+        },
+        {
+          "foo": "bar",
+          "label": "label_145 text_145"
+        },
+        {
+          "foo": "bar",
+          "label": "label_146 text_146"
+        },
+        {
+          "foo": "bar",
+          "label": "label_147 text_147"
+        },
+        {
+          "foo": "bar",
+          "label": "label_148 text_148"
+        },
+        {
+          "foo": "bar",
+          "label": "label_149 text_149"
+        },
+        {
+          "foo": "bar",
+          "label": "label_150 text_150"
+        },
+        {
+          "foo": "bar",
+          "label": "label_151 text_151"
+        },
+        {
+          "foo": "bar",
+          "label": "label_152 text_152"
+        },
+        {
+          "foo": "bar",
+          "label": "label_153 text_153"
+        },
+        {
+          "foo": "bar",
+          "label": "label_154 text_154"
+        },
+        {
+          "foo": "bar",
+          "label": "label_155 text_155"
+        },
+        {
+          "foo": "bar",
+          "label": "label_156 text_156"
+        },
+        {
+          "foo": "bar",
+          "label": "label_157 text_157"
+        },
+        {
+          "foo": "bar",
+          "label": "label_158 text_158"
+        },
+        {
+          "foo": "bar",
+          "label": "label_159 text_159"
+        },
+        {
+          "foo": "bar",
+          "label": "label_160 text_160"
+        },
+        {
+          "foo": "bar",
+          "label": "label_161 text_161"
+        },
+        {
+          "foo": "bar",
+          "label": "label_162 text_162"
+        },
+        {
+          "foo": "bar",
+          "label": "label_163 text_163"
+        },
+        {
+          "foo": "bar",
+          "label": "label_164 text_164"
+        },
+        {
+          "foo": "bar",
+          "label": "label_165 text_165"
+        },
+        {
+          "foo": "bar",
+          "label": "label_166 text_166"
+        },
+        {
+          "foo": "bar",
+          "label": "label_167 text_167"
+        },
+        {
+          "foo": "bar",
+          "label": "label_168 text_168"
+        },
+        {
+          "foo": "bar",
+          "label": "label_169 text_169"
+        },
+        {
+          "foo": "bar",
+          "label": "label_170 text_170"
+        },
+        {
+          "foo": "bar",
+          "label": "label_171 text_171"
+        },
+        {
+          "foo": "bar",
+          "label": "label_172 text_172"
+        },
+        {
+          "foo": "bar",
+          "label": "label_173 text_173"
+        },
+        {
+          "foo": "bar",
+          "label": "label_174 text_174"
+        },
+        {
+          "foo": "bar",
+          "label": "label_175 text_175"
+        },
+        {
+          "foo": "bar",
+          "label": "label_176 text_176"
+        },
+        {
+          "foo": "bar",
+          "label": "label_177 text_177"
+        },
+        {
+          "foo": "bar",
+          "label": "label_178 text_178"
+        },
+        {
+          "foo": "bar",
+          "label": "label_179 text_179"
+        },
+        {
+          "foo": "bar",
+          "label": "label_180 text_180"
+        },
+        {
+          "foo": "bar",
+          "label": "label_181 text_181"
+        },
+        {
+          "foo": "bar",
+          "label": "label_182 text_182"
+        },
+        {
+          "foo": "bar",
+          "label": "label_183 text_183"
+        },
+        {
+          "foo": "bar",
+          "label": "label_184 text_184"
+        },
+        {
+          "foo": "bar",
+          "label": "label_185 text_185"
+        },
+        {
+          "foo": "bar",
+          "label": "label_186 text_186"
+        },
+        {
+          "foo": "bar",
+          "label": "label_187 text_187"
+        },
+        {
+          "foo": "bar",
+          "label": "label_188 text_188"
+        },
+        {
+          "foo": "bar",
+          "label": "label_189 text_189"
+        },
+        {
+          "foo": "bar",
+          "label": "label_190 text_190"
+        },
+        {
+          "foo": "bar",
+          "label": "label_191 text_191"
+        },
+        {
+          "foo": "bar",
+          "label": "label_192 text_192"
+        },
+        {
+          "foo": "bar",
+          "label": "label_193 text_193"
+        },
+        {
+          "foo": "bar",
+          "label": "label_194 text_194"
+        },
+        {
+          "foo": "bar",
+          "label": "label_195 text_195"
+        },
+        {
+          "foo": "bar",
+          "label": "label_196 text_196"
+        },
+        {
+          "foo": "bar",
+          "label": "label_197 text_197"
+        },
+        {
+          "foo": "bar",
+          "label": "label_198 text_198"
+        },
+        {
+          "foo": "bar",
+          "label": "label_199 text_199"
+        },
+        {
+          "foo": "bar",
+          "label": "label_200 text_200"
+        },
+        {
+          "foo": "bar",
+          "label": "label_201 text_201"
+        },
+        {
+          "foo": "bar",
+          "label": "label_202 text_202"
+        },
+        {
+          "foo": "bar",
+          "label": "label_203 text_203"
+        },
+        {
+          "foo": "bar",
+          "label": "label_204 text_204"
+        },
+        {
+          "foo": "bar",
+          "label": "label_205 text_205"
+        },
+        {
+          "foo": "bar",
+          "label": "label_206 text_206"
+        },
+        {
+          "foo": "bar",
+          "label": "label_207 text_207"
+        },
+        {
+          "foo": "bar",
+          "label": "label_208 text_208"
+        },
+        {
+          "foo": "bar",
+          "label": "label_209 text_209"
+        },
+        {
+          "foo": "bar",
+          "label": "label_210 text_210"
+        },
+        {
+          "foo": "bar",
+          "label": "label_211 text_211"
+        },
+        {
+          "foo": "bar",
+          "label": "label_212 text_212"
+        },
+        {
+          "foo": "bar",
+          "label": "label_213 text_213"
+        },
+        {
+          "foo": "bar",
+          "label": "label_214 text_214"
+        },
+        {
+          "foo": "bar",
+          "label": "label_215 text_215"
+        },
+        {
+          "foo": "bar",
+          "label": "label_216 text_216"
+        },
+        {
+          "foo": "bar",
+          "label": "label_217 text_217"
+        },
+        {
+          "foo": "bar",
+          "label": "label_218 text_218"
+        },
+        {
+          "foo": "bar",
+          "label": "label_219 text_219"
+        },
+        {
+          "foo": "bar",
+          "label": "label_220 text_220"
+        },
+        {
+          "foo": "bar",
+          "label": "label_221 text_221"
+        },
+        {
+          "foo": "bar",
+          "label": "label_222 text_222"
+        },
+        {
+          "foo": "bar",
+          "label": "label_223 text_223"
+        },
+        {
+          "foo": "bar",
+          "label": "label_224 text_224"
+        },
+        {
+          "foo": "bar",
+          "label": "label_225 text_225"
+        },
+        {
+          "foo": "bar",
+          "label": "label_226 text_226"
+        },
+        {
+          "foo": "bar",
+          "label": "label_227 text_227"
+        },
+        {
+          "foo": "bar",
+          "label": "label_228 text_228"
+        },
+        {
+          "foo": "bar",
+          "label": "label_229 text_229"
+        },
+        {
+          "foo": "bar",
+          "label": "label_230 text_230"
+        },
+        {
+          "foo": "bar",
+          "label": "label_231 text_231"
+        },
+        {
+          "foo": "bar",
+          "label": "label_232 text_232"
+        },
+        {
+          "foo": "bar",
+          "label": "label_233 text_233"
+        },
+        {
+          "foo": "bar",
+          "label": "label_234 text_234"
+        },
+        {
+          "foo": "bar",
+          "label": "label_235 text_235"
+        },
+        {
+          "foo": "bar",
+          "label": "label_236 text_236"
+        },
+        {
+          "foo": "bar",
+          "label": "label_237 text_237"
+        },
+        {
+          "foo": "bar",
+          "label": "label_238 text_238"
+        },
+        {
+          "foo": "bar",
+          "label": "label_239 text_239"
+        },
+        {
+          "foo": "bar",
+          "label": "label_240 text_240"
+        },
+        {
+          "foo": "bar",
+          "label": "label_241 text_241"
+        },
+        {
+          "foo": "bar",
+          "label": "label_242 text_242"
+        },
+        {
+          "foo": "bar",
+          "label": "label_243 text_243"
+        },
+        {
+          "foo": "bar",
+          "label": "label_244 text_244"
+        },
+        {
+          "foo": "bar",
+          "label": "label_245 text_245"
+        },
+        {
+          "foo": "bar",
+          "label": "label_246 text_246"
+        },
+        {
+          "foo": "bar",
+          "label": "label_247 text_247"
+        },
+        {
+          "foo": "bar",
+          "label": "label_248 text_248"
+        },
+        {
+          "foo": "bar",
+          "label": "label_249 text_249"
+        },
+        {
+          "foo": "bar",
+          "label": "label_250 text_250"
+        },
+        {
+          "foo": "bar",
+          "label": "label_251 text_251"
+        },
+        {
+          "foo": "bar",
+          "label": "label_252 text_252"
+        },
+        {
+          "foo": "bar",
+          "label": "label_253 text_253"
+        },
+        {
+          "foo": "bar",
+          "label": "label_254 text_254"
+        },
+        {
+          "foo": "bar",
+          "label": "label_255 text_255"
+        }
+      ]
+    }
+}

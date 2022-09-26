@@ -16,7 +16,7 @@ const functions = (() => {
     var isSequence = utils.isSequence;
     var isFunction = utils.isFunction;
     var isLambda = utils.isLambda;
-    var isIterable = utils.isIterable;
+    var isPromise = utils.isPromise;
     var getFunctionArity = utils.getFunctionArity;
     var deepEquals = utils.isDeepEqual;
     var stringToArray = utils.stringToArray;
@@ -317,10 +317,10 @@ const functions = (() => {
      * @param {string} str - the string to match against
      * @returns {object} - structure that represents the match(es)
      */
-    function* evaluateMatcher(matcher, str) {
+    async function evaluateMatcher(matcher, str) {
         var result = matcher.apply(this, [str]); // eslint-disable-line no-useless-call
-        if(isIterable(result)) {
-            result = yield * result;
+        if(isPromise(result)) {
+            result = await result;
         }
         if(result && !(typeof result.start === 'number' || result.end === 'number' || Array.isArray(result.groups) || isFunction(result.next))) {
             // the matcher function didn't return the correct structure
@@ -338,7 +338,7 @@ const functions = (() => {
      * @param {String} token - substring or regex to find
      * @returns {Boolean} - true if str contains token
      */
-    function* contains(str, token) {
+    async function contains(str, token) {
         // undefined inputs always return undefined
         if (typeof str === 'undefined') {
             return undefined;
@@ -349,7 +349,7 @@ const functions = (() => {
         if (typeof token === 'string') {
             result = (str.indexOf(token) !== -1);
         } else {
-            var matches = yield* evaluateMatcher(token, str);
+            var matches = await evaluateMatcher(token, str);
             result = (typeof matches !== 'undefined');
         }
 
@@ -363,7 +363,7 @@ const functions = (() => {
      * @param {Integer} [limit] - max number of matches to return
      * @returns {Array} The array of match objects
      */
-    function* match(str, regex, limit) {
+    async function match(str, regex, limit) {
         // undefined inputs always return undefined
         if (typeof str === 'undefined') {
             return undefined;
@@ -383,7 +383,7 @@ const functions = (() => {
 
         if (typeof limit === 'undefined' || limit > 0) {
             var count = 0;
-            var matches = yield* evaluateMatcher(regex, str);
+            var matches = await evaluateMatcher(regex, str);
             if (typeof matches !== 'undefined') {
                 while (typeof matches !== 'undefined' && (typeof limit === 'undefined' || count < limit)) {
                     result.push({
@@ -391,7 +391,7 @@ const functions = (() => {
                         index: matches.start,
                         groups: matches.groups
                     });
-                    matches = yield* evaluateMatcher(matches.next);
+                    matches = await evaluateMatcher(matches.next);
                     count++;
                 }
             }
@@ -408,7 +408,7 @@ const functions = (() => {
      * @param {Integer} [limit] - max number of matches to return
      * @returns {Array} The array of match objects
      */
-    function* replace(str, pattern, replacement, limit) {
+    async function replace(str, pattern, replacement, limit) {
         // undefined inputs always return undefined
         if (typeof str === 'undefined') {
             return undefined;
@@ -506,13 +506,13 @@ const functions = (() => {
                 }
                 result += str.substring(position);
             } else {
-                var matches = yield* evaluateMatcher(pattern, str);
+                var matches = await evaluateMatcher(pattern, str);
                 if (typeof matches !== 'undefined') {
                     while (typeof matches !== 'undefined' && (typeof limit === 'undefined' || count < limit)) {
                         result += str.substring(position, matches.start);
                         var replacedWith = replacer.apply(self, [matches]);
-                        if (isIterable(replacedWith)) {
-                            replacedWith = yield* replacedWith;
+                        if (isPromise(replacedWith)) {
+                            replacedWith = await replacedWith;
                         }
                         // check replacedWith is a string
                         if (typeof replacedWith === 'string') {
@@ -527,7 +527,7 @@ const functions = (() => {
                         }
                         position = matches.start + matches.match.length;
                         count++;
-                        matches = yield* evaluateMatcher(matches.next);
+                        matches = await evaluateMatcher(matches.next);
                     }
                     result += str.substring(position);
                 } else {
@@ -697,7 +697,7 @@ const functions = (() => {
      * @param {Integer} [limit] - max number of substrings
      * @returns {Array} The array of string
      */
-    function* split(str, separator, limit) {
+    async function split(str, separator, limit) {
         // undefined inputs always return undefined
         if (typeof str === 'undefined') {
             return undefined;
@@ -720,13 +720,13 @@ const functions = (() => {
                 result = str.split(separator, limit);
             } else {
                 var count = 0;
-                var matches = yield* evaluateMatcher(separator, str);
+                var matches = await evaluateMatcher(separator, str);
                 if (typeof matches !== 'undefined') {
                     var start = 0;
                     while (typeof matches !== 'undefined' && (typeof limit === 'undefined' || count < limit)) {
                         result.push(str.substring(start, matches.start));
                         start = matches.end;
-                        matches = yield* evaluateMatcher(matches.next);
+                        matches = await evaluateMatcher(matches.next);
                         count++;
                     }
                     if (typeof limit === 'undefined' || count < limit) {
@@ -1471,7 +1471,7 @@ const functions = (() => {
      * @param {Function} func - function to apply
      * @returns {Array} Map array
      */
-    function* map(arr, func) {
+    async function map(arr, func) {
         // undefined inputs always return undefined
         if (typeof arr === 'undefined') {
             return undefined;
@@ -1482,7 +1482,7 @@ const functions = (() => {
         for (var i = 0; i < arr.length; i++) {
             var func_args = hofFuncArgs(func, arr[i], i, arr);
             // invoke func
-            var res = yield* func.apply(this, func_args);
+            var res = await func.apply(this, func_args);
             if (typeof res !== 'undefined') {
                 result.push(res);
             }
@@ -1497,7 +1497,7 @@ const functions = (() => {
      * @param {Function} func - predicate function
      * @returns {Array} Map array
      */
-    function* filter(arr, func) { // eslint-disable-line require-yield
+    async function filter(arr, func) {
         // undefined inputs always return undefined
         if (typeof arr === 'undefined') {
             return undefined;
@@ -1509,7 +1509,7 @@ const functions = (() => {
             var entry = arr[i];
             var func_args = hofFuncArgs(func, entry, i, arr);
             // invoke func
-            var res = yield* func.apply(this, func_args);
+            var res = await func.apply(this, func_args);
             if (boolean(res)) {
                 result.push(entry);
             }
@@ -1525,7 +1525,7 @@ const functions = (() => {
      * @param {Function} [func] - predicate function
      * @returns {*} Matching element
      */
-    function* single(arr, func) { // eslint-disable-line require-yield
+    async function single(arr, func) {
         // undefined inputs always return undefined
         if (typeof arr === 'undefined') {
             return undefined;
@@ -1540,7 +1540,7 @@ const functions = (() => {
             if (typeof func !== 'undefined') {
                 var func_args = hofFuncArgs(func, entry, i, arr);
                 // invoke func
-                var res = yield* func.apply(this, func_args);
+                var res = await func.apply(this, func_args);
                 positiveResult = boolean(res);
             }
             if (positiveResult) {
@@ -1599,7 +1599,7 @@ const functions = (() => {
      * @param {Object} init - Initial value
      * @returns {*} Result
      */
-    function* foldLeft(sequence, func, init) {
+    async function foldLeft(sequence, func, init) {
         // undefined inputs always return undefined
         if (typeof sequence === 'undefined') {
             return undefined;
@@ -1633,7 +1633,7 @@ const functions = (() => {
             if (arity >= 4) {
                 args.push(sequence);
             }
-            result = yield* func.apply(this, args);
+            result = await func.apply(this, args);
             index++;
         }
 
@@ -1805,13 +1805,13 @@ const functions = (() => {
      * @param {*} func - the function to apply to each key/value pair
      * @returns {Array} - the resultant array
      */
-    function* each(obj, func) {
+    async function each(obj, func) {
         var result = createSequence();
 
         for (var key in obj) {
             var func_args = hofFuncArgs(func, obj[key], key, obj);
             // invoke func
-            var val = yield* func.apply(this, func_args);
+            var val = await func.apply(this, func_args);
             if(typeof val !== 'undefined') {
                 result.push(val);
             }
@@ -1896,7 +1896,7 @@ const functions = (() => {
      * @param {*} comparator - comparator function
      * @returns {Array} - sorted array
      */
-    function* sort(arr, comparator) {
+    async function sort(arr, comparator) {
         // undefined inputs always return undefined
         if (typeof arr === 'undefined') {
             return undefined;
@@ -1917,7 +1917,7 @@ const functions = (() => {
                 };
             }
 
-            comp = function* (a, b) {  // eslint-disable-line require-yield
+            comp = async function (a, b) {
                 return a > b;
             };
         } else {
@@ -1925,41 +1925,41 @@ const functions = (() => {
             comp = comparator;
         }
 
-        var merge = function* (l, r) {
-            var merge_iter = function* (result, left, right) {
+        var merge = async function (l, r) {
+            var merge_iter = async function (result, left, right) {
                 if (left.length === 0) {
                     Array.prototype.push.apply(result, right);
                 } else if (right.length === 0) {
                     Array.prototype.push.apply(result, left);
-                } else if (yield* comp(left[0], right[0])) { // invoke the comparator function
+                } else if (await comp(left[0], right[0])) { // invoke the comparator function
                     // if it returns true - swap left and right
                     result.push(right[0]);
-                    yield* merge_iter(result, left, right.slice(1));
+                    await merge_iter(result, left, right.slice(1));
                 } else {
                     // otherwise keep the same order
                     result.push(left[0]);
-                    yield* merge_iter(result, left.slice(1), right);
+                    await merge_iter(result, left.slice(1), right);
                 }
             };
             var merged = [];
-            yield* merge_iter(merged, l, r);
+            await merge_iter(merged, l, r);
             return merged;
         };
 
-        var msort = function* (array) {
+        var msort = async function (array) {
             if (!Array.isArray(array) || array.length <= 1) {
                 return array;
             } else {
                 var middle = Math.floor(array.length / 2);
                 var left = array.slice(0, middle);
                 var right = array.slice(middle);
-                left = yield* msort(left);
-                right = yield* msort(right);
-                return yield* merge(left, right);
+                left = await msort(left);
+                right = await msort(right);
+                return await merge(left, right);
             }
         };
 
-        var result = yield* msort(arr);
+        var result = await msort(arr);
 
         return result;
     }
@@ -2034,14 +2034,14 @@ const functions = (() => {
      * @param {object} func - the predicate function (lambda or native)
      * @returns {object} - sifted object
      */
-    function* sift(arg, func) {
+    async function sift(arg, func) {
         var result = {};
 
         for (var item in arg) {
             var entry = arg[item];
             var func_args = hofFuncArgs(func, entry, item, arg);
             // invoke func
-            var res = yield* func.apply(this, func_args);
+            var res = await func.apply(this, func_args);
             if (boolean(res)) {
                 result[item] = entry;
             }
