@@ -1,0 +1,65 @@
+name: Build and publish JSONata
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x, 14.x, 16.x]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm install
+      - run: npm test
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && github.repository == 'jsonata-js/jsonata' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install and build
+        run: npm install && npm test
+      - name: Publish to NPM
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  documentation:
+    needs: build    
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && github.repository == 'jsonata-js/jsonata' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+      - name: Build documentation
+        run: |
+          cd website
+          npm install
+          npm run build
+      - name: Deploy to GitHub Pages
+        if: success()
+        run: |
+          cd website
+          git config --global user.name "andrew-coleman"
+          git config --global user.email "andrew_coleman@uk.ibm.com"
+          echo "machine github.com login ${GIT_USER} password ${{ secrets.GITHUB_TOKEN }}" > ~/.netrc
+          npm run publish-gh-pages
+        env:
+          GIT_USER: andrew-coleman

@@ -4,9 +4,6 @@ JSON query and transformation language
 
 [![NPM statistics](https://nodei.co/npm/jsonata.png?downloads=true&downloadRank=true)](https://nodei.co/npm/jsonata/)
 
-[![Build Status](https://travis-ci.org/jsonata-js/jsonata.svg)](https://travis-ci.org/jsonata-js/jsonata)
-[![Coverage Status](https://coveralls.io/repos/github/jsonata-js/jsonata/badge.svg?branch=master)](https://coveralls.io/github/jsonata-js/jsonata?branch=master)
-
 Reference implementation of the [JSONata query and transformation language](http://jsonata.org/).
 
 * [JSONata in 5 minutes](https://www.youtube.com/embed/ZBaK40rtIBM)
