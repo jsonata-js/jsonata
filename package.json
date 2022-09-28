@@ -25,7 +25,6 @@
     "lint": "eslint src",
     "doc": "jsdoc --configure jsdoc.json .",
     "cover": "nyc _mocha",
-    "coveralls": "nyc npm run mocha && nyc report --reporter=text-lcov | coveralls",
     "minify": "uglifyjs jsonata.js -o jsonata.min.js --compress --mangle",
     "minify-es5": "uglifyjs jsonata-es5.js -o jsonata-es5.min.js --compress --mangle"
   },
@@ -45,7 +44,6 @@
     "browserify": "^16.5.0",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
-    "coveralls": "^3.0.9",
     "eslint": "8.0.0",
     "eslint-plugin-ideal": "^0.1.3",
     "eslint-plugin-promise": "^6.0.0",
