@@ -30,13 +30,16 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
-          registry-url: 'https://registry.npmjs.org'
       - name: Install and build
         run: npm install && npm test
       - name: Publish to NPM
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        id: npmpub
+        uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+      - if: steps.npmpub.outputs.type != 'none'
+        run: |
+          echo "Version changed: ${{ steps.npmpub.outputs.old-version }} => ${{ steps.npmpub.outputs.version }}"
   documentation:
     needs: build    
     runs-on: ubuntu-latest
