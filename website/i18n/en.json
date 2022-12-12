@@ -227,6 +227,10 @@
         "title": "Using JSONata in a Node application",
         "sidebar_label": "In NodeJS"
       },
+      "version-1.8.0/version-1.8.0-numeric-functions": {
+        "title": "Numeric functions",
+        "sidebar_label": "Numeric Functions"
+      },
       "version-1.8.0/version-1.8.0-object-functions": {
         "title": "Object functions",
         "sidebar_label": "Object Functions"
@@ -234,6 +238,38 @@
       "version-1.8.0/version-1.8.0-path-operators": {
         "title": "Path Operators",
         "sidebar_label": "Path Operators"
+      },
+      "version-2.0.0/version-2.0.0-construction": {
+        "title": "Building result structures",
+        "sidebar_label": "Result Structures"
+      },
+      "version-2.0.0/version-2.0.0-embedding-extending": {
+        "title": "Embedding and Extending JSONata",
+        "sidebar_label": "Embedding and Extending JSONata"
+      },
+      "version-2.0.0/version-2.0.0-numeric-functions": {
+        "title": "Numeric functions",
+        "sidebar_label": "Numeric Functions"
+      },
+      "version-2.0.0/version-2.0.0-path-operators": {
+        "title": "Path Operators",
+        "sidebar_label": "Path Operators"
+      },
+      "version-2.0.0/version-2.0.0-programming": {
+        "title": "Programming constructs",
+        "sidebar_label": "Functional Programming"
+      },
+      "version-2.0.0/version-2.0.0-regex": {
+        "title": "Using Regular Expressions",
+        "sidebar_label": "Regular Expressions"
+      },
+      "version-2.0.0/version-2.0.0-using-browser": {
+        "title": "Using JSONata in a Web page",
+        "sidebar_label": "In a Web Page"
+      },
+      "version-2.0.0/version-2.0.0-using-nodejs": {
+        "title": "Using JSONata in a Node application",
+        "sidebar_label": "In NodeJS"
       }
     },
     "links": {

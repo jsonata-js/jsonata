@@ -1,7 +1,8 @@
 ---
-id: embedding-extending
+id: version-2.0.0-embedding-extending
 title: Embedding and Extending JSONata
 sidebar_label: Embedding and Extending JSONata
+original_id: embedding-extending
 ---
 
 ## API
