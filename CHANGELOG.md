@@ -4,7 +4,7 @@ Version 2.0.0 contains a breaking change to the Javascript API as a result of re
 to use async functions instead of generators.  This provides a performance boost.
 No breaking changes have been made to the JSONata language itself.
 
-- Faster JSONata evaluation by switching from generators to async/await (PR #583 )
+- Faster JSONata evaluation by switching from generators to async/await (PR #583)
 - Add support for parsing binary, octal & hexadecimal numbers (PR #573)
 
 #### 1.8.6 Maintenance Release
