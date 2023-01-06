@@ -19,17 +19,20 @@ Reference implementation of the [JSONata query and transformation language](http
 In Node.js:
 
 ```javascript
-var jsonata = require("jsonata");
+const jsonata = require('jsonata');
 
-var data = {
-  example: [
-    {value: 4},
-    {value: 7},
-    {value: 13}
-  ]
+const data = {
+    example: [
+        {value: 4},
+        {value: 7},
+        {value: 13}
+    ]
 };
-var expression = jsonata("$sum(example.value)");
-var result = expression.evaluate(data);  // returns 24
+
+(async () => {
+    const expression = jsonata('$sum(example.value)');
+    const result = await expression.evaluate(data);  // returns 24
+})()
 ```
 
 In a browser:
@@ -42,9 +45,9 @@ In a browser:
     <title>JSONata test</title>
     <script src="https://cdn.jsdelivr.net/npm/jsonata/jsonata.min.js"></script>
     <script>
-      function greeting() {
+      async function greeting() {
         var json = JSON.parse(document.getElementById('json').value);
-        var result = jsonata('"Hello, " & name').evaluate(json);
+        var result = await jsonata('"Hello, " & name').evaluate(json);
         document.getElementById('greeting').innerHTML = result;
       }
     </script>
