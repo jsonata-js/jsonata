@@ -1,3 +1,7 @@
+#### 2.0.1 Maintenance Release
+
+- Small update to pick up README changes with 2.0.0 changes
+
 #### 2.0.0 Major Release
 
 Version 2.0.0 contains a breaking change to the Javascript API as a result of reimplementing the evaluator
