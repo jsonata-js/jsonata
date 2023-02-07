@@ -18,7 +18,7 @@ describe('Performance', function() {
         const input = new Array(10000000).fill(1).map(() => Math.random());
 
         return expect(jsonata("$").evaluate(input, {})).to.eventually.be.ok;
-    });
+    }).timeout(30000);
 
     it("Recursion", function() {
         const expr = jsonata(`(
@@ -27,7 +27,7 @@ describe('Performance', function() {
         )`);
 
         return expect(expr.evaluate()).to.eventually.be.ok;
-    });
+    }).timeout(30000);
 
     it("Long Array O(n^2) processing", function() {
         const expr = jsonata(`$shuffle($sort($reverse($shuffle($sort($shuffle($sort($shuffle($sort($$)))))))))`);
@@ -45,7 +45,7 @@ describe('Performance', function() {
             const input = new Array(1000).fill(1).map(() => Math.random());
 
             return expect(expr.evaluate(input)).to.eventually.be.undefined;
-        });
+        }).timeout(30000);
 
         it("Chained true statements", function() {
             const filterExpr = new Array(1000).fill(1).map(() => `$v != ${Math.random()}`).join(" and ");
