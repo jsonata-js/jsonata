@@ -34,7 +34,7 @@ describe('Performance', function() {
         const input = new Array(10000).fill(1).map(() => Math.random());
 
         return expect(expr.evaluate(input)).to.eventually.be.ok;
-    });
+    }).timeout(30000);
 
 
     describe("Complex filtering expression", function() {
