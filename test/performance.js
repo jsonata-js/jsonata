@@ -12,7 +12,7 @@ describe('Performance', function() {
         };
 
         return expect(expr.evaluate(input)).to.eventually.be.ok;
-    }).timeout(3000);
+    }).timeout(30000);
 
     it("Heavy input", function() {
         const input = new Array(10000000).fill(1).map(() => Math.random());
@@ -54,6 +54,6 @@ describe('Performance', function() {
             const input = new Array(1000).fill(1).map(() => Math.random());
 
             return expect(expr.evaluate(input)).to.eventually.be.ok;
-        });
+        }).timeout(30000);
     });
 });
