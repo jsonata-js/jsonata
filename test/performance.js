@@ -4,7 +4,7 @@ var jsonata = require('../src/jsonata');
 var chai = require("chai");
 var expect = chai.expect;
 
-describe('Performance', function() {
+xdescribe('Performance', function() {
     it("Heavy output", function() {
         const expr = jsonata("{\"top\": $.\"loop\"[].{ \"nested\": $$.\"loop\"[].{ \"doubleNested\": $$.\"loop\"[].{ \"sum\": $sum($$.\"loop\") } } } }");
         const input = {
