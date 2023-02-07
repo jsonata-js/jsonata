@@ -1178,7 +1178,7 @@ var jsonata = (function() {
 
         // sort the lhs array
         // use comparator function
-        var comparator = async function(a, b) { 
+        var comparator = async function(a, b) {
             // expr.terms is an array of order-by in priority order
             var comp = 0;
             for(var index = 0; comp === 0 && index < expr.terms.length; index++) {

@@ -1,7 +1,8 @@
 ---
-id: numeric-functions
+id: version-2.0.0-numeric-functions
 title: Numeric functions
 sidebar_label: Numeric Functions
+original_id: numeric-functions
 ---
 
 ## `$number()`
