@@ -1,7 +1,8 @@
 ---
-id: using-nodejs
+id: version-2.0.0-using-nodejs
 title: Using JSONata in a Node application
 sidebar_label: In NodeJS
+original_id: using-nodejs
 ---
 
 ## Installing from NPM

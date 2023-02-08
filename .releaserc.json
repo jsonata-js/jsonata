@@ -1,0 +1,23 @@
+{
+  "branches": [
+    {
+      "name": "stedi-main",
+      "prerelease": true,
+      "channel": "fast"
+    },
+    {
+      "name": "master",
+      "release": true
+    }
+  ],
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/npm",
+    [
+      "@semantic-release/exec",
+      {
+        "publishCmd": "echo ::set-output name=released_version::${nextRelease.version}"
+      }
+    ]
+  ]
+}

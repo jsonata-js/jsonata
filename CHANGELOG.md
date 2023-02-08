@@ -1,3 +1,16 @@
+#### 2.0.1 Maintenance Release
+
+- Small update to pick up README changes with 2.0.0 changes
+
+#### 2.0.0 Major Release
+
+Version 2.0.0 contains a breaking change to the Javascript API as a result of reimplementing the evaluator
+to use async functions instead of generators.  This provides a performance boost.
+No breaking changes have been made to the JSONata language itself.
+
+- Faster JSONata evaluation by switching from generators to async/await (PR #583)
+- Add support for parsing binary, octal & hexadecimal numbers (PR #573)
+
 #### 1.8.6 Maintenance Release
 
 - Fix bug in date/time picture string. Width formatting is not respected without a separator (issue #546)
