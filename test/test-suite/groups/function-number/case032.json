@@ -1,0 +1,6 @@
+{
+    "expr": "$number('0B101')",
+    "dataset": null,
+    "bindings": {},
+    "result": 5
+}

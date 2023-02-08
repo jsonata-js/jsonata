@@ -1,7 +1,8 @@
 ---
-id: using-browser
+id: version-2.0.0-using-browser
 title: Using JSONata in a Web page
 sidebar_label: In a Web Page
+original_id: using-browser
 ---
 
 Example HTML page

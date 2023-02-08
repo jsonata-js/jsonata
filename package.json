@@ -1,6 +1,6 @@
 {
   "name": "@stedi/jsonata",
-  "version": "1.8.6",
+  "version": "2.0.1",
   "description": "JSON query and transformation language",
   "module": "jsonata.js",
   "main": "jsonata.js",

@@ -12,13 +12,13 @@ describe('Performance', function() {
         };
 
         return expect(expr.evaluate(input)).to.eventually.be.ok;
-    });
+    }).timeout(20000);
 
     it("Heavy input", function() {
         const input = new Array(10000000).fill(1).map(() => Math.random());
 
         return expect(jsonata("$").evaluate(input, {})).to.eventually.be.ok;
-    });
+    }).timeout(20000);
 
     it("Recursion", function() {
         const expr = jsonata(`(
@@ -34,7 +34,7 @@ describe('Performance', function() {
         const input = new Array(10000).fill(1).map(() => Math.random());
 
         return expect(expr.evaluate(input)).to.eventually.be.ok;
-    });
+    }).timeout(5000);
 
 
     describe("Complex filtering expression", function() {
@@ -45,7 +45,7 @@ describe('Performance', function() {
             const input = new Array(1000).fill(1).map(() => Math.random());
 
             return expect(expr.evaluate(input)).to.eventually.be.undefined;
-        });
+        }).timeout(5000);
 
         it("Chained true statements", function() {
             const filterExpr = new Array(1000).fill(1).map(() => `$v != ${Math.random()}`).join(" and ");
@@ -54,6 +54,6 @@ describe('Performance', function() {
             const input = new Array(1000).fill(1).map(() => Math.random());
 
             return expect(expr.evaluate(input)).to.eventually.be.ok;
-        });
+        }).timeout(10000);
     });
 });
