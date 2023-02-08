@@ -6,8 +6,7 @@
       "channel": "fast"
     },
     {
-      "name": "master",
-      "release": true
+      "name": "master"
     }
   ],
   "plugins": [
