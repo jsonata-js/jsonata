@@ -1,7 +1,9 @@
 {
   "branches": [
     {
-      "name": "stedi-main"
+      "name": "stedi-main",
+      "prerelease": true,
+      "channel": "fast"
     }
   ],
   "plugins": [
