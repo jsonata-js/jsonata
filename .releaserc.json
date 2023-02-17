@@ -4,6 +4,9 @@
       "name": "stedi-main",
       "prerelease": true,
       "channel": "fast"
+    },
+    {
+      "name": "main"
     }
   ],
   "plugins": [
