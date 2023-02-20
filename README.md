@@ -1,4 +1,4 @@
-# JSONata
+# Stedi/JSONata
 
 JSON query and transformation language
 
