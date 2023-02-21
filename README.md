@@ -9,6 +9,7 @@ Reference implementation of the [JSONata query and transformation language](http
 * [JSONata in 5 minutes](https://www.youtube.com/embed/ZBaK40rtIBM)
 * [JSONata language documentation](http://docs.jsonata.org/)
 * [Try it out!](https://www.stedi.com/jsonata/playground)
+* [JSONata Cheatsheet](https://www.stedi.com/docs/mappings/jsonata-cheatsheet)
 
 ## Installation
 
