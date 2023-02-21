@@ -1,3 +1,7 @@
+#### 2.0.2 Maintenance Release
+
+- Typescript definition: fix return type of evaluate method (PR #615)
+
 #### 2.0.1 Maintenance Release
 
 - Small update to pick up README changes with 2.0.0 changes
