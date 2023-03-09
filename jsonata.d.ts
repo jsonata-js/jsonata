@@ -1,4 +1,4 @@
-// Type definitions for jsonata 1.7
+// Type definitions for jsonata 2.0.2
 // Project: https://github.com/jsonata-js/jsonata
 // Definitions by: Nick <https://github.com/nick121212> and Michael M. Tiller <https://github.com/xogeny>
 
@@ -37,7 +37,7 @@ declare namespace jsonata {
     readonly input: any;
   }
   interface Expression {
-    evaluate(input: any, bindings?: Record<string, any>): any;
+    evaluate(input: any, bindings?: Record<string, any>): Promise<any>;
     evaluate(input: any, bindings: Record<string, any> | undefined, callback: (err: JsonataError, resp: any) => void): void;
     assign(name: string, value: any): void;
     registerFunction(name: string, implementation: (this: Focus, ...args: any[]) => any, signature?: string): void;
