@@ -76,9 +76,23 @@ const parser = (() => {
             var depth = 0;
             var pattern;
             var flags;
+
+            var isClosingSlash = function (position) {
+                if (path.charAt(position) === '/' && depth === 0) {
+                    var backslashCount = 0;
+                    while (path.charAt(position - (backslashCount + 1)) === '\\') {
+                        backslashCount++;
+                    }
+                    if (backslashCount % 2 === 0) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+
             while (position < length) {
                 var currentChar = path.charAt(position);
-                if (currentChar === '/' && path.charAt(position - 1) !== '\\' && depth === 0) {
+                if (isClosingSlash(position)) {
                     // end of regex found
                     pattern = path.substring(start, position);
                     if (pattern === '') {
