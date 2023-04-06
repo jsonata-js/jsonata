@@ -2,8 +2,13 @@
 // Project: https://github.com/jsonata-js/jsonata
 // Definitions by: Nick <https://github.com/nick121212> and Michael M. Tiller <https://github.com/xogeny>
 
-declare function jsonata(str: string): jsonata.Expression;
+declare function jsonata(str: string, options?: jsonata.JsonataOptions): jsonata.Expression;
 declare namespace jsonata {
+
+  interface JsonataOptions {
+    recover?: boolean,
+    RegexEngine?: RegExp | any
+  }
 
   interface ExprNode {
     type: string;
