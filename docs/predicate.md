@@ -31,7 +31,7 @@ At any step in a location path, the selected items can be filtered using a predi
 
 ## Singleton array and value equivalence
 
-Within a JSONata expression or subexpression, any value (which is not itself an array) and an array containing just that value are deemed to be equivalent.  This allows the language to be composable such that location paths that extract a single value from and object and location paths that extract multiple values from arrays can both be used as inputs to other expressions without needing to use different syntax for the two forms.
+Within a JSONata expression or subexpression, any value (which is not itself an array) and an array containing just that value are deemed to be equivalent.  This allows the language to be composable such that location paths that extract a single value from an object and location paths that extract multiple values from arrays can both be used as inputs to other expressions without needing to use different syntax for the two forms.
 
 Consider the following examples:
 
