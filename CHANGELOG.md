@@ -1,6 +1,11 @@
+#### 2.0.3 Maintenance Release
+
+- Fix regex termination lexer (PR https://github.com/jsonata-js/jsonata/pull/623)
+- Fix TypeScript definition (PR https://github.com/jsonata-js/jsonata/pull/633)
+
 #### 2.0.2 Maintenance Release
 
-- Typescript definition: fix return type of evaluate method (PR #615)
+- Typescript definition: fix return type of evaluate method (PR https://github.com/jsonata-js/jsonata/pull/615)
 
 #### 2.0.1 Maintenance Release
 
