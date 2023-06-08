@@ -40,6 +40,7 @@ const parser = (() => {
         '<=': 40,
         '>=': 40,
         '~>': 40,
+        '?:': 40,
         'and': 30,
         'or': 25,
         'in': 40,
@@ -197,6 +198,11 @@ const parser = (() => {
                 // ~>  chain function
                 position += 2;
                 return create('operator', '~>');
+            }
+            if (currentChar === '?' && path.charAt(position + 1) === ':') {
+                // ?: default / elvis operator
+                position += 2;
+                return create('operator', '?:');
             }
             // test for single char operators
             if (Object.prototype.hasOwnProperty.call(operators, currentChar)) {
@@ -565,6 +571,7 @@ const parser = (() => {
         terminal("in"); //
         prefix("-"); // unary numeric negation
         infix("~>"); // function application
+        infix("?:"); // default value
 
         infixr("(error)", 10, function (left) {
             this.lhs = left;
