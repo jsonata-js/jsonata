@@ -19,4 +19,3 @@ JSONata is a lightweight query and transformation language for JSON data. Inspir
 ## Find out more
 
 * Introduction at [London Node User Group meetup](https://www.youtube.com/watch?v=TDWf6R8aqDo)
-* IBM developerWorks [Tech Talk](https://www.youtube.com/watch?v=ZRtlkIj0uDY)
