@@ -49,7 +49,7 @@ If this is a concern, then the expression can be modified to make it return an a
 * `Phone[][type='home'].number` returns `[ "0203 544 1234" ]`
 * `Phone[type='office'].number[]` returns `[ "01962 001234",  "01962 001235" ]`
 
-Note that the `[]` can be placed either side of the predicates and on any step in the path expression
+Note that the `[]` can be placed on either side of the predicates and on any step in the path expression
 
 ## Wildcards
 
