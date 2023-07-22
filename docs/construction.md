@@ -44,7 +44,7 @@ __Examples__
 
 ## Object constructors
 
-In a similar manner to the way arrays can be constructed, JSON objects can also be constructed in the output.  At any point in a location path where a field reference is expected, a pair of braces `{}` containing key/value pairs separated by commas, with each key and value separated by a colon: `{key1: value2, key2:value2}`.  The keys and values can either be literals or can be expressions. The key must either be a string or an expression that evaluates to a string.
+In a similar manner to the way arrays can be constructed, JSON objects can also be constructed in the output.  At any point in a location path where a field reference is expected, a pair of braces `{}` containing key/value pairs separated by commas, with each key and value separated by a colon: `{key1: value1, key2:value2}`.  The keys and values can either be literals or can be expressions. The key must either be a string or an expression that evaluates to a string.
 
 When an object constructor follows an expression that selects multiple values, the object constructor will create a single object that contains a key/value pair for each of those context values.  If an array of objects is required (one for each context value), then the object constructor should immediately follow the dot '.' operator.
 
