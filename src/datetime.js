@@ -904,6 +904,13 @@ const dateTime = (function () {
                 if (offset === 0 && markerSpec.presentation2 === 't') {
                     componentValue = 'Z';
                 }
+            } else if (markerSpec.component === 'P') {
+                // §9.8.4.7 Formatting Other Components
+                // Formatting P for am/pm
+                // getDateTimeFragment() always returns am/pm lower case so check for UPPER here
+                if (markerSpec.names === tcase.UPPER) {
+                    componentValue = componentValue.toUpperCase();
+                }
             }
             return componentValue;
         };
