@@ -18,7 +18,9 @@ JSONata is a lightweight query and transformation language for JSON data. Inspir
 
 ## Implementations of JSONata
 
-|Language|Link|Notes|Jsonata version|
+The following are known implementations of JSONata in addition to the primary implementation in JavaScript in the above repo.
+
+|Language|Link|Notes|JSONata version|
 |---|---|---|---|
 |C|https://github.com/qlyoung/jsonata-c|Runs JSONata in embedded JS engine|1.8.3|
 |Go|https://github.com/blues/jsonata-go|Native implementation|1.5.4|
