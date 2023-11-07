@@ -389,7 +389,8 @@ const functions = (() => {
                     result.push({
                         match: matches.match,
                         index: matches.start,
-                        groups: matches.groups
+                        groups: matches.groups,
+                        namedGroups: matches.namedGroups || {}
                     });
                     matches = await evaluateMatcher(matches.next);
                     count++;

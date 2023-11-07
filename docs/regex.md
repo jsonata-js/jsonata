@@ -59,6 +59,7 @@ This returns the following JSONata object (JSON, but also with a function proper
   "start": 2,
   "end": 4,
   "groups": [],
+  "namedGroups": {},
   "next": "<native function>#0"
 }
 ```
@@ -68,6 +69,7 @@ This contains information of the first matching substring within this famous pal
 - `start` - the starting position (zero offset) of the matching substring within the original string
 - `end` - the endinging position of the matching substring within the original string
 - `groups` - if capturing groups are used in the regex, then this array contains a string for the text captured by each group
+- `namedGroups` - if named capture groups are used in the regex, this object will contain the captured text by name
 - `next()` - when invoked, will return details of the second occurrence of any matching substring (and so on).
 
 In this example, invoking `next()` will return:
@@ -78,6 +80,7 @@ In this example, invoking `next()` will return:
   "start": 17,
   "end": 22,
   "groups": [],
+  "namedGroups": {},
   "next": "<native function>#0"
 }
 ```
