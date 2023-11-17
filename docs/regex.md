@@ -31,7 +31,7 @@ Regexes are often used in query predicates (filter expressions) when selecting o
 
 `path.to.object[stringProperty ~> /regex/]`
 
-The `~>` is the [chain operator](control-operators#chain), and its use here implies that the result of `/regex/` is a function.  We'll see below that this is in fact the case.
+The `~>` is the [chain operator](other-operators#-chain), and its use here implies that the result of `/regex/` is a function.  We'll see below that this is in fact the case.
 
 __Examples__
 
