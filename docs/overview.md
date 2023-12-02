@@ -30,6 +30,7 @@ The following are known implementations of JSONata in addition to the primary im
 |.NET|https://github.com/mikhail-barg/jsonata.net.native|Native implementation|1.8.5|
 |Python|https://github.com/qlyoung/pyjsonata|API bindings based on C bindings|1.8.3|
 |Rust|https://github.com/johanventer/jsonata-rust|Implementation work in progress| |
+|Rust|https://github.com/Stedi/jsonata-rs|Actively-developed fork of jsonata-rust| |
 
 ## Find out more
 
