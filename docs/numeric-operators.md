@@ -13,7 +13,7 @@ __Example__
 `5 + 2` => `7`
 
 
-## `-` (Substraction/Negation)
+## `-` (Subtraction/Negation)
 
 The subtraction operator subtracts the RHS value from the LHS value to produce the numerical difference  It is an error if either operand is not a number.
 
