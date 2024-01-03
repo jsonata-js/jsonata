@@ -950,7 +950,9 @@ var jsonata = (function() {
         }
 
         // iterate over the groups to evaluate the 'value' expression
-        let generators = await Promise.all(Object.keys(groups).map(async (key, idx) => {
+        let keys = Object.keys(groups);
+        for(var idx = 0; idx < keys.length; idx++) {
+            let key = keys[idx];
             let entry = groups[key];
             var context = entry.data;
             var env = environment;
@@ -961,11 +963,8 @@ var jsonata = (function() {
                 env = createFrameFromTuple(environment, tuple);
             }
             environment.isParallelCall = idx > 0
-            return [key, await evaluate(expr.lhs[entry.exprIndex][1], context, env)];
-        }));
-
-        for (let generator of generators) {
-            var [key, value] = await generator;
+            
+            let value = await evaluate(expr.lhs[entry.exprIndex][1], context, env);
             if(typeof value !== 'undefined') {
                 result[key] = value;
             }
