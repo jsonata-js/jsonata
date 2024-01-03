@@ -1,0 +1,9 @@
+{
+    "expr": "{'foo': $bar := 'x', 'bar': $bar }",
+    "dataset": null,
+    "bindings": {},
+    "result": {
+        "foo": "x",
+        "bar": "x"
+    }
+}
