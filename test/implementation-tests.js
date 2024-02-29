@@ -974,6 +974,15 @@ describe("Tests that are specific to a Javascript runtime", () => {
                 code: "D1010",
             });
         });
+        it("should throw an error with constructor", async function() {
+            const expr = jsonata('{} ~> | constructor | {"is_admin": true} |');
+            expect(
+                expr.evaluate()
+            ).to.eventually.be.rejected.to.deep.contain({
+                position: 7,
+                code: "D1010",
+            });
+        });
     });
 });
 

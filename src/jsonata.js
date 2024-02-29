@@ -1293,7 +1293,7 @@ var jsonata = (function() {
                 }
                 for(var ii = 0; ii < matches.length; ii++) {
                     var match = matches[ii];
-                    if (match && match.isPrototypeOf(result)) {
+                    if (match && (match.isPrototypeOf(result) || match instanceof Object.constructor)) {
                         throw {
                             code: "D1010",
                             stack: (new Error()).stack,
