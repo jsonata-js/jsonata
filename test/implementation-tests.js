@@ -806,6 +806,32 @@ describe("Tests that are specific to a Javascript runtime", () => {
             });
         });
     });
+    describe("Expressions that attempt to pollute the object prototype", function() {
+        it("should throw an error with __proto__", async function() {
+            const expr = jsonata('{} ~> | __proto__ | {"is_admin": true} |');
+            expect(function() {
+                expr.evaluate();
+            })
+                .to.throw()
+                .to.deep.contain({ position: 7, code: "D1010" });
+        });
+        it("should throw an error with __lookupGetter__", async function() {
+            const expr = jsonata('{} ~> | __lookupGetter__("__proto__")() | {"is_admin": true} |');
+            expect(function() {
+                expr.evaluate();
+            })
+                .to.throw()
+                .to.deep.contain({ position: 7, code: "D1010" });
+        });
+        it("should throw an error with constructor", async function() {
+            const expr = jsonata('{} ~> | constructor | {"is_admin": true} |');
+            expect(function() {
+                expr.evaluate();
+            })
+                .to.throw()
+                .to.deep.contain({ position: 7, code: "D1010" });
+        });
+    });
 });
 
 describe("Test that yield platform specific results", () => {
