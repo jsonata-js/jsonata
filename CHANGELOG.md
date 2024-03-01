@@ -1,3 +1,7 @@
+#### 1.8.7 Maintenance Release
+
+- Prevent writing to the object prototype or constructor (PR https://github.com/jsonata-js/jsonata/pull/681)
+
 #### 1.8.6 Maintenance Release
 
 - Fix bug in date/time picture string. Width formatting is not respected without a separator (issue #546)
