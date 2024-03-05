@@ -1,7 +1,5 @@
-name: Test JSONata
+name: Check
 on:
-    push:
-        branches: [stedi-main]
     pull_request:
         branches: [stedi-main]
 jobs:
