@@ -749,7 +749,38 @@ describe("Tests that are specific to a Javascript runtime", () => {
         });
     });
 
+    describe("empty regex: Escaped termination", function() {
+        it("should throw error", function() {
+            expect(function() {
+                var expr = jsonata("/\\/");
+                expr.evaluate();
+            })
+                .to.throw()
+                .to.deep.contain({ position: 3, code: "S0302" });
+        });
+    });
+
+    describe("empty regex: Escaped termination", function() {
+        it("should throw error", function() {
+            expect(function() {
+                var expr = jsonata("/\\\\\\/");
+                expr.evaluate();
+            })
+                .to.throw()
+                .to.deep.contain({ position: 5, code: "S0302" });
+        });
+    });
+
     describe("Functions - $match", function() {
+        describe('$match("test escape \\\\", /\\\\/)', function() {
+            it("should find \\", async function() {
+                var expr = jsonata('$match("test escape \\\\", /\\\\/)');
+                var result = await expr.evaluate();
+                var expected = { match: "\\", index: 12, groups: []};
+                expect(result).to.deep.equal(expected);
+            });
+        });
+
         describe('$match("ababbabbcc",/ab/)', function() {
             it("should return result object", async function() {
                 var expr = jsonata('$match("ababbabbcc",/ab/)');
@@ -921,6 +952,35 @@ describe("Tests that are specific to a Javascript runtime", () => {
                     token: "match",
                     index: 1,
                 });
+            });
+        });
+    });
+    describe("Expressions that attempt to pollute the object prototype", function() {
+        it("should throw an error with __proto__", async function() {
+            const expr = jsonata('{} ~> | __proto__ | {"is_admin": true} |');
+            expect(
+                expr.evaluate()
+            ).to.eventually.be.rejected.to.deep.contain({
+                position: 7,
+                code: "D1010",
+            });
+        });
+        it("should throw an error with __lookupGetter__", async function() {
+            const expr = jsonata('{} ~> | __lookupGetter__("__proto__")() | {"is_admin": true} |');
+            expect(
+                expr.evaluate()
+            ).to.eventually.be.rejected.to.deep.contain({
+                position: 7,
+                code: "D1010",
+            });
+        });
+        it("should throw an error with constructor", async function() {
+            const expr = jsonata('{} ~> | constructor | {"is_admin": true} |');
+            expect(
+                expr.evaluate()
+            ).to.eventually.be.rejected.to.deep.contain({
+                position: 7,
+                code: "D1010",
             });
         });
     });

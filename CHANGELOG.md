@@ -1,3 +1,18 @@
+#### 2.0.4 Maintenance Release
+
+- Prevent writing to the object prototype or constructor (PR https://github.com/jsonata-js/jsonata/pull/676)
+- Add upper/lower presentation format for am/pm in fromMillis (PR https://github.com/jsonata-js/jsonata/pull/644)
+- Various documentation additions and corrections
+
+#### 2.0.3 Maintenance Release
+
+- Fix regex termination lexer (PR https://github.com/jsonata-js/jsonata/pull/623)
+- Fix TypeScript definition (PR https://github.com/jsonata-js/jsonata/pull/633)
+
+#### 2.0.2 Maintenance Release
+
+- Typescript definition: fix return type of evaluate method (PR https://github.com/jsonata-js/jsonata/pull/615)
+
 #### 2.0.1 Maintenance Release
 
 - Small update to pick up README changes with 2.0.0 changes
