@@ -1923,6 +1923,7 @@ var jsonata = (function() {
     staticFrame.bind('toMillis', defineFunction(datetime.toMillis, '<s-s?:n>'));
     staticFrame.bind('fromMillis', defineFunction(datetime.fromMillis, '<n-s?s?:s>'));
     staticFrame.bind('clone', defineFunction(functionClone, '<(oa)-:o>'));
+    staticFrame.bind('defaultValue', defineFunction(fn.defaultValue, '<jj:o>'));
 
     /**
      * Error codes

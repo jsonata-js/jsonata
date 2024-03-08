@@ -1,0 +1,7 @@
+{
+    "expr": "$defaultValue(null, false)",
+    "dataset": "dataset25",
+    "bindings": {},
+    "result": false,
+    "unordered": true
+}

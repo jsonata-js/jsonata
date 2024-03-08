@@ -1,0 +1,8 @@
+{
+    "defaultValueStructure": {
+        "testField1": "testFeldValue1",
+        "testField2": {
+            "subField1": "subField1"
+        }
+    }
+}

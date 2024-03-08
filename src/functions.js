@@ -2055,6 +2055,20 @@ const functions = (() => {
         return result;
     }
 
+    /**
+     * Returns a default value in case the first argument is null
+     * @param {object} arg1 - the object check for null
+     * @param {object} arg2 - the default value in casse arg1 is null
+     * @returns {object} - arg1 if not null; arg2 otherwise
+     */
+    function defaultValue(arg1, arg2) {
+        if (arg1 === null) {
+            return arg2;
+        }
+
+        return arg1;
+    }
+
     return {
         sum, count, max, min, average,
         string, substring, substringBefore, substringAfter, lowercase, uppercase, length, trim, pad,
@@ -2063,7 +2077,7 @@ const functions = (() => {
         boolean, not,
         map, zip, filter, single, foldLeft, sift,
         keys, lookup, append, exists, spread, merge, reverse, each, error, assert, type, sort, shuffle, distinct,
-        base64encode, base64decode,  encodeUrlComponent, encodeUrl, decodeUrlComponent, decodeUrl
+        base64encode, base64decode,  encodeUrlComponent, encodeUrl, decodeUrlComponent, decodeUrl, defaultValue
     };
 })();
 

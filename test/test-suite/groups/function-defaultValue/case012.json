@@ -1,0 +1,17 @@
+{
+    "expr": "$defaultValue(null, defaultValueStructures)",
+    "dataset": "dataset26",
+    "bindings": {},
+    "result": [{
+        "testField11": "testFeldValue11",
+        "testField12": {
+            "subField11": "subField11"
+        }
+    }, {
+        "testField21": "testFeldValue21",
+        "testField22": {
+            "subField21": "subField21"
+        }
+    }],
+    "unordered": true
+}

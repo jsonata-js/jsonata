@@ -1,0 +1,12 @@
+{
+    "expr": "$defaultValue(null, defaultValueStructure)",
+    "dataset": "dataset25",
+    "bindings": {},
+    "result": {
+        "testField1": "testFeldValue1",
+        "testField2": {
+            "subField1": "subField1"
+        }
+    },
+    "unordered": true
+}
