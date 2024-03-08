@@ -1,0 +1,7 @@
+{
+    "description": "property present on object is used",
+    "expr": "bar ?: 0",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": 98
+}
