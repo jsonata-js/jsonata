@@ -736,11 +736,6 @@ var jsonata = (function() {
         var ltype = typeof lhs;
         var rtype = typeof rhs;
 
-        if (ltype === 'undefined' || rtype === 'undefined') {
-            // if either side is undefined, the result is false
-            return false;
-        }
-
         switch (op) {
             case '=':
                 result = isDeepEqual(lhs, rhs);
