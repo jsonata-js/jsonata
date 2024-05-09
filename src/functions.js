@@ -1658,7 +1658,7 @@ const functions = (() => {
                 });
             });
             result = keys(merge);
-        } else if (arg !== null && typeof arg === 'object' && !(isLambda(arg))) {
+        } else if (arg !== null && typeof arg === 'object' && !isFunction(arg)) {
             Object.keys(arg).forEach(key => result.push(key));
         }
         return result;
@@ -1685,7 +1685,7 @@ const functions = (() => {
                     }
                 }
             }
-        } else if (input !== null && typeof input === 'object') {
+        } else if (input !== null && typeof input === 'object' && !isFunction(input)) {
             result = input[key];
         }
         return result;
