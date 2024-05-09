@@ -1,3 +1,7 @@
+#### 2.0.5 Maintenance Release
+
+- JSONata leaks internal references in expression when using lambdas (issue https://github.com/jsonata-js/jsonata/issues/691)
+
 #### 2.0.4 Maintenance Release
 
 - Prevent writing to the object prototype or constructor (PR https://github.com/jsonata-js/jsonata/pull/676)
