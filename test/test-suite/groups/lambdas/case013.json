@@ -1,0 +1,6 @@
+{
+    "expr": "( $f := function(){1}; $f.environment )",
+    "dataset": null,
+    "bindings": {},
+    "undefinedResult": true
+}
