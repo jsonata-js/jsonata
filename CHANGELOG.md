@@ -1,6 +1,6 @@
 #### 2.0.5 Maintenance Release
 
-- JSONata leaks internal references in expression when using lambdas (issue https://github.com/jsonata-js/jsonata/issues/691)
+- Fix leaking internal references in expressions when using lambdas (issue #691)
 
 #### 2.0.4 Maintenance Release
 
