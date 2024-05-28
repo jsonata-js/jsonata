@@ -200,7 +200,7 @@ Note that it is actually possible to write a recursive function using purely ano
 
 ### Tail call optimization (Tail recursion)
 
-A recursive function adds a new frame to the call stack each time it invokes itself.  This can eventually lead to stack exhaustion if the function recuses beyond a certain limit.  Consider the classic recursive implementation of the factorial function
+A recursive function adds a new frame to the call stack each time it invokes itself.  This can eventually lead to stack exhaustion if the function recurses beyond a certain limit.  Consider the classic recursive implementation of the factorial function
 
 ```
 (
