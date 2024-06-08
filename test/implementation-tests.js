@@ -1024,6 +1024,21 @@ describe("Tests that include infinite recursion", () => {
     });
 });
 
+describe("Tests that use internal frame push callbacks", () => {
+    describe("frame push callback bound to expression", function()  {
+        it("calls callback when new frame created", function(done) {
+            var expr = jsonata("( )");
+            expr.assign(Symbol.for('jsonata.__createFrame_push'), function(parentEnv, newEnv) {
+                expect(parentEnv).to.not.equal(newEnv);
+                expect(parentEnv).to.include.keys(['lookup', 'bind']);
+                expect(newEnv).to.include.keys(['lookup', 'bind']);
+                done();
+            });
+            expr.evaluate();
+        });
+    });
+});
+
 /**
  * Protect the process/browser from a runnaway expression
  * i.e. Infinite loop (tail recursion), or excessive stack growth
