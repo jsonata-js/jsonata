@@ -1057,11 +1057,11 @@ function timeboxExpression(expr, timeout, maxDepth) {
     };
 
     // register callbacks
-    expr.assign("__evaluate_entry", function() {
+    expr.assign(Symbol.for('jsonata.__evaluate_entry'), function() {
         depth++;
         checkRunnaway();
     });
-    expr.assign("__evaluate_exit", function() {
+    expr.assign(Symbol.for('jsonata.__evaluate_exit'), function() {
         depth--;
         checkRunnaway();
     });
