@@ -1837,7 +1837,7 @@ var jsonata = (function() {
      */
     function createFrame(enclosingEnvironment) {
         var bindings = {};
-        return {
+        const newFrame = {
             bind: function (name, value) {
                 bindings[name] = value;
             },
@@ -1857,6 +1857,16 @@ var jsonata = (function() {
                 ancestry: [ null ]
             }
         };
+
+        if (enclosingEnvironment) {
+            var framePushCallback = enclosingEnvironment.lookup(Symbol.for('jsonata.__createFrame_push'));
+            if(framePushCallback) {
+                framePushCallback(enclosingEnvironment, newFrame);
+            }
+        }
+       
+
+        return newFrame
     }
 
     // Function registration
