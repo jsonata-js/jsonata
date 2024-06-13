@@ -911,7 +911,7 @@ const parser = (() => {
                             ancestry[slot.index].slot.label = node.ancestor.label;
                             node.ancestor = slot;
                         }
-                        node.tuple = true;
+                    // node.tuple = true
                     }
                     break;
                 case 'parent':
