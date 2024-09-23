@@ -1194,6 +1194,7 @@ const parser = (() => {
                             result = {type: 'apply', value: expr.value, position: expr.position};
                             result.lhs = processAST(expr.lhs);
                             result.rhs = processAST(expr.rhs);
+                            result.keepArray = result.lhs.keepArray || result.rhs.keepArray;
                             break;
                         default:
                             result = {type: expr.type, value: expr.value, position: expr.position};

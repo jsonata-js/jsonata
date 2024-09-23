@@ -1,0 +1,6 @@
+{
+    "expr": "( $square := function($x){$x*$x}; $map([1], $square)[] )",
+    "data": null,
+    "bindings": {},
+    "result": [1]
+}
