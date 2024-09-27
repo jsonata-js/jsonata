@@ -50,7 +50,7 @@ var jsonata = (function() {
     async function evaluate(expr, input, environment) {
         var result;
 
-        var entryCallback = environment.lookup('__evaluate_entry');
+        var entryCallback = environment.lookup(Symbol.for('jsonata.__evaluate_entry'));
         if(entryCallback) {
             await entryCallback(expr, input, environment);
         }
@@ -124,7 +124,7 @@ var jsonata = (function() {
             result = await evaluateGroupExpression(expr.group, result, environment);
         }
 
-        var exitCallback = environment.lookup('__evaluate_exit');
+        var exitCallback = environment.lookup(Symbol.for('jsonata.__evaluate_exit'));
         if(exitCallback) {
             await exitCallback(expr, input, environment, result);
         }
