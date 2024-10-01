@@ -1,0 +1,7 @@
+{
+    "description": "operator can be chained",
+    "expr": "nope ?: foo.bar ?: 0",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": 42
+}
