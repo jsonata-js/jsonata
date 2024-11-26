@@ -50,8 +50,8 @@ declare namespace jsonata {
   }
 
   interface Environment {
-    bind(name: string, value: any): void;
-    lookup(name: string): any;
+    bind(name: string | symbol, value: any): void;
+    lookup(name: string | symbol): any;
     readonly timestamp: Date;
     readonly async: boolean;
   }

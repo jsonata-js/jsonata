@@ -178,12 +178,12 @@ function timeboxExpression(expr, timeout, maxDepth) {
     };
 
     // register callbacks
-    expr.assign("__evaluate_entry", function(expr, input, env) {
+    expr.assign(Symbol.for('jsonata.__evaluate_entry'), function(expr, input, env) {
         if (env.isParallelCall) return;
         depth++;
         checkRunnaway();
     });
-    expr.assign("__evaluate_exit", function(expr, input, env) {
+    expr.assign(Symbol.for('jsonata.__evaluate_exit'), function(expr, input, env) {
         if (env.isParallelCall) return;
         depth--;
         checkRunnaway();
