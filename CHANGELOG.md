@@ -1,3 +1,11 @@
+#### 2.0.6 Maintenance Release
+
+- Protect __evaluate_entry and __evaluate_exit callbacks (PR #700)
+- Add undocumented/private API to hook into when a new frame is created (PR #701)
+  - Note this is internal and may change in a future release.
+- Update typescript defintion (PR #704)
+- Chain operator should respect array constructor (PR #714)
+
 #### 2.0.5 Maintenance Release
 
 - Fix leaking internal references in expressions when using lambdas (issue #691)
