@@ -2,8 +2,6 @@
 
 JSON query and transformation language
 
-[![NPM statistics](https://nodei.co/npm/jsonata.png?downloads=true&downloadRank=true)](https://nodei.co/npm/jsonata/)
-
 Reference implementation of the [JSONata query and transformation language](http://jsonata.org/).
 
 * [JSONata in 5 minutes](https://www.youtube.com/embed/ZBaK40rtIBM)
