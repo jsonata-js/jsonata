@@ -9,6 +9,13 @@ __Signature:__ `$map(array, function)`
 
 Returns an array containing the results of applying the `function` parameter to each value in the `array` parameter.
 
+> :warning: **If your array has exactly one item the returned value won't be an array.** Only that single item will be returned.
+> 
+> In this case, to have the return of `$map()` be a array, please append `[]` to the closing parenthesis of the `$map()` function:
+```
+$map([1], $string)[]
+```
+
 The function that is supplied as the second parameter must have the following signature:
 
 `function(value [, index [, array]])`
