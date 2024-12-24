@@ -1,14 +1,14 @@
 {
-  "name": "jsonata",
-  "version": "2.0.6",
-  "description": "JSON query and transformation language",
+  "name": "dochub-jsonata",
+  "version": "1.0.0",
+  "description": "JSON query and transformation language for DocHub",
   "module": "jsonata.js",
   "main": "jsonata.js",
   "typings": "jsonata.d.ts",
-  "homepage": "http://jsonata.org/",
+  "homepage": "https://dochub.info",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jsonata-js/jsonata.git"
+    "url": "https://github.com/DocHubTeam/dochub-jsonata"
   },
   "scripts": {
     "pretest": "npm run lint",
