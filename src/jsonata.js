@@ -1090,9 +1090,30 @@ var jsonata = (function() {
         // invoke each expression in turn
         // only return the result of the last one
         for(var ii = 0; ii < expr.expressions.length; ii++) {
-            result = await evaluate(expr.expressions[ii], input, frame);
+            const step = expr.expressions[ii];
+            if (environment.__debugger__.footsteps || step.type === 'debugger') {
+                if (environment.__debugger__.debuggerHandle) {
+                    const action = await environment.__debugger__.debuggerHandle({
+                        '$': result,
+                        step,
+                        input,
+                        environment
+                    });
+                    switch (action) {
+                        case 'next': environment.__debugger__.footsteps = true; break;
+                        case 'run': break;
+                        default: 
+                            throw {
+                                code: "DBG01",
+                                stack: (new Error()).stack,
+                                position: step.position,
+                                value: result
+                            };
+                    }
+                }
+            }
+            if (step.type !== 'debugger') result = await evaluate(expr.expressions[ii], input, frame);
         }
-
         return result;
     }
 
@@ -1855,6 +1876,9 @@ var jsonata = (function() {
             isParallelCall: enclosingEnvironment ? enclosingEnvironment.isParallelCall : false,
             global: enclosingEnvironment ? enclosingEnvironment.global : {
                 ancestry: [ null ]
+            },
+            __debugger__: {
+                ...enclosingEnvironment?.__debugger__
             }
         };
 
@@ -2045,7 +2069,8 @@ var jsonata = (function() {
         "D3138": "The $single() function expected exactly 1 matching result.  Instead it matched more.",
         "D3139": "The $single() function expected exactly 1 matching result.  Instead it matched 0.",
         "D3140": "Malformed URL passed to ${{{functionName}}}(): {{value}}",
-        "D3141": "{{{message}}}"
+        "D3141": "{{{message}}}",
+        "DBG01": "Interrupted by debugger"
     };
 
     /**
@@ -2109,7 +2134,15 @@ var jsonata = (function() {
         }
 
         return {
-            evaluate: async function (input, bindings, callback) {
+            /**
+             * Executing expression
+             * @param {*} input             - context
+             * @param {*} bindings          - variables
+             * @param {*} callback          - result callback
+             * @param {*} debuggerHandle    - Debugger async function
+             * @returns 
+             */
+            evaluate: async function (input, bindings, callback, debuggerHandle) {
                 // throw if the expression compiled with syntax errors
                 if(typeof errors !== 'undefined') {
                     var err = {
@@ -2132,6 +2165,9 @@ var jsonata = (function() {
                 }
                 // put the input document into the environment as the root object
                 exec_env.bind('$', input);
+
+                exec_env.__debugger__.debuggerHandle = debuggerHandle
+                exec_env.__debugger__.footsteps = false;
 
                 // capture the timestamp and put it in the execution environment
                 // the $now() and $millis() functions will return this value - whenever it is called

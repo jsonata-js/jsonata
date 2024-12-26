@@ -304,6 +304,10 @@ const parser = (() => {
                         name = path.substring(position, i);
                         position = i;
                         switch (name) {
+                            case 'debugger':
+                                return create('debugger', () => {
+                                    debugger;
+                                });
                             case 'or':
                             case 'in':
                             case 'and':
@@ -435,6 +439,9 @@ const parser = (() => {
             var type = next_token.type;
             var symbol;
             switch (type) {
+                case 'debugger':
+                    symbol = symbol_table[type];
+                    break;
                 case 'name':
                 case 'variable':
                     symbol = symbol_table["(name)"];
@@ -565,6 +572,10 @@ const parser = (() => {
         terminal("in"); //
         prefix("-"); // unary numeric negation
         infix("~>"); // function application
+
+        /* DocHub */
+        terminal("debugger"); //
+        /* DocHub */
 
         infixr("(error)", 10, function (left) {
             this.lhs = left;
@@ -998,6 +1009,9 @@ const parser = (() => {
         var processAST = function (expr) {
             var result;
             switch (expr.type) {
+                case 'debugger':
+                    result = { type: expr.type, position: expr.position };
+                    break;
                 case 'binary':
                     switch (expr.value) {
                         case '.':
