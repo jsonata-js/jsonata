@@ -13,22 +13,24 @@ const data = {
 (async() => {
     try {
         const expression = jsonata(`(
-            $a := 10;
+            $a := 1;
             $sum(example.value);
             $a := function() {(
-                357;
+                2;
+                3;
+                4;
             )};
             debugger;
             $a();
-            1;
-            2;
-            3;
-            4;
+            $eval('(5;6;7)');
+            8;
+            9;
+            10;
         )`);
         const result = await expression.evaluate(data, undefined, undefined, async(context) => {
             console.info(context);
             return 'next';
-        });  // returns 24
+        });
         console.info(result);
     } catch (error) {
         debugger;
