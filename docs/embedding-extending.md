@@ -39,7 +39,7 @@ var result = await expression.evaluate({example: [{value: 4}, {value: 7}, {value
 
 `input` should be a JavaScript value such as would be returned from `JSON.parse()`. If `input` could not have been parsed from a JSON string (is circular, contains functions, ...), `evaluate`'s behaviour is not defined. `result` is a new JavaScript value suitable for `JSON.stringify()`ing.
 
-`bindings`, if present, contains variable names and values (including functions) to be bound:
+`bindings`, if present, contain variable names and values (including functions) to be bound:
 
 ```javascript
 await jsonata("$a + $b()").evaluate({}, {a: 4, b: () => 78});
@@ -168,7 +168,7 @@ Each type symbol may also have *options* applied.
 
 ### Writing higher-order function extensions
 
-It is possible to write and extension function that takes one or more functions in its list of arguments and/or returns
+It is possible to write an extension function that takes one or more functions in its list of arguments and/or returns
  a function as its return value.
 
 
