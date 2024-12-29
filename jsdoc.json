@@ -5,7 +5,7 @@
   },
   "source": {
     "includePattern": ".+\\.js(doc)?$",
-    "excludePattern": "(^|\\/|\\\\)_|node_modules|doc|coverage"
+    "excludePattern": "(^|\\/|\\\\)_|node_modules|doc|coverage|bin"
   },
   "plugins": [],
   "templates": {
