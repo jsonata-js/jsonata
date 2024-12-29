@@ -1125,8 +1125,8 @@ var jsonata = (function() {
         // only return the result of the last one
         for(var ii = 0; ii < expr.expressions.length; ii++) {
             const step = expr.expressions[ii];
-            if (step.type !== 'debugger') result = await evaluate(expr.expressions[ii], input, frame);
             await debugStep(step, result, input, environment);
+            if (step.type !== 'debugger') result = await evaluate(expr.expressions[ii], input, frame);
         }
         return result;
     }
