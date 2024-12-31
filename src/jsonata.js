@@ -1888,6 +1888,9 @@ var jsonata = (function() {
     function createFrame(enclosingEnvironment) {
         var bindings = {};
         const newFrame = {
+            bindings: function () {
+                return Object.keys(bindings);
+            },
             bind: function (name, value) {
                 bindings[name] = value;
             },
