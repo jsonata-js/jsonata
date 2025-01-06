@@ -10,3 +10,5 @@ npm-debug.log
 package-lock.json
 .idea/
 .nyc_output
+
+.codegpt
