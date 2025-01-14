@@ -293,6 +293,7 @@ const functions = (() => {
         }
 
         var result;
+        width = Math.trunc(width);
         var padLength = Math.abs(width) - length(str);
         if (padLength > 0) {
             var padding = (new Array(padLength + 1)).join(char);
