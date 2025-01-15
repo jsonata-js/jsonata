@@ -588,6 +588,15 @@ const functions = (() => {
     }
 
     /**
+     * Generate a UUID Version 4 (random)
+     * See https://datatracker.ietf.org/doc/html/rfc9562#name-uuid-version-4
+     * @returns {String} UUIDv4
+     */
+    function uuid() {
+        return crypto.randomUUID();
+    }
+
+    /**
      * Encode a string into a component for a url
      * @param {String} str - String to encode
      * @returns {string} Encoded string
@@ -2064,7 +2073,7 @@ const functions = (() => {
         boolean, not,
         map, zip, filter, single, foldLeft, sift,
         keys, lookup, append, exists, spread, merge, reverse, each, error, assert, type, sort, shuffle, distinct,
-        base64encode, base64decode,  encodeUrlComponent, encodeUrl, decodeUrlComponent, decodeUrl
+        base64encode, base64decode,  encodeUrlComponent, encodeUrl, decodeUrlComponent, decodeUrl, uuid
     };
 })();
 
