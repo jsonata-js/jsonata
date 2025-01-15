@@ -19,7 +19,7 @@
 
   // Extra plugins required
   "plugins": [
-    "ideal", // for tabs in file
+//    "ideal", // for tabs in file
     "promise"
   ],
 
@@ -29,7 +29,7 @@
     "brace-style": ["error", "1tbs", {"allowSingleLine": true}],
     "dot-notation": "error",
     "eqeqeq": "error",
-    "ideal/no-tabs-in-file": "error",
+//    "ideal/no-tabs-in-file": "error",
     "indent": ["error", 4, {"SwitchCase": 1}],
     "max-len": ["error", 1000, {"ignoreComments": true}],
     "new-cap": ["error", {"capIsNewExceptions": ["Router"]}],

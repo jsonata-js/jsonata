@@ -11,9 +11,7 @@ const utils = require('./utils');
  * Implements the xpath-functions format-date-time specification
  * @type {{formatInteger, formatDateTime, parseInteger, parseDateTime}}
  */
-const dateTime = (function () {
-    'use strict';
-
+const dateTime = (function() {
     const stringToArray = utils.stringToArray;
 
     const few = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
@@ -30,7 +28,7 @@ const dateTime = (function () {
      * @returns {string} - representation in words
      */
     function numberToWords(value, ordinal) {
-        var lookup = function (num, prev, ord) {
+        var lookup = function(num, prev, ord) {
             var words = '';
             if (num <= 19) {
                 words = (prev ? ' and ' : '') + (ord ? ordinals[num] : few[num]);
@@ -75,19 +73,19 @@ const dateTime = (function () {
     }
 
     const wordValues = {};
-    few.forEach(function (word, index) {
+    few.forEach(function(word, index) {
         wordValues[word.toLowerCase()] = index;
     });
-    ordinals.forEach(function (word, index) {
+    ordinals.forEach(function(word, index) {
         wordValues[word.toLowerCase()] = index;
     });
-    decades.forEach(function (word, index) {
+    decades.forEach(function(word, index) {
         const lword = word.toLowerCase();
         wordValues[lword] = (index + 2) * 10;
         wordValues[lword.substring(0, word.length - 1) + 'ieth'] = wordValues[lword];
     });
     wordValues.hundredth = 100;
-    magnitudes.forEach(function (word, index) {
+    magnitudes.forEach(function(word, index) {
         const lword = word.toLowerCase();
         const val = Math.pow(10, (index + 1) * 3);
         wordValues[lword] = val;
@@ -422,7 +420,7 @@ const dateTime = (function () {
                     format.optionalDigits = optionalDigits;
                     // grouping separator template
                     // are the grouping-separator-signs 'regular'?
-                    const regularRepeat = function (separators) {
+                    const regularRepeat = function(separators) {
                         // are the grouping positions regular? i.e. same interval between each of them
                         // is there at least one separator?
                         if (separators.length === 0) {
@@ -437,7 +435,7 @@ const dateTime = (function () {
                         }
                         // are they equally spaced?
                         const indexes = separators.map(separator => separator.position);
-                        const gcd = function (a, b) {
+                        const gcd = function(a, b) {
                             return b === 0 ? a : gcd(b, a % b);
                         };
                         // find the greatest common divisor of all the positions
@@ -492,7 +490,7 @@ const dateTime = (function () {
             type: 'datetime',
             parts: spec
         };
-        const addLiteral = function (start, end) {
+        const addLiteral = function(start, end) {
             if (end > start) {
                 let literal = picture.substring(start, end);
                 // replace any doubled ]] with single ]
@@ -541,7 +539,7 @@ const dateTime = (function () {
                     const widthMod = marker.substring(comma + 1);
                     const dash = widthMod.indexOf('-');
                     let min, max;
-                    const parseWidth = function (wm) {
+                    const parseWidth = function(wm) {
                         if (typeof wm === 'undefined' || wm === '*') {
                             return undefined;
                         } else {
@@ -642,7 +640,7 @@ const dateTime = (function () {
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const millisInADay = 1000 * 60 * 60 * 24;
 
-    const startOfFirstWeek = function (ym) {
+    const startOfFirstWeek = function(ym) {
         // ISO 8601 defines the first week of the year to be the week that contains the first Thursday
         // XPath F&O extends this same definition for the first week of a month
         // the week starts on a Monday - calculate the millis for the start of the first week
@@ -656,26 +654,26 @@ const dateTime = (function () {
         return dayOfJan1 > 4 ? jan1 + (8 - dayOfJan1) * millisInADay : jan1 - (dayOfJan1 - 1) * millisInADay;
     };
 
-    const yearMonth = function (year, month) {
+    const yearMonth = function(year, month) {
         return {
             year: year,
             month: month,
-            nextMonth: function () {
+            nextMonth: function() {
                 return (month === 11) ? yearMonth(year + 1, 0) : yearMonth(year, month + 1);
             },
-            previousMonth: function () {
+            previousMonth: function() {
                 return (month === 0) ? yearMonth(year - 1, 11) : yearMonth(year, month - 1);
             },
-            nextYear: function () {
+            nextYear: function() {
                 return yearMonth(year + 1, month);
             },
-            previousYear: function () {
+            previousYear: function() {
                 return yearMonth(year - 1, month);
             }
         };
     };
 
-    const deltaWeeks = function (start, end) {
+    const deltaWeeks = function(start, end) {
         return (end - start) / (millisInADay * 7) + 1;
     };
 
@@ -838,7 +836,7 @@ const dateTime = (function () {
             offsetMinutes = offset % 100;
         }
 
-        var formatComponent = function (date, markerSpec) {
+        var formatComponent = function(date, markerSpec) {
             var componentValue = getDateTimeFragment(date, markerSpec.component);
 
             // §9.8.4.3 Formatting Integer-Valued Date/Time Components
@@ -930,7 +928,7 @@ const dateTime = (function () {
         const dateTime = new Date(millis + offsetMillis);
 
         let result = '';
-        formatSpec.parts.forEach(function (part) {
+        formatSpec.parts.forEach(function(part) {
             if (part.type === 'literal') {
                 result += part.value;
             } else {
@@ -950,7 +948,7 @@ const dateTime = (function () {
         var matcher = {};
         if (formatSpec.type === 'datetime') {
             matcher.type = 'datetime';
-            matcher.parts = formatSpec.parts.map(function (part) {
+            matcher.parts = formatSpec.parts.map(function(part) {
                 var res = {};
                 if (part.type === 'literal') {
                     res.regex = part.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -998,7 +996,7 @@ const dateTime = (function () {
                     var lookup = {};
                     if (part.component === 'M' || part.component === 'x') {
                         // months
-                        months.forEach(function (name, index) {
+                        months.forEach(function(name, index) {
                             if (part.width && part.width.max) {
                                 lookup[name.substring(0, part.width.max)] = index + 1;
                             } else {
@@ -1007,7 +1005,7 @@ const dateTime = (function () {
                         });
                     } else if (part.component === 'F') {
                         // days
-                        days.forEach(function (name, index) {
+                        days.forEach(function(name, index) {
                             if (index > 0) {
                                 if (part.width && part.width.max) {
                                     lookup[name.substring(0, part.width.max)] = index;
@@ -1025,7 +1023,7 @@ const dateTime = (function () {
                             value: part.component
                         };
                     }
-                    res.parse = function (value) {
+                    res.parse = function(value) {
                         return lookup[value];
                     };
                 }
@@ -1049,19 +1047,19 @@ const dateTime = (function () {
             switch (formatSpec.primary) {
                 case formats.LETTERS:
                     matcher.regex = isUpper ? '[A-Z]+' : '[a-z]+';
-                    matcher.parse = function (value) {
+                    matcher.parse = function(value) {
                         return lettersToDecimal(value, isUpper ? 'A' : 'a');
                     };
                     break;
                 case formats.ROMAN:
                     matcher.regex = isUpper ? '[MDCLXVI]+' : '[mdclxvi]+';
-                    matcher.parse = function (value) {
+                    matcher.parse = function(value) {
                         return romanToDecimal(isUpper ? value : value.toUpperCase());
                     };
                     break;
                 case formats.WORDS:
                     matcher.regex = '(?:' + Object.keys(wordValues).concat('and', '[\\-, ]').join('|') + ')+';
-                    matcher.parse = function (value) {
+                    matcher.parse = function(value) {
                         return wordsToNumber(value.toLowerCase());
                     };
                     break;
@@ -1071,7 +1069,7 @@ const dateTime = (function () {
                         // ordinals
                         matcher.regex += '(?:th|st|nd|rd)';
                     }
-                    matcher.parse = function (value) {
+                    matcher.parse = function(value) {
                         let digits = value;
                         if (formatSpec.ordinal) {
                             // strip off the suffix
@@ -1322,7 +1320,7 @@ const dateTime = (function () {
             if (!iso8601regex.test(timestamp)) {
                 throw {
                     stack: (new Error()).stack,
-                    code: "D3110",
+                    code: 'D3110',
                     value: timestamp
                 };
             }

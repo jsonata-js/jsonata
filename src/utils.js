@@ -5,7 +5,7 @@
  */
 
 const utils = (() => {
-    'use strict';
+
 
     /**
      * Check if value is a finite number
@@ -18,7 +18,7 @@ const utils = (() => {
             isNum = !isNaN(n);
             if (isNum && !isFinite(n)) {
                 throw {
-                    code: "D1001",
+                    code: 'D1001',
                     value: n,
                     stack: (new Error()).stack
                 };
@@ -107,7 +107,7 @@ const utils = (() => {
     }
 
     // istanbul ignore next
-    var iteratorSymbol = (typeof Symbol === "function" ? Symbol : {}).iterator || "@@iterator";
+    var iteratorSymbol = (typeof Symbol === 'function' ? Symbol : {}).iterator || '@@iterator';
 
     /**
      * @param {Object} arg - expression to test

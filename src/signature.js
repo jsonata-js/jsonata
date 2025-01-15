@@ -7,17 +7,17 @@
 var utils = require('./utils');
 
 const signature = (() => {
-    'use strict';
+
 
     // A mapping between the function signature symbols and the full plural of the type
     // Expected to be used in error messages
     var arraySignatureMapping = {
-        "a": "arrays",
-        "b": "booleans",
-        "f": "functions",
-        "n": "numbers",
-        "o": "objects",
-        "s": "strings"
+        'a': 'arrays',
+        'b': 'booleans',
+        'f': 'functions',
+        'n': 'numbers',
+        'o': 'objects',
+        's': 'strings'
     };
 
     /**
@@ -41,13 +41,13 @@ const signature = (() => {
                 break;
             }
 
-            var next = function () {
+            var next = function() {
                 params.push(param);
                 prevParam = param;
                 param = {};
             };
 
-            var findClosingBracket = function (str, start, openSymbol, closeSymbol) {
+            var findClosingBracket = function(str, start, openSymbol, closeSymbol) {
                 // returns the position of the closing symbol (e.g. bracket) in a string
                 // that balances the opening symbol at position start
                 var depth = 1;
@@ -119,7 +119,7 @@ const signature = (() => {
                     } else {
                         // TODO harder
                         throw {
-                            code: "S0402",
+                            code: 'S0402',
                             stack: (new Error()).stack,
                             value: choice,
                             offset: position
@@ -137,7 +137,7 @@ const signature = (() => {
                         position = endPos;
                     } else {
                         throw {
-                            code: "S0401",
+                            code: 'S0401',
                             stack: (new Error()).stack,
                             value: prevParam.type,
                             offset: position
@@ -148,12 +148,12 @@ const signature = (() => {
             position++;
         }
         var regexStr = '^' +
-            params.map(function (param) {
+            params.map(function(param) {
                 return '(' + param.regex + ')';
             }).join('') +
             '$';
         var regex = new RegExp(regexStr);
-        var getSymbol = function (value) {
+        var getSymbol = function(value) {
             var symbol;
             if (utils.isFunction(value)) {
                 symbol = 'f';
@@ -187,7 +187,7 @@ const signature = (() => {
             return symbol;
         };
 
-        var throwValidationError = function (badArgs, badSig) {
+        var throwValidationError = function(badArgs, badSig) {
             // to figure out where this went wrong we need apply each component of the
             // regex to each argument until we get to the one that fails to match
             var partialPattern = '^';
@@ -198,7 +198,7 @@ const signature = (() => {
                 if (match === null) {
                     // failed here
                     throw {
-                        code: "T0410",
+                        code: 'T0410',
                         stack: (new Error()).stack,
                         value: badArgs[goodTo],
                         index: goodTo + 1
@@ -209,7 +209,7 @@ const signature = (() => {
             // if it got this far, it's probably because of extraneous arguments (we
             // haven't added the trailing '$' in the regex yet.
             throw {
-                code: "T0410",
+                code: 'T0410',
                 stack: (new Error()).stack,
                 value: badArgs[goodTo],
                 index: goodTo + 1
@@ -218,16 +218,16 @@ const signature = (() => {
 
         return {
             definition: signature,
-            validate: function (args, context) {
+            validate: function(args, context) {
                 var suppliedSig = '';
-                args.forEach(function (arg) {
+                args.forEach(function(arg) {
                     suppliedSig += getSymbol(arg);
                 });
                 var isValid = regex.exec(suppliedSig);
                 if (isValid) {
                     var validatedArgs = [];
                     var argIndex = 0;
-                    params.forEach(function (param, index) {
+                    params.forEach(function(param, index) {
                         var arg = args[argIndex];
                         var match = isValid[index + 1];
                         if (match === '') {
@@ -241,7 +241,7 @@ const signature = (() => {
                                 } else {
                                     // context value not compatible with this argument
                                     throw {
-                                        code: "T0411",
+                                        code: 'T0411',
                                         stack: (new Error()).stack,
                                         value: context,
                                         index: argIndex + 1
@@ -254,7 +254,7 @@ const signature = (() => {
                         } else {
                             // may have matched multiple args (if the regex ends with a '+'
                             // split into single tokens
-                            match.split('').forEach(function (single) {
+                            match.split('').forEach(function(single) {
                                 if (param.type === 'a') {
                                     if (single === 'm') {
                                         // missing (undefined)
@@ -273,7 +273,7 @@ const signature = (() => {
                                                         arrayOK = false;
                                                     } else {
                                                         // make sure every item in the array is this type
-                                                        var differentItems = arg.filter(function (val) {
+                                                        var differentItems = arg.filter(function(val) {
                                                             return (getSymbol(val) !== itemType);
                                                         });
                                                         arrayOK = (differentItems.length === 0);
@@ -283,7 +283,7 @@ const signature = (() => {
                                         }
                                         if (!arrayOK) {
                                             throw {
-                                                code: "T0412",
+                                                code: 'T0412',
                                                 stack: (new Error()).stack,
                                                 value: arg,
                                                 index: argIndex + 1,

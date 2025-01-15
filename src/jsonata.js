@@ -22,7 +22,7 @@ var parseSignature = require('./signature');
  * @returns {{evaluate: evaluate, assign: assign}} Evaluated expression
  */
 var jsonata = (function() {
-    'use strict';
+
 
     var isNumeric = utils.isNumeric;
     var isArrayOfStrings = utils.isArrayOfStrings;
@@ -178,12 +178,10 @@ var jsonata = (function() {
             // if the first step is an explicit array constructor, then just evaluate that (i.e. don't iterate over a context array)
             if(ii === 0 && step.consarray) {
                 resultSequence = await evaluate(step, inputSequence, environment);
+            } else if(isTupleStream) {
+                tupleBindings = await evaluateTupleStep(step, inputSequence, tupleBindings, environment);
             } else {
-                if(isTupleStream) {
-                    tupleBindings = await evaluateTupleStep(step, inputSequence, tupleBindings, environment);
-                } else {
-                    resultSequence = await evaluateStep(step, inputSequence, environment, ii === expr.steps.length - 1);
-                }
+                resultSequence = await evaluateStep(step, inputSequence, environment, ii === expr.steps.length - 1);
             }
 
             if (!isTupleStream && (typeof resultSequence === 'undefined' || resultSequence.length === 0)) {
@@ -216,13 +214,15 @@ var jsonata = (function() {
             resultSequence.keepSingleton = true;
         }
 
+        // eslint-disable-next-line no-prototype-builtins
         if (expr.hasOwnProperty('group')) {
-            resultSequence = await evaluateGroupExpression(expr.group, isTupleStream ? tupleBindings : resultSequence, environment)
+            resultSequence = await evaluateGroupExpression(expr.group, isTupleStream ? tupleBindings : resultSequence, environment);
         }
 
         return resultSequence;
     }
 
+    // eslint-disable-next-line require-jsdoc
     function createFrameFromTuple(environment, tuple) {
         var frame = createFrame(environment);
         for(const prop in tuple) {
@@ -242,11 +242,11 @@ var jsonata = (function() {
     async function evaluateStep(expr, input, environment, lastStep) {
         var result;
         if(expr.type === 'sort') {
-             result = await evaluateSortExpression(expr, input, environment);
-             if(expr.stages) {
-                 result = await evaluateStages(expr.stages, result, environment);
-             }
-             return result;
+            result = await evaluateSortExpression(expr, input, environment);
+            if(expr.stages) {
+                result = await evaluateStages(expr.stages, result, environment);
+            }
+            return result;
         }
 
         result = createSequence();
@@ -282,6 +282,7 @@ var jsonata = (function() {
         return resultSequence;
     }
 
+    // eslint-disable-next-line require-jsdoc
     async function evaluateStages(stages, input, environment) {
         var result = input;
         for(var ss = 0; ss < stages.length; ss++) {
@@ -334,7 +335,7 @@ var jsonata = (function() {
         result.tupleStream = true;
         var stepEnv = environment;
         if(tupleBindings === undefined) {
-            tupleBindings = input.map(item => { return {'@': item} });
+            tupleBindings = input.map(item => { return {'@': item}; });
         }
 
         for(var ee = 0; ee < tupleBindings.length; ee++) {
@@ -407,6 +408,7 @@ var jsonata = (function() {
             }
         } else {
             for (index = 0; index < input.length; index++) {
+                // eslint-disable-next-line no-redeclare
                 var item = input[index];
                 var context = item;
                 var env = environment;
@@ -419,7 +421,7 @@ var jsonata = (function() {
                     res = [res];
                 }
                 if (isArrayOfNumbers(res)) {
-                    res.forEach(function (ires) {
+                    res.forEach(function(ires) {
                         // round it down
                         var ii = Math.floor(ires);
                         if (ii < 0) {
@@ -451,8 +453,8 @@ var jsonata = (function() {
         var op = expr.value;
 
         //defer evaluation of RHS to allow short-circuiting
-        var evalrhs = async () => await evaluate(expr.rhs, input, environment);
-        if (op === "and" || op === "or") {
+        var evalrhs = async() => await evaluate(expr.rhs, input, environment);
+        if (op === 'and' || op === 'or') {
             try {
                 return await evaluateBooleanExpression(lhs, evalrhs, op);
             } catch(err) {
@@ -519,7 +521,7 @@ var jsonata = (function() {
                     result = -result;
                 } else {
                     throw {
-                        code: "D1002",
+                        code: 'D1002',
                         stack: (new Error()).stack,
                         position: expr.position,
                         token: expr.value,
@@ -530,10 +532,11 @@ var jsonata = (function() {
             case '[':
                 // array constructor - evaluate each item
                 result = [];
+                // eslint-disable-next-line no-case-declarations
                 let generators = await Promise.all(expr.expressions
-                    .map(async (item, idx) => {
-                        environment.isParallelCall = idx > 0
-                        return [item, await evaluate(item, input, environment)]
+                    .map(async(item, idx) => {
+                        environment.isParallelCall = idx > 0;
+                        return [item, await evaluate(item, input, environment)];
                     }));
                 for (let generator of generators) {
                     var [item, value] = generator;
@@ -569,6 +572,7 @@ var jsonata = (function() {
      * @param {Object} environment - Environment
      * @returns {*} Evaluated input data
      */
+    // eslint-disable-next-line no-unused-vars, require-jsdoc
     function evaluateName(expr, input, environment) {
         // lookup the 'name' item in the input
         return fn.lookup(input, expr.value);
@@ -595,7 +599,7 @@ var jsonata = (function() {
             input = input[0];
         }
         if (input !== null && typeof input === 'object') {
-            Object.keys(input).forEach(function (key) {
+            Object.keys(input).forEach(function(key) {
                 var value = input[key];
                 if(Array.isArray(value)) {
                     value = flatten(value);
@@ -621,7 +625,7 @@ var jsonata = (function() {
             flattened = [];
         }
         if(Array.isArray(arg)) {
-            arg.forEach(function (item) {
+            arg.forEach(function(item) {
                 flatten(item, flattened);
             });
         } else {
@@ -662,11 +666,11 @@ var jsonata = (function() {
             results.push(input);
         }
         if (Array.isArray(input)) {
-            input.forEach(function (member) {
+            input.forEach(function(member) {
                 recurseDescendants(member, results);
             });
         } else if (input !== null && typeof input === 'object') {
-            Object.keys(input).forEach(function (key) {
+            Object.keys(input).forEach(function(key) {
                 recurseDescendants(input[key], results);
             });
         }
@@ -684,14 +688,14 @@ var jsonata = (function() {
 
         if (typeof lhs !== 'undefined' && !isNumeric(lhs)) {
             throw {
-                code: "T2001",
+                code: 'T2001',
                 stack: (new Error()).stack,
                 value: lhs
             };
         }
         if (typeof rhs !== 'undefined' && !isNumeric(rhs)) {
             throw {
-                code: "T2002",
+                code: 'T2002',
                 stack: (new Error()).stack,
                 value: rhs
             };
@@ -772,7 +776,7 @@ var jsonata = (function() {
         // if either aa or bb are not comparable (string or numeric) values, then throw an error
         if (!lcomparable || !rcomparable) {
             throw {
-                code: "T2010",
+                code: 'T2010',
                 stack: (new Error()).stack,
                 value: !(ltype === 'string' || ltype === 'number') ? lhs : rhs
             };
@@ -786,7 +790,7 @@ var jsonata = (function() {
         //if aa and bb are not of the same type
         if (ltype !== rtype) {
             throw {
-                code: "T2009",
+                code: 'T2009',
                 stack: (new Error()).stack,
                 value: lhs,
                 value2: rhs
@@ -862,6 +866,7 @@ var jsonata = (function() {
         return result;
     }
 
+    // eslint-disable-next-line require-jsdoc
     function boolize(value) {
         var booledValue = fn.boolean(value);
         return typeof booledValue === 'undefined' ? false : booledValue;
@@ -918,7 +923,7 @@ var jsonata = (function() {
                 // key has to be a string
                 if (typeof  key !== 'string' && key !== undefined) {
                     throw {
-                        code: "T1003",
+                        code: 'T1003',
                         stack: (new Error()).stack,
                         position: expr.position,
                         value: key
@@ -927,13 +932,14 @@ var jsonata = (function() {
 
                 if (key !== undefined) {
                     var entry = {data: item, exprIndex: pairIndex};
+                    // eslint-disable-next-line no-prototype-builtins
                     if (groups.hasOwnProperty(key)) {
                         // a value already exists in this slot
                         if(groups[key].exprIndex !== pairIndex) {
                             // this key has been generated by another expression in this group
                             // when multiple key expressions evaluate to the same key, then error D1009 must be thrown
                             throw {
-                                code: "D1009",
+                                code: 'D1009',
                                 stack: (new Error()).stack,
                                 position: expr.position,
                                 value: key
@@ -950,7 +956,7 @@ var jsonata = (function() {
         }
 
         // iterate over the groups to evaluate the 'value' expression
-        let generators = await Promise.all(Object.keys(groups).map(async (key, idx) => {
+        let generators = await Promise.all(Object.keys(groups).map(async(key, idx) => {
             let entry = groups[key];
             var context = entry.data;
             var env = environment;
@@ -960,11 +966,12 @@ var jsonata = (function() {
                 delete tuple['@'];
                 env = createFrameFromTuple(environment, tuple);
             }
-            environment.isParallelCall = idx > 0
+            environment.isParallelCall = idx > 0;
             return [key, await evaluate(expr.lhs[entry.exprIndex][1], context, env)];
         }));
 
         for (let generator of generators) {
+            // eslint-disable-next-line no-redeclare
             var [key, value] = await generator;
             if(typeof value !== 'undefined') {
                 result[key] = value;
@@ -974,6 +981,7 @@ var jsonata = (function() {
         return result;
     }
 
+    // eslint-disable-next-line require-jsdoc
     function reduceTupleStream(tupleStream) {
         if(!Array.isArray(tupleStream)) {
             return tupleStream;
@@ -999,14 +1007,14 @@ var jsonata = (function() {
 
         if (typeof lhs !== 'undefined' && !Number.isInteger(lhs)) {
             throw {
-                code: "T2003",
+                code: 'T2003',
                 stack: (new Error()).stack,
                 value: lhs
             };
         }
         if (typeof rhs !== 'undefined' && !Number.isInteger(rhs)) {
             throw {
-                code: "T2004",
+                code: 'T2004',
                 stack: (new Error()).stack,
                 value: rhs
             };
@@ -1028,7 +1036,7 @@ var jsonata = (function() {
         var size = rhs - lhs + 1;
         if(size > 1e7) {
             throw {
-                code: "D2014",
+                code: 'D2014',
                 stack: (new Error()).stack,
                 value: size
             };
@@ -1077,18 +1085,19 @@ var jsonata = (function() {
 
     /**
      * Вызов обработчика шага отладки
-     * @param {*} step              - текущий шаг
-     * @param {*} input             - входящие данные
-     * @param {*} environment       - переменные среды
+     * @param {*} step              - Текущий шаг
+     * @param {*} $                 - Входящие данные
+     * @param {*} input             - Текущий контекст
+     * @param {*} environment       - Переменные среды
      */
     async function debugStep(step, $, input, environment) {
         const debug = environment.__debugger__;
         if (debug.debuggerHandle) {
             debug.step = step;
             if (
-                step.type === 'debugger' 
-                || (debug.action === 'into' )
-                || ((debug.action === 'next') &&  (debug.deep >= debug.stack.length))
+                step.type === 'debugger' ||
+                (debug.action === 'into' ) ||
+                ((debug.action === 'next') &&  (debug.deep >= debug.stack.length))
             ) {
                 debug.deep = debug.stack.length;
                 debug.action = await environment.__debugger__.debuggerHandle({
@@ -1099,7 +1108,7 @@ var jsonata = (function() {
                 });
                 if (debug.action === 'stop') {
                     throw {
-                        code: "DBG01",
+                        code: 'DBG01',
                         stack: (new Error()).stack,
                         position: step.position,
                         value: $
@@ -1125,7 +1134,7 @@ var jsonata = (function() {
         // only return the result of the last one
         for(var ii = 0; ii < expr.expressions.length; ii++) {
             const step = expr.expressions[ii];
-            await debugStep(step, result, input, environment);
+            await debugStep(step, result, input, frame);
             if (step.type !== 'debugger') result = await evaluate(expr.expressions[ii], input, frame);
         }
         return result;
@@ -1162,7 +1171,7 @@ var jsonata = (function() {
                         if(next && next.match === '') {
                             // matches zero length string; this will never progress
                             throw {
-                                code: "D1004",
+                                code: 'D1004',
                                 stack: (new Error()).stack,
                                 position: expr.position,
                                 value: expr.value.source
@@ -1213,7 +1222,7 @@ var jsonata = (function() {
 
         // sort the lhs array
         // use comparator function
-        var comparator = async function(a, b) { 
+        var comparator = async function(a, b) {
             // expr.terms is an array of order-by in priority order
             var comp = 0;
             for(var index = 0; comp === 0 && index < expr.terms.length; index++) {
@@ -1252,7 +1261,7 @@ var jsonata = (function() {
                 // if aa or bb are not string or numeric values, then throw an error
                 if(!(atype === 'string' || atype === 'number') || !(btype === 'string' || btype === 'number')) {
                     throw {
-                        code: "T2008",
+                        code: 'T2008',
                         stack: (new Error()).stack,
                         position: expr.position,
                         value: !(atype === 'string' || atype === 'number') ? aa : bb
@@ -1262,7 +1271,7 @@ var jsonata = (function() {
                 //if aa and bb are not of the same type
                 if(atype !== btype) {
                     throw {
-                        code: "T2007",
+                        code: 'T2007',
                         stack: (new Error()).stack,
                         position: expr.position,
                         value: aa,
@@ -1304,7 +1313,7 @@ var jsonata = (function() {
      */
     function evaluateTransformExpression(expr, input, environment) {
         // create a function to implement the transform definition
-        var transformer = async function (obj) { // signature <(oa):o>
+        var transformer = async function(obj) { // signature <(oa):o>
             // undefined inputs always return undefined
             if(typeof obj === 'undefined') {
                 return undefined;
@@ -1315,7 +1324,7 @@ var jsonata = (function() {
             if(!isFunction(cloneFunction)) {
                 // throw type error
                 throw {
-                    code: "T2013",
+                    code: 'T2013',
                     stack: (new Error()).stack,
                     position: expr.position
                 };
@@ -1328,9 +1337,10 @@ var jsonata = (function() {
                 }
                 for(var ii = 0; ii < matches.length; ii++) {
                     var match = matches[ii];
+                    // eslint-disable-next-line no-prototype-builtins
                     if (match && (match.isPrototypeOf(result) || match instanceof Object.constructor)) {
                         throw {
-                            code: "D1010",
+                            code: 'D1010',
                             stack: (new Error()).stack,
                             position: expr.position
                         };
@@ -1343,7 +1353,7 @@ var jsonata = (function() {
                         if(updateType !== 'object' || update === null || Array.isArray(update)) {
                             // throw type error
                             throw {
-                                code: "T2011",
+                                code: 'T2011',
                                 stack: (new Error()).stack,
                                 position: expr.update.position,
                                 value: update
@@ -1366,7 +1376,7 @@ var jsonata = (function() {
                             if (!isArrayOfStrings(deletions)) {
                                 // throw type error
                                 throw {
-                                    code: "T2012",
+                                    code: 'T2012',
                                     stack: (new Error()).stack,
                                     position: expr.delete.position,
                                     value: val
@@ -1410,7 +1420,7 @@ var jsonata = (function() {
 
             if(!isFunction(func)) {
                 throw {
-                    code: "T2006",
+                    code: 'T2006',
                     stack: (new Error()).stack,
                     position: expr.position,
                     value: func
@@ -1431,6 +1441,7 @@ var jsonata = (function() {
         return result;
     }
 
+    // eslint-disable-next-line valid-jsdoc
     /**
      * Evaluate function against input data
      * @param {Object} expr - JSONata expression
@@ -1450,7 +1461,7 @@ var jsonata = (function() {
         if (typeof proc === 'undefined' && expr.procedure.type === 'path' && environment.lookup(expr.procedure.steps[0].value)) {
             // help the user out here if they simply forgot the leading $
             throw {
-                code: "T1005",
+                code: 'T1005',
                 stack: (new Error()).stack,
                 position: expr.position,
                 token: expr.procedure.steps[0].value
@@ -1466,7 +1477,7 @@ var jsonata = (function() {
             const arg = await evaluate(expr.arguments[jj], input, environment);
             if(isFunction(arg)) {
                 // wrap this in a closure
-                const closure = async function (...params) {
+                const closure = async function(...params) {
                     // invoke func
                     return await apply(arg, params, null, environment);
                 };
@@ -1486,7 +1497,7 @@ var jsonata = (function() {
             if (environment && environment.__debugger__.debuggerHandle) {
                 environment.__debugger__.stack.push({
                     entry: environment.__debugger__.step,
-                    source: environment.__debugger__.stack.slice(-1).source
+                    source: environment.__debugger__.stack.slice(-1)[0].source
                 });
                 result = await apply(proc, evaluatedArgs, input, environment);
                 environment.__debugger__.stack.pop();
@@ -1579,13 +1590,13 @@ var jsonata = (function() {
                 }
             } else {
                 throw {
-                    code: "T1006",
+                    code: 'T1006',
                     stack: (new Error()).stack
                 };
             }
         } catch(err) {
             if(proc) {
-                if (typeof err.token == 'undefined' && typeof proc.token !== 'undefined') {
+                if (typeof err.token === 'undefined' && typeof proc.token !== 'undefined') {
                     err.token = proc.token;
                 }
                 err.position = proc.position || err.position;
@@ -1616,7 +1627,7 @@ var jsonata = (function() {
             procedure.thunk = true;
         }
         procedure.apply = async function(self, args) {
-            return await apply(procedure, args, input, !!self ? self.environment : environment);
+            return await apply(procedure, args, input, self ? self.environment : environment);
         };
         return procedure;
     }
@@ -1646,7 +1657,7 @@ var jsonata = (function() {
         if (typeof proc === 'undefined' && expr.procedure.type === 'path' && environment.lookup(expr.procedure.steps[0].value)) {
             // help the user out here if they simply forgot the leading $
             throw {
-                code: "T1007",
+                code: 'T1007',
                 stack: (new Error()).stack,
                 position: expr.position,
                 token: expr.procedure.steps[0].value
@@ -1660,7 +1671,7 @@ var jsonata = (function() {
             result = partialApplyNativeFunction(proc, evaluatedArgs);
         } else {
             throw {
-                code: "T1008",
+                code: 'T1008',
                 stack: (new Error()).stack,
                 position: expr.position,
                 token: expr.procedure.type === 'path' ? expr.procedure.steps[0].value : expr.procedure.value
@@ -1694,7 +1705,7 @@ var jsonata = (function() {
     async function applyProcedure(proc, args) {
         var result;
         var env = createFrame(proc.environment);
-        proc.arguments.forEach(function (param, index) {
+        proc.arguments.forEach(function(param, index) {
             env.bind(param.value, args[index]);
         });
         if (typeof proc.body === 'function') {
@@ -1716,7 +1727,7 @@ var jsonata = (function() {
         // create a closure, bind the supplied parameters and return a function that takes the remaining (?) parameters
         var env = createFrame(proc.environment);
         var unboundArgs = [];
-        proc.arguments.forEach(function (param, index) {
+        proc.arguments.forEach(function(param, index) {
             var arg = args[index];
             if (arg && arg.type === 'operator' && arg.value === '?') {
                 unboundArgs.push(param);
@@ -1745,7 +1756,7 @@ var jsonata = (function() {
         // get the list of declared arguments from the native function
         // this has to be picked out from the toString() value
         var sigArgs = getNativeFunctionArguments(native);
-        sigArgs = sigArgs.map(function (sigArg) {
+        sigArgs = sigArgs.map(function(sigArg) {
             return '$' + sigArg.trim();
         });
         var body = 'function(' + sigArgs.join(', ') + '){ _ }';
@@ -1766,7 +1777,7 @@ var jsonata = (function() {
     async function applyNativeFunction(proc, env) {
         var sigArgs = getNativeFunctionArguments(proc);
         // generate the array of arguments for invoking the function - look them up in the environment
-        var args = sigArgs.map(function (sigArg) {
+        var args = sigArgs.map(function(sigArg) {
             return env.lookup(sigArg.trim());
         });
 
@@ -1810,6 +1821,7 @@ var jsonata = (function() {
     }
 
 
+    // eslint-disable-next-line valid-jsdoc
     /**
      * parses and evaluates the supplied expression
      * @param {string} expr - expression to evaluate
@@ -1837,7 +1849,7 @@ var jsonata = (function() {
             populateMessage(err);
             throw {
                 stack: (new Error()).stack,
-                code: "D3120",
+                code: 'D3120',
                 value: err.message,
                 error: err
             };
@@ -1857,7 +1869,7 @@ var jsonata = (function() {
             populateMessage(err);
             throw {
                 stack: (new Error()).stack,
-                code: "D3121",
+                code: 'D3121',
                 value:err.message,
                 error: err
             };
@@ -1888,14 +1900,19 @@ var jsonata = (function() {
     function createFrame(enclosingEnvironment) {
         var bindings = {};
         const newFrame = {
-            bindings: function () {
-                return Object.keys(bindings);
+            // Возвращает список доступных переменных
+            bindings: function(includeStatic = false) {
+                const staticVariables = includeStatic ? [] : staticFrame.bindings(true);
+                let result = Object.keys(bindings);
+                result = [...result, ...enclosingEnvironment?.bindings().filter((name) => !result.includes(name) && !staticVariables.includes(name)) || []];
+                return result;
             },
-            bind: function (name, value) {
+            bind: function(name, value) {
                 bindings[name] = value;
             },
-            lookup: function (name) {
+            lookup: function(name) {
                 var value;
+                // eslint-disable-next-line no-prototype-builtins
                 if(bindings.hasOwnProperty(name)) {
                     value = bindings[name];
                 } else if (enclosingEnvironment) {
@@ -1907,9 +1924,9 @@ var jsonata = (function() {
             async: enclosingEnvironment ? enclosingEnvironment.async : false,
             isParallelCall: enclosingEnvironment ? enclosingEnvironment.isParallelCall : false,
             global: enclosingEnvironment ? enclosingEnvironment.global : {
-                ancestry: [ null ]
+                ancestry: [null]
             },
-            __debugger__: enclosingEnvironment ? enclosingEnvironment.__debugger__ : {}
+            __debugger__: enclosingEnvironment ? { ...enclosingEnvironment.__debugger__ } : {}
         };
 
         if (enclosingEnvironment) {
@@ -1918,9 +1935,9 @@ var jsonata = (function() {
                 framePushCallback(enclosingEnvironment, newFrame);
             }
         }
-       
 
-        return newFrame
+
+        return newFrame;
     }
 
     // Function registration
@@ -2003,104 +2020,104 @@ var jsonata = (function() {
      *  3xxx    - functions (blocks of 10 for each function)
      */
     var errorCodes = {
-        "S0101": "String literal must be terminated by a matching quote",
-        "S0102": "Number out of range: {{token}}",
-        "S0103": "Unsupported escape sequence: \\{{token}}",
-        "S0104": "The escape sequence \\u must be followed by 4 hex digits",
-        "S0105": "Quoted property name must be terminated with a backquote (`)",
-        "S0106": "Comment has no closing tag",
-        "S0201": "Syntax error: {{token}}",
-        "S0202": "Expected {{value}}, got {{token}}",
-        "S0203": "Expected {{value}} before end of expression",
-        "S0204": "Unknown operator: {{token}}",
-        "S0205": "Unexpected token: {{token}}",
-        "S0206": "Unknown expression type: {{token}}",
-        "S0207": "Unexpected end of expression",
-        "S0208": "Parameter {{value}} of function definition must be a variable name (start with $)",
-        "S0209": "A predicate cannot follow a grouping expression in a step",
-        "S0210": "Each step can only have one grouping expression",
-        "S0211": "The symbol {{token}} cannot be used as a unary operator",
-        "S0212": "The left side of := must be a variable name (start with $)",
-        "S0213": "The literal value {{value}} cannot be used as a step within a path expression",
-        "S0214": "The right side of {{token}} must be a variable name (start with $)",
-        "S0215": "A context variable binding must precede any predicates on a step",
-        "S0216": "A context variable binding must precede the 'order-by' clause on a step",
-        "S0217": "The object representing the 'parent' cannot be derived from this expression",
-        "S0301": "Empty regular expressions are not allowed",
-        "S0302": "No terminating / in regular expression",
-        "S0402": "Choice groups containing parameterized types are not supported",
-        "S0401": "Type parameters can only be applied to functions and arrays",
-        "S0500": "Attempted to evaluate an expression containing syntax error(s)",
-        "T0410": "Argument {{index}} of function {{token}} does not match function signature",
-        "T0411": "Context value is not a compatible type with argument {{index}} of function {{token}}",
-        "T0412": "Argument {{index}} of function {{token}} must be an array of {{type}}",
-        "D1001": "Number out of range: {{value}}",
-        "D1002": "Cannot negate a non-numeric value: {{value}}",
-        "T1003": "Key in object structure must evaluate to a string; got: {{value}}",
-        "D1004": "Regular expression matches zero length string",
-        "T1005": "Attempted to invoke a non-function. Did you mean ${{{token}}}?",
-        "T1006": "Attempted to invoke a non-function",
-        "T1007": "Attempted to partially apply a non-function. Did you mean ${{{token}}}?",
-        "T1008": "Attempted to partially apply a non-function",
-        "D1009": "Multiple key definitions evaluate to same key: {{value}}",
-        "D1010": "Attempted to access the Javascript object prototype", // Javascript specific 
-        "T1010": "The matcher function argument passed to function {{token}} does not return the correct object structure",
-        "T2001": "The left side of the {{token}} operator must evaluate to a number",
-        "T2002": "The right side of the {{token}} operator must evaluate to a number",
-        "T2003": "The left side of the range operator (..) must evaluate to an integer",
-        "T2004": "The right side of the range operator (..) must evaluate to an integer",
-        "D2005": "The left side of := must be a variable name (start with $)",  // defunct - replaced by S0212 parser error
-        "T2006": "The right side of the function application operator ~> must be a function",
-        "T2007": "Type mismatch when comparing values {{value}} and {{value2}} in order-by clause",
-        "T2008": "The expressions within an order-by clause must evaluate to numeric or string values",
-        "T2009": "The values {{value}} and {{value2}} either side of operator {{token}} must be of the same data type",
-        "T2010": "The expressions either side of operator {{token}} must evaluate to numeric or string values",
-        "T2011": "The insert/update clause of the transform expression must evaluate to an object: {{value}}",
-        "T2012": "The delete clause of the transform expression must evaluate to a string or array of strings: {{value}}",
-        "T2013": "The transform expression clones the input object using the $clone() function.  This has been overridden in the current scope by a non-function.",
-        "D2014": "The size of the sequence allocated by the range operator (..) must not exceed 1e6.  Attempted to allocate {{value}}.",
-        "D3001": "Attempting to invoke string function on Infinity or NaN",
-        "D3010": "Second argument of replace function cannot be an empty string",
-        "D3011": "Fourth argument of replace function must evaluate to a positive number",
-        "D3012": "Attempted to replace a matched string with a non-string value",
-        "D3020": "Third argument of split function must evaluate to a positive number",
-        "D3030": "Unable to cast value to a number: {{value}}",
-        "D3040": "Third argument of match function must evaluate to a positive number",
-        "D3050": "The second argument of reduce function must be a function with at least two arguments",
-        "D3060": "The sqrt function cannot be applied to a negative number: {{value}}",
-        "D3061": "The power function has resulted in a value that cannot be represented as a JSON number: base={{value}}, exponent={{exp}}",
-        "D3070": "The single argument form of the sort function can only be applied to an array of strings or an array of numbers.  Use the second argument to specify a comparison function",
-        "D3080": "The picture string must only contain a maximum of two sub-pictures",
-        "D3081": "The sub-picture must not contain more than one instance of the 'decimal-separator' character",
-        "D3082": "The sub-picture must not contain more than one instance of the 'percent' character",
-        "D3083": "The sub-picture must not contain more than one instance of the 'per-mille' character",
-        "D3084": "The sub-picture must not contain both a 'percent' and a 'per-mille' character",
-        "D3085": "The mantissa part of a sub-picture must contain at least one character that is either an 'optional digit character' or a member of the 'decimal digit family'",
-        "D3086": "The sub-picture must not contain a passive character that is preceded by an active character and that is followed by another active character",
-        "D3087": "The sub-picture must not contain a 'grouping-separator' character that appears adjacent to a 'decimal-separator' character",
-        "D3088": "The sub-picture must not contain a 'grouping-separator' at the end of the integer part",
-        "D3089": "The sub-picture must not contain two adjacent instances of the 'grouping-separator' character",
-        "D3090": "The integer part of the sub-picture must not contain a member of the 'decimal digit family' that is followed by an instance of the 'optional digit character'",
-        "D3091": "The fractional part of the sub-picture must not contain an instance of the 'optional digit character' that is followed by a member of the 'decimal digit family'",
-        "D3092": "A sub-picture that contains a 'percent' or 'per-mille' character must not contain a character treated as an 'exponent-separator'",
-        "D3093": "The exponent part of the sub-picture must comprise only of one or more characters that are members of the 'decimal digit family'",
-        "D3100": "The radix of the formatBase function must be between 2 and 36.  It was given {{value}}",
-        "D3110": "The argument of the toMillis function must be an ISO 8601 formatted timestamp. Given {{value}}",
-        "D3120": "Syntax error in expression passed to function eval: {{value}}",
-        "D3121": "Dynamic error evaluating the expression passed to function eval: {{value}}",
-        "D3130": "Formatting or parsing an integer as a sequence starting with {{value}} is not supported by this implementation",
-        "D3131": "In a decimal digit pattern, all digits must be from the same decimal group",
-        "D3132": "Unknown component specifier {{value}} in date/time picture string",
-        "D3133": "The 'name' modifier can only be applied to months and days in the date/time picture string, not {{value}}",
-        "D3134": "The timezone integer format specifier cannot have more than four digits",
-        "D3135": "No matching closing bracket ']' in date/time picture string",
-        "D3136": "The date/time picture string is missing specifiers required to parse the timestamp",
-        "D3137": "{{{message}}}",
-        "D3138": "The $single() function expected exactly 1 matching result.  Instead it matched more.",
-        "D3139": "The $single() function expected exactly 1 matching result.  Instead it matched 0.",
-        "D3140": "Malformed URL passed to ${{{functionName}}}(): {{value}}",
-        "D3141": "{{{message}}}",
-        "DBG01": "Interrupted by debugger"
+        'S0101': 'String literal must be terminated by a matching quote',
+        'S0102': 'Number out of range: {{token}}',
+        'S0103': 'Unsupported escape sequence: \\{{token}}',
+        'S0104': 'The escape sequence \\u must be followed by 4 hex digits',
+        'S0105': 'Quoted property name must be terminated with a backquote (`)',
+        'S0106': 'Comment has no closing tag',
+        'S0201': 'Syntax error: {{token}}',
+        'S0202': 'Expected {{value}}, got {{token}}',
+        'S0203': 'Expected {{value}} before end of expression',
+        'S0204': 'Unknown operator: {{token}}',
+        'S0205': 'Unexpected token: {{token}}',
+        'S0206': 'Unknown expression type: {{token}}',
+        'S0207': 'Unexpected end of expression',
+        'S0208': 'Parameter {{value}} of function definition must be a variable name (start with $)',
+        'S0209': 'A predicate cannot follow a grouping expression in a step',
+        'S0210': 'Each step can only have one grouping expression',
+        'S0211': 'The symbol {{token}} cannot be used as a unary operator',
+        'S0212': 'The left side of := must be a variable name (start with $)',
+        'S0213': 'The literal value {{value}} cannot be used as a step within a path expression',
+        'S0214': 'The right side of {{token}} must be a variable name (start with $)',
+        'S0215': 'A context variable binding must precede any predicates on a step',
+        'S0216': 'A context variable binding must precede the \'order-by\' clause on a step',
+        'S0217': 'The object representing the \'parent\' cannot be derived from this expression',
+        'S0301': 'Empty regular expressions are not allowed',
+        'S0302': 'No terminating / in regular expression',
+        'S0402': 'Choice groups containing parameterized types are not supported',
+        'S0401': 'Type parameters can only be applied to functions and arrays',
+        'S0500': 'Attempted to evaluate an expression containing syntax error(s)',
+        'T0410': 'Argument {{index}} of function {{token}} does not match function signature',
+        'T0411': 'Context value is not a compatible type with argument {{index}} of function {{token}}',
+        'T0412': 'Argument {{index}} of function {{token}} must be an array of {{type}}',
+        'D1001': 'Number out of range: {{value}}',
+        'D1002': 'Cannot negate a non-numeric value: {{value}}',
+        'T1003': 'Key in object structure must evaluate to a string; got: {{value}}',
+        'D1004': 'Regular expression matches zero length string',
+        'T1005': 'Attempted to invoke a non-function. Did you mean ${{{token}}}?',
+        'T1006': 'Attempted to invoke a non-function',
+        'T1007': 'Attempted to partially apply a non-function. Did you mean ${{{token}}}?',
+        'T1008': 'Attempted to partially apply a non-function',
+        'D1009': 'Multiple key definitions evaluate to same key: {{value}}',
+        'D1010': 'Attempted to access the Javascript object prototype', // Javascript specific
+        'T1010': 'The matcher function argument passed to function {{token}} does not return the correct object structure',
+        'T2001': 'The left side of the {{token}} operator must evaluate to a number',
+        'T2002': 'The right side of the {{token}} operator must evaluate to a number',
+        'T2003': 'The left side of the range operator (..) must evaluate to an integer',
+        'T2004': 'The right side of the range operator (..) must evaluate to an integer',
+        'D2005': 'The left side of := must be a variable name (start with $)',  // defunct - replaced by S0212 parser error
+        'T2006': 'The right side of the function application operator ~> must be a function',
+        'T2007': 'Type mismatch when comparing values {{value}} and {{value2}} in order-by clause',
+        'T2008': 'The expressions within an order-by clause must evaluate to numeric or string values',
+        'T2009': 'The values {{value}} and {{value2}} either side of operator {{token}} must be of the same data type',
+        'T2010': 'The expressions either side of operator {{token}} must evaluate to numeric or string values',
+        'T2011': 'The insert/update clause of the transform expression must evaluate to an object: {{value}}',
+        'T2012': 'The delete clause of the transform expression must evaluate to a string or array of strings: {{value}}',
+        'T2013': 'The transform expression clones the input object using the $clone() function.  This has been overridden in the current scope by a non-function.',
+        'D2014': 'The size of the sequence allocated by the range operator (..) must not exceed 1e6.  Attempted to allocate {{value}}.',
+        'D3001': 'Attempting to invoke string function on Infinity or NaN',
+        'D3010': 'Second argument of replace function cannot be an empty string',
+        'D3011': 'Fourth argument of replace function must evaluate to a positive number',
+        'D3012': 'Attempted to replace a matched string with a non-string value',
+        'D3020': 'Third argument of split function must evaluate to a positive number',
+        'D3030': 'Unable to cast value to a number: {{value}}',
+        'D3040': 'Third argument of match function must evaluate to a positive number',
+        'D3050': 'The second argument of reduce function must be a function with at least two arguments',
+        'D3060': 'The sqrt function cannot be applied to a negative number: {{value}}',
+        'D3061': 'The power function has resulted in a value that cannot be represented as a JSON number: base={{value}}, exponent={{exp}}',
+        'D3070': 'The single argument form of the sort function can only be applied to an array of strings or an array of numbers.  Use the second argument to specify a comparison function',
+        'D3080': 'The picture string must only contain a maximum of two sub-pictures',
+        'D3081': 'The sub-picture must not contain more than one instance of the \'decimal-separator\' character',
+        'D3082': 'The sub-picture must not contain more than one instance of the \'percent\' character',
+        'D3083': 'The sub-picture must not contain more than one instance of the \'per-mille\' character',
+        'D3084': 'The sub-picture must not contain both a \'percent\' and a \'per-mille\' character',
+        'D3085': 'The mantissa part of a sub-picture must contain at least one character that is either an \'optional digit character\' or a member of the \'decimal digit family\'',
+        'D3086': 'The sub-picture must not contain a passive character that is preceded by an active character and that is followed by another active character',
+        'D3087': 'The sub-picture must not contain a \'grouping-separator\' character that appears adjacent to a \'decimal-separator\' character',
+        'D3088': 'The sub-picture must not contain a \'grouping-separator\' at the end of the integer part',
+        'D3089': 'The sub-picture must not contain two adjacent instances of the \'grouping-separator\' character',
+        'D3090': 'The integer part of the sub-picture must not contain a member of the \'decimal digit family\' that is followed by an instance of the \'optional digit character\'',
+        'D3091': 'The fractional part of the sub-picture must not contain an instance of the \'optional digit character\' that is followed by a member of the \'decimal digit family\'',
+        'D3092': 'A sub-picture that contains a \'percent\' or \'per-mille\' character must not contain a character treated as an \'exponent-separator\'',
+        'D3093': 'The exponent part of the sub-picture must comprise only of one or more characters that are members of the \'decimal digit family\'',
+        'D3100': 'The radix of the formatBase function must be between 2 and 36.  It was given {{value}}',
+        'D3110': 'The argument of the toMillis function must be an ISO 8601 formatted timestamp. Given {{value}}',
+        'D3120': 'Syntax error in expression passed to function eval: {{value}}',
+        'D3121': 'Dynamic error evaluating the expression passed to function eval: {{value}}',
+        'D3130': 'Formatting or parsing an integer as a sequence starting with {{value}} is not supported by this implementation',
+        'D3131': 'In a decimal digit pattern, all digits must be from the same decimal group',
+        'D3132': 'Unknown component specifier {{value}} in date/time picture string',
+        'D3133': 'The \'name\' modifier can only be applied to months and days in the date/time picture string, not {{value}}',
+        'D3134': 'The timezone integer format specifier cannot have more than four digits',
+        'D3135': 'No matching closing bracket \']\' in date/time picture string',
+        'D3136': 'The date/time picture string is missing specifiers required to parse the timestamp',
+        'D3137': '{{{message}}}',
+        'D3138': 'The $single() function expected exactly 1 matching result.  Instead it matched more.',
+        'D3139': 'The $single() function expected exactly 1 matching result.  Instead it matched 0.',
+        'D3140': 'Malformed URL passed to ${{{functionName}}}(): {{value}}',
+        'D3141': '{{{message}}}',
+        'DBG01': 'Interrupted by debugger'
     };
 
     /**
@@ -2130,7 +2147,7 @@ var jsonata = (function() {
     /**
      * JSONata
      * @param {Object} expr - JSONata expression
-     * @param {Object} options
+     * @param {Object} options  - Options
      * @param {boolean} options.recover: attempt to recover on parse error
      * @param {Function} options.RegexEngine: RegEx class constructor to use
      * @returns {{evaluate: evaluate, assign: assign}} Evaluated expression
@@ -2164,15 +2181,16 @@ var jsonata = (function() {
         }
 
         return {
+            // eslint-disable-next-line valid-jsdoc
             /**
              * Executing expression
              * @param {*} input             - context
              * @param {*} bindings          - variables
              * @param {*} callback          - result callback
              * @param {*} debuggerHandle    - Debugger async function
-             * @returns 
+             * @returns
              */
-            evaluate: async function (input, bindings, callback, debuggerHandle) {
+            evaluate: async function(input, bindings, callback, debuggerHandle) {
                 // throw if the expression compiled with syntax errors
                 if(typeof errors !== 'undefined') {
                     var err = {
@@ -2196,8 +2214,8 @@ var jsonata = (function() {
                 // put the input document into the environment as the root object
                 exec_env.bind('$', input);
 
-                if (debuggerHandle) {
-                    exec_env.__debugger__.debuggerHandle = debuggerHandle
+                if (debuggerHandle && !exec_env.__debugger__.debuggerHandle) {
+                    exec_env.__debugger__.debuggerHandle = debuggerHandle;
                     exec_env.__debugger__.action = 'run';
                     exec_env.__debugger__.deep = 1;
                     exec_env.__debugger__.step = null;
@@ -2221,7 +2239,7 @@ var jsonata = (function() {
                 var it;
                 try {
                     it = await evaluate(ast, input, exec_env);
-                    if (typeof callback === "function") {
+                    if (typeof callback === 'function') {
                         callback(null, it);
                     }
                     return it;
@@ -2231,7 +2249,7 @@ var jsonata = (function() {
                     throw err;
                 }
             },
-            assign: function (name, value) {
+            assign: function(name, value) {
                 environment.bind(name, value);
             },
             registerFunction: function(name, implementation, signature) {

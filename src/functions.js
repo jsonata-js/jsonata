@@ -7,7 +7,7 @@
 var utils = require('./utils');
 
 const functions = (() => {
-    'use strict';
+
 
     var isNumeric = utils.isNumeric;
     var isArrayOfStrings = utils.isArrayOfStrings;
@@ -33,7 +33,7 @@ const functions = (() => {
         }
 
         var total = 0;
-        args.forEach(function (num) {
+        args.forEach(function(num) {
             total += num;
         });
         return total;
@@ -93,7 +93,7 @@ const functions = (() => {
         }
 
         var total = 0;
-        args.forEach(function (num) {
+        args.forEach(function(num) {
             total += num;
         });
         return total / args.length;
@@ -121,7 +121,7 @@ const functions = (() => {
             str = '';
         } else if (typeof arg === 'number' && !isFinite(arg)) {
             throw {
-                code: "D3001",
+                code: 'D3001',
                 value: arg,
                 stack: (new Error()).stack
             };
@@ -130,7 +130,7 @@ const functions = (() => {
             if(Array.isArray(arg) && arg.outerWrapper) {
                 arg = arg[0];
             }
-            str = JSON.stringify(arg, function (key, val) {
+            str = JSON.stringify(arg, function(key, val) {
                 return (typeof val !== 'undefined' && val !== null && val.toPrecision && isNumeric(val)) ? Number(val.toPrecision(15)) :
                     (val && isFunction(val)) ? '' : val;
             }, space);
@@ -325,8 +325,8 @@ const functions = (() => {
         if(result && !(typeof result.start === 'number' || result.end === 'number' || Array.isArray(result.groups) || isFunction(result.next))) {
             // the matcher function didn't return the correct structure
             throw {
-                code: "T1010",
-                stack: (new Error()).stack,
+                code: 'T1010',
+                stack: (new Error()).stack
             };
         }
         return result;
@@ -419,7 +419,7 @@ const functions = (() => {
         // pattern cannot be an empty string
         if (pattern === '') {
             throw {
-                code: "D3010",
+                code: 'D3010',
                 stack: (new Error()).stack,
                 value: pattern,
                 index: 2
@@ -429,7 +429,7 @@ const functions = (() => {
         // limit, if specified, must be a non-negative number
         if (limit < 0) {
             throw {
-                code: "D3011",
+                code: 'D3011',
                 stack: (new Error()).stack,
                 value: limit,
                 index: 4
@@ -438,7 +438,7 @@ const functions = (() => {
 
         var replacer;
         if (typeof replacement === 'string') {
-            replacer = function (regexMatch) {
+            replacer = function(regexMatch) {
                 var substitute = '';
                 // scan forward, copying the replacement text into the substitute string
                 // and replace any occurrence of $n with the values matched by the regex
@@ -520,7 +520,7 @@ const functions = (() => {
                         } else {
                             // not a string - throw error
                             throw {
-                                code: "D3012",
+                                code: 'D3012',
                                 stack: (new Error()).stack,
                                 value: replacedWith
                             };
@@ -555,7 +555,7 @@ const functions = (() => {
 
         var btoa = typeof window !== 'undefined' ?
             /* istanbul ignore next */ window.btoa :
-            function (str) {
+            function(str) {
                 // Simply doing `new Buffer` at this point causes Browserify to pull
                 // in the entire Buffer browser library, which is large and unnecessary.
                 // Using `global.Buffer` defeats this.
@@ -577,7 +577,7 @@ const functions = (() => {
         // Use btoa in a browser, or Buffer in Node.js
         var atob = typeof window !== 'undefined' ?
             /* istanbul ignore next */ window.atob :
-            function (str) {
+            function(str) {
                 // Simply doing `new Buffer` at this point causes Browserify to pull
                 // in the entire Buffer browser library, which is large and unnecessary.
                 // Using `global.Buffer` defeats this.
@@ -603,10 +603,10 @@ const functions = (() => {
             returnVal = encodeURIComponent(str);
         } catch (e) {
             throw {
-                code: "D3140",
+                code: 'D3140',
                 stack: (new Error()).stack,
                 value: str,
-                functionName: "encodeUrlComponent"
+                functionName: 'encodeUrlComponent'
             };
         }
         return returnVal;
@@ -629,10 +629,10 @@ const functions = (() => {
             returnVal = encodeURI(str);
         } catch (e) {
             throw {
-                code: "D3140",
+                code: 'D3140',
                 stack: (new Error()).stack,
                 value: str,
-                functionName: "encodeUrl"
+                functionName: 'encodeUrl'
             };
         }
         return returnVal;
@@ -655,10 +655,10 @@ const functions = (() => {
             returnVal = decodeURIComponent(str);
         } catch (e) {
             throw {
-                code: "D3140",
+                code: 'D3140',
                 stack: (new Error()).stack,
                 value: str,
-                functionName: "decodeUrlComponent"
+                functionName: 'decodeUrlComponent'
             };
         }
         return returnVal;
@@ -681,10 +681,10 @@ const functions = (() => {
             returnVal = decodeURI(str);
         } catch (e) {
             throw {
-                code: "D3140",
+                code: 'D3140',
                 stack: (new Error()).stack,
                 value: str,
-                functionName: "decodeUrl"
+                functionName: 'decodeUrl'
             };
         }
         return returnVal;
@@ -706,7 +706,7 @@ const functions = (() => {
         // limit, if specified, must be a non-negative number
         if (limit < 0) {
             throw {
-                code: "D3020",
+                code: 'D3020',
                 stack: (new Error()).stack,
                 value: limit,
                 index: 3
@@ -755,7 +755,7 @@ const functions = (() => {
 
         // if separator is not specified, default to empty string
         if (typeof separator === 'undefined') {
-            separator = "";
+            separator = '';
         }
 
         return strs.join(separator);
@@ -775,23 +775,23 @@ const functions = (() => {
         }
 
         var defaults = {
-            "decimal-separator": ".",
-            "grouping-separator": ",",
-            "exponent-separator": "e",
-            "infinity": "Infinity",
-            "minus-sign": "-",
-            "NaN": "NaN",
-            "percent": "%",
-            "per-mille": "\u2030",
-            "zero-digit": "0",
-            "digit": "#",
-            "pattern-separator": ";"
+            'decimal-separator': '.',
+            'grouping-separator': ',',
+            'exponent-separator': 'e',
+            'infinity': 'Infinity',
+            'minus-sign': '-',
+            'NaN': 'NaN',
+            'percent': '%',
+            'per-mille': '\u2030',
+            'zero-digit': '0',
+            'digit': '#',
+            'pattern-separator': ';'
         };
 
         // if `options` is specified, then its entries override defaults
         var properties = defaults;
         if (typeof options !== 'undefined') {
-            Object.keys(options).forEach(function (key) {
+            Object.keys(options).forEach(function(key) {
                 properties[key] = options[key];
             });
         }
@@ -813,8 +813,8 @@ const functions = (() => {
             };
         }
 
-        var splitParts = function (subpicture) {
-            var prefix = (function () {
+        var splitParts = function(subpicture) {
+            var prefix = (function() {
                 var ch;
                 for (var ii = 0; ii < subpicture.length; ii++) {
                     ch = subpicture.charAt(ii);
@@ -823,7 +823,7 @@ const functions = (() => {
                     }
                 }
             })();
-            var suffix = (function () {
+            var suffix = (function() {
                 var ch;
                 for (var ii = subpicture.length - 1; ii >= 0; ii--) {
                     ch = subpicture.charAt(ii);
@@ -863,7 +863,7 @@ const functions = (() => {
         };
 
         // validate the picture string, F&O 4.7.3
-        var validate = function (parts) {
+        var validate = function(parts) {
             var error;
             var ii;
             var subpicture = parts.subpicture;
@@ -891,7 +891,7 @@ const functions = (() => {
             if (!valid) {
                 error = 'D3085';
             }
-            var charTypes = parts.activePart.split('').map(function (char) {
+            var charTypes = parts.activePart.split('').map(function(char) {
                 return activeChars.indexOf(char) === -1 ? 'p' : 'a';
             }).join('');
             if (charTypes.indexOf('p') !== -1) {
@@ -908,13 +908,13 @@ const functions = (() => {
                 error = 'D3089';
             }
             var optionalDigitPos = parts.integerPart.indexOf(properties.digit);
-            if (optionalDigitPos !== -1 && parts.integerPart.substring(0, optionalDigitPos).split('').filter(function (char) {
+            if (optionalDigitPos !== -1 && parts.integerPart.substring(0, optionalDigitPos).split('').filter(function(char) {
                 return decimalDigitFamily.indexOf(char) > -1;
             }).length > 0) {
                 error = 'D3090';
             }
             optionalDigitPos = parts.fractionalPart.lastIndexOf(properties.digit);
-            if (optionalDigitPos !== -1 && parts.fractionalPart.substring(optionalDigitPos).split('').filter(function (char) {
+            if (optionalDigitPos !== -1 && parts.fractionalPart.substring(optionalDigitPos).split('').filter(function(char) {
                 return decimalDigitFamily.indexOf(char) > -1;
             }).length > 0) {
                 error = 'D3091';
@@ -923,7 +923,7 @@ const functions = (() => {
             if (exponentExists && parts.exponentPart.length > 0 && (subpicture.indexOf(properties.percent) !== -1 || subpicture.indexOf(properties['per-mille']) !== -1)) {
                 error = 'D3092';
             }
-            if (exponentExists && (parts.exponentPart.length === 0 || parts.exponentPart.split('').filter(function (char) {
+            if (exponentExists && (parts.exponentPart.length === 0 || parts.exponentPart.split('').filter(function(char) {
                 return decimalDigitFamily.indexOf(char) === -1;
             }).length > 0)) {
                 error = 'D3093';
@@ -937,12 +937,12 @@ const functions = (() => {
         };
 
         // analyse the picture string, F&O 4.7.4
-        var analyse = function (parts) {
-            var getGroupingPositions = function (part, toLeft) {
+        var analyse = function(parts) {
+            var getGroupingPositions = function(part, toLeft) {
                 var positions = [];
                 var groupingPosition = part.indexOf(properties['grouping-separator']);
                 while (groupingPosition !== -1) {
-                    var charsToTheRight = (toLeft ? part.substring(0, groupingPosition) : part.substring(groupingPosition)).split('').filter(function (char) {
+                    var charsToTheRight = (toLeft ? part.substring(0, groupingPosition) : part.substring(groupingPosition)).split('').filter(function(char) {
                         return decimalDigitFamily.indexOf(char) !== -1 || char === properties.digit;
                     }).length;
                     positions.push(charsToTheRight);
@@ -951,12 +951,12 @@ const functions = (() => {
                 return positions;
             };
             var integerPartGroupingPositions = getGroupingPositions(parts.integerPart);
-            var regular = function (indexes) {
+            var regular = function(indexes) {
                 // are the grouping positions regular? i.e. same interval between each of them
                 if (indexes.length === 0) {
                     return 0;
                 }
-                var gcd = function (a, b) {
+                var gcd = function(a, b) {
                     return b === 0 ? a : gcd(b, a % b);
                 };
                 // find the greatest common divisor of all the positions
@@ -973,16 +973,16 @@ const functions = (() => {
             var regularGrouping = regular(integerPartGroupingPositions);
             var fractionalPartGroupingPositions = getGroupingPositions(parts.fractionalPart, true);
 
-            var minimumIntegerPartSize = parts.integerPart.split('').filter(function (char) {
+            var minimumIntegerPartSize = parts.integerPart.split('').filter(function(char) {
                 return decimalDigitFamily.indexOf(char) !== -1;
             }).length;
             var scalingFactor = minimumIntegerPartSize;
 
             var fractionalPartArray = parts.fractionalPart.split('');
-            var minimumFactionalPartSize = fractionalPartArray.filter(function (char) {
+            var minimumFactionalPartSize = fractionalPartArray.filter(function(char) {
                 return decimalDigitFamily.indexOf(char) !== -1;
             }).length;
-            var maximumFactionalPartSize = fractionalPartArray.filter(function (char) {
+            var maximumFactionalPartSize = fractionalPartArray.filter(function(char) {
                 return decimalDigitFamily.indexOf(char) !== -1 || char === properties.digit;
             }).length;
             var exponentPresent = typeof parts.exponentPart === 'string';
@@ -1002,7 +1002,7 @@ const functions = (() => {
             }
             var minimumExponentSize = 0;
             if (exponentPresent) {
-                minimumExponentSize = parts.exponentPart.split('').filter(function (char) {
+                minimumExponentSize = parts.exponentPart.split('').filter(function(char) {
                     return decimalDigitFamily.indexOf(char) !== -1;
                 }).length;
             }
@@ -1081,10 +1081,10 @@ const functions = (() => {
         // bullet 6:
         var roundedNumber = round(mantissa, pic.maximumFactionalPartSize);
         // bullet 7:
-        var makeString = function (value, dp) {
+        var makeString = function(value, dp) {
             var str = Math.abs(value).toFixed(dp);
             if (zero_digit !== '0') {
-                str = str.split('').map(function (digit) {
+                str = str.split('').map(function(digit) {
                     if (digit >= '0' && digit <= '9') {
                         return decimalDigitFamily[digit.charCodeAt(0) - 48];
                     } else {
@@ -1121,14 +1121,14 @@ const functions = (() => {
                 stringValue = [stringValue.slice(0, decimalPos - group * pic.regularGrouping), grouping_separator, stringValue.slice(decimalPos - group * pic.regularGrouping)].join('');
             }
         } else {
-            pic.integerPartGroupingPositions.forEach(function (pos) {
+            pic.integerPartGroupingPositions.forEach(function(pos) {
                 stringValue = [stringValue.slice(0, decimalPos - pos), grouping_separator, stringValue.slice(decimalPos - pos)].join('');
                 decimalPos++;
             });
         }
         // bullet 11:
         decimalPos = stringValue.indexOf(decimal_separator);
-        pic.fractionalPartGroupingPositions.forEach(function (pos) {
+        pic.fractionalPartGroupingPositions.forEach(function(pos) {
             stringValue = [stringValue.slice(0, pos + decimalPos + 1), grouping_separator, stringValue.slice(pos + decimalPos + 1)].join('');
         });
         // bullet 12:
@@ -1212,7 +1212,7 @@ const functions = (() => {
             result = 0;
         } else {
             throw {
-                code: "D3030",
+                code: 'D3030',
                 value: arg,
                 stack: (new Error()).stack,
                 index: 1
@@ -1333,7 +1333,7 @@ const functions = (() => {
         if (arg < 0) {
             throw {
                 stack: (new Error()).stack,
-                code: "D3060",
+                code: 'D3060',
                 index: 1,
                 value: arg
             };
@@ -1363,7 +1363,7 @@ const functions = (() => {
         if (!isFinite(result)) {
             throw {
                 stack: (new Error()).stack,
-                code: "D3061",
+                code: 'D3061',
                 index: 1,
                 value: arg,
                 exp: exp
@@ -1406,7 +1406,7 @@ const functions = (() => {
             if (arg.length === 1) {
                 result = boolean(arg[0]);
             } else if (arg.length > 1) {
-                var trues = arg.filter(function (val) {
+                var trues = arg.filter(function(val) {
                     return boolean(val);
                 });
                 result = trues.length > 0;
@@ -1550,7 +1550,7 @@ const functions = (() => {
                 } else {
                     throw {
                         stack: (new Error()).stack,
-                        code: "D3138",
+                        code: 'D3138',
                         index: i
                     };
                 }
@@ -1560,7 +1560,7 @@ const functions = (() => {
         if(!hasFoundMatch) {
             throw {
                 stack: (new Error()).stack,
-                code: "D3139"
+                code: 'D3139'
             };
         }
 
@@ -1577,7 +1577,7 @@ const functions = (() => {
         var result = [];
         var args = Array.prototype.slice.call(arguments);
         // length of the shortest array
-        var length = Math.min.apply(Math, args.map(function (arg) {
+        var length = Math.min.apply(Math, args.map(function(arg) {
             if (Array.isArray(arg)) {
                 return arg.length;
             }
@@ -1611,7 +1611,7 @@ const functions = (() => {
         if (arity < 2) {
             throw {
                 stack: (new Error()).stack,
-                code: "D3050",
+                code: 'D3050',
                 index: 1
             };
         }
@@ -1651,9 +1651,9 @@ const functions = (() => {
         if (Array.isArray(arg)) {
             // merge the keys of all of the items in the array
             var merge = {};
-            arg.forEach(function (item) {
+            arg.forEach(function(item) {
                 var allkeys = keys(item);
-                allkeys.forEach(function (key) {
+                allkeys.forEach(function(key) {
                     merge[key] = true;
                 });
             });
@@ -1738,7 +1738,7 @@ const functions = (() => {
 
         if (Array.isArray(arg)) {
             // spread all of the items in the array
-            arg.forEach(function (item) {
+            arg.forEach(function(item) {
                 result = append(result, spread(item));
             });
         } else if (arg !== null && typeof arg === 'object' && !isLambda(arg)) {
@@ -1767,7 +1767,7 @@ const functions = (() => {
 
         var result = {};
 
-        arg.forEach(function (obj) {
+        arg.forEach(function(obj) {
             for (var prop in obj) {
                 result[prop] = obj[prop];
             }
@@ -1827,9 +1827,9 @@ const functions = (() => {
      */
     function error(message) {
         throw {
-            code: "D3137",
+            code: 'D3137',
             stack: (new Error()).stack,
-            message: message || "$error() function evaluated"
+            message: message || '$error() function evaluated'
         };
     }
 
@@ -1843,9 +1843,9 @@ const functions = (() => {
     function assert(condition, message) {
         if(!condition) {
             throw {
-                code: "D3141",
+                code: 'D3141',
                 stack: (new Error()).stack,
-                message: message || "$assert() statement failed"
+                message: message || '$assert() statement failed'
             };
         }
 
@@ -1912,12 +1912,12 @@ const functions = (() => {
             if (!isArrayOfNumbers(arr) && !isArrayOfStrings(arr)) {
                 throw {
                     stack: (new Error()).stack,
-                    code: "D3070",
+                    code: 'D3070',
                     index: 1
                 };
             }
 
-            comp = async function (a, b) {
+            comp = async function(a, b) {
                 return a > b;
             };
         } else {
@@ -1925,8 +1925,8 @@ const functions = (() => {
             comp = comparator;
         }
 
-        var merge = async function (l, r) {
-            var merge_iter = async function (result, left, right) {
+        var merge = async function(l, r) {
+            var merge_iter = async function(result, left, right) {
                 if (left.length === 0) {
                     Array.prototype.push.apply(result, right);
                 } else if (right.length === 0) {
@@ -1946,7 +1946,7 @@ const functions = (() => {
             return merged;
         };
 
-        var msort = async function (array) {
+        var msort = async function(array) {
             if (!Array.isArray(array) || array.length <= 1) {
                 return array;
             } else {
