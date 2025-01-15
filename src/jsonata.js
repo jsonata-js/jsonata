@@ -1904,7 +1904,11 @@ var jsonata = (function() {
             bindings: function(includeStatic = false) {
                 const staticVariables = includeStatic ? [] : staticFrame.bindings(true);
                 let result = Object.keys(bindings);
-                result = [...result, ...enclosingEnvironment?.bindings().filter((name) => !result.includes(name) && !staticVariables.includes(name)) || []];
+                result = [...result, ...(
+                    enclosingEnvironment
+                    ? enclosingEnvironment.bindings().filter((name) => !result.includes(name) && !staticVariables.includes(name)) || []
+                    : []
+                )];
                 return result;
             },
             bind: function(name, value) {
