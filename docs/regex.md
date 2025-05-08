@@ -66,7 +66,7 @@ This returns the following JSONata object (JSON, but also with a function proper
 This contains information of the first matching substring within this famous palindrome, specifically:
 - `match` - the substring within the original string that matches the regex
 - `start` - the starting position (zero offset) of the matching substring within the original string
-- `end` - the endinging position of the matching substring within the original string
+- `end` - the ending position of the matching substring within the original string
 - `groups` - if capturing groups are used in the regex, then this array contains a string for the text captured by each group
 - `next()` - when invoked, will return details of the second occurrence of any matching substring (and so on).
 
