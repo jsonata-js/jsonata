@@ -1,0 +1,11 @@
+{
+    "expr": "{...Address, \"hello\":\"world\"}",
+    "dataset": "dataset1",
+    "bindings": {},
+    "result": {
+        "Street": "Hursley Park",
+        "City": "Winchester",
+        "Postcode": "SO21 2JN",
+        "hello": "world"
+    }
+}
