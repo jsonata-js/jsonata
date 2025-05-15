@@ -35,6 +35,7 @@ const parser = (() => {
         '^': 40,
         '**': 60,
         '..': 20,
+        '...': 50,
         ':=': 10,
         '!=': 40,
         '<=': 40,
@@ -164,6 +165,11 @@ const parser = (() => {
             }
             // handle double-char operators
             if (currentChar === '.' && path.charAt(position + 1) === '.') {
+                // triple-dot ... spread operator
+                if (path.charAt(position + 2) === '.') {
+                    position += 3;
+                    return create('operator', '...');
+                }
                 // double-dot .. range operator
                 position += 2;
                 return create('operator', '..');
@@ -565,6 +571,7 @@ const parser = (() => {
         terminal("in"); //
         prefix("-"); // unary numeric negation
         infix("~>"); // function application
+        prefix("..."); // spread operator
 
         infixr("(error)", 10, function (left) {
             this.lhs = left;
@@ -759,9 +766,13 @@ const parser = (() => {
             if (node.id !== "}") {
                 for (; ;) {
                     var n = expression(0);
-                    advance(":");
-                    var v = expression(0);
-                    a.push([n, v]); // holds an array of name/value expression pairs
+                    if (n.id === '...') { // Spread operator
+                        a.push([n, {type: 'variable', value: ''}]); // the value is an identity expression
+                    } else {
+                        advance(":");
+                        var v = expression(0);
+                        a.push([n, v]); // holds an array of name/value expression pairs
+                    }
                     if (node.id !== ",") {
                         break;
                     }
