@@ -765,8 +765,7 @@ const parser = (() => {
                         key.type = 'string';
                         key.position = n.position;
                         a.push([key, n]); // shorthand property syntax
-                    }
-                    else {
+                    } else {
                         advance(":");
                         var v = expression(0);
                         a.push([n, v]); // holds an array of name/value expression pairs
