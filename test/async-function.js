@@ -177,8 +177,8 @@ describe('Handle chained functions that end in promises', function() {
 
 });
 
-describe('Async array', function() {
-    it('should revaluate array items', async function() {
+describe('Array with Promise items', function() {
+    it('should await each item', async function() {
         var data = {
             list: [Promise.resolve({name: 'hello'})]
         };
