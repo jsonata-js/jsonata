@@ -183,6 +183,6 @@ describe('Array with Promise items', function() {
             list: [Promise.resolve({name: 'hello'})]
         };
         var expr = jsonata('list[0].name');
-        return expect(expr.evaluate(data)).to.eventually.equal('hello'); 
+        return expect(expr.evaluate(data)).to.eventually.equal('hello');
     });
 });
