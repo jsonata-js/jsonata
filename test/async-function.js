@@ -176,3 +176,13 @@ describe('Handle chained functions that end in promises', function() {
     });
 
 });
+
+describe('Array with Promise items', function() {
+    it('should await each item', async function() {
+        var data = {
+            list: [Promise.resolve({name: 'hello'})]
+        };
+        var expr = jsonata('list[0].name');
+        return expect(expr.evaluate(data)).to.eventually.equal('hello');
+    });
+});
