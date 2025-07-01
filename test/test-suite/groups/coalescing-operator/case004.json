@@ -1,0 +1,6 @@
+{
+    "expr": "foo.baz ?? 42",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": 42
+}

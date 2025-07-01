@@ -41,6 +41,7 @@ const parser = (() => {
         '>=': 40,
         '~>': 40,
         '?:': 40,
+        '??': 40,
         'and': 30,
         'or': 25,
         'in': 40,
@@ -203,6 +204,11 @@ const parser = (() => {
                 // ?: default / elvis operator
                 position += 2;
                 return create('operator', '?:');
+            }
+            if (currentChar === '?' && path.charAt(position + 1) === '?') {
+                // ?? coalescing operator
+                position += 2;
+                return create('operator', '??');
             }
             // test for single char operators
             if (Object.prototype.hasOwnProperty.call(operators, currentChar)) {
@@ -572,6 +578,7 @@ const parser = (() => {
         prefix("-"); // unary numeric negation
         infix("~>"); // function application
         infix("?:"); // default value
+        infix("??"); // coalescing operator
 
         infixr("(error)", 10, function (left) {
             this.lhs = left;

@@ -483,8 +483,11 @@ var jsonata = (function() {
                     result = evaluateComparisonExpression(lhs, rhs, op);
                     break;
                 case '?:':
-                    result = evaluateDefault(lhs, rhs, op);
-                    break;                    
+                    result = evaluateDefaultExpression(lhs, rhs, op);
+                    break;
+                case '??':
+                    result = evaluateCoalescingExpression(lhs, rhs);
+                    break;
                 case '&':
                     result = evaluateStringConcat(lhs, rhs);
                     break;
@@ -819,8 +822,21 @@ var jsonata = (function() {
      * @param {Object} rhs - RHS value
      * @returns {*} Result
      */
-    function evaluateDefault(lhs, rhs) {
+    function evaluateDefaultExpression(lhs, rhs) {
         return lhs ? lhs : rhs;
+    }
+
+    /**
+     * Evaluate coalescing expression
+     * @param {Object} lhs - LHS value
+     * @param {Object} rhs - RHS value
+     * @returns {*} Result
+     */
+    function evaluateCoalescingExpression(lhs, rhs) {
+        if (typeof lhs === 'undefined') {
+            return rhs;
+        }
+        return lhs;
     }
 
     /**
