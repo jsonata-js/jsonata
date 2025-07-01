@@ -482,6 +482,9 @@ var jsonata = (function() {
                 case '>=':
                     result = evaluateComparisonExpression(lhs, rhs, op);
                     break;
+                case '?:':
+                    result = evaluateDefault(lhs, rhs, op);
+                    break;                    
                 case '&':
                     result = evaluateStringConcat(lhs, rhs);
                     break;
@@ -808,6 +811,16 @@ var jsonata = (function() {
                 break;
         }
         return result;
+    }
+
+    /**
+     * Evaluate default-value expression
+     * @param {Object} lhs - LHS value
+     * @param {Object} rhs - RHS value
+     * @returns {*} Result
+     */
+    function evaluateDefault(lhs, rhs) {
+        return lhs ? lhs : rhs;
     }
 
     /**
