@@ -1,0 +1,6 @@
+{
+    "expr": "0 ?? 42",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": 0
+}
