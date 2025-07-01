@@ -25,6 +25,38 @@ __Example__
 
 `Price < 50 ? "Cheap" : "Expensive"`
 
+## `?:` (Default/Elvis)
+
+The default (or "elvis") operator returns the left-hand side if it is truthy, otherwise it returns the right-hand side. This is useful for providing fallback values when an expression may evaluate to a falsy value (such as `null`, `false`, `0`, `''`, or `undefined`).
+
+__Syntax__
+
+`<expr1> ?: <expr2>`
+
+__Example__
+
+`foo.bar ?: 42` => `42` (if `foo.bar` is falsy)
+
+`foo.bar ?: 'default'` => `'default'` (if `foo.bar` is falsy)
+
+## `??` (Coalescing)
+
+The coalescing operator returns the left-hand side if it is defined (not `undefined`), otherwise it returns the right-hand side. This is useful for providing fallback values only when the left-hand side is missing or not present (empty sequence), but not for other falsy values like `0`, `false`, or `''`.
+
+__Syntax__
+
+`<expr1> ?? <expr2>`
+
+__Example__
+
+`foo.bar ?? 42` => `42` (if `foo.bar` is undefined)
+
+`foo.bar ?? 'default'` => `'default'` (if `foo.bar` is undefined)
+
+`0 ?? 1` => `0`
+
+`'' ?? 'fallback'` => `''`
+
 ## `:=` (Variable binding)
 
 The variable binding operator is used to bind the value of the RHS to the variable name defined on the LHS.  The variable binding is scoped to the current block and any nested blocks.  It is an error if the LHS is not a `$` followed by a valid variable name.
