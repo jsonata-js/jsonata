@@ -1,6 +1,6 @@
 {
     "description": "empty array is used",
-    "expr": "[] ?? 42",
+    "expr": "[] ?: 42",
     "dataset": "dataset0",
     "bindings": {},
     "result": []

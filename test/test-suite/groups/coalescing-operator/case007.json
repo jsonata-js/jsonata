@@ -1,4 +1,5 @@
 {
+    "description": "false is used",
     "expr": "false ?? 42",
     "dataset": "dataset0",
     "bindings": {},
