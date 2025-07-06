@@ -1,7 +1,9 @@
 {
-    "description": "empty object is used",
-    "expr": "{} ?: 42",
+    "description": "object with property is used",
+    "expr": "{ \"a\": 1 } ?: 42",
     "dataset": "dataset0",
     "bindings": {},
-    "result": {}
+    "result": {
+        "a": 1
+    }
 }

@@ -1,6 +1,6 @@
 {
-    "description": "[0] is not used",
-    "expr": "[0] ?: 42",
+    "description": "42 is used",
+    "expr": "Account.blah ?: 42",
     "dataset": "dataset0",
     "bindings": {},
     "result": 42

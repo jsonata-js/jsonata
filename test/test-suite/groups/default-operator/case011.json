@@ -1,0 +1,7 @@
+{
+    "description": "function is not used",
+    "expr": "function(){true} ?: 42",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": 42
+}

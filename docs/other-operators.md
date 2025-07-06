@@ -27,7 +27,7 @@ __Example__
 
 ## `?:` (Default/Elvis)
 
-The default (or "elvis") operator returns the left-hand side if it is truthy, otherwise it returns the right-hand side. This is useful for providing fallback values when an expression may evaluate to a falsy value (such as `null`, `false`, `0`, `''`, or `undefined`).
+The default (or "elvis") operator returns the left-hand side if it has an effective Boolean value of `true`, otherwise it returns the right-hand side. This is useful for providing fallback values when an expression may evaluate to a value with an effective Boolean value of `false` (such as `null`, `false`, `0`, `''`, or `undefined`).
 
 __Syntax__
 
@@ -35,13 +35,11 @@ __Syntax__
 
 __Example__
 
-`foo.bar ?: 42` => `42` (if `foo.bar` is falsy)
-
-`foo.bar ?: 'default'` => `'default'` (if `foo.bar` is falsy)
+`foo.bar ?: 'default'` => `'default'` (if `foo.bar` is evaluates to Boolean `false`)
 
 ## `??` (Coalescing)
 
-The coalescing operator returns the left-hand side if it is defined (not `undefined`), otherwise it returns the right-hand side. This is useful for providing fallback values only when the left-hand side is missing or not present (empty sequence), but not for other falsy values like `0`, `false`, or `''`.
+The coalescing operator returns the left-hand side if it is defined (not `undefined`), otherwise it returns the right-hand side. This is useful for providing fallback values only when the left-hand side is missing or not present (empty sequence), but not for other values with an effective Boolean value of `false` like `0`, `false`, or `''`.
 
 __Syntax__
 

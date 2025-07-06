@@ -1,6 +1,6 @@
 {
-    "description": "property missing on object uses default number on lhs",
-    "expr": "age?:42",
+    "description": "false is not used",
+    "expr": "false ?: 42",
     "dataset": "dataset0",
     "bindings": {},
     "result": 42

@@ -1,7 +1,7 @@
 {
-    "description": "property missing on object uses default string on lhs",
-    "expr": "order?:'the usual'",
+    "description": "true is used",
+    "expr": "true ?: 42",
     "dataset": "dataset0",
     "bindings": {},
-    "result": "the usual"
+    "result": true
 }

@@ -577,8 +577,20 @@ const parser = (() => {
         terminal("in"); //
         prefix("-"); // unary numeric negation
         infix("~>"); // function application
-        infix("?:"); // default value
-        infix("??"); // coalescing operator
+
+        // coalescing operator
+        infix("??", operators['??'], function (left) {
+            this.type = 'condition';
+            this.condition = {
+                type: 'function',
+                value: '(',
+                procedure: { type: 'variable', value: 'exists' },
+                arguments: [left]
+            };
+            this.then = left;
+            this.else = expression(0);
+            return this;
+        });
 
         infixr("(error)", 10, function (left) {
             this.lhs = left;
@@ -860,6 +872,15 @@ const parser = (() => {
                 advance(":");
                 this.else = expression(0);
             }
+            return this;
+        });
+
+        // elvis/default operator
+        infix("?:", operators['?:'], function (left) {
+            this.type = 'condition';
+            this.condition = left;
+            this.then = left;
+            this.else = expression(0);
             return this;
         });
 
