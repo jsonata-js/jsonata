@@ -397,7 +397,7 @@ var jsonata = (function() {
                 // count in from end of array
                 index = input.length + index;
             }
-            var item = input[index];
+            var item = await input[index];
             if(typeof item !== 'undefined') {
                 if(Array.isArray(item)) {
                     results = item;
