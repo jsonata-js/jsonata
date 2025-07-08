@@ -1,0 +1,7 @@
+{
+    "description": "null is used",
+    "expr": "null ?? 42",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": null
+}

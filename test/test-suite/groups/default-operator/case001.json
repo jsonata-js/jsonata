@@ -1,0 +1,7 @@
+{
+    "description": "false is not used",
+    "expr": "false ?: 42",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": 42
+}

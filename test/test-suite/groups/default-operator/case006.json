@@ -1,0 +1,9 @@
+{
+    "description": "[1] is used",
+    "expr": "[1] ?: 42",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": [
+        1
+    ]
+}

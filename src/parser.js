@@ -40,6 +40,8 @@ const parser = (() => {
         '<=': 40,
         '>=': 40,
         '~>': 40,
+        '?:': 40,
+        '??': 40,
         'and': 30,
         'or': 25,
         'in': 40,
@@ -197,6 +199,16 @@ const parser = (() => {
                 // ~>  chain function
                 position += 2;
                 return create('operator', '~>');
+            }
+            if (currentChar === '?' && path.charAt(position + 1) === ':') {
+                // ?: default / elvis operator
+                position += 2;
+                return create('operator', '?:');
+            }
+            if (currentChar === '?' && path.charAt(position + 1) === '?') {
+                // ?? coalescing operator
+                position += 2;
+                return create('operator', '??');
             }
             // test for single char operators
             if (Object.prototype.hasOwnProperty.call(operators, currentChar)) {
@@ -566,6 +578,20 @@ const parser = (() => {
         prefix("-"); // unary numeric negation
         infix("~>"); // function application
 
+        // coalescing operator
+        infix("??", operators['??'], function (left) {
+            this.type = 'condition';
+            this.condition = {
+                type: 'function',
+                value: '(',
+                procedure: { type: 'variable', value: 'exists' },
+                arguments: [left]
+            };
+            this.then = left;
+            this.else = expression(0);
+            return this;
+        });
+
         infixr("(error)", 10, function (left) {
             this.lhs = left;
 
@@ -846,6 +872,15 @@ const parser = (() => {
                 advance(":");
                 this.else = expression(0);
             }
+            return this;
+        });
+
+        // elvis/default operator
+        infix("?:", operators['?:'], function (left) {
+            this.type = 'condition';
+            this.condition = left;
+            this.then = left;
+            this.else = expression(0);
             return this;
         });
 
