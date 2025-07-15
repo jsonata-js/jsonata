@@ -1,0 +1,6 @@
+{
+    "expr": "$substring(\"hello\", 1, 3,)",
+    "data": {},
+    "bindings": {},
+    "result": "ell"
+}

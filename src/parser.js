@@ -637,6 +637,10 @@ const parser = (() => {
                     }
                     if (node.id !== ',') break;
                     advance(',');
+                    // support trailing comma - break if next token is closing parenthesis
+                    if (node.id === ')') {
+                        break;
+                    }
                 }
             }
             advance(")", true);
@@ -720,6 +724,10 @@ const parser = (() => {
                         break;
                     }
                     advance(",");
+                    // support trailing comma - break if next token is closing bracket
+                    if (node.id === "]") {
+                        break;
+                    }
                 }
             }
             advance("]", true);
@@ -792,6 +800,10 @@ const parser = (() => {
                         break;
                     }
                     advance(",");
+                    // support trailing comma - break if next token is closing brace
+                    if (node.id === "}") {
+                        break;
+                    }
                 }
             }
             advance("}", true);

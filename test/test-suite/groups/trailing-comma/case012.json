@@ -1,0 +1,6 @@
+{
+    "expr": "$max([5, 10, 15,])",
+    "data": {},
+    "bindings": {},
+    "result": 15
+}

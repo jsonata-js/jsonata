@@ -1,0 +1,6 @@
+{
+    "expr": "{\"nested\": [{\"items\": [1, 2, 3,],}, {\"more\": \"data\",},],}",
+    "data": {},
+    "bindings": {},
+    "result": {"nested": [{"items": [1, 2, 3]}, {"more": "data"}]}
+}
