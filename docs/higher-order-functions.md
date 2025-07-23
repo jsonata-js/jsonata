@@ -7,7 +7,31 @@ sidebar_label: Higher Order Functions
 ## `$map()`
 __Signature:__ `$map(array, function)`
 
-Returns an array containing the results of applying the `function` parameter to each value in the `array` parameter.
+If the input argument is an array of 2 or more elements, returns an array containing the results of applying the `function` parameter to each value in the `array` parameter.
+
+```
+$map([1,2,3], function($v) { $v * 2 })
+```
+
+evaluates to
+
+```
+[ 2, 4, 6 ]
+```
+
+If the input argument is an array with 1 element, returns the single result of applying the `function` parameter to each value in the `array` parameter.
+
+```
+$map([2], function($v) { $v * 2 })
+```
+
+evaluates to
+
+```
+4
+```
+
+If the input argument is an empty array, returns `undefined`
 
 The function that is supplied as the second parameter must have the following signature:
 
