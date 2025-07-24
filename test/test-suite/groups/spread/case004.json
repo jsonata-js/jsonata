@@ -1,0 +1,11 @@
+{
+    "expr": "['yo', ...foo.blah.baz.fud, 'whats up']",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": [
+        "yo",
+        "hello",
+        "world",
+        "whats up"
+    ]
+}
