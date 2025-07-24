@@ -1,0 +1,9 @@
+{
+    "expr": "($bar:= 256; {\"foo\": foo.bar, $bar})",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": {
+        "foo": 42,
+        "bar": 256
+    }
+}
