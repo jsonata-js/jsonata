@@ -31,7 +31,7 @@ evaluates to
 4
 ```
 
-If the input argument is an empty array, returns `undefined`
+If the input argument is an empty array, returns nothing (represented in Javascript as `undefined`)
 
 The function that is supplied as the second parameter must have the following signature:
 
