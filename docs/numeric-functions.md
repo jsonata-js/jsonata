@@ -18,7 +18,7 @@ If `arg` is not specified (i.e. this function is invoked with no arguments), the
 
 __Examples__  
 - `$number("5")` => `5`  
-- `$number("0x12")` => `0x18`  
+- `$number("0x12")` => `18`  
 - `["1", "2", "3", "4", "5"].$number()` => `[1, 2, 3, 4, 5]`
 
 
