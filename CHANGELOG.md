@@ -1,3 +1,12 @@
+#### 2.1.0 Milestone Release
+
+- New syntax (`?:` default operator) supports fallback to RHS if the LHS is Boolean equivalent to false (PR #784)
+- New syntax (`??` coalescing operator) supports fallback to RHS if the LHS is non-existent (PR #784)
+- Improve regex generation for DateTime parser (PR #728)
+- Truncate fractional part of numeric argument of `$pad` function (PR #729)
+- Await array elements (PR #747)
+- Various documentation fixes and improvements
+
 #### 2.0.6 Maintenance Release
 
 - Protect __evaluate_entry and __evaluate_exit callbacks (PR #700)
