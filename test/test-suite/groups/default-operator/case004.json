@@ -1,0 +1,7 @@
+{
+    "description": "hello is used",
+    "expr": "\"hello\" ?: 42",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "hello"
+}

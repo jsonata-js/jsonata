@@ -612,7 +612,7 @@ const dateTime = (function () {
                             def.integerFormat.mandatoryDigits = def.width.min;
                         }
                     }
-                    if ('YMD'.indexOf(def.component) !== -1) {
+                    if (def.component === 'Y') {
                         // §9.8.4.4
                         def.n = -1;
                         if (def.width && def.width.max !== undefined) {
@@ -624,6 +624,11 @@ const dateTime = (function () {
                                 def.n = w;
                             }
                         }
+                    }
+                    // if the previous part is also an integer with no intervening markup, then its width for parsing must be precisely defined
+                    const previousPart = spec[spec.length - 1];
+                    if (previousPart && previousPart.integerFormat) {
+                        previousPart.integerFormat.parseWidth = previousPart.integerFormat.mandatoryDigits;
                     }
                 }
                 if (def.component === 'Z' || def.component === 'z') {
@@ -904,6 +909,13 @@ const dateTime = (function () {
                 if (offset === 0 && markerSpec.presentation2 === 't') {
                     componentValue = 'Z';
                 }
+            } else if (markerSpec.component === 'P') {
+                // §9.8.4.7 Formatting Other Components
+                // Formatting P for am/pm
+                // getDateTimeFragment() always returns am/pm lower case so check for UPPER here
+                if (markerSpec.names === tcase.UPPER) {
+                    componentValue = componentValue.toUpperCase();
+                }
             }
             return componentValue;
         };
@@ -983,7 +995,6 @@ const dateTime = (function () {
                         return offsetHours * 60 + offsetMinutes;
                     };
                 } else if (part.integerFormat) {
-                    part.integerFormat.n = part.n;
                     res = generateRegex(part.integerFormat);
                 } else {
                     // must be a month or day name
@@ -1028,16 +1039,6 @@ const dateTime = (function () {
         } else { // type === 'integer'
             matcher.type = 'integer';
             const isUpper = formatSpec.case === tcase.UPPER;
-            let occurrences;
-            if(formatSpec.n && formatSpec.n > 0){
-                if(formatSpec.optionalDigits === 0){
-                    occurrences = `{${formatSpec.n}}`;
-                } else {
-                    occurrences = `{${formatSpec.n - formatSpec.optionalDigits},${formatSpec.n}}`;
-                }
-            } else {
-                occurrences = '+';
-            }
 
             switch (formatSpec.primary) {
                 case formats.LETTERS:
@@ -1059,7 +1060,12 @@ const dateTime = (function () {
                     };
                     break;
                 case formats.DECIMAL:
-                    matcher.regex = `[0-9]${occurrences}`;
+                    matcher.regex = '[0-9]';
+                    if (formatSpec.parseWidth) {
+                        matcher.regex += `{${formatSpec.parseWidth}}`;
+                    } else {
+                        matcher.regex += '+';
+                    }
                     if (formatSpec.ordinal) {
                         // ordinals
                         matcher.regex += '(?:th|st|nd|rd)';

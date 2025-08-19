@@ -31,7 +31,7 @@ Regexes are often used in query predicates (filter expressions) when selecting o
 
 `path.to.object[stringProperty ~> /regex/]`
 
-The `~>` is the [chain operator](control-operators#chain), and its use here implies that the result of `/regex/` is a function.  We'll see below that this is in fact the case.
+The `~>` is the [chain operator](other-operators#-chain), and its use here implies that the result of `/regex/` is a function.  We'll see below that this is in fact the case.
 
 __Examples__
 
@@ -66,7 +66,7 @@ This returns the following JSONata object (JSON, but also with a function proper
 This contains information of the first matching substring within this famous palindrome, specifically:
 - `match` - the substring within the original string that matches the regex
 - `start` - the starting position (zero offset) of the matching substring within the original string
-- `end` - the endinging position of the matching substring within the original string
+- `end` - the ending position of the matching substring within the original string
 - `groups` - if capturing groups are used in the regex, then this array contains a string for the text captured by each group
 - `next()` - when invoked, will return details of the second occurrence of any matching substring (and so on).
 

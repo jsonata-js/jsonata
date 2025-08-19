@@ -10,6 +10,8 @@ var fs = require("fs");
 var path = require("path");
 var jsonata = require("../src/jsonata");
 var chai = require("chai");
+var chaiAsPromised = require("chai-as-promised");
+chai.use(chaiAsPromised);
 var expect = chai.expect;
 
 let groups = fs.readdirSync(path.join(__dirname, "test-suite", "groups")).filter((name) => !name.endsWith(".json"));
@@ -112,29 +114,25 @@ describe("JSONata Test Suite", () => {
                             // First is that we have an undefined result.  So, check
                             // to see if the result we get from evaluation is undefined
                             let result = expr.evaluate(dataset, testcase.bindings);
-                            expect(result).to.deep.equal(undefined);
+                            return expect(result).to.eventually.deep.equal(undefined);
                         } else if ("result" in testcase) {
                             // Second is that a (defined) result was provided.  In this case,
                             // we do a deep equality check against the expected result.
                             let result = expr.evaluate(dataset, testcase.bindings);
-                            expect(result).to.deep.equal(testcase.result);
+                            return expect(result).to.eventually.deep.equal(testcase.result);
                         } else if ("error" in testcase) {
                             // If an error was expected,
                             // we do a deep equality check against the expected error structure.
-                            expect(function() {
-                                expr.evaluate(dataset, testcase.bindings);
-                            })
-                                .to.throw()
-                                .to.deep.contain(testcase.error);
+                            return expect(expr.evaluate(dataset, testcase.bindings))
+                                .to.be.rejected
+                                .to.eventually.deep.contain(testcase.error);
                         } else if ("code" in testcase) {
                             // Finally, if a `code` field was specified, we expected the
                             // evaluation to fail and include the specified code in the
                             // thrown exception.
-                            expect(function() {
-                                expr.evaluate(dataset, testcase.bindings);
-                            })
-                                .to.throw()
-                                .to.deep.contain({ code: testcase.code });
+                            return expect(expr.evaluate(dataset, testcase.bindings))
+                                .to.be.rejected
+                                .to.eventually.deep.contain({ code: testcase.code });
                         } else {
                             // If we get here, it means there is something wrong with
                             // the test case data because there was nothing to check.
@@ -160,7 +158,7 @@ function timeboxExpression(expr, timeout, maxDepth) {
     var time = Date.now();
 
     var checkRunnaway = function() {
-        if (depth > maxDepth) {
+        if (maxDepth > 0 && depth > maxDepth) {
             // stack too deep
             throw {
                 message:
@@ -180,11 +178,13 @@ function timeboxExpression(expr, timeout, maxDepth) {
     };
 
     // register callbacks
-    expr.assign("__evaluate_entry", function() {
+    expr.assign(Symbol.for('jsonata.__evaluate_entry'), function(expr, input, env) {
+        if (env.isParallelCall) return;
         depth++;
         checkRunnaway();
     });
-    expr.assign("__evaluate_exit", function() {
+    expr.assign(Symbol.for('jsonata.__evaluate_exit'), function(expr, input, env) {
+        if (env.isParallelCall) return;
         depth--;
         checkRunnaway();
     });

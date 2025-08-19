@@ -1,0 +1,7 @@
+{
+    "description": "42 is used",
+    "expr": "Account.blah ?: 42",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": 42
+}

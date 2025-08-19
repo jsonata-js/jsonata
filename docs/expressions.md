@@ -11,7 +11,7 @@ Path expressions that point to a string value will return that value.
 String literals can also be created by enclosing the
 sequence of characters in quotes. Either double quotes `"` or single quotes `'` can be used, provided the same quote type is 
 used for the start and end of the string literal.  Single quote characters may be included within a double quoted string and
-_vice versa_ withought escaping.  Characters within the string literal may be escaped using the same format
+_vice versa_ without escaping.  Characters within the string literal may be escaped using the same format
 as [JSON strings](https://tools.ietf.org/html/rfc7159#section-7).
 
 Strings can be combined using the concatenation operator `&`. This is an infix operator and will join the two strings

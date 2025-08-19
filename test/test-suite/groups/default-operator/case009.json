@@ -1,0 +1,9 @@
+{
+    "description": "object with property is used",
+    "expr": "{ \"a\": 1 } ?: 42",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": {
+        "a": 1
+    }
+}

@@ -1,0 +1,7 @@
+{
+    "description": "property missing on object uses default number on rhs",
+    "expr": "foo.baz ?? 42",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": 42
+}

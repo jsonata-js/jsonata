@@ -1,0 +1,7 @@
+{
+    "description": "undefined property uses default number on rhs",
+    "expr": "baz ?? 42",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": 42
+}

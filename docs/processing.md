@@ -50,7 +50,7 @@ Stage | Syntax | Action
  __Filter__ | seq`[`expr`]` | Filter results from previous stage by applying predicate expression between brackets to each item.
  __Sort__ | seq`^(`expr`)` | Sorts (re-orders) the input sequence according to the criteria in parentheses.
  __Index__ | seq`#`$var | Binds a named variable to the current context position (zero offset) in the sequence.
- __Join__ | seq`@`$var | Binds a named variable to the current current context item in the sequence.  Can only be used directly following a map stage.
+ __Join__ | seq`@`$var | Binds a named variable to the current context item in the sequence.  Can only be used directly following a map stage.
 __Reduce__ | seq`{` expr`:`expr`,` expr`:`expr ...`}` | Group and aggregate the input sequence to a single result object as defined by the name/value expressions.  Can only appear as the final stage in a path expression.
 
 In the above table:

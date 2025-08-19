@@ -40,6 +40,8 @@ Produces [this](http://try.jsonata.org/ryYn78Q0m), if you're interested!
 
 ## Conditional logic
 
+### Ternary operator (`? :`)
+
 If/then/else constructs can be written using the ternary operator "? :".
 
 `predicate ? expr1 : expr2`
@@ -64,6 +66,84 @@ __Examples__
   },
   {
     "Cloak": "Premium"
+  }
+]</div>
+</div>
+
+### Elvis/Default operator (`?:`)
+
+The default (or "elvis") operator is syntactic sugar for a common pattern using the ternary operator. It returns the left-hand side if it has an effective Boolean value of `true`, otherwise it returns the right-hand side.
+
+`expr1 ?: expr2`
+
+This is equivalent to:
+
+`expr1 ? expr1 : expr2`
+
+The elvis operator is useful for providing fallback values when an expression may evaluate to a value with an effective Boolean value of `false`, without having to repeat the expression twice as you would with the ternary operator.
+
+__Examples__
+
+<div class="jsonata-ex">
+  <div>Account.Order.Product.{
+    `Product Name`: $.'Product Name',
+    `Category`: $.Category ?: "Uncategorized"
+}</div>
+  <div>[
+  {
+    "Product Name": "Bowler Hat",
+    "Category": "Uncategorized"
+  },
+  {
+    "Product Name": "Trilby hat",
+    "Category": "Uncategorized"
+  },
+  {
+    "Product Name": "Bowler Hat",
+    "Category": "Uncategorized"
+  },
+  {
+    "Product Name": "Cloak",
+    "Category": "Uncategorized"
+  }
+]</div>
+</div>
+
+### Coalescing operator (`??`)
+
+The coalescing operator is syntactic sugar for a common pattern using the ternary operator with the `$exists` function. It returns the left-hand side if it is defined (not `undefined`), otherwise it returns the right-hand side.
+
+`expr1 ?? expr2`
+
+This is equivalent to:
+
+`$exists(expr1) ? expr1 : expr2`
+
+The coalescing operator is useful for providing fallback values only when the left-hand side is missing or not present (empty sequence), but not for other values with an effective Boolean value of `false` like `0`, `false`, or `''`. It avoids having to evaluate the expression twice and explicitly use the `$exists` function as you would with the ternary operator.
+
+__Examples__
+
+<div class="jsonata-ex">
+  <div>Account.Order.{
+    "OrderID": OrderID, 
+    Rating": ($sum(Product.Rating) / $count(Product.Rating)) ?? 0
+}</div>
+  <div>[
+  {
+    "OrderID": "order101",
+    "Rating": 5
+  },
+  {
+    "OrderID": "order102",
+    "Rating": 3
+  },
+  {
+    "OrderID": "order103",
+    "Rating": 4
+  },
+  {
+    "OrderID": "order104",
+    "Rating": 2
   }
 ]</div>
 </div>
@@ -200,7 +280,7 @@ Note that it is actually possible to write a recursive function using purely ano
 
 ### Tail call optimization (Tail recursion)
 
-A recursive function adds a new frame to the call stack each time it invokes itself.  This can eventually lead to stack exhaustion if the function recuses beyond a certain limit.  Consider the classic recursive implementation of the factorial function
+A recursive function adds a new frame to the call stack each time it invokes itself.  This can eventually lead to stack exhaustion if the function recurses beyond a certain limit.  Consider the classic recursive implementation of the factorial function
 
 ```
 (

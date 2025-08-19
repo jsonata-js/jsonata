@@ -1,3 +1,52 @@
+#### 2.1.0 Milestone Release
+
+- New syntax (`?:` default operator) supports fallback to RHS if the LHS is Boolean equivalent to false (PR #784)
+- New syntax (`??` coalescing operator) supports fallback to RHS if the LHS is non-existent (PR #784)
+- Improve regex generation for DateTime parser (PR #728)
+- Truncate fractional part of numeric argument of `$pad` function (PR #729)
+- Await array elements (PR #747)
+- Various documentation fixes and improvements
+
+#### 2.0.6 Maintenance Release
+
+- Protect __evaluate_entry and __evaluate_exit callbacks (PR #700)
+- Add undocumented/private API to hook into when a new frame is created (PR #701)
+  - Note this is internal and may change in a future release.
+- Update typescript defintion (PR #704)
+- Chain operator should respect array constructor (PR #714)
+
+#### 2.0.5 Maintenance Release
+
+- Fix leaking internal references in expressions when using lambdas (issue #691)
+
+#### 2.0.4 Maintenance Release
+
+- Prevent writing to the object prototype or constructor (PR https://github.com/jsonata-js/jsonata/pull/676)
+- Add upper/lower presentation format for am/pm in fromMillis (PR https://github.com/jsonata-js/jsonata/pull/644)
+- Various documentation additions and corrections
+
+#### 2.0.3 Maintenance Release
+
+- Fix regex termination lexer (PR https://github.com/jsonata-js/jsonata/pull/623)
+- Fix TypeScript definition (PR https://github.com/jsonata-js/jsonata/pull/633)
+
+#### 2.0.2 Maintenance Release
+
+- Typescript definition: fix return type of evaluate method (PR https://github.com/jsonata-js/jsonata/pull/615)
+
+#### 2.0.1 Maintenance Release
+
+- Small update to pick up README changes with 2.0.0 changes
+
+#### 2.0.0 Major Release
+
+Version 2.0.0 contains a breaking change to the Javascript API as a result of reimplementing the evaluator
+to use async functions instead of generators.  This provides a performance boost.
+No breaking changes have been made to the JSONata language itself.
+
+- Faster JSONata evaluation by switching from generators to async/await (PR #583)
+- Add support for parsing binary, octal & hexadecimal numbers (PR #573)
+
 #### 1.8.6 Maintenance Release
 
 - Fix bug in date/time picture string. Width formatting is not respected without a separator (issue #546)

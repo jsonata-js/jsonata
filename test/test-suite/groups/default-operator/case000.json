@@ -1,0 +1,7 @@
+{
+    "description": "true is used",
+    "expr": "true ?: 42",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": true
+}

@@ -14,9 +14,9 @@ Example HTML page
     <title>JSONata test</title>
     <script src="https://cdn.jsdelivr.net/npm/jsonata/jsonata.min.js"></script>
     <script>
-      function greeting() {
+      async function greeting() {
         var json = JSON.parse(document.getElementById('json').value);
-        var result = jsonata('"Hello, " & name').evaluate(json);
+        var result = await jsonata('"Hello, " & name').evaluate(json);
         document.getElementById('greeting').innerHTML = result;
       }
     </script>

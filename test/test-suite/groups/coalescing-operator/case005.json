@@ -1,0 +1,7 @@
+{
+    "description": "out of bounds index uses default number on rhs",
+    "expr": "foo.blah[9].baz.fud ?? 42",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": 42
+}

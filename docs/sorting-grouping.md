@@ -12,7 +12,7 @@ Arrays contain an ordered collection of values.  If you need to re-order the val
 
 2. Using the [order-by](path-operators#order-by-) operator.
 
-The [order-by](path-operators#order-by-) operator is a convenient syntax that can used directly in a path expression to sort the result sequences in ascending or descending order.  The [`$sort()`](array-functions#sort) function requires more syntax to be written, but is more flexible and supports custom comparator functions.
+The [order-by](path-operators#order-by-) operator is a convenient syntax that can be used directly in a path expression to sort the result sequences in ascending or descending order.  The [`$sort()`](array-functions#sort) function requires more syntax to be written, but is more flexible and supports custom comparator functions.
 
 ## Grouping
 

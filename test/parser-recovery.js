@@ -467,13 +467,10 @@ describe('Invoke parser with incomplete expression', function() {
         describe('Account.', function() {
             it('should return ast', function() {
                 var expr = jsonata('Account.', { recover: true });
-                expect(function () {
-                    expr.evaluate({});
-                }).to.throw()
-                    .to.deep.contain({position: 0, code: 'S0500'});
+                return expect(expr.evaluate({}))
+                    .to.be.rejected
+                    .to.eventually.deep.contain({position: 0, code: 'S0500'});
             });
         });
     });
-
 });
-

@@ -34,15 +34,15 @@ If the expression is not valid JSONata, an `Error` is thrown containing informat
 Run the compiled JSONata expression against object `input` and return the result as a new object.
 
 ```javascript
-var result = expression.evaluate({example: [{value: 4}, {value: 7}, {value: 13}]});
+var result = await expression.evaluate({example: [{value: 4}, {value: 7}, {value: 13}]});
 ```
 
 `input` should be a JavaScript value such as would be returned from `JSON.parse()`. If `input` could not have been parsed from a JSON string (is circular, contains functions, ...), `evaluate`'s behaviour is not defined. `result` is a new JavaScript value suitable for `JSON.stringify()`ing.
 
-`bindings`, if present, contains variable names and values (including functions) to be bound:
+`bindings`, if present, contain variable names and values (including functions) to be bound:
 
 ```javascript
-jsonata("$a + $b()").evaluate({}, {a: 4, b: () => 78});
+await jsonata("$a + $b()").evaluate({}, {a: 4, b: () => 78});
 // returns 82
 ```
 
@@ -50,7 +50,7 @@ jsonata("$a + $b()").evaluate({}, {a: 4, b: () => 78});
 
 ```javascript
 var expression = jsonata("$notafunction()"); // OK, valid JSONata
-expression.evaluate({}); // Throws
+await expression.evaluate({}); // Throws
 ```
 
 The `Error` contains information about the nature of the run-time error, for example:
@@ -68,7 +68,7 @@ The `Error` contains information about the nature of the run-time error, for exa
 If `callback(err, value)` is supplied, `expression.evaluate()` returns `undefined`, the expression is run asynchronously and the `Error` or result is passed to `callback`.
 
 ```javascript
-jsonata("7 + 12").evaluate({}, {}, (error, result) => {
+await jsonata("7 + 12").evaluate({}, {}, (error, result) => {
   if(error) {
     console.error(error);
     return;
@@ -89,13 +89,13 @@ var expression = jsonata("$a + $b()");
 expression.assign("a", 4);
 expression.assign("b", () => 1);
 
-expression.evaluate({}); // 5
+await expression.evaluate({}); // 5
 ```
 
 Note that the `bindings` argument in the `expression.evaluate()` call clobbers these values:
 
 ```javascript
-expression.evaluate({}, {a: 109}); // 110
+await expression.evaluate({}, {a: 109}); // 110
 ```
 
 ### expression.registerFunction(name, implementation[, signature])
@@ -106,7 +106,7 @@ Permanently binds a function to a name in the expression.
 var expression = jsonata("$greet()");
 expression.registerFunction("greet", () => "Hello world");
 
-expression.evaluate({}); // "Hello world"
+await expression.evaluate({}); // "Hello world"
 ```
 
 You can do this using `expression.assign` or `bindings` in `expression.evaluate`, but `expression.registerFunction` allows you to specify a function `signature`. This is a terse string which tells JSONata the expected input argument types and return value type of the function. JSONata raises a run-time error if the actual input argument types do not match (the return value type is not checked yet).
@@ -115,7 +115,7 @@ You can do this using `expression.assign` or `bindings` in `expression.evaluate`
 var expression = jsonata("$add(61, 10005)");
 expression.registerFunction("add", (a, b) => a + b, "<nn:n>");
 
-expression.evaluate({}); // 10066
+await expression.evaluate({}); // 10066
 ```
 
 ### Function signature syntax
@@ -168,7 +168,7 @@ Each type symbol may also have *options* applied.
 
 ### Writing higher-order function extensions
 
-It is possible to write and extension function that takes one or more functions in its list of arguments and/or returns
+It is possible to write an extension function that takes one or more functions in its list of arguments and/or returns
  a function as its return value.
 
 

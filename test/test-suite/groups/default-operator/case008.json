@@ -1,0 +1,7 @@
+{
+    "description": "empty array is not used",
+    "expr": "[] ?: 42",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": 42
+}
