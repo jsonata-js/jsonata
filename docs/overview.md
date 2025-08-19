@@ -16,7 +16,24 @@ JSONata is a lightweight query and transformation language for JSON data. Inspir
 * Install the module from [NPM](https://www.npmjs.com/package/jsonata)
 * Fork the repo on [GitHub](https://github.com/jsonata-js/jsonata)
 
+## Implementations of JSONata
+
+The following are known implementations of JSONata in addition to the primary implementation in JavaScript in the above repo.
+
+|Language|Link|Notes|JSONata version|
+|---|---|---|---|
+|C|https://github.com/qlyoung/jsonata-c|Runs JSONata in embedded JS engine|1.8.3|
+|C++|https://github.com/rayokota/jsonata-cpp|Native port of reference|2.1.0|
+|Go|https://github.com/blues/jsonata-go|Native implementation|1.5.4|
+|Go|https://github.com/yxuco/gojsonata|Native implementation| |
+|Java|https://github.com/IBM/JSONata4Java|Native implementation| |
+|Java|https://github.com/dashjoin/jsonata-java|Native port of reference|2.0.5|
+|.NET|https://github.com/mikhail-barg/jsonata.net.native|Native implementation|1.8.5|
+|Python|https://github.com/qlyoung/pyjsonata|API bindings based on C bindings|1.8.3|
+|Python|https://github.com/rayokota/jsonata-python|Native port of reference|2.1.0|
+|Rust|https://github.com/johanventer/jsonata-rust|Implementation work in progress| |
+|Rust|https://github.com/Stedi/jsonata-rs|Actively-developed fork of jsonata-rust| |
+
 ## Find out more
 
 * Introduction at [London Node User Group meetup](https://www.youtube.com/watch?v=TDWf6R8aqDo)
-* IBM developerWorks [Tech Talk](https://www.youtube.com/watch?v=ZRtlkIj0uDY)
