@@ -785,9 +785,17 @@ const parser = (() => {
             if (node.id !== "}") {
                 for (; ;) {
                     var n = expression(0);
-                    advance(":");
-                    var v = expression(0);
-                    a.push([n, v]); // holds an array of name/value expression pairs
+                    if((node.id === ',' || node.id === '}') && n.id === '(name)') {
+                        const key = Object.create(symbol_table["(literal)"]);
+                        key.value = n.value;
+                        key.type = 'string';
+                        key.position = n.position;
+                        a.push([key, n]); // shorthand property syntax
+                    } else {
+                        advance(":");
+                        var v = expression(0);
+                        a.push([n, v]); // holds an array of name/value expression pairs
+                    }
                     if (node.id !== ",") {
                         break;
                     }

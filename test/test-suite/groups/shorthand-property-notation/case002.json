@@ -1,0 +1,8 @@
+{
+    "expr": "($foobar:= 256; {$foobar})",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": {
+        "foobar": 256
+    }
+}
