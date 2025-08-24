@@ -1,6 +1,6 @@
-{
-  // Rules ammendments
-  "rules": {
-    "strict": ["error", "global"],
-  }
-}
+// {
+//   // Rules ammendments
+//   "rules": {
+//     "strict": ["error", "global"],
+//   }
+// }
