@@ -1929,6 +1929,7 @@ var jsonata = (function() {
     staticFrame.bind('encodeUrl', defineFunction(fn.encodeUrl, '<s-:s>'));
     staticFrame.bind('decodeUrlComponent', defineFunction(fn.decodeUrlComponent, '<s-:s>'));
     staticFrame.bind('decodeUrl', defineFunction(fn.decodeUrl, '<s-:s>'));
+    staticFrame.bind('uuid', defineFunction(fn.uuid, '<:s>'));
     staticFrame.bind('eval', defineFunction(functionEval, '<sx?:x>'));
     staticFrame.bind('toMillis', defineFunction(datetime.toMillis, '<s-s?:n>'));
     staticFrame.bind('fromMillis', defineFunction(datetime.fromMillis, '<n-s?s?:s>'));

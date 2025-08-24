@@ -1,0 +1,6 @@
+{
+    "expr": "$length($uuid())",
+    "data": null,
+    "bindings": {},
+    "result": 36
+}
