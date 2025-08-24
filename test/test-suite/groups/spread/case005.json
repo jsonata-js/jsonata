@@ -1,0 +1,8 @@
+{
+    "expr": "{...Wrong.Address, \"hello\":\"world\"}",
+    "dataset": "dataset1",
+    "bindings": {},
+    "result": {
+        "hello": "world"
+    }
+}
