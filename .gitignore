@@ -11,4 +11,3 @@ package-lock.json
 .idea/
 .nyc_output
 sync-test
-sync

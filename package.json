@@ -2,9 +2,18 @@
   "name": "jsonata",
   "version": "2.1.0",
   "description": "JSON query and transformation language",
-  "module": "jsonata.js",
-  "main": "jsonata.js",
-  "typings": "jsonata.d.ts",
+  "exports": {
+    ".": {
+      "types": "./jsonata.d.ts",
+      "import": "./jsonata.js",
+      "require": "./jsonata.js"
+    },
+    "./sync": {
+      "types": "./sync/jsonata.d.ts",
+      "import": "./sync/jsonata.js",
+      "require": "./sync/jsonata.js"
+    }
+  },
   "homepage": "http://jsonata.org/",
   "repository": {
     "type": "git",

@@ -22,6 +22,12 @@ srcFiles.forEach(file => {
     fs.writeFileSync(path.join(syncDir, path.basename(file)), newContent);
 });
 
+const dts = fs.readFileSync(path.join(__dirname, "../jsonata.d.ts"), "utf8");
+fs.writeFileSync(
+    path.join(syncDir, 'jsonata.d.ts'),
+    dts.replaceAll(/Promise<(.*)>/g, '$1')
+);
+
 const syncTestDir = path.join(__dirname, "../sync-test");
 
 fs.writeFileSync(path.join(syncTestDir, 'reasynced.js'), 
