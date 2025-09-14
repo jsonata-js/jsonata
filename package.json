@@ -2,6 +2,12 @@
   "name": "jsonata",
   "version": "2.1.0",
   "description": "JSON query and transformation language",
+  "files": [
+    "*.js",
+    "*.d.ts",
+    "src",
+    "sync"
+  ],
   "exports": {
     ".": {
       "types": "./jsonata.d.ts",
