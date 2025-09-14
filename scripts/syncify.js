@@ -22,8 +22,6 @@ srcFiles.forEach(file => {
     fs.writeFileSync(path.join(syncDir, path.basename(file)), newContent);
 });
 
-const testDir = path.join(__dirname, "../test");
-
 const syncTestDir = path.join(__dirname, "../sync-test");
 fs.mkdirSync(syncTestDir, { recursive: true });
 const testFiles = fs.globSync('test/**/*.*')
@@ -36,12 +34,36 @@ testFiles.forEach(file => {
     let newContent = content
     if (file.endsWith('.js')) {
         newContent = newContent
-        // .replace(/(.)/, `/* eslint-disable */\n$1`)
-        .replaceAll(`../src`, `../sync`)
-        .replaceAll(`.eventually.`, `/* .eventually */ .`)
+            .replace(/(.)/, `/* eslint-disable */\n$1`)
+            .replaceAll(`../src`, `../sync`)
+        
+        newContent = newContent
+            .split('.be.rejected')
+            .map((part, i, arr) => {
+                if (i === arr.length - 1) return part;
+                const expectParen = 'expect('
+                const indexOfExpectParen = part.lastIndexOf(expectParen);
+                if (indexOfExpectParen === -1) throw new Error(`Expected expect( to appear in ${part}`);
+                const upToLastExpectParen = part.slice(0, indexOfExpectParen);
+                const indent = upToLastExpectParen.slice(upToLastExpectParen.trimEnd().length)
+
+                const indexOfLastParen = part.lastIndexOf(')');
+                if (indexOfLastParen === -1) throw new Error(`Expected ) to appear in ${part}`);
+                
+                return part.slice(0, indexOfExpectParen)
+                    + `expect(
+                        Promise.resolve().then(() => 
+                            ${part.slice(indexOfExpectParen + expectParen.length, indexOfLastParen).trim()}
+                        )
+                    )`.replaceAll('                    ', indent).replaceAll('\n\n', '\n').trim()
+                    + indent
+                    + part.slice(indexOfLastParen + 1)
+            })
+            .join('.be.rejected')
+            // .join('.to.eventually /* leave this "eventually" alone */.be.rejected')
+
+        // newContent = newContent.replaceAll(`.eventually.`, `/* .eventually */ .`)
     }
-    console.log(newFilepath);
-    console.log(newContent.slice(0, 100));
     fs.mkdirSync(path.dirname(newFilepath), { recursive: true });
     fs.writeFileSync(newFilepath, newContent)
 });
