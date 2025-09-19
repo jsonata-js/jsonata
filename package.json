@@ -26,6 +26,7 @@
     "url": "https://github.com/jsonata-js/jsonata.git"
   },
   "scripts": {
+    "prepare": "node scripts/syncify.js && git diff --exit-code",
     "pretest": "npm run lint",
     "mocha": "nyc ./node_modules/mocha/bin/_mocha -- \"test/**/*.js\"",
     "mocha-sync": "./node_modules/mocha/bin/_mocha -- \"sync-test/**/*.js\"",
