@@ -1,0 +1,8 @@
+{
+    "expr": "$removeEmpty({\"keep\": \"\", \"remove\": \"\"}, [\"keep\"])",
+    "dataset": "dataset25",
+    "bindings": {},
+    "result": {
+        "keep": ""
+    }
+}

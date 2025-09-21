@@ -1,0 +1,8 @@
+{
+    "expr": "data.arrays.nested[value != \"\"].{\"item_id\": id, \"cleaned_meta\": $removeEmpty(meta, [\"flags\"])}",
+    "dataset": "dataset26",
+    "bindings": {},
+    "result": {
+        "item_id": 1
+    }
+}

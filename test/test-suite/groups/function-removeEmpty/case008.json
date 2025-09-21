@@ -1,0 +1,8 @@
+{
+    "expr": "$removeEmpty(data.exclusion_test, [\"$.keep_empty_array\"])",
+    "dataset": "dataset26",
+    "bindings": {},
+    "result": {
+        "keep_empty_array": []
+    }
+}

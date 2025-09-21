@@ -2056,6 +2056,92 @@ const functions = (() => {
         return result;
     }
 
+    /**
+     * Clean up empty values from an object or array
+     * @param {*} input - The input value to clean
+     * @param {Array} exclusionList - Array of paths to exclude from cleaning (optional)
+     * @param {boolean} removeEmptyStrings - Whether to remove empty strings (optional, default true)
+     * @param {string} currentPath - Current path for internal recursion (optional)
+     * @returns {*} Cleaned input with empty objects, arrays, and optionally strings removed
+     */
+    function removeEmpty(input, exclusionList, removeEmptyStrings, currentPath) {
+        // Handle undefined input
+        if (typeof input === 'undefined') {
+            return undefined;
+        }
+
+        // Set default values
+        exclusionList = exclusionList || [];
+        removeEmptyStrings = (removeEmptyStrings !== false); // default to true
+        currentPath = currentPath || '';
+
+        // Helper to check if currentPath matches any exclusion path
+        var isExcluded = exclusionList.some(function(exclusionPath) {
+            var normalizedExclusionPath = exclusionPath.indexOf('$.') === 0 ? exclusionPath.slice(2) : exclusionPath;
+            return normalizedExclusionPath === currentPath;
+        });
+
+        if (isExcluded) {
+            // If the current path is excluded, return the object/array/value as is, without cleaning children
+            return input;
+        }
+
+        if (Array.isArray(input)) {
+            var cleanedArray = input
+                .map(function(item, idx) {
+                    return removeEmpty(item, exclusionList, removeEmptyStrings, currentPath + '[' + idx + ']');
+                })
+                .filter(function(item) {
+                    // Filter out undefined values
+                    if (typeof item === 'undefined') {
+                        return false;
+                    }
+                    // Filter out empty objects and arrays
+                    if (typeof item === 'object' && item !== null) {
+                        return Object.keys(item).length > 0 || (Array.isArray(item) && item.length > 0);
+                    }
+                    // Keep everything else (including null, strings, numbers, booleans)
+                    return true;
+                });
+            return cleanedArray;
+        } else if (typeof input === 'object' && input !== null) {
+            var cleanedObject = {};
+            var keys = Object.keys(input);
+            for (var i = 0; i < keys.length; i++) {
+                var key = keys[i];
+                var nextPath = currentPath ? currentPath + '.' + key : key;
+                // Check if the nextPath is excluded before recursing
+                var isChildExcluded = exclusionList.some(function(exclusionPath) {
+                    var normalizedExclusionPath = exclusionPath.indexOf('$.') === 0 ? exclusionPath.slice(2) : exclusionPath;
+                    return normalizedExclusionPath === nextPath;
+                });
+                if (isChildExcluded) {
+                    cleanedObject[key] = input[key];
+                } else {
+                    var value = removeEmpty(input[key], exclusionList, removeEmptyStrings, nextPath);
+                    if (
+                        typeof value !== 'undefined' &&
+                        value !== null &&
+                        !(typeof value === 'object' && value !== null && Object.keys(value).length === 0) &&
+                        !(Array.isArray(value) && value.length === 0) &&
+                        !(removeEmptyStrings && value === '')
+                    ) {
+                        cleanedObject[key] = value;
+                    }
+                }
+            }
+            // Return undefined if the cleaned object is empty
+            return Object.keys(cleanedObject).length === 0 ? undefined : cleanedObject;
+        }
+
+        // Handle empty strings
+        if (removeEmptyStrings && input === '') {
+            return undefined;
+        }
+
+        return input;
+    }
+
     return {
         sum, count, max, min, average,
         string, substring, substringBefore, substringAfter, lowercase, uppercase, length, trim, pad,
@@ -2064,7 +2150,8 @@ const functions = (() => {
         boolean, not,
         map, zip, filter, single, foldLeft, sift,
         keys, lookup, append, exists, spread, merge, reverse, each, error, assert, type, sort, shuffle, distinct,
-        base64encode, base64decode,  encodeUrlComponent, encodeUrl, decodeUrlComponent, decodeUrl
+        base64encode, base64decode,  encodeUrlComponent, encodeUrl, decodeUrlComponent, decodeUrl,
+        removeEmpty
     };
 })();
 

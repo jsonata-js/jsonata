@@ -1,0 +1,76 @@
+{
+    "expr": "{\"cleaned_user\": $removeEmpty(user), \"original_org\": organization}",
+    "dataset": "dataset25",
+    "bindings": {},
+    "result": {
+        "cleaned_user": {
+            "name": "John Doe",
+            "email": "john@example.com",
+            "profile": {
+                "social": {
+                    "linkedin": "https://linkedin.com/in/johndoe"
+                },
+                "preferences": {
+                    "privacy": {
+                        "public": true
+                    }
+                }
+            },
+            "projects": [
+                {
+                    "name": "Project Alpha",
+                    "description": "A sample project",
+                    "tags": ["work", "important"],
+                    "metadata": {
+                        "created": "2023-01-15"
+                    }
+                }
+            ],
+            "settings": {
+                "theme": "dark",
+                "language": "en",
+                "features": {
+                    "beta": false
+                }
+            }
+        },
+        "original_org": {
+            "name": "ACME Corp",
+            "departments": [
+                {
+                    "name": "Engineering",
+                    "employees": [
+                        {
+                            "name": "Alice Smith",
+                            "role": "Developer",
+                            "skills": ["JavaScript", "Python"],
+                            "certifications": []
+                        },
+                        {
+                            "name": "",
+                            "role": null,
+                            "skills": [],
+                            "certifications": null
+                        }
+                    ],
+                    "budget": {
+                        "allocated": 100000,
+                        "spent": 0,
+                        "remaining": null
+                    }
+                },
+                {
+                    "name": "",
+                    "employees": [],
+                    "budget": {}
+                }
+            ],
+            "locations": [],
+            "policies": {
+                "remote": true,
+                "benefits": {},
+                "training": []
+            }
+        }
+    }
+}

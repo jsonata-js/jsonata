@@ -1,0 +1,38 @@
+{
+    "expr": "$removeEmpty(user, [\"profile.social.twitter\", \"contacts\"])",
+    "dataset": "dataset25",
+    "bindings": {},
+    "result": {
+        "name": "John Doe",
+        "email": "john@example.com",
+        "profile": {
+            "social": {
+                "linkedin": "https://linkedin.com/in/johndoe",
+                "twitter": ""
+            },
+            "preferences": {
+                "privacy": {
+                    "public": true
+                }
+            }
+        },
+        "contacts": [],
+        "projects": [
+            {
+                "name": "Project Alpha",
+                "description": "A sample project",
+                "tags": ["work", "important"],
+                "metadata": {
+                    "created": "2023-01-15"
+                }
+            }
+        ],
+        "settings": {
+            "theme": "dark",
+            "language": "en",
+            "features": {
+                "beta": false
+            }
+        }
+    }
+}

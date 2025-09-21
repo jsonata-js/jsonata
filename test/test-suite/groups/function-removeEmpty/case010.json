@@ -1,0 +1,11 @@
+{
+    "expr": "$removeEmpty(data.arrays.nested)",
+    "dataset": "dataset26",
+    "bindings": {},
+    "result": [
+        {
+            "id": 1,
+            "value": "test"
+        }
+    ]
+}
