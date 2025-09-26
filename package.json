@@ -2,6 +2,7 @@
   "name": "jsonata",
   "version": "2.1.0",
   "description": "JSON query and transformation language",
+  "sideEffects": false,
   "files": [
     "*.js",
     "*.d.ts",
