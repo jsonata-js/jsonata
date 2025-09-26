@@ -29,6 +29,7 @@ fs.writeFileSync(
 );
 
 const syncTestDir = path.join(__dirname, "../sync-test");
+fs.mkdirSync(syncTestDir, { recursive: true });
 
 fs.writeFileSync(path.join(syncTestDir, 'reasynced.js'), 
 ` // use the sync library but make it async anyway, so that tests relying on moch-as-promised work
