@@ -252,15 +252,15 @@ const signature = (() => {
                                 argIndex++;
                             }
                         } else {
-                            // may have matched multiple args (if the regex ends with a '+'
+                            // may have matched multiple args (if the regex ends with a '+')
                             // split into single tokens
                             match.split('').forEach(function (single) {
+                                arg = args[argIndex];
                                 if (param.type === 'a') {
                                     if (single === 'm') {
                                         // missing (undefined)
                                         arg = undefined;
                                     } else {
-                                        arg = args[argIndex];
                                         var arrayOK = true;
                                         // is there type information on the contents of the array?
                                         if (typeof param.subtype !== 'undefined') {
