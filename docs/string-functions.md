@@ -329,3 +329,12 @@ Decodes a Uniform Resource Locator (URL) previously created by encodeUrl.
 __Examples__
 
 - `$decodeUrl("https://mozilla.org/?x=%D1%88%D0%B5%D0%BB%D0%BB%D1%8B")` => `"https://mozilla.org/?x=шеллы"`
+
+## `$uuid()`
+__Signature:__ `$uuid()`
+
+Generates a random universally unique identifer in accordance with the UUIDv4 RFC (https://datatracker.ietf.org/doc/html/rfc9562#name-uuid-version-4)
+
+__Examples__
+
+- `$uuid()` => `"721ae209-7d07-4cda-a1ff-1df536cfc79c"`
