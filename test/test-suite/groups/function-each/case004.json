@@ -1,0 +1,7 @@
+{
+    "expr": "[123, 321] ~> $each(?, function($v) {$v})",
+    "data": {},
+    "bindings": {},
+    "result": [123, 321],
+    "unordered": true
+}

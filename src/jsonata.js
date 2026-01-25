@@ -1916,7 +1916,7 @@ var jsonata = (function() {
     staticFrame.bind('spread', defineFunction(fn.spread, '<x-:a<o>>'));
     staticFrame.bind('merge', defineFunction(fn.merge, '<a<o>:o>'));
     staticFrame.bind('reverse', defineFunction(fn.reverse, '<a:a>'));
-    staticFrame.bind('each', defineFunction(fn.each, '<o-f:a>'));
+    staticFrame.bind('each', defineFunction(fn.each, '<(ao)-f:a>'));
     staticFrame.bind('error', defineFunction(fn.error, '<s?:x>'));
     staticFrame.bind('assert', defineFunction(fn.assert, '<bs?:x>'));
     staticFrame.bind('type', defineFunction(fn.type, '<x:s>'));
