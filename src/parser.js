@@ -1052,8 +1052,6 @@ const parser = (() => {
                                 rest.procedure.steps.length === 1 &&
                                 rest.procedure.steps[0].type === 'name' &&
                                 result.steps[result.steps.length - 1].type === 'function') {
-                                // next function in chain of functions - will override a thenable
-                                result.steps[result.steps.length - 1].nextFunction = rest.procedure.steps[0].value;
                             }
                             if (rest.type === 'path') {
                                 Array.prototype.push.apply(result.steps, rest.steps);
