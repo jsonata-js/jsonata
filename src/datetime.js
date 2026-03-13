@@ -1307,7 +1307,7 @@ const dateTime = (function () {
     }
 
     // Regular expression to match an ISO 8601 formatted timestamp
-    var iso8601regex = new RegExp('^\\d{4}(-[01]\\d)*(-[0-3]\\d)*(T[0-2]\\d:[0-5]\\d:[0-5]\\d)*(\\.\\d+)?([+-][0-2]\\d:?[0-5]\\d|Z)?$');
+    var iso8601regex = new RegExp('^\\d{4}(-[01]\\d)?(-[0-3]\\d)?(T[0-2]\\d:[0-5]\\d:[0-5]\\d)?(\\.\\d+)?([+-][0-2]\\d:?[0-5]\\d|Z)?$');
 
     /**
      * Converts an ISO 8601 timestamp to milliseconds since the epoch
