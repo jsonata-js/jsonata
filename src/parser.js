@@ -585,7 +585,7 @@ const parser = (() => {
                 type: 'function',
                 value: '(',
                 procedure: { type: 'variable', value: 'exists' },
-                arguments: [left]
+                arguments: [JSON.parse(JSON.stringify(left))]
             };
             this.then = left;
             this.else = expression(0);

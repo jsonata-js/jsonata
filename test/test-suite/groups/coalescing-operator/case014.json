@@ -1,0 +1,7 @@
+{
+    "description": "array predicate on lhs does not exist, should return rhs value",
+    "expr": "foo.blah[5] ?? 42",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": 42
+}
