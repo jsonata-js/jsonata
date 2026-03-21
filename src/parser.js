@@ -1047,12 +1047,6 @@ const parser = (() => {
                                 result.seekingParent = [lstep.slot];
                             }
                             var rest = processAST(expr.rhs);
-                            if (rest.type === 'function' &&
-                                rest.procedure.type === 'path' &&
-                                rest.procedure.steps.length === 1 &&
-                                rest.procedure.steps[0].type === 'name' &&
-                                result.steps[result.steps.length - 1].type === 'function') {
-                            }
                             if (rest.type === 'path') {
                                 Array.prototype.push.apply(result.steps, rest.steps);
                             } else {
