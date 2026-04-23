@@ -1,0 +1,7 @@
+{
+    "description": "unary minus on number literal LHS is not double-negated",
+    "expr": "-5 ?: 99",
+    "dataset": null,
+    "bindings": {},
+    "result": -5
+}

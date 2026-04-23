@@ -1,0 +1,7 @@
+{
+    "description": "negative array index on single-element array returns the element",
+    "expr": "[true][-1] ?: \"no\"",
+    "dataset": null,
+    "bindings": {},
+    "result": true
+}

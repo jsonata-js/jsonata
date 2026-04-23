@@ -1,0 +1,7 @@
+{
+    "description": "negative array index on lhs returns last element",
+    "expr": "[1,2,3][-1] ?: 42",
+    "dataset": null,
+    "bindings": {},
+    "result": 3
+}

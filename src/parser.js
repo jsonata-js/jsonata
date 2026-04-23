@@ -878,7 +878,12 @@ const parser = (() => {
         // elvis/default operator
         infix("?:", operators['?:'], function (left) {
             this.type = 'condition';
-            this.condition = left;
+            // Deep-clone `left` so the condition and then branches have
+            // independent AST nodes. Sharing the same reference causes
+            // post-parse processing (e.g. predicate stages, unary minus
+            // folding on number literals) to mutate the same node twice,
+            // producing wrong results (see #773 for the equivalent ?? fix).
+            this.condition = JSON.parse(JSON.stringify(left));
             this.then = left;
             this.else = expression(0);
             return this;

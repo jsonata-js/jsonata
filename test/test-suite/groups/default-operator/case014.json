@@ -1,0 +1,7 @@
+{
+    "description": "array predicate on lhs exists, should return lhs value",
+    "expr": "foo.blah[0] ?: 42",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": {"baz": {"fud": "hello"}}
+}
