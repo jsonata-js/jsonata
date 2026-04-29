@@ -1698,7 +1698,7 @@ const functions = (() => {
                     }
                 }
             }
-        } else if (input !== null && typeof input === 'object' && !isFunction(input)) {
+        } else if (input !== null && typeof input === 'object' && Object.prototype.hasOwnProperty.call(input, key) && !isFunction(input)) {
             result = input[key];
         }
         return result;

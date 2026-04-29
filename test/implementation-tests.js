@@ -955,33 +955,45 @@ describe("Tests that are specific to a Javascript runtime", () => {
             });
         });
     });
-    describe("Expressions that attempt to pollute the object prototype", function() {
-        it("should throw an error with __proto__", async function() {
-            const expr = jsonata('{} ~> | __proto__ | {"is_admin": true} |');
+
+    describe("Expressions that attempt to access the object prototype", function() {
+        const data = {"foo": {"bar": "baz"}};
+        it("should ignore __proto__", async function() {
+            const expr = jsonata('foo.__proto__');
+            const result = await expr.evaluate(data);
+            expect(result).to.deep.equal(undefined);
+        });
+
+        it("should throw an error trying to invoke toString()", async function() {
+            const expr = jsonata('foo.toString()');
             expect(
-                expr.evaluate()
+                expr.evaluate(data)
             ).to.eventually.be.rejected.to.deep.contain({
-                position: 7,
-                code: "D1010",
+                position: 13,
+                code: "T1006",
             });
+        });
+    });
+
+    describe("Expressions that attempt to pollute the object prototype", function() {
+        it("should ignore __proto__", async function() {
+            const expr = jsonata('{} ~> | __proto__ | {"is_admin": true} |');
+            const result = await expr.evaluate();
+            expect(result).to.deep.equal({});
         });
         it("should throw an error with __lookupGetter__", async function() {
             const expr = jsonata('{} ~> | __lookupGetter__("__proto__")() | {"is_admin": true} |');
             expect(
                 expr.evaluate()
             ).to.eventually.be.rejected.to.deep.contain({
-                position: 7,
-                code: "D1010",
+                position: 25,
+                code: "T1006",
             });
         });
-        it("should throw an error with constructor", async function() {
+        it("should ignore constructor", async function() {
             const expr = jsonata('{} ~> | constructor | {"is_admin": true} |');
-            expect(
-                expr.evaluate()
-            ).to.eventually.be.rejected.to.deep.contain({
-                position: 7,
-                code: "D1010",
-            });
+            const result = await expr.evaluate();
+            expect(result).to.deep.equal({});
         });
     });
 });
