@@ -366,5 +366,13 @@
         "expr": "$toMillis('2020-09-09 12:00:00 +0530', '[Y0001]-[M01]-[D01] [H01]:[m01]:[s01] [Z0001]') ~> $fromMillis() ",
         "data": {},
         "result": "2020-09-09T06:30:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "timezones",
+        "description": "should correctly parse fractional seconds of more than 3 digits, and truncate to millis",
+        "expr": "$toMillis('2026-04-08T19:05:04.01987', '[Y0001]-[M01]-[D01]T[H01]:[m01]:[s01].[f1]') ~> $fromMillis() ",
+        "data": {},
+        "result": "2026-04-08T19:05:04.019Z"
     }
 ]

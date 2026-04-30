@@ -994,6 +994,11 @@ const dateTime = (function () {
                         }
                         return offsetHours * 60 + offsetMinutes;
                     };
+                } else if (part.component === 'f') {
+                    res.regex = '[0-9]+';
+                    res.parse = function(value) {
+                        return parseFloat('0.' + value.substring(0, 3)) * 1000;
+                    };
                 } else if (part.integerFormat) {
                     res = generateRegex(part.integerFormat);
                 } else {
