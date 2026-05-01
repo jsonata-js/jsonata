@@ -24,6 +24,7 @@ The following are known implementations of JSONata in addition to the primary im
 |---|---|---|---|
 |C|https://github.com/qlyoung/jsonata-c|Runs JSONata in embedded JS engine|1.8.3|
 |C++|https://github.com/rayokota/jsonata-cpp|Native port of reference|2.1.0|
+|Go|https://github.com/jsonata-go/jsonata|Native implementation|2.0.6|
 |Go|https://github.com/RecoLabs/gnata|Native implementation|2.x|
 |Go|https://github.com/blues/jsonata-go|Native implementation|1.5.4|
 |Go|https://github.com/yxuco/gojsonata|Native implementation| |
