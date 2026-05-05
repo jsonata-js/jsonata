@@ -1,0 +1,26 @@
+[
+    {
+        "expr": "$formatNumber(42, '%%')",
+        "dataset": null,
+        "bindings": {},
+        "code": "D3086"
+    },
+    {
+        "expr": "$formatNumber(42, '‰‰')",
+        "dataset": null,
+        "bindings": {},
+        "code": "D3086"
+    },
+    {
+        "expr": "$formatNumber(42, '%‰')",
+        "dataset": null,
+        "bindings": {},
+        "code": "D3086"
+    },
+    {
+        "expr": "$formatNumber(42, '---')",
+        "dataset": null,
+        "bindings": {},
+        "code": "D3086"
+    }
+]

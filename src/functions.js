@@ -825,6 +825,7 @@ const functions = (() => {
                         return subpicture.substring(0, ii);
                     }
                 }
+                return "";
             })();
             var suffix = (function () {
                 var ch;
@@ -834,6 +835,7 @@ const functions = (() => {
                         return subpicture.substring(ii + 1);
                     }
                 }
+                return "";
             })();
             var activePart = subpicture.substring(prefix.length, subpicture.length - suffix.length);
             var mantissaPart, exponentPart, integerPart, fractionalPart;
