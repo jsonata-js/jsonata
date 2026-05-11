@@ -1074,13 +1074,21 @@ const functions = (() => {
             var minMantissa = Math.pow(10, pic.scalingFactor - 1);
             mantissa = adjustedNumber;
             exponent = 0;
-            while (mantissa < minMantissa) {
-                mantissa *= 10;
-                exponent -= 1;
-            }
-            while (mantissa > maxMantissa) {
-                mantissa /= 10;
-                exponent += 1;
+            // Compare magnitudes; previously `mantissa < minMantissa` was
+            // true for every negative mantissa and `0 * 10 === 0` never
+            // crossed the threshold, producing an infinite loop on zero
+            // and negative inputs (#785). For zero the desired exponent is
+            // simply zero — the XPath F&O Bullet 5 says "if N is zero, set
+            // M to zero and E to zero".
+            if (mantissa !== 0) {
+                while (Math.abs(mantissa) < minMantissa) {
+                    mantissa *= 10;
+                    exponent -= 1;
+                }
+                while (Math.abs(mantissa) > maxMantissa) {
+                    mantissa /= 10;
+                    exponent += 1;
+                }
             }
         }
         // bullet 6:

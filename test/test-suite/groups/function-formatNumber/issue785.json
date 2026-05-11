@@ -1,0 +1,26 @@
+[
+    {
+        "expr": "$formatNumber(0, '0e0')",
+        "dataset": null,
+        "bindings": {},
+        "result": "0e0"
+    },
+    {
+        "expr": "$formatNumber(-42, '0e0')",
+        "dataset": null,
+        "bindings": {},
+        "result": "-4e1"
+    },
+    {
+        "expr": "$formatNumber(42, '0e0')",
+        "dataset": null,
+        "bindings": {},
+        "result": "4e1"
+    },
+    {
+        "expr": "$formatNumber(0, '0.00e0')",
+        "dataset": null,
+        "bindings": {},
+        "result": "0.00e0"
+    }
+]
