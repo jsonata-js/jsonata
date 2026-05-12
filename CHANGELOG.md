@@ -1,3 +1,13 @@
+#### 2.1.1 Maintenance Release
+
+- Fix picture string parsing for $formatNumber (PR #788)
+- Fix $toMillis() with more than 3 digit fractional seconds (PR #782)
+- Fix ?: operator returning wrong result when LHS has array predicate (PR #780)
+- Fix ?? operator with array predicate on LHS (PR #774)
+- Fix function signature for repeating arguments (PR #760)
+- Fix precision fix for $string() function (PR #762)
+- Fix to prevent $formatNumber() getting into an infinite loop (PR #785)
+
 #### 2.1.0 Milestone Release
 
 - New syntax (`?:` default operator) supports fallback to RHS if the LHS is Boolean equivalent to false (PR #784)
