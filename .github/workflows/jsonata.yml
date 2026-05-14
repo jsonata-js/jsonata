@@ -1,12 +1,9 @@
-name: Build and publish JSONata
+name: Build JSONata
 on:
   push:
     branches: [ master, v1 ]
   pull_request:
     branches: [ master, v1 ]
-permissions:
-  id-token: write  # Required for OIDC
-  contents: read
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,21 +19,6 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: npm install
       - run: npm test
-  publish:
-    needs: build
-    runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && github.repository == 'jsonata-js/jsonata' }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Use Node.js 24.x
-        uses: actions/setup-node@v3
-        with:
-          node-version: 24.x
-      - name: Install and build
-        run: npm install && npm test
-      - name: Publish to NPM
-        run: npm publish
   documentation:
     needs: build    
     runs-on: ubuntu-latest
