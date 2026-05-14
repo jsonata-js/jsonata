@@ -1013,12 +1013,15 @@ describe("Test that yield platform specific results", () => {
 describe("Tests that include infinite recursion", () => {
     describe("stack overflow - infinite recursive function - non-tail call", function() {
         it("should throw error", function() {
-            var expr = jsonata("(" + "  $inf := function($n){$n+$inf($n-1)};" + "  $inf(5)" + ")");
-            timeboxExpression(expr, 1000, 300);
+            const options = {
+                'timeout': 1000,
+                'stack': 300
+            }
+            const expr = jsonata("($inf := function($n){$n+$inf($n-1)};  $inf(5))", options);
             expect(expr.evaluate()).to.eventually.be.rejected.to.deep.contain({
                 token: "inf",
-                position: 32,
-                code: "U1001",
+                position: 30,
+                code: "D1011",
             });
         });
     });
@@ -1026,11 +1029,96 @@ describe("Tests that include infinite recursion", () => {
     describe("stack overflow - infinite recursive function - tail call", function() {
         this.timeout(5000);
         it("should throw error", function() {
-            var expr = jsonata("( $inf := function(){$inf()}; $inf())");
-            timeboxExpression(expr, 1000, 500);
+            const options = {
+                'timeout': 1000,
+                'stack': 500
+            }
+            const expr = jsonata("( $inf := function(){$inf()}; $inf())", options);
             expect(expr.evaluate()).to.eventually.be.rejected.to.deep.contain({
                 token: "inf",
-                code: "U1001",
+                code: "D1012",
+            });
+        });
+    });
+
+    describe("stack overflow - infinite recursive function - tail call (no stack guardrail)", function() {
+        this.timeout(5000);
+        it("should throw error", function() {
+            const options = {
+                'timeout': 1000
+            }
+            const expr = jsonata("( $inf := function(){$inf()}; $inf())", options);
+            expect(expr.evaluate()).to.eventually.be.rejected.to.deep.contain({
+                token: "inf",
+                code: "D1012",
+            });
+        });
+    });
+
+    describe("guardrails on Ackermann function", function() {
+        this.timeout(5000);
+        const ackermann = (m, n) => `
+        (
+            $ack := function($m, $n) {
+                $m = 0 ? $n + 1 :
+                $n = 0 ? $ack($m - 1, 1) :
+                $ack($m - 1, $ack($m, $n - 1))
+            };
+
+            $ack(${m}, ${n})
+        )`;
+
+        it("should complete for small parameters", async function() {
+            const options = {
+                'timeout': 1000,
+                'stack': 500
+            }
+            const expr = jsonata(ackermann(3, 4), options);
+            const result = await expr.evaluate();
+            expect(result).to.equal(125);
+        });
+
+        it("larger inputs cause stack overflow", function() {
+            const options = {
+                'stack': 500
+            }
+            const expr = jsonata(ackermann(4, 4), options);
+            expect(expr.evaluate()).to.eventually.be.rejected.to.deep.contain({
+                token: "ack",
+                code: "D1011",
+            });
+        });
+
+        it("larger inputs cause stack overflow", function() {
+            const options = {
+                'stack': 500
+            }
+            const expr = jsonata(ackermann(4, 4), options);
+            expect(expr.evaluate()).to.eventually.be.rejected.to.deep.contain({
+                token: "ack",
+                code: "D1011",
+            });
+        });
+    });
+
+    describe("guardrails on sequence length", function() {
+        it("prevents large ranges", function() {
+            const options = {
+                'sequence': 1000
+            }
+            const expr = jsonata('[0..1001]', options);
+            expect(expr.evaluate()).to.eventually.be.rejected.to.deep.contain({
+                code: "D2015",
+            });
+        });
+
+        it("prevents large intermediate sequences", function() {
+            const options = {
+                'sequence': 1000
+            }
+            const expr = jsonata('[0..100].([0..100]) ~> count()', options);
+            expect(expr.evaluate()).to.eventually.be.rejected.to.deep.contain({
+                code: "D2015",
             });
         });
     });
@@ -1050,46 +1138,3 @@ describe("Tests that use internal frame push callbacks", () => {
         });
     });
 });
-
-/**
- * Protect the process/browser from a runnaway expression
- * i.e. Infinite loop (tail recursion), or excessive stack growth
- *
- * @param {Object} expr - expression to protect
- * @param {Number} timeout - max time in ms
- * @param {Number} maxDepth - max stack depth
- */
-function timeboxExpression(expr, timeout, maxDepth) {
-    var depth = 0;
-    var time = Date.now();
-
-    var checkRunnaway = function() {
-        if (depth > maxDepth) {
-            // stack too deep
-            throw {
-                message:
-                    "Stack overflow error: Check for non-terminating recursive function.  Consider rewriting as tail-recursive.",
-                stack: new Error().stack,
-                code: "U1001"
-            };
-        }
-        if (Date.now() - time > timeout) {
-            // expression has run for too long
-            throw {
-                message: "Expression evaluation timeout: Check for infinite loop",
-                stack: new Error().stack,
-                code: "U1001"
-            };
-        }
-    };
-
-    // register callbacks
-    expr.assign(Symbol.for('jsonata.__evaluate_entry'), function() {
-        depth++;
-        checkRunnaway();
-    });
-    expr.assign(Symbol.for('jsonata.__evaluate_exit'), function() {
-        depth--;
-        checkRunnaway();
-    });
-}

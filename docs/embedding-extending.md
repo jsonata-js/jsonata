@@ -6,9 +6,11 @@ sidebar_label: Embedding and Extending JSONata
 
 ## API
 
-### jsonata(str)
+### jsonata(str[, options])
 
 Parse a string `str` as a JSONata expression and return a compiled JSONata expression object.
+
+`options`, if present, is used to control certain aspects of the evaluator, and can be used to protect the server from expressions that take longer to execute than expected.  See [Configuring Guardrails](guardrails) for more details.
 
 ```javascript
 var expression = jsonata("$sum(example.value)");

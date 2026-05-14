@@ -12,7 +12,6 @@ const functions = (() => {
     var isNumeric = utils.isNumeric;
     var isArrayOfStrings = utils.isArrayOfStrings;
     var isArrayOfNumbers = utils.isArrayOfNumbers;
-    var createSequence = utils.createSequence;
     var isSequence = utils.isSequence;
     var isFunction = utils.isFunction;
     var isLambda = utils.isLambda;
@@ -382,7 +381,7 @@ const functions = (() => {
             };
         }
 
-        var result = createSequence();
+        var result = this.createSequence();
 
         if (typeof limit === 'undefined' || limit > 0) {
             var count = 0;
@@ -1490,7 +1489,7 @@ const functions = (() => {
             return undefined;
         }
 
-        var result = createSequence();
+        var result = this.createSequence();
         // do the map - iterate over the arrays, and invoke func
         for (var i = 0; i < arr.length; i++) {
             var func_args = hofFuncArgs(func, arr[i], i, arr);
@@ -1516,7 +1515,7 @@ const functions = (() => {
             return undefined;
         }
 
-        var result = createSequence();
+        var result = this.createSequence();
 
         for (var i = 0; i < arr.length; i++) {
             var entry = arr[i];
@@ -1659,18 +1658,18 @@ const functions = (() => {
      * @returns {Array} Array of keys
      */
     function keys(arg) {
-        var result = createSequence();
+        var result = this.createSequence();
 
         if (Array.isArray(arg)) {
             // merge the keys of all of the items in the array
             var merge = {};
-            arg.forEach(function (item) {
-                var allkeys = keys(item);
+            for(var ii = 0; ii < arg.length; ii++) {
+                var allkeys = keys.call(this, arg[ii]);
                 allkeys.forEach(function (key) {
                     merge[key] = true;
                 });
-            });
-            result = keys(merge);
+            }
+            result = keys.call(this, merge);
         } else if (arg !== null && typeof arg === 'object' && !isFunction(arg)) {
             Object.keys(arg).forEach(key => result.push(key));
         }
@@ -1687,9 +1686,9 @@ const functions = (() => {
         // lookup the 'name' item in the input
         var result;
         if (Array.isArray(input)) {
-            result = createSequence();
+            result = this.createSequence();
             for(var ii = 0; ii < input.length; ii++) {
-                var res =  lookup(input[ii], key);
+                var res =  lookup.call(this, input[ii], key);
                 if (typeof res !== 'undefined') {
                     if (Array.isArray(res)) {
                         res.forEach(val => result.push(val));
@@ -1720,7 +1719,7 @@ const functions = (() => {
         }
         // if either argument is not an array, make it so
         if (!Array.isArray(arg1)) {
-            arg1 = createSequence(arg1);
+            arg1 = this.createSequence(arg1);
         }
         if (!Array.isArray(arg2)) {
             arg2 = [arg2];
@@ -1747,13 +1746,13 @@ const functions = (() => {
      * @returns {*} - the array
      */
     function spread(arg) {
-        var result = createSequence();
+        var result = this.createSequence();
 
         if (Array.isArray(arg)) {
             // spread all of the items in the array
-            arg.forEach(function (item) {
-                result = append(result, spread(item));
-            });
+            for(var ii = 0; ii < arg.length; ii++) {
+                result = append.call(this, result, spread.call(this, arg[ii]));
+            }
         } else if (arg !== null && typeof arg === 'object' && !isLambda(arg)) {
             for (var key in arg) {
                 var obj = {};
@@ -1819,7 +1818,7 @@ const functions = (() => {
      * @returns {Array} - the resultant array
      */
     async function each(obj, func) {
-        var result = createSequence();
+        var result = this.createSequence();
 
         for (var key in obj) {
             var func_args = hofFuncArgs(func, obj[key], key, obj);
@@ -2020,7 +2019,7 @@ const functions = (() => {
             return arr;
         }
 
-        var results = isSequence(arr) ? createSequence() : [];
+        var results = isSequence(arr) ? this.createSequence() : [];
 
         for(var ii = 0; ii < arr.length; ii++) {
             var value = arr[ii];

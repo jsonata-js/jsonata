@@ -55,19 +55,6 @@ const utils = (() => {
     }
 
     /**
-     * Create an empty sequence to contain query results
-     * @returns {Array} - empty sequence
-     */
-    function createSequence() {
-        var sequence = [];
-        sequence.sequence = true;
-        if (arguments.length === 1) {
-            sequence.push(arguments[0]);
-        }
-        return sequence;
-    }
-
-    /**
      * Tests if a value is a sequence
      * @param {*} value the value to test
      * @returns {boolean} true if it's a sequence
@@ -204,7 +191,6 @@ const utils = (() => {
         isNumeric,
         isArrayOfStrings,
         isArrayOfNumbers,
-        createSequence,
         isSequence,
         isFunction,
         isLambda,
