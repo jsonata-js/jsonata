@@ -1,3 +1,11 @@
+#### 2.2.0 Milestone Release
+
+- New API to specify resource guardrails on expressions (PR #795)
+- Fix ISO8601 regex pattern (PR #793)
+- Prevent $lookup from accessing object prototype members (PR #794)
+- Enable OIDC publishing to NPM (PR #792)
+- Publish step to be triggered by new version tag (PR #796)
+
 #### 2.1.1 Maintenance Release
 
 - Fix picture string parsing for $formatNumber (PR #788)
