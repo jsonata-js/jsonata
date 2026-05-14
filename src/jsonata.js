@@ -1293,13 +1293,6 @@ var jsonata = (function() {
                 }
                 for(var ii = 0; ii < matches.length; ii++) {
                     var match = matches[ii];
-                    if (match && (match.isPrototypeOf(result) || match instanceof Object.constructor)) {
-                        throw {
-                            code: "D1010",
-                            stack: (new Error()).stack,
-                            position: expr.position
-                        };
-                    }
                     // evaluate the update value for each match
                     var update = await evaluate(expr.update, match, environment);
                     // update must be an object
@@ -1989,7 +1982,6 @@ var jsonata = (function() {
         "T1007": "Attempted to partially apply a non-function. Did you mean ${{{token}}}?",
         "T1008": "Attempted to partially apply a non-function",
         "D1009": "Multiple key definitions evaluate to same key: {{value}}",
-        "D1010": "Attempted to access the Javascript object prototype", // Javascript specific 
         "T1010": "The matcher function argument passed to function {{token}} does not return the correct object structure",
         "T2001": "The left side of the {{token}} operator must evaluate to a number",
         "T2002": "The right side of the {{token}} operator must evaluate to a number",
