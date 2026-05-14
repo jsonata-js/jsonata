@@ -4,6 +4,9 @@ on:
     branches: [ master, v1 ]
   pull_request:
     branches: [ master, v1 ]
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -33,13 +36,7 @@ jobs:
       - name: Install and build
         run: npm install && npm test
       - name: Publish to NPM
-        id: npmpub
-        uses: JS-DevTools/npm-publish@v1
-        with:
-          token: ${{ secrets.NPM_TOKEN }}
-      - if: steps.npmpub.outputs.type != 'none'
-        run: |
-          echo "Version changed: ${{ steps.npmpub.outputs.old-version }} => ${{ steps.npmpub.outputs.version }}"
+        run: npm publish
   documentation:
     needs: build    
     runs-on: ubuntu-latest
