@@ -1,0 +1,43 @@
+{
+  "version-2.2.0-docs": {
+    "Getting Started": [
+      "version-2.2.0-overview",
+      "version-2.2.0-using-nodejs",
+      "version-2.2.0-using-browser"
+    ],
+    "Language Guide": [
+      "version-2.2.0-simple",
+      "version-2.2.0-predicate",
+      "version-2.2.0-expressions",
+      "version-2.2.0-construction",
+      "version-2.2.0-composition",
+      "version-2.2.0-sorting-grouping",
+      "version-2.2.0-processing",
+      "version-2.2.0-programming",
+      "version-2.2.0-regex",
+      "version-2.2.0-date-time"
+    ],
+    "Operators": [
+      "version-2.2.0-path-operators",
+      "version-2.2.0-numeric-operators",
+      "version-2.2.0-comparison-operators",
+      "version-2.2.0-boolean-operators",
+      "version-2.2.0-other-operators"
+    ],
+    "Function Library": [
+      "version-2.2.0-string-functions",
+      "version-2.2.0-numeric-functions",
+      "version-2.2.0-aggregation-functions",
+      "version-2.2.0-boolean-functions",
+      "version-2.2.0-array-functions",
+      "version-2.2.0-object-functions",
+      "version-2.2.0-date-time-functions",
+      "version-2.2.0-higher-order-functions"
+    ],
+    "Extending JSONata": [
+      "version-2.2.0-embedding-extending",
+      "version-2.2.0-guardrails",
+      "version-2.2.0-contributing"
+    ]
+  }
+}

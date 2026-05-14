@@ -4,6 +4,6 @@
     "Language Guide": ["simple", "predicate", "expressions", "construction", "composition", "sorting-grouping", "processing", "programming", "regex", "date-time"],
     "Operators": ["path-operators", "numeric-operators", "comparison-operators", "boolean-operators", "other-operators"],
     "Function Library": ["string-functions", "numeric-functions", "aggregation-functions", "boolean-functions", "array-functions", "object-functions", "date-time-functions", "higher-order-functions"],
-    "Extending JSONata": ["embedding-extending", "contributing"]
+    "Extending JSONata": ["embedding-extending", "guardrails", "contributing"]
   }
 }
