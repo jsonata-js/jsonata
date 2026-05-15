@@ -74,7 +74,7 @@ const dateTime = (function () {
         return words;
     }
 
-    const wordValues = {};
+    const wordValues = Object.create(null);
     few.forEach(function (word, index) {
         wordValues[word.toLowerCase()] = index;
     });
@@ -952,11 +952,11 @@ const dateTime = (function () {
      * @returns {object} - regex
      */
     function generateRegex(formatSpec) {
-        var matcher = {};
+        var matcher = Object.create(null);
         if (formatSpec.type === 'datetime') {
             matcher.type = 'datetime';
             matcher.parts = formatSpec.parts.map(function (part) {
-                var res = {};
+                var res = Object.create(null);
                 if (part.type === 'literal') {
                     res.regex = part.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                 } else if (part.component === 'Z' || part.component === 'z') {
@@ -1004,7 +1004,7 @@ const dateTime = (function () {
                 } else {
                     // must be a month or day name
                     res.regex = '[a-zA-Z]+';
-                    var lookup = {};
+                    var lookup = Object.create(null);
                     if (part.component === 'M' || part.component === 'x') {
                         // months
                         months.forEach(function (name, index) {
@@ -1187,7 +1187,7 @@ const dateTime = (function () {
             const tmA = 23;   // binary 010111
             const tmB = 47;   // binary 101111
 
-            const components = {};
+            const components = Object.create(null);
             for (let i = 1; i < info.length; i++) {
                 const mpart = matchSpec.parts[i - 1];
                 if (mpart.parse) {
