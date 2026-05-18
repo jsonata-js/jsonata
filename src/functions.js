@@ -1724,6 +1724,15 @@ const functions = (() => {
         if (!Array.isArray(arg2)) {
             arg2 = [arg2];
         }
+        const size = arg1.length + arg2.length;
+        if(this.options && size > this.options.sequence) {
+            throw {
+                code: "D2015",
+                stack: (new Error()).stack,
+                value: size
+            };
+        }
+
         return arg1.concat(arg2);
     }
 
