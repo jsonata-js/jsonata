@@ -606,7 +606,7 @@ var jsonata = (function() {
         if (Array.isArray(input) && input.outerWrapper && input.length > 0) {
             input = input[0];
         }
-        if (input !== null && typeof input === 'object') {
+        if (input !== null && typeof input === 'object' && !isFunction(input)) {
             Object.keys(input).forEach(function (key) {
                 var value = input[key];
                 if(Array.isArray(value)) {
@@ -677,7 +677,7 @@ var jsonata = (function() {
             Array.prototype.forEach.call(input, function (member) {
                 recurseDescendants(member, results);
             });
-        } else if (input !== null && typeof input === 'object') {
+        } else if (input !== null && typeof input === 'object' && !isFunction(input)) {
             Object.keys(input).forEach(function (key) {
                 recurseDescendants(input[key], results);
             });
