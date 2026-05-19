@@ -1,3 +1,9 @@
+#### 2.2.1 Maintenance Release
+- Prevent object prototype pollution (PR #799)
+- Wildcards should not unwrap function objects (PR #800)
+- `$append` should enforce the sequence guardrail limit (PR #801)
+- Prevent object contructor setting internal flags (PR #802)
+
 #### 2.2.0 Milestone Release
 
 - New API to specify resource guardrails on expressions (PR #795)
