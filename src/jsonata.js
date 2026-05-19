@@ -514,6 +514,7 @@ var jsonata = (function() {
         var result;
 
         var focus = {
+            options: environment.base.options,
             createSequence: environment.base.createSequence
         };
         switch (expr.value) {
@@ -600,6 +601,7 @@ var jsonata = (function() {
      */
     function evaluateWildcard(expr, input, environment) {
         var focus = {
+            options: environment.base.options,
             createSequence: environment.base.createSequence
         };
         var results = focus.createSequence();
@@ -913,10 +915,12 @@ var jsonata = (function() {
         var groups = Object.create(null);
         var reduce = input && input.tupleStream ? true : false;
         var focus = {
+            options: environment.base.options,
             createSequence: environment.base.createSequence
         };
         // group the input sequence by 'key' expression
         if (!Array.isArray(input)) {
+            options: environment.base.options,
             input = focus.createSequence(input);
         }
         // if the array is empty, add an undefined entry to enable literal JSON object to be generated
@@ -995,6 +999,7 @@ var jsonata = (function() {
         }
         var result = Object.create(null);
         var focus = {
+            options: environment.base.options,
             createSequence: environment.base.createSequence
         };
         Object.assign(result, tupleStream[0]);
@@ -1532,6 +1537,7 @@ var jsonata = (function() {
                 var focus = {
                     environment: environment,
                     input: input,
+                    options: environment.base.options,
                     createSequence: environment.base.createSequence
                 };
                 // the `focus` is passed in as the `this` for the invoked function

@@ -1121,6 +1121,16 @@ describe("Tests that include infinite recursion", () => {
                 code: "D2015",
             });
         });
+
+        it("prevents appending large sequences", function() {
+            const options = {
+                'sequence': 1000
+            }
+            const expr = jsonata('$append([0..600], [0..600]) ~> $count()', options);
+            expect(expr.evaluate()).to.eventually.be.rejected.to.deep.contain({
+                code: "D2015",
+            });
+        });
     });
 });
 
