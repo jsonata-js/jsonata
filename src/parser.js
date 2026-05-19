@@ -351,7 +351,7 @@ const parser = (() => {
         var node;
         var lexer;
 
-        var symbol_table = {};
+        var symbol_table = Object.create(null);
         var errors = [];
 
         var remainingTokens = function () {

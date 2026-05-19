@@ -1662,7 +1662,7 @@ const functions = (() => {
 
         if (Array.isArray(arg)) {
             // merge the keys of all of the items in the array
-            var merge = {};
+            var merge = Object.create(null);
             for(var ii = 0; ii < arg.length; ii++) {
                 var allkeys = keys.call(this, arg[ii]);
                 allkeys.forEach(function (key) {
@@ -1754,8 +1754,8 @@ const functions = (() => {
                 result = append.call(this, result, spread.call(this, arg[ii]));
             }
         } else if (arg !== null && typeof arg === 'object' && !isLambda(arg)) {
-            for (var key in arg) {
-                var obj = {};
+            for (const key of Object.keys(arg)) {
+                var obj = Object.create(null);
                 obj[key] = arg[key];
                 result.push(obj);
             }
@@ -1777,10 +1777,10 @@ const functions = (() => {
             return undefined;
         }
 
-        var result = {};
+        var result = Object.create(null);
 
         arg.forEach(function (obj) {
-            for (var prop in obj) {
+            for (const prop of Object.keys(obj)) {
                 result[prop] = obj[prop];
             }
         });
@@ -1820,7 +1820,7 @@ const functions = (() => {
     async function each(obj, func) {
         var result = this.createSequence();
 
-        for (var key in obj) {
+        for (const key of Object.keys(obj)) {
             var func_args = hofFuncArgs(func, obj[key], key, obj);
             // invoke func
             var val = await func.apply(this, func_args);
@@ -2047,9 +2047,9 @@ const functions = (() => {
      * @returns {object} - sifted object
      */
     async function sift(arg, func) {
-        var result = {};
+        var result = Object.create(null);
 
-        for (var item in arg) {
+        for (const item of Object.keys(arg)) {
             var entry = arg[item];
             var func_args = hofFuncArgs(func, entry, item, arg);
             // invoke func
