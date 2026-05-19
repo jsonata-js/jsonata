@@ -945,6 +945,16 @@ var jsonata = (function() {
                 }
 
                 if (key !== undefined) {
+                    // reject any attempts to set the internal JSONata flags
+                    if (key === '_jsonata_lambda' || key === '_jsonata_function') {
+                        // this is a restriction of this implementation rather than JSONata itself
+                        throw {
+                            code: "D1013",
+                            stack: (new Error()).stack,
+                            position: expr.position,
+                            value: key
+                        };
+                    }
                     var entry = {data: item, exprIndex: pairIndex};
                     if (Object.prototype.hasOwnProperty.call(groups, key)) {
                         // a value already exists in this slot
@@ -2018,6 +2028,7 @@ var jsonata = (function() {
         "T1010": "The matcher function argument passed to function {{token}} does not return the correct object structure",
         "D1011": "Stack overflow. Check for non-terminating recursive function.  Consider rewriting as tail-recursive",
         "D1012": "Evaluation timeout after {{value}} milliseconds. Check for infinite loop",
+        "D1013": "Object property names starting with _jsonata_ are reserved for internal use: {{value}}",
         "T2001": "The left side of the {{token}} operator must evaluate to a number",
         "T2002": "The right side of the {{token}} operator must evaluate to a number",
         "T2003": "The left side of the range operator (..) must evaluate to an integer",

@@ -1134,6 +1134,21 @@ describe("Tests that include infinite recursion", () => {
     });
 });
 
+describe("Tests invalid object creation", () => {
+    it("prevents creating an object mimicking a lambda", () => {
+        const expr = jsonata('($lambda = {"_jsonata_lambda": true}; $lambda())');
+        expect(expr.evaluate()).to.eventually.be.rejected.to.deep.contain({
+                code: "D1013",
+            });
+    })
+    it("prevents creating an object mimicking a function", () => {
+        const expr = jsonata('($fn = {"_jsonata_function": true}; $fn())');
+        expect(expr.evaluate()).to.eventually.be.rejected.to.deep.contain({
+                code: "D1013",
+            });
+    })
+})
+
 describe("Tests that use internal frame push callbacks", () => {
     describe("frame push callback bound to expression", function()  {
         it("calls callback when new frame created", function(done) {
