@@ -31,7 +31,7 @@ const signature = (() => {
         // step through the signature, one symbol at a time
         var position = 1;
         var params = [];
-        var param = {};
+        var param = Object.create(null);
         var prevParam = param;
         while (position < signature.length) {
             var symbol = signature.charAt(position);
@@ -44,7 +44,7 @@ const signature = (() => {
             var next = function () {
                 params.push(param);
                 prevParam = param;
-                param = {};
+                param = Object.create(null);
             };
 
             var findClosingBracket = function (str, start, openSymbol, closeSymbol) {
