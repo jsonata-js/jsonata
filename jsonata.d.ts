@@ -1,4 +1,4 @@
-// Type definitions for jsonata 1.7
+// Type definitions for jsonata 2.2
 // Project: https://github.com/jsonata-js/jsonata
 // Definitions by: Nick <https://github.com/nick121212> and Michael M. Tiller <https://github.com/xogeny>
 
@@ -6,8 +6,11 @@ declare function jsonata(str: string, options?: jsonata.JsonataOptions): jsonata
 declare namespace jsonata {
 
   interface JsonataOptions {
-    recover?: boolean,
-    RegexEngine?: RegExp
+    recover?: boolean;
+    RegexEngine?: RegExpConstructor;
+    timeout?: number;
+    stack?: number;
+    sequence?: number;
   }
 
   interface ExprNode {
@@ -39,7 +42,7 @@ declare namespace jsonata {
     steps?: ExprNode[];
     expressions?: ExprNode[];
     stages?: ExprNode[];
-    lhs?: ExprNode | ExprNode[];
+    lhs?: ExprNode | ExprNode[] | [ExprNode, ExprNode][];
     rhs?: ExprNode;
   }
 
@@ -60,6 +63,7 @@ declare namespace jsonata {
     readonly environment: Environment;
     readonly input: any;
   }
+
   interface Expression {
     evaluate(input: any, bindings?: Record<string, any>): Promise<any>;
     evaluate(input: any, bindings: Record<string, any> | undefined, callback: (err: JsonataError, resp: any) => void): void;
