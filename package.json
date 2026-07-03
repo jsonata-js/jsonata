@@ -2,17 +2,35 @@
   "name": "jsonata",
   "version": "2.2.1",
   "description": "JSON query and transformation language",
-  "module": "jsonata.js",
-  "main": "jsonata.js",
-  "typings": "jsonata.d.ts",
+  "sideEffects": false,
+  "files": [
+    "*.js",
+    "*.d.ts",
+    "src",
+    "sync"
+  ],
+  "exports": {
+    ".": {
+      "types": "./jsonata.d.ts",
+      "import": "./jsonata.js",
+      "require": "./jsonata.js"
+    },
+    "./sync": {
+      "types": "./sync/jsonata.d.ts",
+      "import": "./sync/jsonata.js",
+      "require": "./sync/jsonata.js"
+    }
+  },
   "homepage": "http://jsonata.org/",
   "repository": {
     "type": "git",
     "url": "https://github.com/jsonata-js/jsonata.git"
   },
   "scripts": {
+    "syncify": "node scripts/syncify.js && git diff --exit-code",
     "pretest": "npm run lint",
     "mocha": "nyc ./node_modules/mocha/bin/_mocha -- \"test/**/*.js\"",
+    "mocha-sync": "./node_modules/mocha/bin/_mocha -- \"sync-test/**/*.js\"",
     "test": "npm run mocha",
     "posttest": "npm run check-coverage && npm run browserify && npm run minify && npm run build-es5",
     "build-es5": "npm run mkdir-dist && npm run regenerator && npm run browserify-es5 && npm run minify-es5",
