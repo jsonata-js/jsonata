@@ -6,27 +6,32 @@
     {
       "match": "a",
       "index": 0,
-      "groups": []
+      "groups": [],
+      "namedGroups": {}
     },
     {
       "match": "a",
       "index": 3,
-      "groups": []
+      "groups": [],
+      "namedGroups": {}
     },
     {
       "match": "a",
       "index": 5,
-      "groups": []
+      "groups": [],
+      "namedGroups": {}
     },
     {
       "match": "a",
       "index": 7,
-      "groups": []
+      "groups": [],
+      "namedGroups": {}
     },
     {
       "match": "a",
       "index": 10,
-      "groups": []
+      "groups": [],
+      "namedGroups": {}
     }
   ]
 }

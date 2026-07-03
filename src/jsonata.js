@@ -1152,7 +1152,8 @@ var jsonata = (function() {
                     match: match[0],
                     start: match.index,
                     end: match.index + match[0].length,
-                    groups: []
+                    groups: [],
+                    namedGroups: match.groups || {}
                 };
                 if(match.length > 1) {
                     for(var i = 1; i < match.length; i++) {

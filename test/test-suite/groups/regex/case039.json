@@ -1,0 +1,30 @@
+{
+    "expr": "$map($, function($i){ $match($i, /^(?<first>[^ ]*)\\s*(?<last>.*)/) }).namedGroups",
+    "data": [
+        "Felicia Saunders",
+        "Jimmy Schultz",
+        "Dolores Figueroa",
+        "Craig Moreno",
+        "Lindsey Hall",
+        "Bonnie Russell",
+        "Kristin Stewart",
+        "Owen Reid",
+        "Brenda Sherman",
+        "Dwayne Baldwin",
+        "Joy Smith Carmichael"
+      ],
+    "bindings": {},
+    "result": [
+        { "first": "Felicia", "last": "Saunders" },
+        { "first": "Jimmy", "last": "Schultz" },
+        { "first": "Dolores", "last": "Figueroa" },
+        { "first": "Craig", "last": "Moreno" },
+        { "first": "Lindsey", "last": "Hall" },
+        { "first": "Bonnie", "last": "Russell" },
+        { "first": "Kristin", "last": "Stewart" },
+        { "first": "Owen", "last": "Reid" },
+        { "first": "Brenda", "last": "Sherman" },
+        { "first": "Dwayne", "last": "Baldwin" },
+        { "first": "Joy", "last": "Smith Carmichael" }
+    ]
+}
