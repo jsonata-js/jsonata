@@ -1,0 +1,6 @@
+{
+    "expr": "data.objects.nested.level1.$removeEmpty().level2.$removeEmpty()",
+    "dataset": "dataset26",
+    "bindings": {},
+    "undefinedResult": true
+}

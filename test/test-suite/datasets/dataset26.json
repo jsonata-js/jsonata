@@ -1,0 +1,65 @@
+{
+    "data": {
+        "arrays": {
+            "empty": [],
+            "mixed": [1, "", null, {}, [], "valid"],
+            "nested": [
+                {
+                    "id": 1,
+                    "value": "test",
+                    "meta": {}
+                },
+                {
+                    "id": null,
+                    "value": "",
+                    "meta": {
+                        "tags": [],
+                        "flags": {}
+                    }
+                },
+                []
+            ]
+        },
+        "objects": {
+            "empty": {},
+            "partial": {
+                "valid": "data",
+                "empty_string": "",
+                "null_value": null,
+                "empty_object": {},
+                "empty_array": []
+            },
+            "nested": {
+                "level1": {
+                    "level2": {
+                        "level3": {
+                            "data": "",
+                            "more": {}
+                        }
+                    },
+                    "other": null
+                }
+            }
+        },
+        "primitives": {
+            "string": "valid",
+            "empty_string": "",
+            "null": null,
+            "number": 42,
+            "zero": 0,
+            "boolean": true,
+            "false": false
+        },
+        "exclusion_test": {
+            "keep_empty_string": "",
+            "keep_empty_object": {},
+            "keep_empty_array": [],
+            "nested_exclusion": {
+                "deep": {
+                    "empty_to_keep": "",
+                    "empty_to_remove": {}
+                }
+            }
+        }
+    }
+}

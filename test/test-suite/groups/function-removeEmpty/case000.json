@@ -1,0 +1,6 @@
+{
+    "expr": "[$removeEmpty(undefined), $removeEmpty(null), $removeEmpty(\"test string\"), $removeEmpty(\"\"), $removeEmpty(42), $removeEmpty({}), $removeEmpty([])]",
+    "dataset": "dataset25",
+    "bindings": {},
+    "result": [null, "test string", 42]
+}

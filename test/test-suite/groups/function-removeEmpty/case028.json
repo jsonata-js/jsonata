@@ -1,0 +1,10 @@
+{
+    "expr": "$removeEmpty(organization.departments[0].budget, [\"remaining\"], true)",
+    "dataset": "dataset25",
+    "bindings": {},
+    "result": {
+        "allocated": 100000,
+        "spent": 0,
+        "remaining": null
+    }
+}

@@ -1,0 +1,13 @@
+{
+    "expr": "user.{\"profile_clean\": $removeEmpty(profile.social), \"settings_clean\": $removeEmpty(settings.features, [], true)}",
+    "dataset": "dataset25",
+    "bindings": {},
+    "result": {
+        "profile_clean": {
+            "linkedin": "https://linkedin.com/in/johndoe"
+        },
+        "settings_clean": {
+            "beta": false
+        }
+    }
+}
