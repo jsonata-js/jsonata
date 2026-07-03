@@ -1,0 +1,9 @@
+{
+    "expr": "{bar, \"foo\": foo.bar}",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": {
+        "bar": 98,
+        "foo": 42
+    }
+}
