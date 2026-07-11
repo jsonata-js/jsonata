@@ -1827,6 +1827,11 @@ const functions = (() => {
      * @returns {Array} - the resultant array
      */
     async function each(obj, func) {
+        // undefined inputs always return undefined
+        if (typeof obj === 'undefined') {
+            return undefined;
+        }
+
         var result = this.createSequence();
 
         for (const key of Object.keys(obj)) {

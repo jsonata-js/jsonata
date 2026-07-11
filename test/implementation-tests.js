@@ -423,6 +423,12 @@ describe("Tests that bind Javascript functions", () => {
             var expected = [1, 2, 3, 4];
             expect(result).to.deep.equal(expected);
         });
+
+        it("should return undefined when the input is undefined", async function() {
+            var expr = jsonata("$each(input.data, function($v, $k) { $v })");
+            var result = await expr.evaluate({ input: {}, output: {} });
+            expect(result).to.deep.equal(undefined);
+        });
     });
 
     describe("Partially apply user-defined Javascript function", function() {
