@@ -1,6 +1,11 @@
+#### 1.8.8 Maintenance Release
+
+- Prevent object prototype pollution (PR #806)
+- Backport important security fixes to v1 (PR #815)
+
 #### 1.8.7 Maintenance Release
 
-- Prevent writing to the object prototype or constructor (PR https://github.com/jsonata-js/jsonata/pull/681)
+- Prevent writing to the object prototype or constructor (PR #681)
 
 #### 1.8.6 Maintenance Release
 
