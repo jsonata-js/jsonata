@@ -1,0 +1,3 @@
+library.loans@$L.books@$B[$L.isbn=$B.isbn].customers[$L.customer='not found']{
+  name: $B.title[]
+}

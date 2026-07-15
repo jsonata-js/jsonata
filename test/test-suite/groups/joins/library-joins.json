@@ -196,5 +196,25 @@
                 "customer": "10003"
             }
         ]
+    },
+    {
+        "expr-file": "library-joins011.jsonata",
+        "dataset": "library",
+        "bindings": {},
+        "result": {
+            "Joe Doe": [
+                "Structure and Interpretation of Computer Programs"
+            ],
+            "Jason Arthur": [
+                "Compilers: Principles, Techniques, and Tools",
+                "Structure and Interpretation of Computer Programs"
+            ]
+        }
+    },
+    {
+        "expr-file": "library-joins012.jsonata",
+        "dataset": "library",
+        "bindings": {},
+        "result": {}
     }
 ]
