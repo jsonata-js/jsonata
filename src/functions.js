@@ -342,7 +342,7 @@ const functions = (() => {
      */
     async function contains(str, token) {
         // undefined inputs always return undefined
-        if (typeof str === 'undefined') {
+        if (typeof str === 'undefined' || typeof token === 'undefined') {
             return undefined;
         }
 
