@@ -1,0 +1,5 @@
+{
+    "expr": "$each(input.data, function($v, $k) {$v})",
+    "data": { "input": {}, "output": {} },
+    "undefinedResult": true
+}

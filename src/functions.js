@@ -791,7 +791,7 @@ const functions = (() => {
         // if `options` is specified, then its entries override defaults
         var properties = defaults;
         if (typeof options !== 'undefined') {
-            Object.keys(options).forEach(function (key) {
+            utils.keys(options).forEach(function (key) {
                 properties[key] = options[key];
             });
         }
@@ -1418,7 +1418,7 @@ const functions = (() => {
                 result = true;
             }
         } else if (arg !== null && typeof arg === 'object') {
-            if (Object.keys(arg).length > 0) {
+            if (utils.keys(arg).length > 0) {
                 result = true;
             }
         } else if (typeof arg === 'boolean' && arg === true) {
@@ -1657,7 +1657,7 @@ const functions = (() => {
             });
             result = keys(merge);
         } else if (arg !== null && typeof arg === 'object' && !(isLambda(arg))) {
-            Object.keys(arg).forEach(key => result.push(key));
+            utils.keys(arg).forEach(key => result.push(key));
         }
         return result;
     }
@@ -1683,7 +1683,7 @@ const functions = (() => {
                     }
                 }
             }
-        } else if (input !== null && typeof input === 'object') {
+        } else if (input !== null && typeof input === 'object' && Object.prototype.hasOwnProperty.call(input, key) && !isFunction(input)) {
             result = input[key];
         }
         return result;
@@ -1740,7 +1740,7 @@ const functions = (() => {
                 result = append(result, spread(item));
             });
         } else if (arg !== null && typeof arg === 'object' && !isLambda(arg)) {
-            for (const key of Object.keys(arg)) {
+            for (const key of utils.keys(arg)) {
                 var obj = Object.create(null);
                 obj[key] = arg[key];
                 result.push(obj);
@@ -1766,7 +1766,7 @@ const functions = (() => {
         var result = Object.create(null);
 
         arg.forEach(function (obj) {
-            for (const prop of Object.keys(obj)) {
+            for (const prop of utils.keys(obj)) {
                 result[prop] = obj[prop];
             }
         });
@@ -1806,7 +1806,7 @@ const functions = (() => {
     function* each(obj, func) {
         var result = createSequence();
 
-        for (const key of Object.keys(obj)) {
+        for (const key of utils.keys(obj)) {
             var func_args = hofFuncArgs(func, obj[key], key, obj);
             // invoke func
             var val = yield* func.apply(this, func_args);
@@ -2035,7 +2035,7 @@ const functions = (() => {
     function* sift(arg, func) {
         var result = Object.create(null);
 
-        for (const item of Object.keys(arg)) {
+        for (const item of utils.keys(arg)) {
             var entry = arg[item];
             var func_args = hofFuncArgs(func, entry, item, arg);
             // invoke func
@@ -2046,7 +2046,7 @@ const functions = (() => {
         }
 
         // empty objects should be changed to undefined
-        if (Object.keys(result).length === 0) {
+        if (utils.keys(result).length === 0) {
             result = undefined;
         }
 
