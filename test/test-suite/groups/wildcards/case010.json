@@ -1,0 +1,20 @@
+[
+    {
+        "expr": "$sum.*",
+        "data": {},
+        "bindings": {},
+        "undefinedResult": true
+    },
+    {
+        "expr": "[$sum, $count].*",
+        "data": {},
+        "bindings": {},
+        "undefinedResult": true
+    },
+    {
+        "expr": "/a/.*",
+        "data": {},
+        "bindings": {},
+        "undefinedResult": true
+    }
+]

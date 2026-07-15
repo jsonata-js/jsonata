@@ -235,7 +235,7 @@ var jsonata = (function() {
 
     function createFrameFromTuple(environment, tuple) {
         var frame = createFrame(environment);
-        for(const prop of Object.keys(tuple)) {
+        for(const prop of utils.keys(tuple)) {
             frame.bind(prop, tuple[prop]);
         }
         return frame;
@@ -600,8 +600,8 @@ var jsonata = (function() {
         if (Array.isArray(input) && input.outerWrapper && input.length > 0) {
             input = input[0];
         }
-        if (input !== null && typeof input === 'object') {
-            Object.keys(input).forEach(function (key) {
+        if (input !== null && typeof input === 'object' && !isFunction(input)) {
+            utils.keys(input).forEach(function (key) {
                 var value = input[key];
                 if(Array.isArray(value)) {
                     value = flatten(value);
@@ -671,8 +671,8 @@ var jsonata = (function() {
             Array.prototype.forEach.call(input, function (member) {
                 recurseDescendants(member, results);
             });
-        } else if (input !== null && typeof input === 'object') {
-            Object.keys(input).forEach(function (key) {
+        } else if (input !== null && typeof input === 'object' && !isFunction(input)) {
+            utils.keys(input).forEach(function (key) {
                 recurseDescendants(input[key], results);
             });
         }
@@ -932,6 +932,16 @@ var jsonata = (function() {
                 }
 
                 if (key !== undefined) {
+                    // reject any attempts to set the internal JSONata flags
+                    if (key === '_jsonata_lambda' || key === '_jsonata_function') {
+                        // this is a restriction of this implementation rather than JSONata itself
+                        throw {
+                            code: "D1013",
+                            stack: (new Error()).stack,
+                            position: expr.position,
+                            value: key
+                        };
+                    }
                     var entry = {data: item, exprIndex: pairIndex};
                     if (Object.prototype.hasOwnProperty.call(groups, key)) {
                         // a value already exists in this slot
@@ -982,7 +992,7 @@ var jsonata = (function() {
         var result = Object.create(null);
         Object.assign(result, tupleStream[0]);
         for(var ii = 1; ii < tupleStream.length; ii++) {
-            for(const prop of Object.keys(tupleStream[ii])) {
+            for(const prop of utils.keys(tupleStream[ii])) {
                 result[prop] = fn.append(result[prop], tupleStream[ii][prop]);
             }
         }
@@ -1295,13 +1305,6 @@ var jsonata = (function() {
                 }
                 for(var ii = 0; ii < matches.length; ii++) {
                     var match = matches[ii];
-                    if (match && (match.isPrototypeOf(result) || match instanceof Object.constructor)) {
-                        throw {
-                            code: "D1010",
-                            stack: (new Error()).stack,
-                            position: expr.position
-                        };
-                    }
                     // evaluate the update value for each match
                     var update = yield * evaluate(expr.update, match, environment);
                     // update must be an object
@@ -1317,7 +1320,7 @@ var jsonata = (function() {
                             };
                         }
                         // merge the update
-                        for(const prop of Object.keys(update)) {
+                        for(const prop of utils.keys(update)) {
                             match[prop] = update[prop];
                         }
                     }
@@ -1978,7 +1981,7 @@ var jsonata = (function() {
         "T1007": "Attempted to partially apply a non-function. Did you mean ${{{token}}}?",
         "T1008": "Attempted to partially apply a non-function",
         "D1009": "Multiple key definitions evaluate to same key: {{value}}",
-        "D1010": "Attempted to access the Javascript object prototype", // Javascript specific 
+        "D1013": "Object property names starting with _jsonata_ are reserved for internal use: {{value}}",
         "T1010": "The matcher function argument passed to function {{token}} does not return the correct object structure",
         "T2001": "The left side of the {{token}} operator must evaluate to a number",
         "T2002": "The right side of the {{token}} operator must evaluate to a number",
@@ -2113,7 +2116,7 @@ var jsonata = (function() {
                     var exec_env;
                     // the variable bindings have been passed in - create a frame to hold these
                     exec_env = createFrame(environment);
-                    for (const v of Object.keys(bindings)) {
+                    for (const v of utils.keys(bindings)) {
                         exec_env.bind(v, bindings[v]);
                     }
                 } else {

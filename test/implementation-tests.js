@@ -806,30 +806,42 @@ describe("Tests that are specific to a Javascript runtime", () => {
             });
         });
     });
-    describe("Expressions that attempt to pollute the object prototype", function() {
-        it("should throw an error with __proto__", async function() {
-            const expr = jsonata('{} ~> | __proto__ | {"is_admin": true} |');
+    describe("Expressions that attempt to access the object prototype", function() {
+        const data = {"foo": {"bar": "baz"}};
+        it("should ignore __proto__", function() {
+            const expr = jsonata('foo.__proto__');
+            const result = expr.evaluate(data);
+            expect(result).to.deep.equal(undefined);
+        });
+
+        it("should throw an error trying to invoke toString()", function() {
+            const expr = jsonata('foo.toString()');
             expect(function() {
-                expr.evaluate();
+                expr.evaluate(data);
             })
                 .to.throw()
-                .to.deep.contain({ position: 7, code: "D1010" });
+                .to.deep.contain({ position: 13, code: "T1006" });
         });
-        it("should throw an error with __lookupGetter__", async function() {
+    });
+
+    describe("Expressions that attempt to pollute the object prototype", function() {
+        it("should ignore __proto__", function() {
+            const expr = jsonata('{} ~> | __proto__ | {"is_admin": true} |');
+            const result = expr.evaluate();
+            expect(result).to.deep.equal({});
+        });
+        it("should throw an error with __lookupGetter__", function() {
             const expr = jsonata('{} ~> | __lookupGetter__("__proto__")() | {"is_admin": true} |');
             expect(function() {
                 expr.evaluate();
             })
                 .to.throw()
-                .to.deep.contain({ position: 7, code: "D1010" });
+                .to.deep.contain({ position: 25, code: "T1006" });
         });
-        it("should throw an error with constructor", async function() {
+        it("should ignore constructor", function() {
             const expr = jsonata('{} ~> | constructor | {"is_admin": true} |');
-            expect(function() {
-                expr.evaluate();
-            })
-                .to.throw()
-                .to.deep.contain({ position: 7, code: "D1010" });
+            const result = expr.evaluate();
+            expect(result).to.deep.equal({});
         });
     });
 });
@@ -870,6 +882,25 @@ describe("Tests that include infinite recursion", () => {
                 .to.throw()
                 .to.deep.contain({ token: "inf", code: "U1001" });
         });
+    });
+});
+
+describe("Tests invalid object creation", function() {
+    it("prevents creating an object mimicking a lambda", function() {
+        expect(function() {
+            var expr = jsonata('($lambda = {"_jsonata_lambda": true}; $lambda())');
+            expr.evaluate();
+        })
+            .to.throw()
+            .to.deep.contain({ code: "D1013" });
+    });
+    it("prevents creating an object mimicking a function", function() {
+        expect(function() {
+            var expr = jsonata('($fn = {"_jsonata_function": true}; $fn())');
+            expr.evaluate();
+        })
+            .to.throw()
+            .to.deep.contain({ code: "D1013" });
     });
 });
 
