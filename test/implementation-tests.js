@@ -1153,13 +1153,55 @@ describe("Tests that use internal frame push callbacks", () => {
     describe("frame push callback bound to expression", function()  {
         it("calls callback when new frame created", function(done) {
             var expr = jsonata("( )");
+            // gets called twice
+            let count = 0;
             expr.assign(Symbol.for('jsonata.__createFrame_push'), function(parentEnv, newEnv) {
                 expect(parentEnv).to.not.equal(newEnv);
                 expect(parentEnv).to.include.keys(['lookup', 'bind']);
                 expect(newEnv).to.include.keys(['lookup', 'bind']);
-                done();
+                count++;
+                if (count == 2) done();
             });
             expr.evaluate();
         });
     });
 });
+
+describe("Concurrency tests", () => {
+    it("invokes a single compiled expression multiple times concurrently", async () => {
+        const expression = `
+        {
+            "id": $$.id,
+            "delayed": $slow($$.id)
+        }`;
+
+
+        const compiled = jsonata(expression);
+
+        // Async user function — long-running on purpose.
+        compiled.registerFunction(
+            "slow",
+            async (id) => {
+                await new Promise((resolve) => setTimeout(resolve, 20));
+                return `done:${id}`;
+            },
+            "<s:s>",
+        );
+
+        const inputs = [
+            { id: "a" },
+            { id: "b" },
+            { id: "c" },
+        ];
+
+        const results = await Promise.all(
+            inputs.map((input) => compiled.evaluate(input)),
+        );
+
+        expect(results).to.deep.equal([
+            {"id": "a", "delayed": "done:a"}, 
+            {"id": "b", "delayed": "done:b"}, 
+            {"id": "c", "delayed": "done:c"}
+        ])
+    })
+})
