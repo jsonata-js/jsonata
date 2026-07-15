@@ -2156,16 +2156,13 @@ var jsonata = (function() {
                     throw err;
                 }
 
-                if (typeof bindings !== 'undefined') {
-                    var exec_env;
-                    // the variable bindings have been passed in - create a frame to hold these
-                    exec_env = createFrame(environment);
-                    for (const v of utils.keys(bindings)) {
-                        exec_env.bind(v, bindings[v]);
-                    }
-                } else {
-                    exec_env = environment;
+                const exec_env = createFrame(environment);
+
+                // add any variable bindings may have been passed in
+                for (const v of utils.keys(bindings)) {
+                    exec_env.bind(v, bindings[v]);
                 }
+
                 // put the input document into the environment as the root object
                 exec_env.bind('$', input);
 
