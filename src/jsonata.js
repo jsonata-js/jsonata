@@ -924,7 +924,7 @@ var jsonata = (function() {
             input = focus.createSequence(input);
         }
         // if the array is empty, add an undefined entry to enable literal JSON object to be generated
-        if (input.length === 0) {
+        if (input.length === 0 && !reduce) {
             input.push(undefined);
         }
 
