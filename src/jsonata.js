@@ -228,7 +228,7 @@ var jsonata = (function() {
 
     function createFrameFromTuple(environment, tuple) {
         var frame = createFrame(environment);
-        for(const prop of Object.keys(tuple)) {
+        for(const prop of utils.keys(tuple)) {
             frame.bind(prop, tuple[prop]);
         }
         return frame;
@@ -609,7 +609,7 @@ var jsonata = (function() {
             input = input[0];
         }
         if (input !== null && typeof input === 'object' && !isFunction(input)) {
-            Object.keys(input).forEach(function (key) {
+            utils.keys(input).forEach(function (key) {
                 var value = input[key];
                 if(Array.isArray(value)) {
                     value = flatten(value);
@@ -680,7 +680,7 @@ var jsonata = (function() {
                 recurseDescendants(member, results);
             });
         } else if (input !== null && typeof input === 'object' && !isFunction(input)) {
-            Object.keys(input).forEach(function (key) {
+            utils.keys(input).forEach(function (key) {
                 recurseDescendants(input[key], results);
             });
         }
@@ -979,7 +979,7 @@ var jsonata = (function() {
         }
 
         // iterate over the groups to evaluate the 'value' expression
-        let generators = await Promise.all(Object.keys(groups).map(async (key, idx) => {
+        let generators = await Promise.all(utils.keys(groups).map(async (key, idx) => {
             let entry = groups[key];
             var context = entry.data;
             var env = environment;
@@ -1014,7 +1014,7 @@ var jsonata = (function() {
         };
         Object.assign(result, tupleStream[0]);
         for(var ii = 1; ii < tupleStream.length; ii++) {
-            for(const prop of Object.keys(tupleStream[ii])) {
+            for(const prop of utils.keys(tupleStream[ii])) {
                 result[prop] = fn.append.call(focus, result[prop], tupleStream[ii][prop]);
             }
         }
@@ -1348,7 +1348,7 @@ var jsonata = (function() {
                             };
                         }
                         // merge the update
-                        for(const prop of Object.keys(update)) {
+                        for(const prop of utils.keys(update)) {
                             match[prop] = update[prop];
                         }
                     }
@@ -2160,7 +2160,7 @@ var jsonata = (function() {
                     var exec_env;
                     // the variable bindings have been passed in - create a frame to hold these
                     exec_env = createFrame(environment);
-                    for (const v of Object.keys(bindings)) {
+                    for (const v of utils.keys(bindings)) {
                         exec_env.bind(v, bindings[v]);
                     }
                 } else {

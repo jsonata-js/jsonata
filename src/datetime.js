@@ -1059,7 +1059,7 @@ const dateTime = (function () {
                     };
                     break;
                 case formats.WORDS:
-                    matcher.regex = '(?:' + Object.keys(wordValues).concat('and', '[\\-, ]').join('|') + ')+';
+                    matcher.regex = '(?:' + utils.keys(wordValues).concat('and', '[\\-, ]').join('|') + ')+';
                     matcher.parse = function (value) {
                         return wordsToNumber(value.toLowerCase());
                     };

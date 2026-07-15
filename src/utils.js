@@ -187,6 +187,15 @@ const utils = (() => {
         return arr;
     }
 
+    /**
+     *
+     * @param {Object} arg - the object to inspect
+     * @returns {Array} - the keys (property names) of the object
+     */
+    function keys(arg) {
+        return typeof arg === 'object' && arg !== null ? Object.keys(arg) : [];
+    }
+
     return {
         isNumeric,
         isArrayOfStrings,
@@ -198,7 +207,8 @@ const utils = (() => {
         getFunctionArity,
         isDeepEqual,
         stringToArray,
-        isPromise
+        isPromise,
+        keys
     };
 })();
 
