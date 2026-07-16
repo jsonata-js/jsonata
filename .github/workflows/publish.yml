@@ -23,4 +23,4 @@ jobs:
       - name: Install and build
         run: npm install && npm test
       - name: Publish to NPM
-        run: npm publish
+        run: npm publish --tag ${{ github.ref_name }}
