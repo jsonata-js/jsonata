@@ -1,4 +1,13 @@
+#### 2.2.2 Maintenance Release
+
+- Update TypeScript type definitions (PR #807)
+- Fix `$contains()` when the token is undefined (PR #809)
+- Regression looking up keys of an object (PR #814)
+- Race condition when $$ used concurrently (PR #816)
+- Correctly handle empty joins (PR #817)
+
 #### 2.2.1 Maintenance Release
+
 - Prevent object prototype pollution (PR #799)
 - Wildcards should not unwrap function objects (PR #800)
 - `$append` should enforce the sequence guardrail limit (PR #801)
