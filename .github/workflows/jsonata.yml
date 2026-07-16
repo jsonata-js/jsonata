@@ -1,4 +1,4 @@
-name: Build and publish JSONata
+name: Build JSONata
 on:
   push:
     branches: [ master, v1 ]
@@ -19,27 +19,6 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: npm install
       - run: npm test
-  publish:
-    needs: build
-    runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && github.repository == 'jsonata-js/jsonata' }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Use Node.js 18.x
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18.x
-      - name: Install and build
-        run: npm install && npm test
-      - name: Publish to NPM
-        id: npmpub
-        uses: JS-DevTools/npm-publish@v1
-        with:
-          token: ${{ secrets.NPM_TOKEN }}
-      - if: steps.npmpub.outputs.type != 'none'
-        run: |
-          echo "Version changed: ${{ steps.npmpub.outputs.old-version }} => ${{ steps.npmpub.outputs.version }}"
   documentation:
     needs: build    
     runs-on: ubuntu-latest
