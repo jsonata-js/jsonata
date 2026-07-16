@@ -23,4 +23,4 @@ jobs:
       - name: Install and build
         run: npm install && npm test
       - name: Publish to NPM
-        run: npm publish --tag ${GITHUB_REF_NAME#v}
+        run: npm publish --tag latest-v1
