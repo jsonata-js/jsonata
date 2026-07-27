@@ -122,6 +122,8 @@ Returns `true` if `str` is matched by `pattern`, otherwise it returns `false`. I
 
 The `pattern` parameter can either be a string or a regular expression (regex).  If it is a string, the function returns `true` if the characters within `pattern` are contained contiguously within `str`.  If it is a regex, the function will return `true` if the regex matches the contents of `str`.
 
+The parameter `str` is required and cannot be undefined. When the parameter is a variable it is a good practice to wrap it with `$string` to avoid unexpected error.
+
 __Examples__
 
 - `$contains("abracadabra", "bra")` => `true`
