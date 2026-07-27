@@ -470,12 +470,13 @@ describe("Tests that bind Javascript functions", () => {
             var expr = jsonata("$match('LLANFAIRPWLLGWYNGYLLGOGERYCHWYRNDROBWLLLLANTYSILIOGOGOGOCH', $repeatingLetters('L', 2))");
             expr.registerFunction("repeatingLetters", repeatingLetters);
             var result = await expr.evaluate();
+            console.log(result)
             var expected = [
-                {"match": "LL", "index": 0, "groups": []},
-                {"match": "LL", "index": 10, "groups": []},
-                {"match": "LL", "index": 18, "groups": []},
-                {"match": "LL", "index": 37, "groups": []},
-                {"match": "LL", "index": 39, "groups": []}
+                {"match": "LL", "index": 0, "groups": [], "namedGroups": {}},
+                {"match": "LL", "index": 10, "groups": [], "namedGroups": {}},
+                {"match": "LL", "index": 18, "groups": [], "namedGroups": {}},
+                {"match": "LL", "index": 37, "groups": [], "namedGroups": {}},
+                {"match": "LL", "index": 39, "groups": [], "namedGroups": {}}
             ];
             expect(result).to.deep.equal(expected);
         });
@@ -659,7 +660,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
         it("should return result object", async function() {
             var expr = jsonata('/ab/ ("ab")');
             var result = await expr.evaluate();
-            var expected = { match: "ab", start: 0, end: 2, groups: [] };
+            var expected = { match: "ab", start: 0, end: 2, groups: [], namedGroups: {} };
             expect(JSON.stringify(result)).to.equal(JSON.stringify(expected));
         });
     });
@@ -677,7 +678,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
         it("should return result object", async function() {
             var expr = jsonata('/ab+/ ("ababbabbcc")');
             var result = await expr.evaluate();
-            var expected = { match: "ab", start: 0, end: 2, groups: [] };
+            var expected = { match: "ab", start: 0, end: 2, groups: [], namedGroups: {} };
             expect(JSON.stringify(result)).to.equal(JSON.stringify(expected));
         });
     });
@@ -686,7 +687,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
         it("should return result object", async function() {
             var expr = jsonata('/a(b+)/ ("ababbabbcc")');
             var result = await expr.evaluate();
-            var expected = { match: "ab", start: 0, end: 2, groups: ["b"] };
+            var expected = { match: "ab", start: 0, end: 2, groups: ["b"], namedGroups: {} };
             expect(JSON.stringify(result)).to.equal(JSON.stringify(expected));
         });
     });
@@ -695,7 +696,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
         it("should return result object", async function() {
             var expr = jsonata('/a(b+)/ ("ababbabbcc").next()');
             var result = await expr.evaluate();
-            var expected = { match: "abb", start: 2, end: 5, groups: ["bb"] };
+            var expected = { match: "abb", start: 2, end: 5, groups: ["bb"], namedGroups: {} };
             expect(JSON.stringify(result)).to.equal(JSON.stringify(expected));
         });
     });
@@ -704,7 +705,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
         it("should return result object", async function() {
             var expr = jsonata('/a(b+)/ ("ababbabbcc").next().next()');
             var result = await expr.evaluate();
-            var expected = { match: "abb", start: 5, end: 8, groups: ["bb"] };
+            var expected = { match: "abb", start: 5, end: 8, groups: ["bb"], namedGroups: {} };
             expect(JSON.stringify(result)).to.equal(JSON.stringify(expected));
         });
     });
@@ -722,7 +723,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
         it("should return result object", async function() {
             var expr = jsonata('/a(b+)/i ("Ababbabbcc")');
             var result = await expr.evaluate();
-            var expected = { match: "Ab", start: 0, end: 2, groups: ["b"] };
+            var expected = { match: "Ab", start: 0, end: 2, groups: ["b"], namedGroups: {} };
             expect(JSON.stringify(result)).to.equal(JSON.stringify(expected));
         });
     });
@@ -776,7 +777,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
             it("should find \\", async function() {
                 var expr = jsonata('$match("test escape \\\\", /\\\\/)');
                 var result = await expr.evaluate();
-                var expected = { match: "\\", index: 12, groups: []};
+                var expected = { match: "\\", index: 12, groups: [], namedGroups: {} };
                 expect(result).to.deep.equal(expected);
             });
         });
@@ -786,13 +787,14 @@ describe("Tests that are specific to a Javascript runtime", () => {
                 var expr = jsonata('$match("ababbabbcc",/ab/)');
                 var result = await expr.evaluate();
                 var expected = [
-                    { match: "ab", index: 0, groups: [] },
+                    { match: "ab", index: 0, groups: [], namedGroups: {} },
                     {
                         match: "ab",
                         index: 2,
-                        groups: []
+                        groups: [],
+                        namedGroups: {}
                     },
-                    { match: "ab", index: 5, groups: [] }
+                    { match: "ab", index: 5, groups: [], namedGroups: {} }
                 ];
                 expect(result).to.deep.equal(expected);
             });
@@ -803,13 +805,14 @@ describe("Tests that are specific to a Javascript runtime", () => {
                 var expr = jsonata('$match("ababbabbcc",/a(b+)/)');
                 var result = await expr.evaluate();
                 var expected = [
-                    { match: "ab", index: 0, groups: ["b"] },
+                    { match: "ab", index: 0, groups: ["b"], namedGroups: {} },
                     {
                         match: "abb",
                         index: 2,
-                        groups: ["bb"]
+                        groups: ["bb"],
+                        namedGroups: {}
                     },
-                    { match: "abb", index: 5, groups: ["bb"] }
+                    { match: "abb", index: 5, groups: ["bb"], namedGroups: {} }
                 ];
                 expect(result).to.deep.equal(expected);
             });
@@ -819,7 +822,7 @@ describe("Tests that are specific to a Javascript runtime", () => {
             it("should return result object", async function() {
                 var expr = jsonata('$match("ababbabbcc",/a(b+)/, 1)');
                 var result = await expr.evaluate();
-                var expected = { match: "ab", index: 0, groups: ["b"] };
+                var expected = { match: "ab", index: 0, groups: ["b"], namedGroups: {} };
                 expect(result).to.deep.equal(expected);
             });
         });
