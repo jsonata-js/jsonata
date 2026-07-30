@@ -1,3 +1,7 @@
+#### 1.8.9 Maintenance Release
+
+- Backport $toMillis security fixes to v1 (PR #825)
+
 #### 1.8.8 Maintenance Release
 
 - Prevent object prototype pollution (PR #806)
