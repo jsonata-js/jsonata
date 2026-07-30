@@ -982,6 +982,11 @@ const dateTime = (function () {
                         }
                         return offsetHours * 60 + offsetMinutes;
                     };
+                } else if (part.component === 'f') {
+                    res.regex = '[0-9]+';
+                    res.parse = function(value) {
+                        return parseFloat('0.' + value.substring(0, 3)) * 1000;
+                    };
                 } else if (part.integerFormat) {
                     part.integerFormat.n = part.n;
                     res = generateRegex(part.integerFormat);
@@ -1296,7 +1301,7 @@ const dateTime = (function () {
     }
 
     // Regular expression to match an ISO 8601 formatted timestamp
-    var iso8601regex = new RegExp('^\\d{4}(-[01]\\d)*(-[0-3]\\d)*(T[0-2]\\d:[0-5]\\d:[0-5]\\d)*(\\.\\d+)?([+-][0-2]\\d:?[0-5]\\d|Z)?$');
+    var iso8601regex = new RegExp('^\\d{4}(-[01]\\d)?(-[0-3]\\d)?(T[0-2]\\d:[0-5]\\d:[0-5]\\d)?(\\.\\d+)?([+-][0-2]\\d:?[0-5]\\d|Z)?$');
 
     /**
      * Converts an ISO 8601 timestamp to milliseconds since the epoch
