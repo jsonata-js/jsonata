@@ -1,0 +1,38 @@
+[
+    {
+        "expr": "$intersection([1,2,3], [3,4,5])",
+        "data": null,
+        "bindings": {},
+        "result": [3]
+    },
+    {
+        "expr": "$intersection([1,2,3], 3)",
+        "data": null,
+        "bindings": {},
+        "result": [3]
+    },
+    {
+        "expr": "$intersection([1,2,3], nothing)",
+        "data": null,
+        "bindings": {},
+        "undefinedResult": true
+    },
+    {
+        "expr": "$intersection(nothing, [1,2,3])",
+        "data": null,
+        "bindings": {},
+        "undefinedResult": true
+    },
+    {
+        "expr": "$intersection(Account.Order.Product.SKU, [\"0406654608\", \"12345\"])",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": "0406654608"
+    },
+    {
+        "expr": "$intersection([{\"a\": 1, \"b\": 2}, 3], [{\"a\": 1, \"b\": 2}, 4])",
+        "data": null,
+        "bindings": {},
+        "result": [{"a": 1, "b": 2}]
+    }
+]

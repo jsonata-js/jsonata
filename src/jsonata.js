@@ -1959,6 +1959,10 @@ var jsonata = (function() {
     staticFrame.bind('sort', defineFunction(fn.sort, '<af?:a>'));
     staticFrame.bind('shuffle', defineFunction(fn.shuffle, '<a:a>'));
     staticFrame.bind('distinct', defineFunction(fn.distinct, '<x:x>'));
+    staticFrame.bind('union', defineFunction(fn.union, '<a-a:a>'));
+    staticFrame.bind('intersection', defineFunction(fn.intersection, '<a-a:a>'));
+    staticFrame.bind('difference', defineFunction(fn.difference, '<a-a:a>'));
+    staticFrame.bind('symmetricDifference', defineFunction(fn.symmetricDifference, '<a-a:a>'));
     staticFrame.bind('base64encode', defineFunction(fn.base64encode, '<s-:s>'));
     staticFrame.bind('base64decode', defineFunction(fn.base64decode, '<s-:s>'));
     staticFrame.bind('encodeUrlComponent', defineFunction(fn.encodeUrlComponent, '<s-:s>'));

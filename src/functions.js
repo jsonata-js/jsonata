@@ -2048,6 +2048,100 @@ const functions = (() => {
     }
 
     /**
+     * Helper function to check if an array includes a value using deep equality
+     * @param {Array} arr - the array to check
+     * @param {*} value - the value to look for
+     * @returns {boolean} - true if the value is found, false otherwise
+     */
+    function arrayIncludes(arr, value) {
+        for (var ii = 0; ii < arr.length; ii++) {
+            if (deepEquals(value, arr[ii])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Set Union
+     * @param {Array} arg1 - An array or sequence of values
+     * @param {Array} arg2 - An array or sequence of values
+     * @returns {Array} - sequence of distinct values from both arrays
+     */
+    function union(arg1, arg2) {
+        if (typeof arg1 === 'undefined') return distinct.call(this, arg2);
+        if (typeof arg2 === 'undefined') return distinct.call(this, arg1);
+        var results = (isSequence(arg1) || isSequence(arg2)) ? this.createSequence() : [];
+        var appendArgs = arg1.concat(arg2);
+        for (var ii = 0; ii < appendArgs.length; ii++) {
+            var value = appendArgs[ii];
+            if (!arrayIncludes(results, value)) {
+                results.push(value);
+            }
+        }
+        return results;
+    }
+
+    /**
+     * Set Intersection
+     * @param {Array} arg1 - An array or sequence of values
+     * @param {Array} arg2 - An array or sequence of values
+     * @returns {Array} - sequence of distinct values present in both arrays
+     */
+    function intersection(arg1, arg2) {
+        if (typeof arg1 === 'undefined' || typeof arg2 === 'undefined') return undefined;
+        var results = (isSequence(arg1) || isSequence(arg2)) ? this.createSequence() : [];
+        for (var ii = 0; ii < arg1.length; ii++) {
+            var value = arg1[ii];
+            if (arrayIncludes(arg2, value) && !arrayIncludes(results, value)) {
+                results.push(value);
+            }
+        }
+        return results;
+    }
+
+    /**
+     * Set Difference
+     * @param {Array} arg1 - An array or sequence of values
+     * @param {Array} arg2 - An array or sequence of values
+     * @returns {Array} - sequence of distinct values from arg1 not present in arg2
+     */
+    function difference(arg1, arg2) {
+        if (typeof arg1 === 'undefined') return undefined;
+        if (typeof arg2 === 'undefined') return distinct.call(this, arg1);
+        var results = (isSequence(arg1) || isSequence(arg2)) ? this.createSequence() : [];
+        for (var ii = 0; ii < arg1.length; ii++) {
+            var value = arg1[ii];
+            if (!arrayIncludes(arg2, value) && !arrayIncludes(results, value)) {
+                results.push(value);
+            }
+        }
+        return results;
+    }
+
+    /**
+     * Set Symmetric Difference
+     * @param {Array} arg1 - An array or sequence of values
+     * @param {Array} arg2 - An array or sequence of values
+     * @returns {Array} - sequence of distinct values present in either arg1 or arg2, but not both
+     */
+    function symmetricDifference(arg1, arg2) {
+        if (typeof arg1 === 'undefined') return distinct.call(this, arg2);
+        if (typeof arg2 === 'undefined') return distinct.call(this, arg1);
+        var results = (isSequence(arg1) || isSequence(arg2)) ? this.createSequence() : [];
+        var appendArgs = arg1.concat(arg2);
+        for (var ii = 0; ii < appendArgs.length; ii++) {
+            var value = appendArgs[ii];
+            var inArg1 = arrayIncludes(arg1, value);
+            var inArg2 = arrayIncludes(arg2, value);
+            if (inArg1 !== inArg2 && !arrayIncludes(results, value)) {
+                results.push(value);
+            }
+        }
+        return results;
+    }
+
+    /**
      * Applies a predicate function to each key/value pair in an object, and returns an object containing
      * only the key/value pairs that passed the predicate
      *
@@ -2083,7 +2177,7 @@ const functions = (() => {
         formatNumber, formatBase, number, floor, ceil, round, abs, sqrt, power, random,
         boolean, not,
         map, zip, filter, single, foldLeft, sift,
-        keys, lookup, append, exists, spread, merge, reverse, each, error, assert, type, sort, shuffle, distinct,
+        keys, lookup, append, exists, spread, merge, reverse, each, error, assert, type, sort, shuffle, distinct, union, intersection, difference, symmetricDifference,
         base64encode, base64decode,  encodeUrlComponent, encodeUrl, decodeUrlComponent, decodeUrl
     };
 })();
