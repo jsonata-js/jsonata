@@ -1,0 +1,6 @@
+{
+    "expr": "$replace(\"Hello World\", nothing, \"Earth\")",
+    "dataset": null,
+    "bindings": {},
+    "undefinedResult": true
+}

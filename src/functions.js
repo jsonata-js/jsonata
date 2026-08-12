@@ -412,7 +412,7 @@ const functions = (() => {
      */
     async function replace(str, pattern, replacement, limit) {
         // undefined inputs always return undefined
-        if (typeof str === 'undefined') {
+        if (typeof str === 'undefined' || typeof pattern === 'undefined') {
             return undefined;
         }
 
@@ -701,7 +701,7 @@ const functions = (() => {
      */
     async function split(str, separator, limit) {
         // undefined inputs always return undefined
-        if (typeof str === 'undefined') {
+        if (typeof str === 'undefined' || typeof separator === 'undefined') {
             return undefined;
         }
 
