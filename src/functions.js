@@ -297,6 +297,16 @@ const functions = (() => {
         width = Math.trunc(width);
         var padLength = Math.abs(width) - length(str);
         if (padLength > 0) {
+            // limit the length of the padding to ten million characters (1e7) to
+            // protect against excessive memory allocation, consistent with the hard
+            // limit imposed by the range operator (see error D2014)
+            if (padLength > 1e7) {
+                throw {
+                    code: "D2016",
+                    stack: (new Error()).stack,
+                    value: padLength
+                };
+            }
             var padding = (new Array(padLength + 1)).join(char);
             if (char.length > 1) {
                 padding = substring(padding, 0, padLength);

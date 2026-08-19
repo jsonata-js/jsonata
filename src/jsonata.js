@@ -2044,6 +2044,7 @@ var jsonata = (function() {
         "T2013": "The transform expression clones the input object using the $clone() function.  This has been overridden in the current scope by a non-function.",
         "D2014": "The size of the sequence allocated by the range operator (..) must not exceed 1e7.  Attempted to allocate {{value}}.",
         "D2015": "The maximum sequence length of {{value}} was exceeded.",
+        "D2016": "The size of the string requested by the $pad function must not exceed 1e7.  Attempted to allocate {{value}}.",
         "D3001": "Attempting to invoke string function on Infinity or NaN",
         "D3010": "Second argument of replace function cannot be an empty string",
         "D3011": "Fourth argument of replace function must evaluate to a positive number",
