@@ -1142,9 +1142,20 @@ var jsonata = (function() {
      * @returns {Function} Higher order function representing prepared regex
      */
     function evaluateRegex(expr, input, environment) {
-        var re = new environment.base.RegexEngine(expr.value);
-        var closure = function(str, fromIndex) {
+        // Build a fresh RegExp for each top-level match walk rather than sharing
+        // one stateful RegExp across every invocation of the closure. A regex
+        // bound to a variable (e.g. `$p := /[,-]/`) is evaluated once, so the
+        // same closure — and, previously, the same `re` with its mutable
+        // `lastIndex` — was reused by every `$match`/`$replace`/`$split` call.
+        // Independent calls then interfered through the shared `lastIndex`,
+        // producing different results on repeated use and breaking immutability
+        // (issue #749). Each walk now owns its RegExp; the `next()` chain keeps
+        // sharing that walk's own instance so multi-match iteration is unchanged.
+        var closure = function(str, fromIndex, re) {
             var result;
+            if (typeof re === 'undefined') {
+                re = new environment.base.RegexEngine(expr.value);
+            }
             re.lastIndex = fromIndex || 0;
             var match = re.exec(str);
             if(match !== null) {
@@ -1163,7 +1174,7 @@ var jsonata = (function() {
                     if(re.lastIndex >= str.length) {
                         return undefined;
                     } else {
-                        var next = closure(str, re.lastIndex);
+                        var next = closure(str, re.lastIndex, re);
                         if(next && next.match === '') {
                             // matches zero length string; this will never progress
                             throw {
