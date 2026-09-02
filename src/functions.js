@@ -6,6 +6,12 @@
 
 var utils = require('./utils');
 
+// The default ceiling on the length of a string a function may construct.
+// Deliberately the same 1e7 the range operator applies to sequences: it is the
+// answer this library already gives to "how much may a single operation
+// allocate". Adjustable per-evaluation with the `maxStringLength` option.
+const MAX_STRING_LENGTH = 1e7;
+
 const functions = (() => {
     'use strict';
 
@@ -297,6 +303,18 @@ const functions = (() => {
         width = Math.trunc(width);
         var padLength = Math.abs(width) - length(str);
         if (padLength > 0) {
+            // limit the length of the string being constructed. Like the range
+            // operator's limit this is an implementation defined limit to
+            // protect against memory and performance issues; unlike it, it can
+            // be adjusted with the `maxStringLength` option.
+            var maxLength = (this.options && this.options.maxStringLength) || MAX_STRING_LENGTH;
+            if (length(str) + padLength > maxLength) {
+                throw {
+                    code: "D2016",
+                    stack: (new Error()).stack,
+                    value: maxLength
+                };
+            }
             var padding = (new Array(padLength + 1)).join(char);
             if (char.length > 1) {
                 padding = substring(padding, 0, padLength);

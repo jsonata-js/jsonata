@@ -1132,6 +1132,61 @@ describe("Tests that include infinite recursion", () => {
             });
         });
     });
+
+    describe("guardrails on string length", function() {
+        it("prevents constructing a huge string by default", function() {
+            // $pad takes its width straight from the expression, so this is a
+            // ~25 byte expression asking for 20 million characters.
+            const expr = jsonata('$pad("", 20000000, "x")');
+            expect(expr.evaluate()).to.eventually.be.rejected.to.deep.contain({
+                code: "D2016",
+            });
+        });
+
+        it("respects a lower limit", function() {
+            const options = {
+                'maxStringLength': 100
+            }
+            const expr = jsonata('$pad("", 101, "x")', options);
+            expect(expr.evaluate()).to.eventually.be.rejected.to.deep.contain({
+                code: "D2016",
+            });
+        });
+
+        it("allows a raised limit", function() {
+            const options = {
+                'maxStringLength': 2e7
+            }
+            const expr = jsonata('$pad("", 20000000, "x") ~> $length()', options);
+            return expect(expr.evaluate()).to.eventually.equal(20000000);
+        });
+
+        it("counts the string already there, not just the padding added", function() {
+            const options = {
+                'maxStringLength': 10
+            }
+            const expr = jsonata('$pad("12345678", 11, "x")', options);
+            expect(expr.evaluate()).to.eventually.be.rejected.to.deep.contain({
+                code: "D2016",
+            });
+        });
+
+        it("leaves padding within the limit alone", function() {
+            const options = {
+                'maxStringLength': 10
+            }
+            const expr = jsonata('$pad("ab", 5, "-")', options);
+            return expect(expr.evaluate()).to.eventually.equal("ab---");
+        });
+
+        it("does not affect a string that needs no padding", function() {
+            const options = {
+                'maxStringLength': 2
+            }
+            const expr = jsonata('$pad("abcdef", 3, "-")', options);
+            return expect(expr.evaluate()).to.eventually.equal("abcdef");
+        });
+    });
 });
 
 describe("Tests invalid object creation", () => {
