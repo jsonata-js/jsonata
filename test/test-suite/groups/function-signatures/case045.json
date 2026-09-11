@@ -1,0 +1,6 @@
+{
+    "expr": "($numStr := λ($a, $b)<n?s-:o> {{'num1': $a,'str2': $b}};  'str2'~> $numStr; )",
+    "dataset": null,
+    "bindings": {},
+    "result": {"str2": "str2"}
+}

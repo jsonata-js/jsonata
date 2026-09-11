@@ -2,5 +2,5 @@
     "expr": "λ($arg1, $arg2)<s?n+:a<n>>{[$arg1, $arg2]}(1, 2, 3)",
     "dataset": null,
     "bindings": {},
-    "result": [1, 2]
+    "result": [1, 2, 3]
 }
