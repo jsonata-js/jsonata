@@ -1,0 +1,13 @@
+{
+    "expr": "[$removeEmpty({\"empty\": \"\", \"null\": null, \"emptyObj\": {}}, [\"\"]), $removeEmpty([[1, \"\", null, {}, []]], [\"$.\"])]",
+    "dataset": "dataset25",
+    "bindings": {},
+    "result": [
+        {
+            "empty": "",
+            "null": null,
+            "emptyObj": {}
+        },
+        [1, "", null, {}, []]
+    ]
+}

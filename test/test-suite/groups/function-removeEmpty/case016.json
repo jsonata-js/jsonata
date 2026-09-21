@@ -1,0 +1,8 @@
+{
+    "expr": "$removeEmpty({\"empty\": \"\", \"valid\": \"data\", \"null\": null})",
+    "dataset": "dataset25",
+    "bindings": {},
+    "result": {
+        "valid": "data"
+    }
+}

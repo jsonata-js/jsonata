@@ -1,0 +1,18 @@
+{
+    "expr": "organization.departments.{\"name\": name, \"clean_employees\": $map(employees[name != \"\"], function($emp) { $removeEmpty($emp) })}",
+    "dataset": "dataset25",
+    "bindings": {},
+    "result": [
+        {
+            "name": "Engineering",
+            "clean_employees": {
+                "name": "Alice Smith",
+                "role": "Developer",
+                "skills": ["JavaScript", "Python"]
+            }
+        },
+        {
+            "name": ""
+        }
+    ]
+}

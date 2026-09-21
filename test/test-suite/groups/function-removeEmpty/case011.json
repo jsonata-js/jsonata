@@ -1,0 +1,6 @@
+{
+    "expr": "$removeEmpty(data.objects.nested)",
+    "dataset": "dataset26",
+    "bindings": {},
+    "undefinedResult": true
+}

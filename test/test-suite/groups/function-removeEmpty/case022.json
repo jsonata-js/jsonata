@@ -1,0 +1,11 @@
+{
+    "expr": "user.projects[name != \"\"].{\"project\": name, \"clean_metadata\": $removeEmpty(metadata)}",
+    "dataset": "dataset25",
+    "bindings": {},
+    "result": {
+        "project": "Project Alpha",
+        "clean_metadata": {
+            "created": "2023-01-15"
+        }
+    }
+}

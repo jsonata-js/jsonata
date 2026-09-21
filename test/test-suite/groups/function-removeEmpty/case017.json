@@ -1,0 +1,6 @@
+{
+    "expr": "[$removeEmpty({\"test\": \"value\"}, {\"invalid\": \"object\"}), $removeEmpty({\"test\": \"value\"}, [\"valid\", 123, \"another\"]), $removeEmpty({\"test\": \"value\"}, [], \"not_a_boolean\"), $removeEmpty({\"test\": \"value\"}, [], 123), $removeEmpty({\"test\": \"value\"}, [], {\"invalid\": \"object\"})]",
+    "dataset": "dataset25",
+    "bindings": {},
+    "code": "T0410"
+}
