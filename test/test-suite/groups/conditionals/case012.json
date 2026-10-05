@@ -1,0 +1,8 @@
+{
+    "expr": "$merge([flag ? {\"b\": 2}])",
+    "data": {
+        "flag": false
+    },
+    "bindings": {},
+    "result": {}
+}

@@ -1,0 +1,17 @@
+{
+    "expr": "$merge(items.{\"v\": v})",
+    "data": {
+        "items": [
+            {
+                "v": 1
+            },
+            {
+                "w": 2
+            }
+        ]
+    },
+    "bindings": {},
+    "result": {
+        "v": 1
+    }
+}

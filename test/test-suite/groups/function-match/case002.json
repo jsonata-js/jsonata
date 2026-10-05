@@ -1,0 +1,21 @@
+{
+    "expr": "items.$match(code, /^([A-Z]+)/).groups[0]",
+    "data": {
+        "items": [
+            {
+                "code": "AB1"
+            },
+            {
+                "id": 2
+            },
+            {
+                "code": "CD2"
+            }
+        ]
+    },
+    "bindings": {},
+    "result": [
+        "AB",
+        "CD"
+    ]
+}

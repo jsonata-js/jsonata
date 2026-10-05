@@ -1,0 +1,8 @@
+{
+    "expr": "missing = null",
+    "data": {
+        "present": 1
+    },
+    "bindings": {},
+    "result": false
+}

@@ -1,0 +1,6 @@
+{
+    "expr": "($a := $now(); $sum([1..10000]); $a = $now())",
+    "data": {},
+    "bindings": {},
+    "result": true
+}

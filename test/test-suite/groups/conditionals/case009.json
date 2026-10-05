@@ -1,0 +1,10 @@
+{
+    "expr": "{\"a\": flag ? {\"b\": 1}, \"c\": 2}",
+    "data": {
+        "flag": false
+    },
+    "bindings": {},
+    "result": {
+        "c": 2
+    }
+}
