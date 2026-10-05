@@ -1,0 +1,27 @@
+{
+    "expr": "items[tag != \"b\"].id",
+    "data": {
+        "items": [
+            {
+                "id": 1,
+                "tag": "a"
+            },
+            {
+                "id": 2,
+                "tag": "b"
+            },
+            {
+                "id": 3
+            },
+            {
+                "id": 4,
+                "tag": "c"
+            }
+        ]
+    },
+    "bindings": {},
+    "result": [
+        1,
+        4
+    ]
+}

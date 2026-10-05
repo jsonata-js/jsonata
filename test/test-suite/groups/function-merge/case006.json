@@ -1,0 +1,6 @@
+{
+    "expr": "$merge([{\"a\": nothing}])",
+    "data": {},
+    "bindings": {},
+    "result": {}
+}

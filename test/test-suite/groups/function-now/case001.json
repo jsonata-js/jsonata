@@ -1,0 +1,6 @@
+{
+    "expr": "$now('[Y0001]-[M01]-[D01]') = $substringBefore($now(), 'T')",
+    "data": {},
+    "bindings": {},
+    "result": true
+}
