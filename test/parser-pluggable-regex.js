@@ -70,3 +70,36 @@ describe('Detect and repel ReDoS attack', function() {
         });
     })
 })
+
+describe("ParseDateTime RegexEngine tests", () => {
+    describe("$toMillis respects the RegexEngine option in parseDateTime", function () {
+        it("should return result object", async function () {
+            var engineCalled = false;
+            function TrackingRegExp(pattern, flags) {
+                engineCalled = true;
+                return new RegExp(pattern, flags);
+            }
+            var expr = jsonata(
+                "$toMillis('2018-03-27T14:03:00.123Z', '[Y0001]-[M01]-[D01]T[H01]:[m01]:[s01].[f001]Z')",
+                { RegexEngine: TrackingRegExp }
+            );
+            var result = await expr.evaluate({});
+            expect(engineCalled).to.equal(true);
+            expect(result).to.equal(1522159380123);
+        });
+    });
+
+    describe("$toMillis falls back to RegExp when no RegexEngine is in the environment", function () {
+        it("should return result object", function () {
+            var datetime = require('../src/datetime');
+            var fakeThis = {
+                environment: {
+                    timestamp: new Date('2018-03-27T14:03:00.123Z'),
+                    base: {}
+                }
+            };
+            var result = datetime.toMillis.call(fakeThis, '2018-03-27T14:03:00.123Z', '[Y0001]-[M01]-[D01]T[H01]:[m01]:[s01].[f001]Z');
+            expect(result).to.equal(1522159380123);
+        });
+    });
+});
