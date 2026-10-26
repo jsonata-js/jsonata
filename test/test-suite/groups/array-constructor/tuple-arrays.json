@@ -1,0 +1,35 @@
+[
+    {
+        "description": "index binding preserves each order's item array",
+        "expr": "orders#$i.[items.sku]",
+        "data": {
+            "orders": [
+                {"items": [{"sku": "p"}, {"sku": "q"}]},
+                {"items": []},
+                {"items": [{"sku": "r"}]}
+            ]
+        },
+        "bindings": {},
+        "result": [["p", "q"], [], ["r"]]
+    },
+    {
+        "description": "context binding preserves each order's item array",
+        "expr": "orders@$order.[$order.items.sku]",
+        "data": {
+            "orders": [
+                {"items": [{"sku": "p"}, {"sku": "q"}]},
+                {"items": []},
+                {"items": [{"sku": "r"}]}
+            ]
+        },
+        "bindings": {},
+        "result": [["p", "q"], [], ["r"]]
+    },
+    {
+        "description": "filter stages still evaluate individual tuple values",
+        "expr": "foo#$i.[$][$ > 1]",
+        "data": {"foo": [1, 2, 3]},
+        "bindings": {},
+        "result": [2, 3]
+    }
+]

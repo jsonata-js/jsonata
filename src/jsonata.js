@@ -345,7 +345,7 @@ var jsonata = (function() {
             var res = await evaluate(expr, tupleBindings[ee]['@'], stepEnv);
             // res is the binding sequence for the output tuple stream
             if(typeof res !== 'undefined') {
-                if (!Array.isArray(res)) {
+                if (!Array.isArray(res) || (res.cons && !expr.stages)) {
                     res = [res];
                 }
                 for (var bb = 0; bb < res.length; bb++) {
