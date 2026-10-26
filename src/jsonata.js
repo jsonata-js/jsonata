@@ -380,6 +380,26 @@ var jsonata = (function() {
     }
 
     /**
+     * Whether an expression's value cannot depend on the context item
+     * @param {Object} expr - JSONata expression
+     * @returns {boolean} true if context free
+     */
+    function isContextFree(expr) {
+        switch (expr.type) {
+            case 'number':
+                return true;
+            case 'variable':
+                return expr.value !== ''; // $ is the context
+            case 'unary':
+                return expr.value === '-' && isContextFree(expr.expression);
+            case 'binary':
+                return isContextFree(expr.lhs) && isContextFree(expr.rhs);
+            default:
+                return false;
+        }
+    }
+
+    /**
      * Apply filter predicate to input data
      * @param {Object} predicate - filter expression
      * @param {Object} input - Input data to apply predicates against
@@ -394,8 +414,18 @@ var jsonata = (function() {
         if (!Array.isArray(input)) {
             input = environment.base.createSequence(input);
         }
+        var index;
         if (predicate.type === 'number') {
-            var index = Math.floor(predicate.value);  // round it down
+            index = predicate.value;
+        } else if (input.length > 0 && !input.tupleStream && isContextFree(predicate)) {
+            // e.g. $arr[$i] - evaluate once, and if numeric treat it as a literal index (#766)
+            var value = await evaluate(predicate, input, environment);
+            if (isNumeric(value)) {
+                index = value;
+            }
+        }
+        if (index !== undefined) {
+            index = Math.floor(index);  // round it down
             if (index < 0) {
                 // count in from end of array
                 index = input.length + index;
@@ -409,7 +439,6 @@ var jsonata = (function() {
                 }
             }
         } else {
-            var scalarIndex = true;
             for (index = 0; index < input.length; index++) {
                 var item = input[index];
                 var context = item;
@@ -421,8 +450,6 @@ var jsonata = (function() {
                 var res = await evaluate(predicate, context, env);
                 if (isNumeric(res)) {
                     res = [res];
-                } else {
-                    scalarIndex = false;
                 }
                 if (isArrayOfNumbers(res)) {
                     Array.prototype.forEach.call(res, function (ires) {
@@ -439,10 +466,6 @@ var jsonata = (function() {
                 } else if (fn.boolean(res)) { // truthy
                     results.push(item);
                 }
-            }
-            // a computed single index selects an array item the same way a literal index does (#766)
-            if (scalarIndex && !input.tupleStream && results.length === 1 && Array.isArray(results[0])) {
-                results = results[0];
             }
         }
         return results;
