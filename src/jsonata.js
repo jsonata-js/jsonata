@@ -409,6 +409,7 @@ var jsonata = (function() {
                 }
             }
         } else {
+            var scalarIndex = true;
             for (index = 0; index < input.length; index++) {
                 var item = input[index];
                 var context = item;
@@ -420,6 +421,8 @@ var jsonata = (function() {
                 var res = await evaluate(predicate, context, env);
                 if (isNumeric(res)) {
                     res = [res];
+                } else {
+                    scalarIndex = false;
                 }
                 if (isArrayOfNumbers(res)) {
                     Array.prototype.forEach.call(res, function (ires) {
@@ -436,6 +439,10 @@ var jsonata = (function() {
                 } else if (fn.boolean(res)) { // truthy
                     results.push(item);
                 }
+            }
+            // a computed single index selects an array item the same way a literal index does (#766)
+            if (scalarIndex && !input.tupleStream && results.length === 1 && Array.isArray(results[0])) {
+                results = results[0];
             }
         }
         return results;
