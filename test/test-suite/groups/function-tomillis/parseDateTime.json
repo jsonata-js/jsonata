@@ -374,5 +374,13 @@
         "expr": "$toMillis('2026-04-08T19:05:04.01987', '[Y0001]-[M01]-[D01]T[H01]:[m01]:[s01].[f1]') ~> $fromMillis() ",
         "data": {},
         "result": "2026-04-08T19:05:04.019Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "adjacent fractional-second components",
+        "description": "should correctly process adjacent [f] components to prevent ReDoS",
+        "expr": "$toMillis('2026-09-17T18:10:23.0190', '[Y0001]-[M01]-[D01]T[H01]:[m01]:[s01].[f1][f001]') ~> $fromMillis()",
+        "data": {},
+        "result": "2026-09-17T18:10:23.190Z"
     }
 ]
