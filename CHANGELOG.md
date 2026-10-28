@@ -1,3 +1,7 @@
+#### Unreleased
+
+- Index by variable on nested arrays behaves like a literal index, e.g. `$arr[$i][$j]` (#766). Results of such expressions may change shape, e.g. `x[$i].$[$j]` now matches `x[0].$[1]`
+
 #### 2.2.2 Maintenance Release
 
 - Update TypeScript type definitions (PR #807)

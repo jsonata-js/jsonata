@@ -1,0 +1,6 @@
+{
+    "expr": "items[$ = $v]",
+    "data": {"items": [1, 2, 3]},
+    "bindings": {"v": 2},
+    "result": 2
+}
