@@ -176,6 +176,37 @@ describe("Functions with side-effects", () => {
         });
     });
 
+    describe("$millis() and $now() are not affected by an overlapping evaluate() call", function() {
+        it("should return the same value within each evaluation", async function() {
+            var expr = jsonata("($m := $millis(); $n := $now(); $pause($m); [$m = $millis(), $n = $now()])");
+            var paused, release;
+            var reached = new Promise((resolve) => { paused = resolve; });
+            var resume = new Promise((resolve) => { release = resolve; });
+            // the first evaluation suspends part way through, until released
+            var first = expr.evaluate(testdata2, {
+                pause: function(millis) {
+                    paused(millis);
+                    return resume;
+                }
+            });
+            var firstMillis = await reached;
+            // make sure the overlapping evaluation captures a later timestamp
+            while (Date.now() <= firstMillis) {
+                await new Promise((resolve) => setTimeout(resolve, 1));
+            }
+            var secondMillis;
+            var second = await expr.evaluate(testdata2, {
+                pause: function(millis) {
+                    secondMillis = millis;
+                }
+            });
+            release();
+            expect(secondMillis).to.be.above(firstMillis);
+            expect(second).to.deep.equal([true, true]);
+            expect(await first).to.deep.equal([true, true]);
+        });
+    });
+
     describe("$millis() returns milliseconds since the epoch", function() {
         it("should return result object", function() {
             var expr = jsonata("$millis()");
