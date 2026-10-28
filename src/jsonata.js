@@ -1159,11 +1159,12 @@ var jsonata = (function() {
                         result.groups.push(match[i]);
                     }
                 }
+                var lastIndex = re.lastIndex;
                 result.next = function() {
-                    if(re.lastIndex >= str.length) {
+                    if(lastIndex >= str.length) {
                         return undefined;
                     } else {
-                        var next = closure(str, re.lastIndex);
+                        var next = closure(str, lastIndex);
                         if(next && next.match === '') {
                             // matches zero length string; this will never progress
                             throw {
