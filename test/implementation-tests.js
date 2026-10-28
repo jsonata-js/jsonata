@@ -1010,6 +1010,51 @@ describe("Test that yield platform specific results", () => {
     });
 });
 
+describe("Sorting large arrays", function() {
+    // a user-defined comparator is called about 1.7 million times for 100,000 items
+    this.timeout(30000);
+
+    // values in a scrambled but deterministic order
+    var largeInput = {
+        items: Array.from({ length: 100000 }, function(_, index) {
+            return { id: index, v: (index * 7919) % 100000 };
+        })
+    };
+
+    var isAscending = function(values) {
+        return values.every(function(value, index) {
+            return index === 0 || values[index - 1] <= value;
+        });
+    };
+
+    describe("$sort() of 100,000 numbers", function() {
+        it("should return the sorted array", async function() {
+            var expr = jsonata("$sort(items.v)");
+            var result = await expr.evaluate(largeInput);
+            expect(result).to.have.lengthOf(100000);
+            expect(isAscending(result)).to.equal(true);
+        });
+    });
+
+    describe("$sort() of 100,000 objects with a comparator function", function() {
+        it("should return the sorted array", async function() {
+            var expr = jsonata("$sort(items, function($l, $r) { $l.v > $r.v }).v");
+            var result = await expr.evaluate(largeInput);
+            expect(result).to.have.lengthOf(100000);
+            expect(isAscending(result)).to.equal(true);
+        });
+    });
+
+    describe("order-by of 100,000 objects", function() {
+        it("should return the sorted array", async function() {
+            var expr = jsonata("items^(v).v");
+            var result = await expr.evaluate(largeInput);
+            expect(result).to.have.lengthOf(100000);
+            expect(isAscending(result)).to.equal(true);
+        });
+    });
+});
+
 describe("Tests that include infinite recursion", () => {
     describe("stack overflow - infinite recursive function - non-tail call", function() {
         it("should throw error", function() {
