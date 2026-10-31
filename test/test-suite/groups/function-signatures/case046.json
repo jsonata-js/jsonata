@@ -1,0 +1,6 @@
+{
+    "expr": "( $strStr := λ($a, $b)<s?s-:o> { { 'str1': $a, 'str2': $b } };  'str2' ~> $strStr; )",
+    "dataset": null,
+    "bindings": {},
+    "result": {"str2": "str2"}
+}
