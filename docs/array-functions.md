@@ -83,3 +83,40 @@ This function accepts a variable number of arguments.  The length of the returne
 __Examples__
 - `$zip([1,2,3], [4,5,6])` => `[[1,4] ,[2,5], [3,6]]`
 - `$zip([1,2,3],[4,5],[7,8,9])` => `[[1,4,7], [2,5,8]]`
+
+## `$union()`
+
+__Signature:__ `$union(array1, array2)`
+
+Returns a new array containing all distinct elements from both `array1` and `array2`.
+
+__Examples__
+- `$union([1,2,3], [3,4,5])` => `[1, 2, 3, 4, 5]`
+- `$union([1,2,3], 3)` => `[1, 2, 3]`
+
+## `$intersection()`
+
+__Signature:__ `$intersection(array1, array2)`
+
+Returns a new array containing all distinct elements that are present in both `array1` and `array2`.
+
+__Examples__
+- `$intersection([1,2,3], [3,4,5])` => `[3]`
+
+## `$difference()`
+
+__Signature:__ `$difference(array1, array2)`
+
+Returns a new array containing all distinct elements from `array1` that are NOT present in `array2`.
+
+__Examples__
+- `$difference([1,2,3], [3,4,5])` => `[1, 2]`
+
+## `$symmetricDifference()`
+
+__Signature:__ `$symmetricDifference(array1, array2)`
+
+Returns a new array containing all distinct elements that are present in either `array1` or `array2`, but NOT in both.
+
+__Examples__
+- `$symmetricDifference([1,2,3], [3,4,5])` => `[1, 2, 4, 5]`

@@ -1,0 +1,38 @@
+[
+    {
+        "expr": "$union([1,2,3], [3,4,5])",
+        "data": null,
+        "bindings": {},
+        "result": [1,2,3,4,5]
+    },
+    {
+        "expr": "$union([1,2,3], 3)",
+        "data": null,
+        "bindings": {},
+        "result": [1,2,3]
+    },
+    {
+        "expr": "$union([1,2,3], nothing)",
+        "data": null,
+        "bindings": {},
+        "result": [1,2,3]
+    },
+    {
+        "expr": "$union(nothing, [1,2,3])",
+        "data": null,
+        "bindings": {},
+        "result": [1,2,3]
+    },
+    {
+        "expr": "$union(Account.Order.Product.SKU, [\"0406654608\", \"12345\"])",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            "0406654608",
+            "0406634348",
+            "040657863",
+            "0406654603",
+            "12345"
+        ]
+    }
+]

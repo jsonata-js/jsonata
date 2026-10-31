@@ -1,0 +1,43 @@
+[
+    {
+        "expr": "$symmetricDifference([1,2,3], [3,4,5])",
+        "data": null,
+        "bindings": {},
+        "result": [1, 2, 4, 5]
+    },
+    {
+        "expr": "$symmetricDifference([1,2,3], 3)",
+        "data": null,
+        "bindings": {},
+        "result": [1, 2]
+    },
+    {
+        "expr": "$symmetricDifference([1,2,3], nothing)",
+        "data": null,
+        "bindings": {},
+        "result": [1, 2, 3]
+    },
+    {
+        "expr": "$symmetricDifference(nothing, [1,2,3])",
+        "data": null,
+        "bindings": {},
+        "result": [1, 2, 3]
+    },
+    {
+        "expr": "$symmetricDifference([{\"a\":1}, {\"b\":2}], [{\"b\":2}, {\"c\":3}])",
+        "data": null,
+        "bindings": {},
+        "result": [{"a": 1}, {"c": 3}]
+    },
+    {
+        "expr": "$symmetricDifference(Account.Order.Product.SKU, [\"0406654608\", \"12345\"])",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            "0406634348",
+            "040657863",
+            "0406654603",
+            "12345"
+        ]
+    }
+]
