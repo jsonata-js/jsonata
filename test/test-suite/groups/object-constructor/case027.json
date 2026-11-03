@@ -1,0 +1,8 @@
+{
+    "expr": "items{k:$sum(v)}.x",
+    "data": {
+        "items": [{"k": "x", "v": 1}]
+    },
+    "bindings": {},
+    "result": 1
+}

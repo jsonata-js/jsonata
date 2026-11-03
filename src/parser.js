@@ -1043,7 +1043,7 @@ const parser = (() => {
                         case '.':
                             var lstep = processAST(expr.lhs);
 
-                            if (lstep.type === 'path') {
+                            if (lstep.type === 'path' && typeof lstep.group === 'undefined') {
                                 result = lstep;
                             } else {
                                 result = {type: 'path', steps: [lstep]};
