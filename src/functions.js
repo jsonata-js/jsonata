@@ -1956,24 +1956,31 @@ const functions = (() => {
             comp = comparator;
         }
 
+        // iterative merge: a recursive merge would hold one pending call and one copy of the remaining
+        // input per element, so memory would grow quadratically with the array size
         var merge = async function (l, r) {
-            var merge_iter = async function (result, left, right) {
-                if (left.length === 0) {
-                    Array.prototype.push.apply(result, right);
-                } else if (right.length === 0) {
-                    Array.prototype.push.apply(result, left);
-                } else if (await comp(left[0], right[0])) { // invoke the comparator function
+            var merged = [];
+            var leftIndex = 0;
+            var rightIndex = 0;
+            while (leftIndex < l.length && rightIndex < r.length) {
+                if (await comp(l[leftIndex], r[rightIndex])) { // invoke the comparator function
                     // if it returns true - swap left and right
-                    result.push(right[0]);
-                    await merge_iter(result, left, right.slice(1));
+                    merged.push(r[rightIndex]);
+                    rightIndex++;
                 } else {
                     // otherwise keep the same order
-                    result.push(left[0]);
-                    await merge_iter(result, left.slice(1), right);
+                    merged.push(l[leftIndex]);
+                    leftIndex++;
                 }
-            };
-            var merged = [];
-            await merge_iter(merged, l, r);
+            }
+            while (leftIndex < l.length) {
+                merged.push(l[leftIndex]);
+                leftIndex++;
+            }
+            while (rightIndex < r.length) {
+                merged.push(r[rightIndex]);
+                rightIndex++;
+            }
             return merged;
         };
 
