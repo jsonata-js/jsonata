@@ -36,6 +36,7 @@ The following are known implementations of JSONata in addition to the primary im
 |Python|https://github.com/rayokota/jsonata-python|Native port of reference|2.1.0|
 |Rust|https://github.com/johanventer/jsonata-rust|Implementation work in progress| |
 |Rust|https://github.com/Stedi/jsonata-rs|Actively-developed fork of jsonata-rust| |
+|Rust|https://github.com/thkprado/jlens|Native port of reference; also WebAssembly (npm) and Python bindings|2.2.2|
 
 ## Find out more
 
