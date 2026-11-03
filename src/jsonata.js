@@ -2138,12 +2138,11 @@ var jsonata = (function() {
         }
         var environment = createFrame(staticFrame);
 
-        var timestamp = new Date(); // will be overridden on each call to evalute()
         environment.bind('now', defineFunction(function(picture, timezone) {
-            return datetime.fromMillis(timestamp.getTime(), picture, timezone);
+            return datetime.fromMillis(this.environment.timestamp.getTime(), picture, timezone);
         }, '<s?s?:s>'));
         environment.bind('millis', defineFunction(function() {
-            return timestamp.getTime();
+            return this.environment.timestamp.getTime();
         }, '<:n>'));
 
         return {
@@ -2170,8 +2169,7 @@ var jsonata = (function() {
 
                 // capture the timestamp and put it in the execution environment
                 // the $now() and $millis() functions will return this value - whenever it is called
-                timestamp = new Date();
-                exec_env.timestamp = timestamp;
+                exec_env.timestamp = new Date();
                 exec_env.options = options;
 
                 exec_env.createSequence = function() {
