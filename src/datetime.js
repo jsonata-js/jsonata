@@ -995,7 +995,8 @@ const dateTime = (function () {
                         return offsetHours * 60 + offsetMinutes;
                     };
                 } else if (part.component === 'f') {
-                    res.regex = '[0-9]+';
+                    const fParseWidth = part.integerFormat && part.integerFormat.parseWidth;
+                    res.regex = fParseWidth ? `[0-9]{${fParseWidth}}` : '[0-9]+';
                     res.parse = function(value) {
                         return parseFloat('0.' + value.substring(0, 3)) * 1000;
                     };
@@ -1138,7 +1139,10 @@ const dateTime = (function () {
         const matchSpec = generateRegex(formatSpec);
         const fullRegex = '^' + matchSpec.parts.map(part => '(' + part.regex + ')').join('') + '$';
 
-        const matcher = new RegExp(fullRegex, 'i'); // TODO can cache this against the picture
+        // Use the caller-supplied RegexEngine (if any) so that a ReDoS-safe engine
+        // plugged in via the `RegexEngine` option also protects this code path.
+        const RegexEngine = (this && this.environment && this.environment.base && this.environment.base.RegexEngine) || RegExp;
+        const matcher = new RegexEngine(fullRegex, 'i'); // TODO can cache this against the picture
         var info = matcher.exec(timestamp);
         if (info !== null) {
             // validate what we've just parsed - do we have enough information to create a timestamp?
