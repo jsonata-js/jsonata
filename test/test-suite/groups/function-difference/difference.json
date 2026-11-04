@@ -1,0 +1,42 @@
+[
+    {
+        "expr": "$difference([1,2,3], [3,4,5])",
+        "data": null,
+        "bindings": {},
+        "result": [1, 2]
+    },
+    {
+        "expr": "$difference([1,2,3], 3)",
+        "data": null,
+        "bindings": {},
+        "result": [1, 2]
+    },
+    {
+        "expr": "$difference([1,2,3], nothing)",
+        "data": null,
+        "bindings": {},
+        "result": [1, 2, 3]
+    },
+    {
+        "expr": "$difference(nothing, [1,2,3])",
+        "data": null,
+        "bindings": {},
+        "undefinedResult": true
+    },
+    {
+        "expr": "$difference([{\"a\": 1, \"b\": 2}, 3], [{\"a\": 1, \"b\": 2}, 4])",
+        "data": null,
+        "bindings": {},
+        "result": [3]
+    },
+    {
+        "expr": "$difference(Account.Order.Product.SKU, [\"0406654608\", \"12345\"])",
+        "dataset": "dataset5",
+        "bindings": {},
+        "result": [
+            "0406634348",
+            "040657863",
+            "0406654603"
+        ]
+    }
+]
