@@ -1,0 +1,6 @@
+{
+    "expr": "$o.m[$i][]",
+    "dataset": null,
+    "bindings": {"o": {"m": [[1], [2, 3]]}, "i": 0},
+    "result": [1]
+}

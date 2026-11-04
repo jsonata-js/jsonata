@@ -1,0 +1,6 @@
+{
+    "expr": "x[$i].$[$j]",
+    "data": {"x": [[1, 2], [3, 4]]},
+    "bindings": {"i": 0, "j": 1},
+    "undefinedResult": true
+}

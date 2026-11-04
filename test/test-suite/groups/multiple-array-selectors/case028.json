@@ -1,0 +1,6 @@
+{
+    "expr": "($arr := [[1, 2], [4, 5]]; $i := -1; $arr[$i][1])",
+    "dataset": null,
+    "bindings": {},
+    "result": 5
+}
