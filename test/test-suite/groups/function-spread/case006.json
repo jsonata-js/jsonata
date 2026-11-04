@@ -1,0 +1,8 @@
+{
+    "expr": "$spread({\"a\": 1})",
+    "data": {},
+    "bindings": {},
+    "result": {
+        "a": 1
+    }
+}

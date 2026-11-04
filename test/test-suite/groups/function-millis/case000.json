@@ -1,0 +1,6 @@
+{
+    "expr": "($a := $millis(); $sum([1..10000]); $a = $millis())",
+    "data": {},
+    "bindings": {},
+    "result": true
+}

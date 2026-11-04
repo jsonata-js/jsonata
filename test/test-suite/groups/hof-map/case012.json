@@ -1,0 +1,6 @@
+{
+    "expr": "$map([], function($v){$v})",
+    "data": {},
+    "bindings": {},
+    "undefinedResult": true
+}
