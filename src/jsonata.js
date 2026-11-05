@@ -117,7 +117,7 @@ var jsonata = (function() {
 
         if (Object.prototype.hasOwnProperty.call(expr, 'predicate')) {
             for(var ii = 0; ii < expr.predicate.length; ii++) {
-                result = await evaluateFilter(expr.predicate[ii].expr, result, environment);
+                result = await evaluateFilter(expr.predicate[ii].expr, result, environment, ii < expr.predicate.length - 1);
             }
         }
 
@@ -258,7 +258,7 @@ var jsonata = (function() {
             var res = await evaluate(expr, input[ii], environment);
             if(expr.stages) {
                 for(var ss = 0; ss < expr.stages.length; ss++) {
-                    res = await evaluateFilter(expr.stages[ss].expr, res, environment);
+                    res = await evaluateFilter(expr.stages[ss].expr, res, environment, ss < expr.stages.length - 1);
                 }
             }
             if(typeof res !== 'undefined') {
@@ -291,7 +291,7 @@ var jsonata = (function() {
             var stage = stages[ss];
             switch(stage.type) {
                 case 'filter':
-                    result = await evaluateFilter(stage.expr, result, environment);
+                    result = await evaluateFilter(stage.expr, result, environment, ss < stages.length - 1);
                     break;
                 case 'index':
                     for(var ee = 0; ee < result.length; ee++) {
@@ -384,9 +384,10 @@ var jsonata = (function() {
      * @param {Object} predicate - filter expression
      * @param {Object} input - Input data to apply predicates against
      * @param {Object} environment - Environment
+     * @param {boolean} chained - another predicate will be applied to the result
      * @returns {*} Result after applying predicates
      */
-    async function evaluateFilter(predicate, input, environment) {
+    async function evaluateFilter(predicate, input, environment, chained) {
         var results = environment.base.createSequence();
         if( input && input.tupleStream) {
             results.tupleStream = true;
@@ -409,6 +410,7 @@ var jsonata = (function() {
                 }
             }
         } else {
+            var indexMatches = 0;
             for (index = 0; index < input.length; index++) {
                 var item = input[index];
                 var context = item;
@@ -418,7 +420,8 @@ var jsonata = (function() {
                     env = createFrameFromTuple(environment, item);
                 }
                 var res = await evaluate(predicate, context, env);
-                if (isNumeric(res)) {
+                var isIndex = isNumeric(res);
+                if (isIndex) {
                     res = [res];
                 }
                 if (isArrayOfNumbers(res)) {
@@ -431,11 +434,19 @@ var jsonata = (function() {
                         }
                         if (ii === index) {
                             results.push(item);
+                            if (isIndex) {
+                                indexMatches++;
+                            }
                         }
                     });
                 } else if (fn.boolean(res)) { // truthy
                     results.push(item);
                 }
+            }
+            if (chained && indexMatches === 1 && results.length === 1 && Array.isArray(results[0])) {
+                // an expression that evaluates to a number selects an array the same way a literal index does,
+                // so the next predicate is applied to that array rather than to a sequence containing it
+                results = results[0];
             }
         }
         return results;

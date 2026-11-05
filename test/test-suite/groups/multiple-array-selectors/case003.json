@@ -1,0 +1,114 @@
+[
+    {
+        "description": "issue #766: a variable index followed by another index",
+        "expr": "$arr[$i][$j]",
+        "dataset": null,
+        "bindings": {"arr": [[], [4, 5]], "i": 1, "j": 1},
+        "result": 5
+    },
+    {
+        "description": "issue #766: a variable index followed by a literal index",
+        "expr": "$arr[$i][0]",
+        "dataset": null,
+        "bindings": {"arr": [[], [4, 5]], "i": 1},
+        "result": 4
+    },
+    {
+        "description": "issue #766: a computed index matches the equivalent literal index",
+        "expr": "$arr[$count($arr) - 1][-1]",
+        "dataset": null,
+        "bindings": {"arr": [[], [4, 5]]},
+        "result": 5
+    },
+    {
+        "description": "issue #766: chained variable indexes into a 3-d array",
+        "expr": "$cube[$i][$j][$i]",
+        "dataset": null,
+        "bindings": {"cube": [[[1, 2], [3, 4]], [[5, 6], [7, 8]]], "i": 1, "j": 0},
+        "result": 6
+    },
+    {
+        "description": "issue #766: a variable index in a path step followed by another index",
+        "expr": "x[$i][$j]",
+        "data": {"x": [[1, 2], [3, 4]]},
+        "bindings": {"i": 1, "j": 0},
+        "result": 3
+    },
+    {
+        "description": "issue #766: the result of a chained variable index can be used by other operators",
+        "expr": "$arr[$i][$j] ?? 'none'",
+        "dataset": null,
+        "bindings": {"arr": [[], [4, 5]], "i": 1, "j": 1},
+        "result": 5
+    },
+    {
+        "description": "issue #766: a final variable index still selects the whole array",
+        "expr": "$cube[$i][$j]",
+        "dataset": null,
+        "bindings": {"cube": [[[1, 2], [3, 4]], [[5, 6], [7, 8]]], "i": 1, "j": 0},
+        "result": [5, 6]
+    },
+    {
+        "description": "issue #766: an array of indexes followed by another index applies to the selected sequence",
+        "expr": "$arr[[0, 1]][1]",
+        "dataset": null,
+        "bindings": {"arr": [[1, 2], [3, 4], [5, 6]]},
+        "result": [3, 4]
+    },
+    {
+        "description": "issue #766: a boolean predicate followed by an index applies to the matching sequence",
+        "expr": "$arr[$[0] > 1][0]",
+        "dataset": null,
+        "bindings": {"arr": [[1, 2], [3, 4], [5, 6]]},
+        "result": [3, 4]
+    },
+    {
+        "description": "issue #766: a variable index that selects a non-array item",
+        "expr": "$arr[$i][0]",
+        "dataset": null,
+        "bindings": {"arr": [1, 2, 3], "i": 2},
+        "result": 3
+    },
+    {
+        "description": "issue #766: a variable index past the end of the array",
+        "expr": "$arr[$i][0]",
+        "dataset": null,
+        "bindings": {"arr": [[1, 2]], "i": 5},
+        "undefinedResult": true
+    },
+    {
+        "description": "issue #766: a variable index that selects an empty array",
+        "expr": "$arr[$i][0]",
+        "dataset": null,
+        "bindings": {"arr": [[], [4, 5]], "i": 0},
+        "undefinedResult": true
+    },
+    {
+        "description": "issue #766: a variable index followed by a keep-singleton-array marker",
+        "expr": "$arr[$i][$j][]",
+        "dataset": null,
+        "bindings": {"arr": [[], [4, 5]], "i": 1, "j": 1},
+        "result": [5]
+    },
+    {
+        "description": "issue #766: a variable index after a sort followed by another index",
+        "expr": "x^($[0])[$i][$j]",
+        "data": {"x": [[3, 4], [1, 2]]},
+        "bindings": {"i": 0, "j": 1},
+        "result": 2
+    },
+    {
+        "description": "issue #766: a variable index on each item of a path followed by another index",
+        "expr": "a.b[$i][$j]",
+        "data": {"a": [{"b": [[1, 2], [9]]}, {"b": [[3, 4], [9]]}]},
+        "bindings": {"i": 0, "j": 1},
+        "result": [2, 4]
+    },
+    {
+        "description": "issue #766: a variable index followed by a path step is not affected",
+        "expr": "rows[$r].$sum($)",
+        "data": {"rows": [[1, 2, 3], [4, 5, 6]]},
+        "bindings": {"r": 1},
+        "result": 15
+    }
+]
