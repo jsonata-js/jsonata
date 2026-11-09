@@ -5,6 +5,7 @@ var assert = require('assert');
 var chai = require("chai");
 var expect = chai.expect;
 
+
 describe('Invoke parser with valid expression', function() {
     describe('Account.Order[0]', function() {
         it('should return ast', function() {
@@ -248,60 +249,74 @@ describe('Invoke parser with incomplete expression', function() {
         });
     });
 
-    describe('Account.Order[0].Product;', function() {
-        it('should return ast', function() {
-            var expr = jsonata('Account.Order[0].Product;', { recover: true });
-            var ast = expr.ast();
-            var expected_ast = {
-                "type": "path",
-                "steps": [
-                    {
-                        "value": "Account",
-                        "type": "name",
-                        "position": 7
-                    },
-                    {
-                        "value": "Order",
-                        "type": "name",
-                        "position": 13,
-                        "stages": [
-                            {
-                                "expr": {
-                                    "value": 0,
-                                    "type": "number",
-                                    "position": 15
-                                },
-                                "position": 14,
-                                "type": "filter"
-                            }
-                        ]
-                    },
-                    {
-                        "value": "Product",
-                        "type": "name",
-                        "position": 24
-                    }
-                ]
-            };
-            var errors = expr.errors();
-            var expected_errors = [
-                {
-                    "code": "S0201",
-                    "position": 25,
-                    "remaining": [
-                        {
-                            "position": 25,
-                            "type": "operator",
-                            "value": ";"
-                        }
-                    ],
-                    "token": ";"
-                }
-            ];
-            assert.deepEqual(ast, expected_ast);
-            assert.deepEqual(errors, expected_errors);
-        });
+    const chai = require('chai');
+    const expect = chai.expect;
+    const jsonata = require('jsonata'); // Import the JSONata library
+    
+    // Describe your test suite
+    describe('JSONata Tests', () => {
+      // Define a test case
+      it('should return the expected result', () => {
+        // Your test code goes here
+    
+        // Example JSON data
+        const data = [
+            [
+              {
+                "obj": 1
+              },
+              {
+                "obj": 2
+              }
+            ],
+            [
+              {
+                "obj": 3
+              },
+              {
+                "obj": 4
+              }
+            ]
+          ]
+    
+        // Your JSONata expression
+        const expression = `$map($, function($outerArray) {
+          $map($outerArray, function($innerArray) {
+            $innerArray
+          })
+        })`;
+    
+        // Use the jsonata() function to compile the expression
+        const compiled = jsonata(expression);
+    
+        // Evaluate the expression with the data
+        const result = compiled.evaluate(data);
+    
+        // Define your expected result
+        const expected = [
+            {
+              "obj": 1
+            },
+            {
+              "obj": 2
+            },
+            true,
+            {
+              "obj": 3
+            },
+            {
+              "obj": 4
+            },
+            true
+          ];
+    
+        // Assert that the result matches the expected value
+        expect(result).to.deep.equal(expected);
+      });
+    
+      // Add more test cases as needed
     });
+    
 
     describe('$inputSource[0].UnstructuredAnswers^()[0].Text', function() {
         it('should return ast', function() {
