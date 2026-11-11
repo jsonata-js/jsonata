@@ -303,5 +303,107 @@
             "01.0'33",
             "01.5'0"
         ]
+    },
+    {
+        "description": "#853: semicolon grouping preserves all mandatory digits",
+        "expr": "ms.$fromMillis($, $$.picture)",
+        "data": {
+            "ms": [
+                1000,
+                1005,
+                1033,
+                1333,
+                1500,
+                1999
+            ],
+            "picture": "[s].[f0;00c]"
+        },
+        "result": [
+            "01.0;00",
+            "01.0;05",
+            "01.0;33",
+            "01.3;33",
+            "01.5;00",
+            "01.9;99"
+        ]
+    },
+    {
+        "description": "#853: semicolon grouping works without a second presentation modifier",
+        "expr": "ms.$fromMillis($, $$.picture)",
+        "data": {
+            "ms": [
+                1033,
+                1500
+            ],
+            "picture": "[s].[f00;0]"
+        },
+        "result": [
+            "01.03;3",
+            "01.50;0"
+        ]
+    },
+    {
+        "description": "#853: semicolon grouping respects optional fractional digits",
+        "expr": "ms.$fromMillis($, $$.picture)",
+        "data": {
+            "ms": [
+                1000,
+                1033,
+                1500,
+                1999
+            ],
+            "picture": "[s].[f0;##c]"
+        },
+        "result": [
+            "01.0",
+            "01.0;33",
+            "01.5",
+            "01.9;99"
+        ]
+    },
+    {
+        "description": "#853: semicolon grouping preserves mandatory digits with a width modifier",
+        "expr": "ms.$fromMillis($, $$.picture)",
+        "data": {
+            "ms": [
+                1033,
+                1500
+            ],
+            "picture": "[s].[f0;0c,1-3]"
+        },
+        "result": [
+            "01.0;33",
+            "01.5;0"
+        ]
+    },
+    {
+        "description": "#853: multiple semicolon grouping positions are preserved",
+        "expr": "ms.$fromMillis($, $$.picture)",
+        "data": {
+            "ms": [
+                1033,
+                1500
+            ],
+            "picture": "[s].[f0;0;0c]"
+        },
+        "result": [
+            "01.0;3;3",
+            "01.5;0;0"
+        ]
+    },
+    {
+        "description": "#853: semicolon grouping preserves the selected digit family",
+        "expr": "ms.$fromMillis($, $$.picture)",
+        "data": {
+            "ms": [
+                1033,
+                1500
+            ],
+            "picture": "[s].[f٠;٠٠c]"
+        },
+        "result": [
+            "01.٠;٣٣",
+            "01.٥;٠٠"
+        ]
     }
 ]

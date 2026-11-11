@@ -882,7 +882,8 @@ const dateTime = (function () {
                     componentValue = _formatInteger(componentValue, markerSpec.integerFormat);
                 } else {
                     const picture = stringToArray(markerSpec.presentation1);
-                    const format = analyseIntegerPicture(markerSpec.presentation1);
+                    // Append an empty modifier so semicolons in the primary token remain grouping signs.
+                    const format = analyseIntegerPicture(markerSpec.presentation1 + ';');
                     let minDigits = format.mandatoryDigits;
                     let maxDigits = minDigits + format.optionalDigits;
                     if (markerSpec.width) {
