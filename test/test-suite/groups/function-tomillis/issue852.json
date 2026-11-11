@@ -1,0 +1,468 @@
+[
+    {
+        "description": "#852: parse timezone -0330 across numeric pictures",
+        "expr": "zones.$toMillis(\"2020-01-01 00:00 \" & value, \"[Y]-[M]-[D] [H]:[m] \" & picture)",
+        "data": {
+            "zones": [
+                {
+                    "picture": "[Z]",
+                    "value": "-03:30"
+                },
+                {
+                    "picture": "[Z01:01]",
+                    "value": "-03:30"
+                },
+                {
+                    "picture": "[Z0]",
+                    "value": "-3:30"
+                },
+                {
+                    "picture": "[Z01]",
+                    "value": "-03:30"
+                },
+                {
+                    "picture": "[Z001]",
+                    "value": "-330"
+                },
+                {
+                    "picture": "[Z0000]",
+                    "value": "-0330"
+                },
+                {
+                    "picture": "[z]",
+                    "value": "GMT-03:30"
+                },
+                {
+                    "picture": "[z0]",
+                    "value": "GMT-3:30"
+                }
+            ]
+        },
+        "result": [
+            1577849400000,
+            1577849400000,
+            1577849400000,
+            1577849400000,
+            1577849400000,
+            1577849400000,
+            1577849400000,
+            1577849400000
+        ]
+    },
+    {
+        "description": "#852: parse timezone -0030 across numeric pictures",
+        "expr": "zones.$toMillis(\"2020-01-01 00:00 \" & value, \"[Y]-[M]-[D] [H]:[m] \" & picture)",
+        "data": {
+            "zones": [
+                {
+                    "picture": "[Z]",
+                    "value": "-00:30"
+                },
+                {
+                    "picture": "[Z01:01]",
+                    "value": "-00:30"
+                },
+                {
+                    "picture": "[Z0]",
+                    "value": "-0:30"
+                },
+                {
+                    "picture": "[Z01]",
+                    "value": "-00:30"
+                },
+                {
+                    "picture": "[Z001]",
+                    "value": "-030"
+                },
+                {
+                    "picture": "[Z0000]",
+                    "value": "-0030"
+                },
+                {
+                    "picture": "[z]",
+                    "value": "GMT-00:30"
+                },
+                {
+                    "picture": "[z0]",
+                    "value": "GMT-0:30"
+                }
+            ]
+        },
+        "result": [
+            1577838600000,
+            1577838600000,
+            1577838600000,
+            1577838600000,
+            1577838600000,
+            1577838600000,
+            1577838600000,
+            1577838600000
+        ]
+    },
+    {
+        "description": "#852: parse timezone -0001 across numeric pictures",
+        "expr": "zones.$toMillis(\"2020-01-01 00:00 \" & value, \"[Y]-[M]-[D] [H]:[m] \" & picture)",
+        "data": {
+            "zones": [
+                {
+                    "picture": "[Z]",
+                    "value": "-00:01"
+                },
+                {
+                    "picture": "[Z01:01]",
+                    "value": "-00:01"
+                },
+                {
+                    "picture": "[Z0]",
+                    "value": "-0:01"
+                },
+                {
+                    "picture": "[Z01]",
+                    "value": "-00:01"
+                },
+                {
+                    "picture": "[Z001]",
+                    "value": "-001"
+                },
+                {
+                    "picture": "[Z0000]",
+                    "value": "-0001"
+                },
+                {
+                    "picture": "[z]",
+                    "value": "GMT-00:01"
+                },
+                {
+                    "picture": "[z0]",
+                    "value": "GMT-0:01"
+                }
+            ]
+        },
+        "result": [
+            1577836860000,
+            1577836860000,
+            1577836860000,
+            1577836860000,
+            1577836860000,
+            1577836860000,
+            1577836860000,
+            1577836860000
+        ]
+    },
+    {
+        "description": "#852: parse timezone -0059 across numeric pictures",
+        "expr": "zones.$toMillis(\"2020-01-01 00:00 \" & value, \"[Y]-[M]-[D] [H]:[m] \" & picture)",
+        "data": {
+            "zones": [
+                {
+                    "picture": "[Z]",
+                    "value": "-00:59"
+                },
+                {
+                    "picture": "[Z01:01]",
+                    "value": "-00:59"
+                },
+                {
+                    "picture": "[Z0]",
+                    "value": "-0:59"
+                },
+                {
+                    "picture": "[Z01]",
+                    "value": "-00:59"
+                },
+                {
+                    "picture": "[Z001]",
+                    "value": "-059"
+                },
+                {
+                    "picture": "[Z0000]",
+                    "value": "-0059"
+                },
+                {
+                    "picture": "[z]",
+                    "value": "GMT-00:59"
+                },
+                {
+                    "picture": "[z0]",
+                    "value": "GMT-0:59"
+                }
+            ]
+        },
+        "result": [
+            1577840340000,
+            1577840340000,
+            1577840340000,
+            1577840340000,
+            1577840340000,
+            1577840340000,
+            1577840340000,
+            1577840340000
+        ]
+    },
+    {
+        "description": "#852: parse timezone -0300 across numeric pictures",
+        "expr": "zones.$toMillis(\"2020-01-01 00:00 \" & value, \"[Y]-[M]-[D] [H]:[m] \" & picture)",
+        "data": {
+            "zones": [
+                {
+                    "picture": "[Z]",
+                    "value": "-03:00"
+                },
+                {
+                    "picture": "[Z01:01]",
+                    "value": "-03:00"
+                },
+                {
+                    "picture": "[Z0]",
+                    "value": "-3"
+                },
+                {
+                    "picture": "[Z01]",
+                    "value": "-03"
+                },
+                {
+                    "picture": "[Z001]",
+                    "value": "-300"
+                },
+                {
+                    "picture": "[Z0000]",
+                    "value": "-0300"
+                },
+                {
+                    "picture": "[z]",
+                    "value": "GMT-03:00"
+                },
+                {
+                    "picture": "[z0]",
+                    "value": "GMT-3"
+                }
+            ]
+        },
+        "result": [
+            1577847600000,
+            1577847600000,
+            1577847600000,
+            1577847600000,
+            1577847600000,
+            1577847600000,
+            1577847600000,
+            1577847600000
+        ]
+    },
+    {
+        "description": "#852: parse timezone +0330 across numeric pictures",
+        "expr": "zones.$toMillis(\"2020-01-01 00:00 \" & value, \"[Y]-[M]-[D] [H]:[m] \" & picture)",
+        "data": {
+            "zones": [
+                {
+                    "picture": "[Z]",
+                    "value": "+03:30"
+                },
+                {
+                    "picture": "[Z01:01]",
+                    "value": "+03:30"
+                },
+                {
+                    "picture": "[Z0]",
+                    "value": "+3:30"
+                },
+                {
+                    "picture": "[Z01]",
+                    "value": "+03:30"
+                },
+                {
+                    "picture": "[Z001]",
+                    "value": "+330"
+                },
+                {
+                    "picture": "[Z0000]",
+                    "value": "+0330"
+                },
+                {
+                    "picture": "[z]",
+                    "value": "GMT+03:30"
+                },
+                {
+                    "picture": "[z0]",
+                    "value": "GMT+3:30"
+                }
+            ]
+        },
+        "result": [
+            1577824200000,
+            1577824200000,
+            1577824200000,
+            1577824200000,
+            1577824200000,
+            1577824200000,
+            1577824200000,
+            1577824200000
+        ]
+    },
+    {
+        "description": "#852: parse timezone +0030 across numeric pictures",
+        "expr": "zones.$toMillis(\"2020-01-01 00:00 \" & value, \"[Y]-[M]-[D] [H]:[m] \" & picture)",
+        "data": {
+            "zones": [
+                {
+                    "picture": "[Z]",
+                    "value": "+00:30"
+                },
+                {
+                    "picture": "[Z01:01]",
+                    "value": "+00:30"
+                },
+                {
+                    "picture": "[Z0]",
+                    "value": "+0:30"
+                },
+                {
+                    "picture": "[Z01]",
+                    "value": "+00:30"
+                },
+                {
+                    "picture": "[Z001]",
+                    "value": "+030"
+                },
+                {
+                    "picture": "[Z0000]",
+                    "value": "+0030"
+                },
+                {
+                    "picture": "[z]",
+                    "value": "GMT+00:30"
+                },
+                {
+                    "picture": "[z0]",
+                    "value": "GMT+0:30"
+                }
+            ]
+        },
+        "result": [
+            1577835000000,
+            1577835000000,
+            1577835000000,
+            1577835000000,
+            1577835000000,
+            1577835000000,
+            1577835000000,
+            1577835000000
+        ]
+    },
+    {
+        "description": "#852: parse timezone +0000 across numeric pictures",
+        "expr": "zones.$toMillis(\"2020-01-01 00:00 \" & value, \"[Y]-[M]-[D] [H]:[m] \" & picture)",
+        "data": {
+            "zones": [
+                {
+                    "picture": "[Z]",
+                    "value": "+00:00"
+                },
+                {
+                    "picture": "[Z01:01]",
+                    "value": "+00:00"
+                },
+                {
+                    "picture": "[Z0]",
+                    "value": "+0"
+                },
+                {
+                    "picture": "[Z01]",
+                    "value": "+00"
+                },
+                {
+                    "picture": "[Z001]",
+                    "value": "+000"
+                },
+                {
+                    "picture": "[Z0000]",
+                    "value": "+0000"
+                },
+                {
+                    "picture": "[z]",
+                    "value": "GMT+00:00"
+                },
+                {
+                    "picture": "[z0]",
+                    "value": "GMT+0"
+                }
+            ]
+        },
+        "result": [
+            1577836800000,
+            1577836800000,
+            1577836800000,
+            1577836800000,
+            1577836800000,
+            1577836800000,
+            1577836800000,
+            1577836800000
+        ]
+    },
+    {
+        "description": "#852: ISO parsing without a picture agrees with numeric timezone pictures",
+        "expr": "$toMillis('2020-01-01T00:00:00-03:30')",
+        "dataset": null,
+        "result": 1577849400000
+    },
+    {
+        "description": "#852: round-trip -0030 using [Z]",
+        "expr": "millis.$toMillis($fromMillis($, $$.picture, $$.timezone), $$.picture)",
+        "data": {
+            "millis": [
+                -1,
+                0,
+                1577836800123,
+                1583020800000
+            ],
+            "timezone": "-0030",
+            "picture": "[Y0001]-[M01]-[D01]T[H01]:[m01]:[s01].[f001] [Z]"
+        },
+        "result": [
+            -1,
+            0,
+            1577836800123,
+            1583020800000
+        ]
+    },
+    {
+        "description": "#852: round-trip -0330 using [Z0]",
+        "expr": "millis.$toMillis($fromMillis($, $$.picture, $$.timezone), $$.picture)",
+        "data": {
+            "millis": [
+                -1,
+                0,
+                1577836800123,
+                1583020800000
+            ],
+            "timezone": "-0330",
+            "picture": "[Y0001]-[M01]-[D01]T[H01]:[m01]:[s01].[f001] [Z0]"
+        },
+        "result": [
+            -1,
+            0,
+            1577836800123,
+            1583020800000
+        ]
+    },
+    {
+        "description": "#852: round-trip -0945 using [Z001]",
+        "expr": "millis.$toMillis($fromMillis($, $$.picture, $$.timezone), $$.picture)",
+        "data": {
+            "millis": [
+                -1,
+                0,
+                1577836800123,
+                1583020800000
+            ],
+            "timezone": "-0945",
+            "picture": "[Y0001]-[M01]-[D01]T[H01]:[m01]:[s01].[f001] [Z001]"
+        },
+        "result": [
+            -1,
+            0,
+            1577836800123,
+            1583020800000
+        ]
+    }
+]
