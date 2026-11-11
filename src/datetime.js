@@ -877,8 +877,46 @@ const dateTime = (function () {
                     componentValue = _formatInteger(componentValue, markerSpec.integerFormat);
                 }
             } else if (markerSpec.component === 'f') {
-                // TODO §9.8.4.5 Formatting Fractional Seconds
-                componentValue = _formatInteger(componentValue, markerSpec.integerFormat);
+                // §9.8.4.5 Formatting Fractional Seconds
+                if (markerSpec.integerFormat.primary !== formats.DECIMAL) {
+                    componentValue = _formatInteger(componentValue, markerSpec.integerFormat);
+                } else {
+                    const picture = stringToArray(markerSpec.presentation1);
+                    const format = analyseIntegerPicture(markerSpec.presentation1);
+                    let minDigits = format.mandatoryDigits;
+                    let maxDigits = minDigits + format.optionalDigits;
+                    if (markerSpec.width) {
+                        if (markerSpec.width.min !== undefined) {
+                            minDigits = Math.max(minDigits, markerSpec.width.min);
+                        }
+                        maxDigits = Math.max(maxDigits, minDigits);
+                        if (markerSpec.width.max !== undefined) {
+                            maxDigits = Math.max(maxDigits, markerSpec.width.max);
+                        }
+                    } else if (picture.length === 1) {
+                        maxDigits = 3; // a single digit allows the full millisecond precision
+                    }
+
+                    let fraction = ('00' + componentValue).slice(-3).replace(/0+$/, '');
+                    if (fraction.length < minDigits) {
+                        fraction += new Array(minDigits - fraction.length + 1).join('0');
+                    }
+                    // Pad and truncate on the right, without rounding into the next second.
+                    const digits = fraction.substring(0, maxDigits).split('').map(digit =>
+                        String.fromCodePoint(format.zeroCode + Number(digit)));
+                    // Count grouping positions from the left. The output cannot exceed the
+                    // adjusted picture's width, so separators never need to be extrapolated.
+                    let position = 0;
+                    picture.forEach(character => {
+                        const code = character.codePointAt(0);
+                        if (character === '#' || (code >= format.zeroCode && code <= format.zeroCode + 9)) {
+                            position++;
+                        } else if (position < digits.length) {
+                            digits[position] = character + digits[position];
+                        }
+                    });
+                    componentValue = digits.join('');
+                }
             } else if (markerSpec.component === 'Z' || markerSpec.component === 'z') {
                 // §9.8.4.6 Formatting timezones
                 const offset = offsetHours * 100 + offsetMinutes;
