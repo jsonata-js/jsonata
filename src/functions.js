@@ -1144,8 +1144,10 @@ const functions = (() => {
             }
         } else {
             pic.integerPartGroupingPositions.forEach(function (pos) {
-                stringValue = [stringValue.slice(0, decimalPos - pos), grouping_separator, stringValue.slice(decimalPos - pos)].join('');
-                decimalPos++;
+                if (decimalPos > pos) {
+                    stringValue = [stringValue.slice(0, decimalPos - pos), grouping_separator, stringValue.slice(decimalPos - pos)].join('');
+                    decimalPos++;
+                }
             });
         }
         // bullet 11:

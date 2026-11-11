@@ -1,0 +1,58 @@
+[
+    {
+        "description": "#851: irregular grouping with fewer integer digits than grouping positions",
+        "expr": "[0, 5, 1234, 12345, 123456].$formatNumber($, '#,##,##0.00')",
+        "dataset": null,
+        "bindings": {},
+        "result": ["0.00", "5.00", "1,234.00", "12,345.00", "1,23,456.00"]
+    },
+    {
+        "description": "#851: irregular grouping at integer boundaries without a fractional part",
+        "expr": "[0, 5, 999, 1000, 99999, 100000, 1234567].$formatNumber($, '#,##,##0')",
+        "dataset": null,
+        "bindings": {},
+        "result": ["0", "5", "999", "1,000", "99,999", "1,00,000", "12,34,567"]
+    },
+    {
+        "description": "#851: irregular grouping of negative numbers",
+        "expr": "[-5, -12345, -123456].$formatNumber($, '#,##,##0.00')",
+        "dataset": null,
+        "bindings": {},
+        "result": ["-5.00", "-12,345.00", "-1,23,456.00"]
+    },
+    {
+        "description": "#851: irregular grouping after rounding across integer boundaries",
+        "expr": "[999.999, 99999.999].$formatNumber($, '#,##,##0.00')",
+        "dataset": null,
+        "bindings": {},
+        "result": ["1,000.00", "1,00,000.00"]
+    },
+    {
+        "description": "#851: irregular grouping preserves required leading zeros",
+        "expr": "$formatNumber(5, '0,00,000.00')",
+        "dataset": null,
+        "bindings": {},
+        "result": "0,00,005.00"
+    },
+    {
+        "description": "#851: irregular grouping with a prefix",
+        "expr": "[5, 12345].$formatNumber($, 'USD #,##,##0.00')",
+        "dataset": null,
+        "bindings": {},
+        "result": ["USD 5.00", "USD 12,345.00"]
+    },
+    {
+        "description": "#851: irregular grouping with custom separators",
+        "expr": "[5, 12345, 123456].$formatNumber($, '#.##.##0,00', {'grouping-separator': '.', 'decimal-separator': ','})",
+        "dataset": null,
+        "bindings": {},
+        "result": ["5,00", "12.345,00", "1.23.456,00"]
+    },
+    {
+        "description": "#851: irregular grouping with an empty optional integer part",
+        "expr": "$formatNumber(0.5, '#,##,###.00')",
+        "dataset": null,
+        "bindings": {},
+        "result": ".50"
+    }
+]
