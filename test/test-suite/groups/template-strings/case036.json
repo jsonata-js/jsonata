@@ -1,0 +1,12 @@
+{
+    "description": "sort key is compared as a string",
+    "expr": "Account.Order.Product^(>«{Price}»).`Product Name`",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        "Bowler Hat",
+        "Bowler Hat",
+        "Trilby hat",
+        "Cloak"
+    ]
+}
