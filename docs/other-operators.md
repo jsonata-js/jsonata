@@ -13,6 +13,23 @@ __Example__
 
 `"Hello" & "World"` => `"HelloWorld"`
 
+## `«...»` (Template string)
+
+A template string builds a string from literal text and embedded expressions. It is enclosed in guillemets (`«` and `»`), and each embedded expression is written in curly braces. Any expression can go inside the braces, including paths, function calls and object constructors. A sequence of expressions separated by `;` needs its own parentheses, e.g. `«{($x := 1; $x + 1)}»`.
+
+The result is always a string. Each embedded value is cast to string using the same rules as the `&` operator, so a missing value gives an empty string. Empty braces `{}` add nothing.
+
+The text supports the same backslash escapes as string literals. Use `\{`, `\}`, `\«` and `\»` for literal braces and guillemets.
+
+__Examples__
+
+- `«Hello {FirstName} {Surname}»` is the same as `"Hello " & FirstName & " " & Surname`
+- `«{1 + 2} apples»` => `"3 apples"`
+- `«{missing}»` => `""`
+- `«\{literal\}»` => `"{literal}"`
+
+On Windows, `«` and `»` can be typed with Alt+0171 and Alt+0187 on the numeric keypad. On a Mac with a US layout, use Option+\ and Option+Shift+\. On Linux, use the compose key followed by `<<` or `>>`.
+
 ## `? :` (Conditional)
 
 The conditional ternary operator is used to evaluate one of two alternative expressions based on the result of a predicate (test) condition.  The operator takes the form:
