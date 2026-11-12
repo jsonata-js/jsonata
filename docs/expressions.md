@@ -38,6 +38,7 @@ __Examples__
     <div>"50true"</div>
   </div>
 
+See also [template strings](other-operators#-template-string), e.g. `«{FirstName} {Surname}»`, which do the same job with less punctuation.
 
 
 ## Numeric expressions

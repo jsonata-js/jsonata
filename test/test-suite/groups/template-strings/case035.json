@@ -1,0 +1,7 @@
+{
+    "description": "template in a predicate",
+    "expr": "Account.Order[«{OrderID}» = \"order104\"].OrderID",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": "order104"
+}

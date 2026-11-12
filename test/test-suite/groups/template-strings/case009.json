@@ -1,0 +1,7 @@
+{
+    "description": "object value",
+    "expr": "«{foo.blah[0]}»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "{\"baz\":{\"fud\":\"hello\"}}"
+}

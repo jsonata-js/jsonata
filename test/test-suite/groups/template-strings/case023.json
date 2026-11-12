@@ -1,0 +1,9 @@
+{
+    "description": "templates as object key and value",
+    "expr": "{«key_{bar}»: «value {foo.bar}»}",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": {
+        "key_98": "value 42"
+    }
+}

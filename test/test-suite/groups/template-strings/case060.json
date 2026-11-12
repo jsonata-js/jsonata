@@ -1,0 +1,7 @@
+{
+    "description": "backslash at end of input",
+    "expr": "«abc\\",
+    "dataset": null,
+    "bindings": {},
+    "code": "S0103"
+}

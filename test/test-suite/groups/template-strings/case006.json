@@ -1,0 +1,6 @@
+{
+    "expr": "«flag: {true}, other: {false}»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "flag: true, other: false"
+}

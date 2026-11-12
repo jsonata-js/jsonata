@@ -1,0 +1,12 @@
+{
+    "description": "focus variable bound earlier in the path",
+    "expr": "Account.Order@$o.$o.Product.«{$o.OrderID}/{SKU}»",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        "order103/0406654608",
+        "order103/0406634348",
+        "order104/040657863",
+        "order104/0406654603"
+    ]
+}

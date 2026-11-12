@@ -1,0 +1,6 @@
+{
+    "expr": "«{$substring(?, 0, 2)(\"hello\")}»",
+    "dataset": null,
+    "bindings": {},
+    "result": "he"
+}

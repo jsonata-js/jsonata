@@ -1,0 +1,7 @@
+{
+    "description": "> directly after a <<...>> template",
+    "expr": "<<{bar}>>>\"99\"",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": false
+}

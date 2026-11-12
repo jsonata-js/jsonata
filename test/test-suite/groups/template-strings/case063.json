@@ -1,0 +1,7 @@
+{
+    "description": "comparing two <<...>> templates",
+    "expr": "<<a>><<<b>>",
+    "dataset": null,
+    "bindings": {},
+    "result": true
+}

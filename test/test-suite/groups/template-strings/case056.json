@@ -1,0 +1,7 @@
+{
+    "description": "less-than before a <<...>> template, with a space",
+    "expr": "\"a\" < <<b>>",
+    "dataset": null,
+    "bindings": {},
+    "result": true
+}

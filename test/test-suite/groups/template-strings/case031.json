@@ -1,0 +1,7 @@
+{
+    "description": "unterminated template",
+    "expr": "«abc {bar}",
+    "dataset": "dataset0",
+    "bindings": {},
+    "code": "S0107"
+}

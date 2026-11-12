@@ -1,0 +1,7 @@
+{
+    "description": "numbers are formatted like $string",
+    "expr": "«{0.1 + 0.2} {1e21} {22/7} {1e-7}»",
+    "dataset": null,
+    "bindings": {},
+    "result": "0.3 1e+21 3.14285714285714 1e-7"
+}

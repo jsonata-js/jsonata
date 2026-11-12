@@ -802,6 +802,123 @@ describe("Tests that are specific to a Javascript runtime", () => {
         });
     });
 
+    describe("template string: syntax error inside braces", function() {
+        it("should throw error", function() {
+            expect(function() {
+                jsonata("«a {1 +} b»");
+            })
+                .to.throw()
+                .to.deep.contain({ position: 8, code: "S0211", token: "}" });
+        });
+    });
+
+    describe("template string: unclosed function call inside braces", function() {
+        it("should throw error", function() {
+            expect(function() {
+                jsonata("«a {foo(} b»");
+            })
+                .to.throw()
+                .to.deep.contain({ position: 9, code: "S0211", token: "}" });
+        });
+    });
+
+    describe("template string: syntax error inside nested template", function() {
+        it("should throw error", function() {
+            expect(function() {
+                jsonata("«a {«b {1 +}»} c»");
+            })
+                .to.throw()
+                .to.deep.contain({ position: 12, code: "S0211", token: "}" });
+        });
+    });
+
+    describe("template string: syntax error in second interpolation", function() {
+        it("should throw error", function() {
+            expect(function() {
+                jsonata("«a {x} b {y:} c»");
+            })
+                .to.throw()
+                .to.deep.contain({ position: 12, code: "S0202", token: ":" });
+        });
+    });
+
+    describe("template string: unterminated, starting mid-expression", function() {
+        it("should throw error", function() {
+            expect(function() {
+                jsonata("x & «abc");
+            })
+                .to.throw()
+                .to.deep.contain({ position: 8, code: "S0107" });
+        });
+    });
+
+    describe("template string: illegal escape", function() {
+        it("should throw error", function() {
+            expect(function() {
+                jsonata("«a\\qb»");
+            })
+                .to.throw()
+                .to.deep.contain({ position: 3, code: "S0103", token: "q" });
+        });
+    });
+
+    describe("template string: number formatting matches &", function() {
+        it("should return result object", async function() {
+            var result = await jsonata("«{-0} {12345678901234567890}»").evaluate();
+            var expected = await jsonata('"" & -0 & " " & 12345678901234567890').evaluate();
+            expect(result).to.equal(expected);
+            expect(result).to.equal("0 12345678901234567000");
+        });
+    });
+
+    describe("template string with 1000 interpolations", function() {
+        it("should return the same as the & chain", async function() {
+            var template = "«";
+            var chain = '""';
+            for (var i = 0; i < 1000; i++) {
+                template += "x{a}";
+                chain += ' & "x" & a';
+            }
+            template += "»";
+            var result = await jsonata(template).evaluate({a: 1});
+            var expected = await jsonata(chain).evaluate({a: 1});
+            expect(result).to.equal(expected);
+            expect(result.length).to.equal(2000);
+        });
+    });
+
+    describe("template string with 20000 interpolations", function() {
+        it("should not grow the stack with the number of parts", async function() {
+            var template = "<<" + "x{a}".repeat(20000) + ">>";
+            var result = await jsonata(template).evaluate({a: 1});
+            expect(result).to.equal("x1".repeat(20000));
+        });
+    });
+
+    describe("template string: evaluation error reports the embedded expression, not an & operator", function() {
+        it("should throw error", function() {
+            return expect(jsonata("«{1/0}»").evaluate())
+                .to.eventually.be.rejected.to.deep.contain({ position: 2, code: "D3001", token: "{" });
+        });
+    });
+
+    describe("template string: evaluation error reports the embedded expression that failed", function() {
+        it("should throw error", function() {
+            return expect(jsonata("«{1} and {2} and {1/0}»").evaluate())
+                .to.eventually.be.rejected.to.deep.contain({ position: 18, code: "D3001", token: "{" });
+        });
+    });
+
+    describe("template string: unescaped } in the text", function() {
+        it("should throw error", function() {
+            expect(function() {
+                jsonata("«{a}}»");
+            })
+                .to.throw()
+                .to.deep.contain({ position: 5, code: "S0108", token: "}" });
+        });
+    });
+
     describe("Functions - $match", function() {
         describe('$match("test escape \\\\", /\\\\/)', function() {
             it("should find \\", async function() {

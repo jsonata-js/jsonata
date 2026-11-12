@@ -61,6 +61,9 @@ const parser = (() => {
         't': '\t'
     };
 
+    // opening and closing delimiters of template strings
+    var TEMPLATE_DELIMITERS = {'\u00AB': '\u00BB', '<<': '>>'};
+
     // Tokenizer (lexer) - invoked by the parser to return one token at a time
     var tokenizer = function (path) {
         var position = 0;
@@ -131,7 +134,96 @@ const parser = (() => {
             };
         };
 
+        // decode the escape sequence whose '\' has just been scanned; position is on the escaped character.
+        // 'extra' lists additional characters that may be escaped as themselves
+        var scanEscape = function (extra) {
+            var currentChar = path.charAt(position);
+            if (Object.prototype.hasOwnProperty.call(escapes, currentChar)) {
+                return escapes[currentChar];
+            }
+            if (currentChar !== '' && extra && extra.indexOf(currentChar) > -1) {
+                return currentChar;
+            }
+            if (currentChar === 'u') {
+                // \u should be followed by 4 hex digits
+                var octets = path.substr(position + 1, 4);
+                if (/^[0-9a-fA-F]{4}$/.test(octets)) {
+                    position += 4;
+                    return String.fromCharCode(parseInt(octets, 16));
+                }
+                throw {
+                    code: "S0104",
+                    stack: (new Error()).stack,
+                    position: position
+                };
+            }
+            // illegal escape sequence
+            throw {
+                code: "S0103",
+                stack: (new Error()).stack,
+                position: position,
+                token: currentChar
+            };
+        };
+
+        // Template strings «...» and <<...>> are tokenized as:
+        //   (template) [ (template-text) | '{' <tokens> '}' ]* (template-end)
+        // The tokenizer keeps a stack with one entry per open template (they can nest inside {}).
+        // Each entry counts the unmatched '{' in the current embedded expression; when it is
+        // zero the tokenizer is scanning literal text, otherwise it is scanning JSONata tokens.
+        // The count only changes where '{' and '}' are lexed as operators (see below), and the
+        // '{' that starts an embedded expression is lexed that way too, taking the count to one.
+        // Keeping this state here means every caller of the lexer (including remainingTokens)
+        // gets the right tokens without having to know about templates.
+        // Reaching the end of input inside template text is not an error here: the lexer returns
+        // null like it does at the end of any expression, and the parser reports the unterminated
+        // template (S0107), so that it can be recovered from in recover mode.
+        var TEMPLATE_ESCAPES = '{}<>\u00AB\u00BB';
+        var templates = [];
+
+        var isTemplateClose = function (template) {
+            // the first '>>' closes a <<...>> template, so '<<a>>>b' is '<<a>>' followed by '>'
+            return path.substr(position, template.close.length) === template.close;
+        };
+
+        var nextTemplateToken = function (template) {
+            if (position >= length) {
+                return null;
+            }
+            if (isTemplateClose(template)) {
+                position += template.close.length;
+                templates.pop();
+                return create('template-end', template.close);
+            }
+            // literal text up to the next unescaped '{' or the closing delimiter
+            var text = '';
+            while (position < length && path.charAt(position) !== '{' && !isTemplateClose(template)) {
+                var currentChar = path.charAt(position);
+                if (currentChar === '\\') {
+                    position++;
+                    text += scanEscape(TEMPLATE_ESCAPES);
+                } else if (currentChar === '}') {
+                    // a literal '}' must be escaped, so that a stray brace is reported rather than kept as text
+                    throw {
+                        code: "S0108",
+                        stack: (new Error()).stack,
+                        position: position + 1,
+                        token: currentChar
+                    };
+                } else {
+                    text += currentChar;
+                }
+                position++;
+            }
+            return create('template-text', text);
+        };
+
         var next = function (prefix) {
+            var template = templates[templates.length - 1];
+            if (template && template.depth === 0 && path.charAt(position) !== '{') {
+                // template text; a '{' falls through to be lexed as an operator, starting an embedded expression
+                return nextTemplateToken(template);
+            }
             if (position >= length) return null;
             var currentChar = path.charAt(position);
             // skip whitespace
@@ -163,6 +255,14 @@ const parser = (() => {
             if (prefix !== true && currentChar === '/') {
                 position++;
                 return create('regex', scanRegex());
+            }
+            // test for the start of a template string: '«', or '<<' in prefix position
+            // (in infix position '<' is the less-than operator, so "a"<<<b>> is "a" < <<b>>)
+            var open = currentChar === '<' ? (prefix === true ? '' : path.substr(position, 2)) : currentChar;
+            if (Object.prototype.hasOwnProperty.call(TEMPLATE_DELIMITERS, open)) {
+                position += open.length;
+                templates.push({close: TEMPLATE_DELIMITERS[open], depth: 0});
+                return create('template', open);
             }
             // handle double-char operators
             if (currentChar === '.' && path.charAt(position + 1) === '.') {
@@ -213,6 +313,15 @@ const parser = (() => {
             // test for single char operators
             if (Object.prototype.hasOwnProperty.call(operators, currentChar)) {
                 position++;
+                if (template) {
+                    // track braces inside an embedded expression; the '}' that brings the depth
+                    // back to zero closes the expression and resumes the template text
+                    if (currentChar === '{') {
+                        template.depth++;
+                    } else if (currentChar === '}') {
+                        template.depth--;
+                    }
+                }
                 return create('operator', currentChar);
             }
             // test for string literals
@@ -225,33 +334,7 @@ const parser = (() => {
                     currentChar = path.charAt(position);
                     if (currentChar === '\\') { // escape sequence
                         position++;
-                        currentChar = path.charAt(position);
-                        if (Object.prototype.hasOwnProperty.call(escapes, currentChar)) {
-                            qstr += escapes[currentChar];
-                        } else if (currentChar === 'u') {
-                            // \u should be followed by 4 hex digits
-                            var octets = path.substr(position + 1, 4);
-                            if (/^[0-9a-fA-F]+$/.test(octets)) {
-                                var codepoint = parseInt(octets, 16);
-                                qstr += String.fromCharCode(codepoint);
-                                position += 4;
-                            } else {
-                                throw {
-                                    code: "S0104",
-                                    stack: (new Error()).stack,
-                                    position: position
-                                };
-                            }
-                        } else {
-                            // illegal escape sequence
-                            throw {
-                                code: "S0103",
-                                stack: (new Error()).stack,
-                                position: position,
-                                token: currentChar
-                            };
-
-                        }
+                        qstr += scanEscape();
                     } else if (currentChar === quoteType) {
                         position++;
                         return create('string', qstr);
@@ -471,6 +554,11 @@ const parser = (() => {
                     type = "regex";
                     symbol = symbol_table["(regex)"];
                     break;
+                case 'template':
+                case 'template-text':
+                case 'template-end':
+                    symbol = symbol_table["(" + type + ")"];
+                    break;
                 /* istanbul ignore next */
                 default:
                     return handleError({
@@ -488,11 +576,14 @@ const parser = (() => {
             return node;
         };
 
+        // prefix operators whose nud parses an operand, so the token after them is in prefix position
+        var startsOperand = {'-': true, '(': true, '[': true, '{': true, '|': true};
+
         // Pratt's algorithm
         var expression = function (rbp) {
             var left;
             var t = node;
-            advance(null, true);
+            advance(null, !(t.type === 'operator' && startsOperand[t.value]));
             left = t.nud();
             while (rbp < node.lbp) {
                 t = node;
@@ -556,6 +647,8 @@ const parser = (() => {
         symbol("]");
         symbol("}");
         symbol(".."); // range operator
+        symbol("(template-text)"); // only valid inside a template string
+        symbol("(template-end)"); //
         infix("."); // map operator
         infix("+"); // numeric addition
         infix("-"); // numeric subtraction
@@ -590,6 +683,43 @@ const parser = (() => {
             this.then = left;
             this.else = expression(0);
             return this;
+        });
+
+        // template string: «text {expr} text» or <<text {expr} text>>
+        // produces a 'template' node whose parts are, in order, literal text (plain strings) and
+        // embedded expressions ({expression, position}, where position is that of the opening '{')
+        prefix("(template)", function () {
+            var errorCount = errors.length;
+            this.type = 'template';
+            this.parts = [];
+            for (;;) {
+                if (node.id === '(template-text)') {
+                    this.parts.push(node.value);
+                    advance();
+                } else if (node.id === '{') {
+                    var position = node.position;
+                    advance();
+                    if (node.id !== '}') { // empty {} contributes nothing
+                        this.parts.push({expression: expression(0), position: position});
+                    }
+                    advance('}');
+                } else if (node.id === '(template-end)') {
+                    advance(null, true);
+                    return this;
+                } else if (node.id === '(end)' && errors.length === errorCount) {
+                    // the input ended inside the template text
+                    handleError({
+                        code: "S0107",
+                        position: node.position,
+                        value: TEMPLATE_DELIMITERS[this.value]
+                    });
+                    return this;
+                } else {
+                    // recover mode only: an error inside {} has already been recorded and the
+                    // remaining tokens consumed, so return what has been parsed so far
+                    return this;
+                }
+            }
         });
 
         infixr("(error)", 10, function (left) {
@@ -1285,6 +1415,17 @@ const parser = (() => {
                     };
                     var body = processAST(expr.body);
                     result.body = tailCallOptimize(body);
+                    break;
+                case 'template':
+                    result = {type: expr.type, value: expr.value, position: expr.position};
+                    result.parts = expr.parts.map(function (part) {
+                        if (typeof part === 'string') {
+                            return part; // literal text
+                        }
+                        var partAST = processAST(part.expression);
+                        pushAncestry(result, partAST);
+                        return {expression: partAST, position: part.position};
+                    });
                     break;
                 case 'condition':
                     result = {type: expr.type, position: expr.position};

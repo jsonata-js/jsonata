@@ -463,6 +463,170 @@ describe('Invoke parser with incomplete expression', function() {
         });
     });
 
+    describe('«a {x;} b»', function() {
+        it('should return ast', function() {
+            var expr = jsonata('«a {x;} b»', { recover: true });
+            var ast = expr.ast();
+            var expected_ast = {
+                "type": "template",
+                "value": "«",
+                "position": 1,
+                "parts": [
+                    "a ",
+                    {
+                        "expression": {
+                            "type": "path",
+                            "steps": [
+                                {
+                                    "value": "x",
+                                    "type": "name",
+                                    "position": 5
+                                }
+                            ]
+                        },
+                        "position": 4
+                    }
+                ]
+            };
+            var errors = expr.errors();
+            var expected_errors = [
+                {
+                    "code": "S0202",
+                    "position": 6,
+                    "token": ";",
+                    "value": "}",
+                    "remaining": [
+                        {
+                            "type": "operator",
+                            "value": ";",
+                            "position": 6
+                        },
+                        {
+                            "type": "operator",
+                            "value": "}",
+                            "position": 7
+                        },
+                        {
+                            "type": "template-text",
+                            "value": " b",
+                            "position": 9
+                        },
+                        {
+                            "type": "template-end",
+                            "value": "»",
+                            "position": 10
+                        }
+                    ]
+                }
+            ];
+            assert.deepEqual(ast, expected_ast);
+            assert.deepEqual(errors, expected_errors);
+        });
+    });
+
+    describe('«abc', function() {
+        it('should return ast', function() {
+            var expr = jsonata('«abc', { recover: true });
+            var ast = expr.ast();
+            var expected_ast = {
+                "type": "template",
+                "value": "«",
+                "position": 1,
+                "parts": ["abc"]
+            };
+            var errors = expr.errors();
+            var expected_errors = [
+                {
+                    "code": "S0107",
+                    "position": 4,
+                    "value": "»",
+                    "remaining": []
+                }
+            ];
+            assert.deepEqual(ast, expected_ast);
+            assert.deepEqual(errors, expected_errors);
+        });
+    });
+
+    describe('«Hello {name}', function() {
+        it('should return ast', function() {
+            var expr = jsonata('«Hello {name}', { recover: true });
+            var ast = expr.ast();
+            var expected_ast = {
+                "type": "template",
+                "value": "«",
+                "position": 1,
+                "parts": [
+                    "Hello ",
+                    {
+                        "expression": {
+                            "type": "path",
+                            "steps": [
+                                {
+                                    "value": "name",
+                                    "type": "name",
+                                    "position": 12
+                                }
+                            ]
+                        },
+                        "position": 8
+                    }
+                ]
+            };
+            var errors = expr.errors();
+            var expected_errors = [
+                {
+                    "code": "S0107",
+                    "position": 13,
+                    "value": "»",
+                    "remaining": []
+                }
+            ];
+            assert.deepEqual(ast, expected_ast);
+            assert.deepEqual(errors, expected_errors);
+        });
+    });
+
+    describe('«a {x;} b', function() {
+        it('should record the error inside the braces without throwing', function() {
+            var expr = jsonata('«a {x;} b', { recover: true });
+            var errors = expr.errors().map(err => ({ code: err.code, position: err.position }));
+            assert.deepEqual(errors, [{ code: "S0202", position: 6 }]);
+        });
+    });
+
+    describe('<<a {«b', function() {
+        it('should report the unterminated inner template and the missing }', function() {
+            var expr = jsonata('<<a {«b', { recover: true });
+            var errors = expr.errors().map(err => ({ code: err.code, position: err.position, value: err.value }));
+            assert.deepEqual(errors, [
+                { code: "S0107", position: 7, value: "»" },
+                { code: "S0203", position: 7, value: "}" }
+            ]);
+        });
+    });
+
+    describe('«a {+} b»', function() {
+        it('should recover from an invalid expression inside a closed template', function() {
+            var expr = jsonata('«a {+} b»', { recover: true });
+            var errors = expr.errors().map(err => ({ code: err.code, position: err.position, token: err.token }));
+            assert.deepEqual(errors, [{ code: "S0211", position: 5, token: "+" }]);
+        });
+    });
+
+    describe('«s3://{bucket;}/x»', function() {
+        it('should tokenize the rest of the template as text, not as a regex', function() {
+            var expr = jsonata('«s3://{bucket;}/x»', { recover: true });
+            var errors = expr.errors();
+            assert.equal(errors.length, 1);
+            assert.equal(errors[0].code, "S0202");
+            assert.deepEqual(errors[0].remaining.slice(-2), [
+                { type: "template-text", value: "/x", position: 17 },
+                { type: "template-end", value: "»", position: 18 }
+            ]);
+        });
+    });
+
     describe('An expression with syntax error should not be executable', function() {
         describe('Account.', function() {
             it('should return ast', function() {

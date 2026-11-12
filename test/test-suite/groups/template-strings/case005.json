@@ -1,0 +1,7 @@
+{
+    "description": "a lone number is still a string",
+    "expr": "«{bar}»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "98"
+}

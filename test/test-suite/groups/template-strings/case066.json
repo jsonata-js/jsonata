@@ -1,0 +1,7 @@
+{
+    "description": "text ending in > without an escape is an error",
+    "expr": "<<<li>{bar}</li>>>",
+    "dataset": "dataset0",
+    "bindings": {},
+    "code": "S0207"
+}

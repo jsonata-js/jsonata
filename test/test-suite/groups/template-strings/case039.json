@@ -1,0 +1,6 @@
+{
+    "expr": "«x{bar}» ~> $length()",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": 3
+}
