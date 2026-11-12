@@ -871,6 +871,22 @@ describe("Tests that are specific to a Javascript runtime", () => {
         });
     });
 
+    describe("template string with 1000 interpolations", function() {
+        it("should return the same as the & chain", async function() {
+            var template = "«";
+            var chain = '""';
+            for (var i = 0; i < 1000; i++) {
+                template += "x{a}";
+                chain += ' & "x" & a';
+            }
+            template += "»";
+            var result = await jsonata(template).evaluate({a: 1});
+            var expected = await jsonata(chain).evaluate({a: 1});
+            expect(result).to.equal(expected);
+            expect(result.length).to.equal(2000);
+        });
+    });
+
     describe("Functions - $match", function() {
         describe('$match("test escape \\\\", /\\\\/)', function() {
             it("should find \\", async function() {
