@@ -802,6 +802,66 @@ describe("Tests that are specific to a Javascript runtime", () => {
         });
     });
 
+    describe("template string: syntax error inside braces", function() {
+        it("should throw error", function() {
+            expect(function() {
+                jsonata("«a {1 +} b»");
+            })
+                .to.throw()
+                .to.deep.contain({ position: 8, code: "S0211", token: "}" });
+        });
+    });
+
+    describe("template string: unclosed function call inside braces", function() {
+        it("should throw error", function() {
+            expect(function() {
+                jsonata("«a {foo(} b»");
+            })
+                .to.throw()
+                .to.deep.contain({ position: 9, code: "S0211", token: "}" });
+        });
+    });
+
+    describe("template string: syntax error inside nested template", function() {
+        it("should throw error", function() {
+            expect(function() {
+                jsonata("«a {«b {1 +}»} c»");
+            })
+                .to.throw()
+                .to.deep.contain({ position: 12, code: "S0211", token: "}" });
+        });
+    });
+
+    describe("template string: syntax error in second interpolation", function() {
+        it("should throw error", function() {
+            expect(function() {
+                jsonata("«a {x} b {y:} c»");
+            })
+                .to.throw()
+                .to.deep.contain({ position: 12, code: "S0202", token: ":" });
+        });
+    });
+
+    describe("template string: unterminated, starting mid-expression", function() {
+        it("should throw error", function() {
+            expect(function() {
+                jsonata("x & «abc");
+            })
+                .to.throw()
+                .to.deep.contain({ position: 8, code: "S0107" });
+        });
+    });
+
+    describe("template string: illegal escape", function() {
+        it("should throw error", function() {
+            expect(function() {
+                jsonata("«a\\qb»");
+            })
+                .to.throw()
+                .to.deep.contain({ position: 3, code: "S0103", token: "q" });
+        });
+    });
+
     describe("Functions - $match", function() {
         describe('$match("test escape \\\\", /\\\\/)', function() {
             it("should find \\", async function() {
