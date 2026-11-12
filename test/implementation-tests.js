@@ -887,6 +887,38 @@ describe("Tests that are specific to a Javascript runtime", () => {
         });
     });
 
+    describe("template string with 20000 interpolations", function() {
+        it("should not grow the stack with the number of parts", async function() {
+            var template = "<<" + "x{a}".repeat(20000) + ">>";
+            var result = await jsonata(template).evaluate({a: 1});
+            expect(result).to.equal("x1".repeat(20000));
+        });
+    });
+
+    describe("template string: evaluation error reports the embedded expression, not an & operator", function() {
+        it("should throw error", function() {
+            return expect(jsonata("«{1/0}»").evaluate())
+                .to.eventually.be.rejected.to.deep.contain({ position: 2, code: "D3001", token: "{" });
+        });
+    });
+
+    describe("template string: evaluation error reports the embedded expression that failed", function() {
+        it("should throw error", function() {
+            return expect(jsonata("«{1} and {2} and {1/0}»").evaluate())
+                .to.eventually.be.rejected.to.deep.contain({ position: 18, code: "D3001", token: "{" });
+        });
+    });
+
+    describe("template string: unescaped } in the text", function() {
+        it("should throw error", function() {
+            expect(function() {
+                jsonata("«{a}}»");
+            })
+                .to.throw()
+                .to.deep.contain({ position: 5, code: "S0108", token: "}" });
+        });
+    });
+
     describe("Functions - $match", function() {
         describe('$match("test escape \\\\", /\\\\/)', function() {
             it("should find \\", async function() {

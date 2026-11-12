@@ -1,0 +1,15 @@
+{
+    "description": "templates as the first item in a block, array and object constructor",
+    "expr": "[(<<a>>), [<<b>>], {<<c>>: <<d>>}]",
+    "dataset": null,
+    "bindings": {},
+    "result": [
+        "a",
+        [
+            "b"
+        ],
+        {
+            "c": "d"
+        }
+    ]
+}

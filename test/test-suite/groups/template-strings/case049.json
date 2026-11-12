@@ -1,0 +1,7 @@
+{
+    "description": "angle-bracket delimiters",
+    "expr": "<<Hello {bar}!>>",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "Hello 98!"
+}

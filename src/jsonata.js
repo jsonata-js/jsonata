@@ -86,6 +86,9 @@ var jsonata = (function() {
             case 'condition':
                 result = await evaluateCondition(expr, input, environment);
                 break;
+            case 'template':
+                result = await evaluateTemplate(expr, input, environment);
+                break;
             case 'block':
                 result = await evaluateBlock(expr, input, environment);
                 break;
@@ -888,18 +891,44 @@ var jsonata = (function() {
      * @returns {string|*} Concatenated string
      */
     function evaluateStringConcat(lhs, rhs) {
-        var result;
+        return castString(lhs).concat(castString(rhs));
+    }
 
-        var lstr = '';
-        var rstr = '';
-        if (typeof lhs !== 'undefined') {
-            lstr = fn.string(lhs);
-        }
-        if (typeof rhs !== 'undefined') {
-            rstr = fn.string(rhs);
-        }
+    /**
+     * Cast a value to string for concatenation, as done by the & operator and template strings
+     * @param {Object} value - value to cast
+     * @returns {string} the empty string if value is undefined, otherwise the result of $string(value)
+     */
+    function castString(value) {
+        return typeof value === 'undefined' ? '' : fn.string(value);
+    }
 
-        result = lstr.concat(rstr);
+    /**
+     * Evaluate template string against input data
+     * Literal text is appended as is; each embedded expression is evaluated and cast like the & operator
+     * @param {Object} expr - JSONata expression
+     * @param {Object} input - Input data to evaluate against
+     * @param {Object} environment - Environment
+     * @returns {string} Evaluated template
+     */
+    async function evaluateTemplate(expr, input, environment) {
+        var result = '';
+        for (var ii = 0; ii < expr.parts.length; ii++) {
+            var part = expr.parts[ii];
+            if (typeof part === 'string') {
+                result += part;
+                continue;
+            }
+            var value = await evaluate(part.expression, input, environment);
+            try {
+                result += castString(value);
+            } catch (err) {
+                // point at the embedded expression whose value could not be cast
+                err.position = part.position;
+                err.token = '{';
+                throw err;
+            }
+        }
         return result;
     }
 
@@ -1992,7 +2021,8 @@ var jsonata = (function() {
         "S0104": "The escape sequence \\u must be followed by 4 hex digits",
         "S0105": "Quoted property name must be terminated with a backquote (`)",
         "S0106": "Comment has no closing tag",
-        "S0107": "Template string must be terminated with »",
+        "S0107": "Template string must be terminated with {{value}}",
+        "S0108": "A } in template string text must be escaped as \\}",
         "S0201": "Syntax error: {{token}}",
         "S0202": "Expected {{value}}, got {{token}}",
         "S0203": "Expected {{value}} before end of expression",

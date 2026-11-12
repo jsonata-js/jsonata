@@ -1,0 +1,7 @@
+{
+    "description": "nested templates mixing delimiters",
+    "expr": "<<outer {«inner {bar}»} and {<<x>>}>>",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "outer inner 98 and x"
+}

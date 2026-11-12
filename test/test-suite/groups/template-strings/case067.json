@@ -1,0 +1,7 @@
+{
+    "description": "unescaped } in template text",
+    "expr": "«a}b»",
+    "dataset": null,
+    "bindings": {},
+    "code": "S0108"
+}

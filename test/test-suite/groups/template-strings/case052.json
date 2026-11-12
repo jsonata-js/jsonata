@@ -1,0 +1,7 @@
+{
+    "description": ">> is literal text inside «...»",
+    "expr": "«a >> b {bar}»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "a >> b 98"
+}

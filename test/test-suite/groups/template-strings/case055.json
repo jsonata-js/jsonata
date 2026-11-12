@@ -1,0 +1,7 @@
+{
+    "description": ">> in a lambda signature inside braces is not a closing delimiter",
+    "expr": "<<n={λ($x)<a<n>>{$x}([1,2])}>>",
+    "dataset": null,
+    "bindings": {},
+    "result": "n=[1,2]"
+}
