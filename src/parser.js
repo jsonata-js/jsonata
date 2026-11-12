@@ -484,7 +484,7 @@ const parser = (() => {
             }
         };
 
-        var advance = function (id, infix) {
+        var advance = function (id, infix, template) {
             if (id && node.id !== id) {
                 var code;
                 if (node.id === '(end)') {
@@ -501,7 +501,7 @@ const parser = (() => {
                 };
                 return handleError(err);
             }
-            var next_token = lexer(infix);
+            var next_token = lexer(infix, template);
             if (next_token === null) {
                 node = symbol_table["(end)"];
                 node.position = source.length;
@@ -535,6 +535,9 @@ const parser = (() => {
                     type = "regex";
                     symbol = symbol_table["(regex)"];
                     break;
+                case 'template':
+                    symbol = symbol_table["(template)"];
+                    break;
                 /* istanbul ignore next */
                 default:
                     return handleError({
@@ -549,6 +552,9 @@ const parser = (() => {
             node.value = value;
             node.type = type;
             node.position = next_token.position;
+            if (next_token.more) {
+                node.more = true;
+            }
             return node;
         };
 
@@ -654,6 +660,26 @@ const parser = (() => {
             this.then = left;
             this.else = expression(0);
             return this;
+        });
+
+        // template string - desugared into a chain of & concatenations
+        prefix("(template)", function () {
+            var result = {type: 'string', value: this.value, position: this.position};
+            var chunk = this;
+            while (chunk.more) {
+                var position = node.position;
+                advance('{');
+                if (node.id !== '}') {
+                    result = {type: 'binary', value: '&', position: position, lhs: result, rhs: expression(0)};
+                }
+                chunk = advance('}', false, true);
+                if (chunk.value !== '') {
+                    var str = {type: 'string', value: chunk.value, position: chunk.position};
+                    result = {type: 'binary', value: '&', position: chunk.position, lhs: result, rhs: str};
+                }
+                advance(null, true);
+            }
+            return result;
         });
 
         infixr("(error)", 10, function (left) {
