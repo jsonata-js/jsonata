@@ -463,6 +463,71 @@ describe('Invoke parser with incomplete expression', function() {
         });
     });
 
+    describe('«a {x;} b»', function() {
+        it('should return ast', function() {
+            var expr = jsonata('«a {x;} b»', { recover: true });
+            var ast = expr.ast();
+            var expected_ast = {
+                "type": "binary",
+                "value": "&",
+                "position": 4,
+                "lhs": {
+                    "type": "string",
+                    "value": "a ",
+                    "position": 3
+                },
+                "rhs": {
+                    "type": "path",
+                    "steps": [
+                        {
+                            "value": "x",
+                            "type": "name",
+                            "position": 5
+                        }
+                    ]
+                }
+            };
+            var errors = expr.errors();
+            var expected_errors = [
+                {
+                    "code": "S0202",
+                    "position": 6,
+                    "token": ";",
+                    "value": "}",
+                    "remaining": [
+                        {
+                            "type": "operator",
+                            "value": ";",
+                            "position": 6
+                        },
+                        {
+                            "type": "operator",
+                            "value": "}",
+                            "position": 7
+                        },
+                        {
+                            "type": "name",
+                            "value": "b»",
+                            "position": 10
+                        }
+                    ]
+                }
+            ];
+            assert.deepEqual(ast, expected_ast);
+            assert.deepEqual(errors, expected_errors);
+        });
+    });
+
+    describe('«abc', function() {
+        it('should throw error', function() {
+            expect(function() {
+                jsonata('«abc', { recover: true });
+            })
+                .to.throw()
+                .to.deep.contain({ position: 4, code: "S0107" });
+        });
+    });
+
     describe('An expression with syntax error should not be executable', function() {
         describe('Account.', function() {
             it('should return ast', function() {

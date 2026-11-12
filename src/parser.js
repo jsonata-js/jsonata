@@ -673,6 +673,9 @@ const parser = (() => {
                     result = {type: 'binary', value: '&', position: position, lhs: result, rhs: expression(0)};
                 }
                 chunk = advance('}', false, true);
+                if (chunk.type === '(error)') {
+                    break;
+                }
                 if (chunk.value !== '') {
                     var str = {type: 'string', value: chunk.value, position: chunk.position};
                     result = {type: 'binary', value: '&', position: chunk.position, lhs: result, rhs: str};
