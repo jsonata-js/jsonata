@@ -1,0 +1,7 @@
+{
+    "description": "block needs its own parentheses",
+    "expr": "«{($x := 2; $x * bar)}»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "196"
+}

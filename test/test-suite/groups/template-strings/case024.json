@@ -1,0 +1,6 @@
+{
+    "expr": "«héllo {\"wörld\"} ✓»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "héllo wörld ✓"
+}

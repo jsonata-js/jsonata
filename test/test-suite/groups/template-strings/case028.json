@@ -1,0 +1,10 @@
+{
+    "description": "template as a path step",
+    "expr": "Account.Order.«{OrderID}-{$count(Product)}»",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        "order103-2",
+        "order104-2"
+    ]
+}

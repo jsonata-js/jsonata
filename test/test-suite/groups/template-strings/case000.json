@@ -1,0 +1,7 @@
+{
+    "description": "plain text with no braces",
+    "expr": "«Hello, World»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "Hello, World"
+}

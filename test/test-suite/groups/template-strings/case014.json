@@ -1,0 +1,7 @@
+{
+    "description": "function chain",
+    "expr": "«{foo.blah.baz.fud ~> $join(\", \")}»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "hello, world"
+}

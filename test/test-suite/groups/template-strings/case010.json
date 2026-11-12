@@ -1,0 +1,7 @@
+{
+    "description": "missing value gives empty string",
+    "expr": "«[{nothing}]»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "[]"
+}

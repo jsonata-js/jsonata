@@ -1,0 +1,7 @@
+{
+    "description": "nested template",
+    "expr": "«outer {«inner {bar}»} done»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "outer inner 98 done"
+}
