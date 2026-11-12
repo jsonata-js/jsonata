@@ -131,7 +131,66 @@ const parser = (() => {
             };
         };
 
-        var next = function (prefix) {
+        var scanTemplate = function () {
+            // the opening '«' or the closing '}' of an embedded expression will have been previously scanned.
+            // read literal text up to the next unescaped '{' or '»'
+            var str = "";
+            while (position < length) {
+                var currentChar = path.charAt(position);
+                if (currentChar === '\\') { // escape sequence
+                    position++;
+                    currentChar = path.charAt(position);
+                    if (Object.prototype.hasOwnProperty.call(escapes, currentChar)) {
+                        str += escapes[currentChar];
+                    } else if ('{}«»'.indexOf(currentChar) > -1) {
+                        str += currentChar;
+                    } else if (currentChar === 'u') {
+                        // \u should be followed by 4 hex digits
+                        var octets = path.substr(position + 1, 4);
+                        if (/^[0-9a-fA-F]+$/.test(octets)) {
+                            str += String.fromCharCode(parseInt(octets, 16));
+                            position += 4;
+                        } else {
+                            throw {
+                                code: "S0104",
+                                stack: (new Error()).stack,
+                                position: position
+                            };
+                        }
+                    } else {
+                        // illegal escape sequence
+                        throw {
+                            code: "S0103",
+                            stack: (new Error()).stack,
+                            position: position,
+                            token: currentChar
+                        };
+                    }
+                } else if (currentChar === '{') {
+                    // leave the '{' to be returned as the next token
+                    var token = create('template', str);
+                    token.more = true;
+                    return token;
+                } else if (currentChar === '»') {
+                    position++;
+                    return create('template', str);
+                } else {
+                    str += currentChar;
+                }
+                position++;
+            }
+            throw {
+                code: "S0107",
+                stack: (new Error()).stack,
+                position: position
+            };
+        };
+
+        var next = function (prefix, template) {
+            if (template) {
+                // continue a template string after an embedded expression
+                return scanTemplate();
+            }
             if (position >= length) return null;
             var currentChar = path.charAt(position);
             // skip whitespace
@@ -265,6 +324,11 @@ const parser = (() => {
                     stack: (new Error()).stack,
                     position: position
                 };
+            }
+            // test for template strings
+            if (currentChar === '«') {
+                position++;
+                return scanTemplate();
             }
             // test for numbers
             var numregex = /^-?(0|([1-9][0-9]*))(\.[0-9]+)?([Ee][-+]?[0-9]+)?/;
