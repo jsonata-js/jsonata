@@ -862,6 +862,15 @@ describe("Tests that are specific to a Javascript runtime", () => {
         });
     });
 
+    describe("template string: number formatting matches &", function() {
+        it("should return result object", async function() {
+            var result = await jsonata("«{-0} {12345678901234567890}»").evaluate();
+            var expected = await jsonata('"" & -0 & " " & 12345678901234567890').evaluate();
+            expect(result).to.equal(expected);
+            expect(result).to.equal("0 12345678901234567000");
+        });
+    });
+
     describe("Functions - $match", function() {
         describe('$match("test escape \\\\", /\\\\/)', function() {
             it("should find \\", async function() {
