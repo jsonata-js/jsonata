@@ -839,8 +839,8 @@ const dateTime = (function () {
             // parse the hour and minute offsets
             // assume for now the format supplied is +hhmm
             const offset = parseInt(timezone);
-            offsetHours = Math.floor(offset / 100);
             offsetMinutes = offset % 100;
+            offsetHours = (offset - offsetMinutes) / 100;
         }
 
         var formatComponent = function (date, markerSpec) {
@@ -883,16 +883,16 @@ const dateTime = (function () {
                 // §9.8.4.6 Formatting timezones
                 const offset = offsetHours * 100 + offsetMinutes;
                 if (markerSpec.integerFormat.regular) {
-                    componentValue = _formatInteger(offset, markerSpec.integerFormat);
+                    componentValue = _formatInteger(Math.abs(offset), markerSpec.integerFormat);
                 } else {
                     const numDigits = markerSpec.integerFormat.mandatoryDigits;
                     if (numDigits === 1 || numDigits === 2) {
-                        componentValue = _formatInteger(offsetHours, markerSpec.integerFormat);
+                        componentValue = _formatInteger(Math.abs(offsetHours), markerSpec.integerFormat);
                         if (offsetMinutes !== 0) {
-                            componentValue += ':' + formatInteger(offsetMinutes, '00');
+                            componentValue += ':' + formatInteger(Math.abs(offsetMinutes), '00');
                         }
                     } else if (numDigits === 3 || numDigits === 4) {
-                        componentValue = _formatInteger(offset, markerSpec.integerFormat);
+                        componentValue = _formatInteger(Math.abs(offset), markerSpec.integerFormat);
                     } else {
                         throw {
                             code: 'D3134',
@@ -900,9 +900,7 @@ const dateTime = (function () {
                         };
                     }
                 }
-                if (offset >= 0) {
-                    componentValue = '+' + componentValue;
-                }
+                componentValue = (offset < 0 ? '-' : '+') + componentValue;
                 if (markerSpec.component === 'z') {
                     componentValue = 'GMT' + componentValue;
                 }
@@ -972,27 +970,33 @@ const dateTime = (function () {
                     res.regex += '[-+][0-9]+';
                     if (separator) {
                         res.regex += separator.character + '[0-9]+';
+                    } else if (part.integerFormat.mandatoryDigits <= 2) {
+                        res.regex += '(?::[0-9]+)?';
                     }
                     res.parse = function(value) {
                         if (part.component === 'z') {
                             value = value.substring(3); // remove the leading GMT
                         }
+                        // The sign applies to both components, including offsets such as -00:30.
+                        const sign = value.charAt(0) === '-' ? -1 : 1;
+                        value = value.substring(1);
                         let offsetHours = 0, offsetMinutes = 0;
-                        if (separator) {
-                            offsetHours = Number.parseInt(value.substring(0, value.indexOf(separator.character)));
-                            offsetMinutes = Number.parseInt(value.substring(value.indexOf(separator.character) + 1));
+                        const separatorPos = value.indexOf(separator ? separator.character : ':');
+                        if (separatorPos !== -1) {
+                            offsetHours = Number.parseInt(value.substring(0, separatorPos));
+                            offsetMinutes = Number.parseInt(value.substring(separatorPos + 1));
                         } else {
                             // depends on number of digits
-                            const numdigits = value.length - 1;
+                            const numdigits = value.length;
                             if (numdigits <= 2) {
                                 // just hour offset
                                 offsetHours = Number.parseInt(value);
                             } else {
-                                offsetHours = Number.parseInt(value.substring(0, 3));
-                                offsetMinutes = Number.parseInt(value.substring(3));
+                                offsetHours = Number.parseInt(value.substring(0, numdigits - 2));
+                                offsetMinutes = Number.parseInt(value.substring(numdigits - 2));
                             }
                         }
-                        return offsetHours * 60 + offsetMinutes;
+                        return sign * (offsetHours * 60 + offsetMinutes);
                     };
                 } else if (part.component === 'f') {
                     res.regex = '[0-9]+';
