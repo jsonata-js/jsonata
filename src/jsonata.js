@@ -181,6 +181,9 @@ var jsonata = (function() {
             // if the first step is an explicit array constructor, then just evaluate that (i.e. don't iterate over a context array)
             if(ii === 0 && step.consarray) {
                 resultSequence = await evaluate(step, inputSequence, environment);
+            } else if(ii === 0 && step.type === 'path' && Object.prototype.hasOwnProperty.call(step, 'group')) {
+                // a grouped path terminates the path before it, so it reduces the whole input sequence once
+                resultSequence = environment.base.createSequence(await evaluate(step, inputSequence, environment));
             } else {
                 if(isTupleStream) {
                     tupleBindings = await evaluateTupleStep(step, inputSequence, tupleBindings, environment);
