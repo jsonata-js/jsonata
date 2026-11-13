@@ -13,6 +13,7 @@
   "scripts": {
     "pretest": "npm run lint",
     "mocha": "nyc ./node_modules/mocha/bin/_mocha -- \"test/**/*.js\"",
+    "mocha2": "nyc ./node_modules/mocha/bin/_mocha -- \"test/signature2-tests.js\"",
     "test": "npm run mocha",
     "posttest": "npm run check-coverage && npm run browserify && npm run minify && npm run build-es5",
     "build-es5": "npm run mkdir-dist && npm run regenerator && npm run browserify-es5 && npm run minify-es5",

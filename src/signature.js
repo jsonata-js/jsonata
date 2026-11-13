@@ -248,11 +248,20 @@ const signature = (() => {
                                     };
                                 }
                             } else {
-                                validatedArgs.push(arg);
-                                argIndex++;
+                                //validatedArgs.push(arg);
+                                //argIndex++;
+                                validatedArgs.push(undefined);
                             }
+                        } else if (match.length > 1 && param.type !== 'a') { // may have matched multiple args (if the regex ends with a '+')
+                            //the signature should have been like 'n+' - we still pack multiple args into array
+                            var argsAsArray = [];
+                            match.split('').forEach(function () {
+                                arg = args[argIndex];
+                                argsAsArray.push(arg);
+                                argIndex++;
+                            });
+                            validatedArgs.push(argsAsArray);
                         } else {
-                            // may have matched multiple args (if the regex ends with a '+')
                             // split into single tokens
                             match.split('').forEach(function (single) {
                                 arg = args[argIndex];

@@ -1,0 +1,6 @@
+{
+    "expr": "λ($arg1, $arg2)<s?n+:o>{{\"arg1\": $arg1, \"arg2\": $arg2}}(1, 2, 3)",
+    "dataset": null,
+    "bindings": {},
+    "result": {"arg2": [1, 2, 3]}
+}
