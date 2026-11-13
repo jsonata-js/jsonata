@@ -87,7 +87,7 @@ __Examples__
 
 <div class="jsonata-ex">
   <div>Account.Order.Product.{
-    `Product Name`: $.'Product Name',
+    "Product Name": $.'Product Name',
     `Category`: $.Category ?: "Uncategorized"
 }</div>
   <div>[
@@ -337,7 +337,7 @@ Consider the following example:
 Account.(
   $AccName := function() { $.'Account Name' };
 
-  Order[OrderID = 'order104'].Product.{
+  Order[OrderID = 'order104'].Product{
     'Account': $AccName(),
     'SKU-' & $string(ProductID): $.'Product Name'
   }
