@@ -1047,6 +1047,10 @@ const parser = (() => {
                                 result = lstep;
                             } else {
                                 result = {type: 'path', steps: [lstep]};
+                                if (lstep.type === 'path') {
+                                    // a grouped path is a complete path - carry its unresolved parent references up
+                                    pushAncestry(result, lstep);
+                                }
                             }
                             if(lstep.type === 'parent') {
                                 result.seekingParent = [lstep.slot];
