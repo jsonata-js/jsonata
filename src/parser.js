@@ -999,6 +999,15 @@ const parser = (() => {
             }
         };
 
+        // add a processed expression to a block (expressions in parentheses)
+        var blockExpression = function(block, part) {
+            pushAncestry(block, part);
+            if (part.consarray || (part.type === 'path' && part.steps[0].consarray)) {
+                block.consarray = true;
+            }
+            return part;
+        };
+
         var resolveAncestry = function(path) {
             var index = path.steps.length - 1;
             var laststep = path.steps[index];
@@ -1043,7 +1052,16 @@ const parser = (() => {
                         case '.':
                             var lstep = processAST(expr.lhs);
 
-                            if (lstep.type === 'path' && typeof lstep.group === 'undefined') {
+                            if (lstep.type === 'path' && typeof lstep.group !== 'undefined') {
+                                // a reduce terminates its path, so the steps that follow it start a new path, as if
+                                // the grouped path was in parentheses - i.e. a{k:v}.x is the same as (a{k:v}).x
+                                var block = {type: 'block', position: expr.lhs.position};
+                                block.expressions = [blockExpression(block, lstep)];
+                                result = {type: 'path', steps: [block]};
+                                // but unlike in parentheses, the parent references that the grouped path can't
+                                // resolve itself are passed on to be resolved by the enclosing expression
+                                pushAncestry(result, block);
+                            } else if (lstep.type === 'path') {
                                 result = lstep;
                             } else {
                                 result = {type: 'path', steps: [lstep]};
@@ -1309,12 +1327,7 @@ const parser = (() => {
                     result = {type: expr.type, position: expr.position};
                     // array of expressions - process each one
                     result.expressions = expr.expressions.map(function (item) {
-                        var part = processAST(item);
-                        pushAncestry(result, part);
-                        if (part.consarray || (part.type === 'path' && part.steps[0].consarray)) {
-                            result.consarray = true;
-                        }
-                        return part;
+                        return blockExpression(result, processAST(item));
                     });
                     // TODO scan the array of expressions to see if any of them assign variables
                     // if so, need to mark the block as one that needs to create a new frame
