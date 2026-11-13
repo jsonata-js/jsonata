@@ -1,0 +1,8 @@
+{
+    "expr": "$match(missing, /(a)/).groups[0]",
+    "data": {
+        "present": "a"
+    },
+    "bindings": {},
+    "undefinedResult": true
+}

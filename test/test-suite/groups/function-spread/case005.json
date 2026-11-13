@@ -1,0 +1,6 @@
+{
+    "expr": "$spread({})",
+    "data": {},
+    "bindings": {},
+    "undefinedResult": true
+}
