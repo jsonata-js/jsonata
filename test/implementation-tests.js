@@ -121,8 +121,12 @@ describe("Functions with side-effects", () => {
 
         describe("$millis() returns different timestamp for subsequent evaluate() calls", function() {
             it("should return result object", async function() {
-                var expr = jsonata("($sum([1..10000]); $millis())");
+                var expr = jsonata("$millis()");
                 var result = await expr.evaluate(testdata2);
+                // Wait for the clock to advance before starting another evaluation.
+                while (Date.now() <= result) {
+                    await new Promise((resolve) => setTimeout(resolve, 1));
+                }
                 var result2 = await expr.evaluate(testdata2);
                 expect(result).to.not.equal(result2);
             });
