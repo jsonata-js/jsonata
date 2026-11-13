@@ -1,0 +1,163 @@
+[
+    {
+        "description": "#765: and preserves the failing function",
+        "expr": "1=1 and $contains([''], '')",
+        "error": {
+            "code": "T0410",
+            "token": "contains",
+            "position": 18,
+            "message": "Argument 1 of function \"contains\" does not match function signature"
+        },
+        "dataset": null
+    },
+    {
+        "description": "#765: or preserves the failing function",
+        "expr": "false or $contains([''], '')",
+        "error": {
+            "code": "T0410",
+            "token": "contains",
+            "position": 19,
+            "message": "Argument 1 of function \"contains\" does not match function signature"
+        },
+        "dataset": null
+    },
+    {
+        "description": "#765: and preserves left operand errors",
+        "expr": "$contains([''], '') and true",
+        "error": {
+            "code": "T0410",
+            "token": "contains",
+            "position": 10,
+            "message": "Argument 1 of function \"contains\" does not match function signature"
+        },
+        "dataset": null
+    },
+    {
+        "description": "#765: or preserves left operand errors",
+        "expr": "$contains([''], '') or false",
+        "error": {
+            "code": "T0410",
+            "token": "contains",
+            "position": 10,
+            "message": "Argument 1 of function \"contains\" does not match function signature"
+        },
+        "dataset": null
+    },
+    {
+        "description": "#765: nested or preserves its failing function",
+        "expr": "true and (false or $contains([''], ''))",
+        "error": {
+            "code": "T0410",
+            "token": "contains",
+            "position": 29,
+            "message": "Argument 1 of function \"contains\" does not match function signature"
+        },
+        "dataset": null
+    },
+    {
+        "description": "#765: nested and preserves its failing function",
+        "expr": "false or (true and $contains([''], ''))",
+        "error": {
+            "code": "T0410",
+            "token": "contains",
+            "position": 29,
+            "message": "Argument 1 of function \"contains\" does not match function signature"
+        },
+        "dataset": null
+    },
+    {
+        "description": "#765: function body errors keep their original position",
+        "expr": "($f := function() { $contains([''], '') }; true and $f())",
+        "error": {
+            "code": "T0410",
+            "token": "contains",
+            "position": 29,
+            "message": "Argument 1 of function \"contains\" does not match function signature"
+        },
+        "dataset": null
+    },
+    {
+        "description": "#765: an inner numeric operator keeps its location",
+        "expr": "true and (1 + 'bad')",
+        "error": {
+            "code": "T2002",
+            "token": "+",
+            "position": 13,
+            "message": "The right side of the \"+\" operator must evaluate to a number"
+        },
+        "dataset": null
+    },
+    {
+        "description": "#765: a missing function keeps its location",
+        "expr": "false or $missing()",
+        "error": {
+            "code": "T1006",
+            "token": "missing",
+            "position": 18
+        },
+        "dataset": null
+    },
+    {
+        "description": "#765: an explicit error keeps its message",
+        "expr": "true and $error('boom')",
+        "error": {
+            "code": "D3137",
+            "token": "error",
+            "position": 16,
+            "message": "boom"
+        },
+        "dataset": null
+    },
+    {
+        "description": "#765: and identifies left boolean conversion errors",
+        "expr": "(1e308 * 10) and true",
+        "error": {
+            "code": "D1001",
+            "token": "and",
+            "position": 16
+        },
+        "dataset": null
+    },
+    {
+        "description": "#765: and identifies right boolean conversion errors",
+        "expr": "true and (1e308 * 10)",
+        "error": {
+            "code": "D1001",
+            "token": "and",
+            "position": 8
+        },
+        "dataset": null
+    },
+    {
+        "description": "#765: or identifies left boolean conversion errors",
+        "expr": "(1e308 * 10) or false",
+        "error": {
+            "code": "D1001",
+            "token": "or",
+            "position": 15
+        },
+        "dataset": null
+    },
+    {
+        "description": "#765: or identifies right boolean conversion errors",
+        "expr": "false or (1e308 * 10)",
+        "error": {
+            "code": "D1001",
+            "token": "or",
+            "position": 8
+        },
+        "dataset": null
+    },
+    {
+        "description": "#765: and still short-circuits",
+        "expr": "false and $contains([''], '')",
+        "result": false,
+        "dataset": null
+    },
+    {
+        "description": "#765: or still short-circuits",
+        "expr": "true or $contains([''], '')",
+        "result": true,
+        "dataset": null
+    }
+]

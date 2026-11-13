@@ -475,8 +475,12 @@ var jsonata = (function() {
             try {
                 return await evaluateBooleanExpression(lhs, evalrhs, op);
             } catch(err) {
-                err.position = expr.position;
-                err.token = op;
+                if (typeof err.position === 'undefined') {
+                    err.position = expr.position;
+                }
+                if (typeof err.token === 'undefined') {
+                    err.token = op;
+                }
                 throw err;
             }
         }
