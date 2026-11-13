@@ -123,10 +123,7 @@ describe("Functions with side-effects", () => {
             it("should return result object", async function() {
                 var expr = jsonata("$millis()");
                 var result = await expr.evaluate(testdata2);
-                // Wait for the clock to advance before starting another evaluation.
-                while (Date.now() <= result) {
-                    await new Promise((resolve) => setTimeout(resolve, 1));
-                }
+                await new Promise((resolve) => setTimeout(resolve, 2));
                 var result2 = await expr.evaluate(testdata2);
                 expect(result).to.not.equal(result2);
             });
@@ -173,8 +170,9 @@ describe("Functions with side-effects", () => {
 
     describe("$now() returns different timestamp for subsequent evaluate() calls", function() {
         it("should return result object", async function() {
-            var expr = jsonata("($sum([1..100000]); $now())");
+            var expr = jsonata("$now()");
             var result = await expr.evaluate(testdata2);
+            await new Promise((resolve) => setTimeout(resolve, 2));
             var result2 = await expr.evaluate(testdata2);
             expect(result).to.not.equal(result2);
         });
