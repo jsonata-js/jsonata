@@ -266,7 +266,7 @@ const dateTime = (function () {
                 }
                 break;
             case formats.DECIMAL:
-                formattedInteger = '' + value;
+                formattedInteger = utils.toFixedDecimal(value);
                 // TODO use functionPad
                 var padLength = format.mandatoryDigits - formattedInteger.length;
                 if (padLength > 0) {

@@ -1,0 +1,38 @@
+[
+    {
+        "expr": "$formatNumber(1e21, '#,##0')",
+        "dataset": null,
+        "bindings": {},
+        "result": "1,000,000,000,000,000,000,000"
+    },
+    {
+        "expr": "$formatNumber(-1e21, '#,##0')",
+        "dataset": null,
+        "bindings": {},
+        "result": "-1,000,000,000,000,000,000,000"
+    },
+    {
+        "expr": "$formatNumber(1.5e21, '#,##0.00')",
+        "dataset": null,
+        "bindings": {},
+        "result": "1,500,000,000,000,000,000,000.00"
+    },
+    {
+        "expr": "$formatNumber(123456789012345678901234, '0')",
+        "dataset": null,
+        "bindings": {},
+        "result": "123456789012345690000000"
+    },
+    {
+        "expr": "$formatNumber(1e19, '0%')",
+        "dataset": null,
+        "bindings": {},
+        "result": "1000000000000000000000%"
+    },
+    {
+        "expr": "$formatNumber(1e20, '#,##0')",
+        "dataset": null,
+        "bindings": {},
+        "result": "100,000,000,000,000,000,000"
+    }
+]

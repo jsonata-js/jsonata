@@ -196,6 +196,32 @@ const utils = (() => {
         return typeof arg === 'object' && arg !== null ? Object.keys(arg) : [];
     }
 
+    /**
+     * Converts a non-negative number to a string of plain decimal digits (never exponent notation)
+     * Number.prototype.toFixed falls back to exponent notation for values >= 1e21 (e.g. "1.5e+21")
+     * @param {number} value - the non-negative number to convert
+     * @param {number} [dp] - the number of digits after the decimal point. Defaults to 0
+     * @returns {string} - the decimal string
+     */
+    function toFixedDecimal(value, dp) {
+        dp = dp || 0;
+        var str = value.toFixed(dp);
+        var exponentPos = str.indexOf('e');
+        if (exponentPos !== -1) {
+            // only reached for values >= 1e21, so the exponent is always positive
+            var mantissa = str.substring(0, exponentPos);
+            var exponent = Number(str.substring(exponentPos + 1));
+            var pointPos = mantissa.indexOf('.');
+            var digits = mantissa.replace('.', '');
+            var integerLength = (pointPos === -1 ? mantissa.length : pointPos) + exponent;
+            str = digits + new Array(integerLength - digits.length + 1).join('0');
+            if (dp > 0) {
+                str += '.' + new Array(dp + 1).join('0');
+            }
+        }
+        return str;
+    }
+
     return {
         isNumeric,
         isArrayOfStrings,
@@ -208,7 +234,8 @@ const utils = (() => {
         isDeepEqual,
         stringToArray,
         isPromise,
-        keys
+        keys,
+        toFixedDecimal
     };
 })();
 
