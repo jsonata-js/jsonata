@@ -1094,7 +1094,7 @@ const functions = (() => {
                     mantissa *= 10;
                     exponent -= 1;
                 }
-                while (Math.abs(mantissa) > maxMantissa) {
+                while (Math.abs(mantissa) >= maxMantissa) {
                     mantissa /= 10;
                     exponent += 1;
                 }

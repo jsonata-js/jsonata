@@ -1,0 +1,44 @@
+[
+    {
+        "expr": "$formatNumber(10, '0.0e0')",
+        "dataset": null,
+        "bindings": {},
+        "result": "1.0e1"
+    },
+    {
+        "expr": "$formatNumber(-10, '0.0e0')",
+        "dataset": null,
+        "bindings": {},
+        "result": "-1.0e1"
+    },
+    {
+        "expr": "$formatNumber(100, '0.0e0')",
+        "dataset": null,
+        "bindings": {},
+        "result": "1.0e2"
+    },
+    {
+        "expr": "$formatNumber(100, '00.0e0')",
+        "dataset": null,
+        "bindings": {},
+        "result": "10.0e1"
+    },
+    {
+        "expr": "$formatNumber(1, '.0e0')",
+        "dataset": null,
+        "bindings": {},
+        "result": ".1e1"
+    },
+    {
+        "expr": "$formatNumber(10, '#.0e0')",
+        "dataset": null,
+        "bindings": {},
+        "result": "0.1e2"
+    },
+    {
+        "expr": "$formatNumber(99, '0.0e0')",
+        "dataset": null,
+        "bindings": {},
+        "result": "9.9e1"
+    }
+]
