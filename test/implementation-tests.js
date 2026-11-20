@@ -1049,6 +1049,13 @@ describe("Formatting numbers >= 1e21", () => {
     // $formatNumber and $formatInteger still print every digit.
     // Other implementations may hold such numbers differently, so the
     // tests live here rather than in the shared test suite.
+    describe("$formatInteger(12345678901234567000, '0')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatInteger(12345678901234567000, '0')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("12345678901234567000");
+        });
+    });
     describe("$formatInteger(1e21, '#,##0')", function() {
         it("should return result object", async function() {
             var expr = jsonata("$formatInteger(1e21, '#,##0')");
