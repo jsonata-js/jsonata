@@ -1043,6 +1043,84 @@ describe("Test that yield platform specific results", () => {
     });
 });
 
+describe("Formatting numbers >= 1e21", () => {
+    // JavaScript numbers are IEEE-754 doubles, and Number.prototype.toString()
+    // switches to exponent notation from 1e21. These tests check that
+    // $formatNumber and $formatInteger still print every digit.
+    // Other implementations may hold such numbers differently, so the
+    // tests live here rather than in the shared test suite.
+    describe("$formatInteger(12345678901234567000, '0')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatInteger(12345678901234567000, '0')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("12345678901234567000");
+        });
+    });
+    describe("$formatInteger(1e21, '#,##0')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatInteger(1e21, '#,##0')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("1,000,000,000,000,000,000,000");
+        });
+    });
+    describe("$formatInteger(-1e21, '0')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatInteger(-1e21, '0')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("-1000000000000000000000");
+        });
+    });
+    describe("$formatInteger(123456789012345678901234, '0')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatInteger(123456789012345678901234, '0')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("123456789012345690000000");
+        });
+    });
+    describe("$formatNumber(1e21, '#,##0')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber(1e21, '#,##0')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("1,000,000,000,000,000,000,000");
+        });
+    });
+    describe("$formatNumber(-1e21, '#,##0')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber(-1e21, '#,##0')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("-1,000,000,000,000,000,000,000");
+        });
+    });
+    describe("$formatNumber(1.5e21, '#,##0.00')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber(1.5e21, '#,##0.00')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("1,500,000,000,000,000,000,000.00");
+        });
+    });
+    describe("$formatNumber(123456789012345678901234, '0')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber(123456789012345678901234, '0')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("123456789012345690000000");
+        });
+    });
+    describe("$formatNumber(1e19, '0%')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber(1e19, '0%')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("1000000000000000000000%");
+        });
+    });
+    describe("$formatNumber(1e20, '#,##0')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber(1e20, '#,##0')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("100,000,000,000,000,000,000");
+        });
+    });
+});
+
 describe("Sorting large arrays", function() {
     // a user-defined comparator is called about 1.7 million times for 100,000 items
     this.timeout(30000);

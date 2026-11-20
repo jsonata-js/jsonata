@@ -1104,7 +1104,7 @@ const functions = (() => {
         var roundedNumber = round(mantissa, pic.maximumFactionalPartSize);
         // bullet 7:
         var makeString = function (value, dp) {
-            var str = Math.abs(value).toFixed(dp);
+            var str = utils.toFixedDecimal(Math.abs(value), dp);
             if (zero_digit !== '0') {
                 str = str.split('').map(function (digit) {
                     if (digit >= '0' && digit <= '9') {
