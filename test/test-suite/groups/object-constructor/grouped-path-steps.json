@@ -1,0 +1,30 @@
+[
+    {
+        "description": "a reduce in an array context groups the whole sequence before the next step",
+        "expr": "orders{c: lines{p:$sum(q)}.w}",
+        "data": {"orders": [{"c": "A", "lines": [{"p": "w", "q": 1}]}, {"c": "A", "lines": [{"p": "w", "q": 2}]}]},
+        "bindings": {},
+        "result": {"A": 3}
+    },
+    {
+        "description": "a reduce of an absolute path is evaluated once in an array context",
+        "expr": "orders{c: $$.lk{k:$sum(v)}.x}",
+        "data": {"lk": [{"k": "x", "v": 5}], "orders": [{"c": "A"}, {"c": "A"}, {"c": "A"}]},
+        "bindings": {},
+        "result": {"A": 5}
+    },
+    {
+        "description": "a parent reference inside a reduce resolves when a step follows it",
+        "expr": "a.c.(%.b{k:$sum(v)}.x)",
+        "data": {"a": [{"b": [{"k": "x", "v": 1}], "c": [1]}]},
+        "bindings": {},
+        "result": 1
+    },
+    {
+        "description": "an unresolvable parent reference inside a reduce is still a static error",
+        "expr": "%.b{k:$sum(v)}.x",
+        "data": {},
+        "bindings": {},
+        "code": "S0217"
+    }
+]
