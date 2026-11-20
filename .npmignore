@@ -1,7 +1,0 @@
-*
-!*.js
-!LICENSE
-!package.json
-!README.md
-!jsonata.d.ts
-polyfill.js
