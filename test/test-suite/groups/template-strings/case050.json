@@ -1,0 +1,7 @@
+{
+    "description": "the first >> closes the template, so text ending in > needs an escape",
+    "expr": "<<<li>{bar}</li\\>>>",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "<li>98</li>"
+}

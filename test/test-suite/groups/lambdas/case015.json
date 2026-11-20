@@ -1,0 +1,8 @@
+{
+    "expr": "function($x){ {\"k\": $x} }(1)",
+    "dataset": null,
+    "bindings": {},
+    "result": {
+        "k": 1
+    }
+}

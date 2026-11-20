@@ -1,0 +1,6 @@
+{
+    "expr": "$eval(\"«{bar}!»\")",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "98!"
+}

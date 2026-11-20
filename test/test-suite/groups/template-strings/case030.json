@@ -1,0 +1,7 @@
+{
+    "description": "whitespace is kept",
+    "expr": "«  {bar}  »",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "  98  "
+}

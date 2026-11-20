@@ -1,0 +1,12 @@
+{
+    "description": "template in a transform",
+    "expr": "{\"a\": {\"b\": 1}} ~> | a | {\"c\": «b={b}»} |",
+    "dataset": null,
+    "bindings": {},
+    "result": {
+        "a": {
+            "b": 1,
+            "c": "b=1"
+        }
+    }
+}

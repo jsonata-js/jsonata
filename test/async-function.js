@@ -169,6 +169,18 @@ describe('Handle chained functions that end in promises', function() {
         return expect(expr.evaluate(data, bindings)).to.eventually.equal('4');
     });
 
+    it('basic async function inside a template string', function() {
+        var data = {};
+        var expr = jsonata('«count: {$counter(1).inc().value}, then {$counter(5).value}»');
+        return expect(expr.evaluate(data, bindings)).to.eventually.equal('count: 2, then 5');
+    });
+
+    it('registered async function inside a template string', function() {
+        var expr = jsonata('«Hello {$greet(name)}!»');
+        expr.registerFunction('greet', async (name) => 'dear ' + name, '<s:s>');
+        return expect(expr.evaluate({name: 'Fred'})).to.eventually.equal('Hello dear Fred!');
+    });
+
     it('basic async function, but invokes a non-existent function', function() {
         var data = {};
         var expr = jsonata('$counter(2).inc().foo().value');

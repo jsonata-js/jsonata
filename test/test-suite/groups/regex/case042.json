@@ -1,0 +1,7 @@
+{
+    "description": "regex as the first item in an array constructor",
+    "expr": "$count([/a/, /b/])",
+    "dataset": null,
+    "bindings": {},
+    "result": 2
+}

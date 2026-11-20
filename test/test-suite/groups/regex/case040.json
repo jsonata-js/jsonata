@@ -1,0 +1,6 @@
+{
+    "expr": "$match(\"a«b\", /«/).index",
+    "dataset": null,
+    "bindings": {},
+    "result": 1
+}

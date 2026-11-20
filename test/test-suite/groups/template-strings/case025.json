@@ -1,0 +1,7 @@
+{
+    "description": "json escapes",
+    "expr": "«a\\t\\n\\\"\\\\\\/\\b\\f\\r»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "a\t\n\"\\/\b\f\r"
+}

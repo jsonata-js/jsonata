@@ -1,0 +1,7 @@
+{
+    "description": "coalescing inside braces",
+    "expr": "«{nothing ?? \"default\"}»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "default"
+}

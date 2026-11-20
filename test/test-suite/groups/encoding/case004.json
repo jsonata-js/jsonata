@@ -1,0 +1,6 @@
+{
+    "expr": "\"\\u00ab{x}\\u00bb\"",
+    "dataset": null,
+    "bindings": {},
+    "result": "«{x}»"
+}

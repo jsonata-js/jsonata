@@ -1,0 +1,7 @@
+{
+    "description": "object constructor inside braces",
+    "expr": "«{ {\"a\": bar} }»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "{\"a\":98}"
+}

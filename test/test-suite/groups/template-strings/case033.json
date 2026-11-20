@@ -1,0 +1,7 @@
+{
+    "description": "bad unicode escape",
+    "expr": "«\\u12»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "code": "S0104"
+}

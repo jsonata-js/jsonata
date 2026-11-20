@@ -1,0 +1,7 @@
+{
+    "description": "partial application is a function, so it gives an empty string",
+    "expr": "«[{$substring(?, 0, 2)}]»",
+    "dataset": null,
+    "bindings": {},
+    "result": "[]"
+}

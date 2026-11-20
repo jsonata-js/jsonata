@@ -1,0 +1,7 @@
+{
+    "description": "predicate inside braces",
+    "expr": "«First order: {Account.Order[0].OrderID}»",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": "First order: order103"
+}

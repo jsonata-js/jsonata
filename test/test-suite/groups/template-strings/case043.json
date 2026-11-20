@@ -1,0 +1,10 @@
+{
+    "description": "index variable",
+    "expr": "Account.Order#$i.«{$i}:{OrderID}»",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        "0:order103",
+        "1:order104"
+    ]
+}

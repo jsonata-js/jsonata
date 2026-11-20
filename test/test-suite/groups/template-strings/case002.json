@@ -1,0 +1,6 @@
+{
+    "expr": "«The answer is {foo.bar}»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "The answer is 42"
+}

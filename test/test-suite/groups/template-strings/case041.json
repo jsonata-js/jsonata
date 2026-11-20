@@ -1,0 +1,11 @@
+{
+    "expr": "Account.Order.Product.«{%.%.`Account Name`}»",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        "Firefly",
+        "Firefly",
+        "Firefly",
+        "Firefly"
+    ]
+}

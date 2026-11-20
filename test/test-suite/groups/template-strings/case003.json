@@ -1,0 +1,7 @@
+{
+    "description": "two interpolations",
+    "expr": "«{foo.bar} and {bar}»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "42 and 98"
+}

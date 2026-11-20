@@ -1,0 +1,11 @@
+{
+    "description": "grouping key",
+    "expr": "Account.Order.Product{«{`Product Name`}»: $sum(Quantity)}",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": {
+        "Bowler Hat": 6,
+        "Trilby hat": 1,
+        "Cloak": 1
+    }
+}
