@@ -197,29 +197,79 @@ const utils = (() => {
     }
 
     /**
-     * Converts a non-negative number to a string of plain decimal digits (never exponent notation)
-     * Number.prototype.toFixed falls back to exponent notation for values >= 1e21 (e.g. "1.5e+21")
-     * @param {number} value - the non-negative number to convert
-     * @param {number} [dp] - the number of digits after the decimal point. Defaults to 0
+     * Returns a string of zeros
+     * @param {number} count - the number of zeros
+     * @returns {string} - the zeros, or an empty string if count is not positive
+     */
+    function zeros(count) {
+        return count > 0 ? new Array(count + 1).join('0') : '';
+    }
+
+    /**
+     * Returns the decimal digits of a finite number.  As XPath F&O 3.1 section 4.7.5 requires, these are the digits
+     * of the shortest decimal that converts back to the same number (which Number.prototype.toString produces),
+     * rather than the digits of its exact binary value (which toFixed uses)
+     * @param {number} value - the number; its sign is ignored
+     * @returns {{digits: string, exponent: number}} - the digits without leading zeros, and the power of ten of the last one
+     */
+    function decimalDigits(value) {
+        var parts = Math.abs(value).toString().split('e');
+        var mantissa = parts[0].split('.');
+        var fraction = mantissa[1] || '';
+        var digits = (mantissa[0] + fraction).replace(/^0+/, '');
+        if (digits === '') {
+            return {digits: '0', exponent: 0};
+        }
+        return {digits: digits, exponent: (parts[1] ? Number(parts[1]) : 0) - fraction.length};
+    }
+
+    /**
+     * Rounds decimal digits half-to-even to the given number of decimal places
+     * @param {{digits: string, exponent: number}} number - the digits, and the power of ten of the last one
+     * @param {number} dp - the number of decimal places
+     * @returns {{digits: string, exponent: number}} - the rounded digits
+     */
+    function roundDecimalDigits(number, dp) {
+        var dropCount = -number.exponent - dp;
+        if (dropCount <= 0) {
+            return number;
+        }
+        var digits = zeros(dropCount - number.digits.length) + number.digits;
+        var kept = digits.substring(0, digits.length - dropCount);
+        var dropped = digits.substring(digits.length - dropCount);
+        var lastKept = kept.length > 0 ? Number(kept.charAt(kept.length - 1)) : 0;
+        if (dropped.charAt(0) > '5' || (dropped.charAt(0) === '5' && (/[1-9]/.test(dropped.substring(1)) || lastKept % 2 === 1))) {
+            // add one to the kept digits
+            var ii = kept.length - 1;
+            while (ii >= 0 && kept.charAt(ii) === '9') {
+                ii--;
+            }
+            kept = (ii < 0 ? '1' : kept.substring(0, ii) + (Number(kept.charAt(ii)) + 1)) + zeros(kept.length - ii - 1);
+        }
+        return {digits: kept.replace(/^0+/, '') || '0', exponent: -dp};
+    }
+
+    /**
+     * Writes decimal digits out in full (never exponent notation), with exactly the given number of decimal places.
+     * The digits must already be rounded to that number of decimal places
+     * @param {{digits: string, exponent: number}} number - the digits, and the power of ten of the last one
+     * @param {number} dp - the number of decimal places
      * @returns {string} - the decimal string
      */
-    function toFixedDecimal(value, dp) {
-        dp = dp || 0;
-        var str = value.toFixed(dp);
-        var exponentPos = str.indexOf('e');
-        if (exponentPos !== -1) {
-            // only reached for values >= 1e21, so the exponent is always positive
-            var mantissa = str.substring(0, exponentPos);
-            var exponent = Number(str.substring(exponentPos + 1));
-            var pointPos = mantissa.indexOf('.');
-            var digits = mantissa.replace('.', '');
-            var integerLength = (pointPos === -1 ? mantissa.length : pointPos) + exponent;
-            str = digits + new Array(integerLength - digits.length + 1).join('0');
-            if (dp > 0) {
-                str += '.' + new Array(dp + 1).join('0');
-            }
+    function decimalDigitsToString(number, dp) {
+        var digits = number.digits;
+        var integerPart, fractionalPart;
+        if (number.exponent >= 0) {
+            integerPart = digits + zeros(number.exponent);
+            fractionalPart = '';
+        } else {
+            digits = zeros(-number.exponent - digits.length) + digits;
+            integerPart = digits.substring(0, digits.length + number.exponent);
+            fractionalPart = digits.substring(digits.length + number.exponent);
         }
-        return str;
+        integerPart = integerPart.replace(/^0+/, '') || '0';
+        fractionalPart = fractionalPart + zeros(dp - fractionalPart.length);
+        return dp > 0 ? integerPart + '.' + fractionalPart : integerPart;
     }
 
     return {
@@ -235,7 +285,9 @@ const utils = (() => {
         stringToArray,
         isPromise,
         keys,
-        toFixedDecimal
+        decimalDigits,
+        roundDecimalDigits,
+        decimalDigitsToString
     };
 })();
 

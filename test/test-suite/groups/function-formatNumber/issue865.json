@@ -1,0 +1,44 @@
+[
+    {
+        "description": "#865: an exact power of ten has a mantissa below 10^N",
+        "expr": "[10, -10].$formatNumber($, '0.0e0')",
+        "dataset": null,
+        "bindings": {},
+        "result": ["1.0e1", "-1.0e1"]
+    },
+    {
+        "description": "#865: an exact power of ten with two integer digits in the mantissa",
+        "expr": "$formatNumber(100, '00.0e0')",
+        "dataset": null,
+        "bindings": {},
+        "result": "10.0e1"
+    },
+    {
+        "description": "#865: with no integer digits in the picture, the mantissa is below 1",
+        "expr": "[$formatNumber(1, '.0e0'), $formatNumber(1, '#.0e0')]",
+        "dataset": null,
+        "bindings": {},
+        "result": [".1e1", "0.1e1"]
+    },
+    {
+        "description": "#865: a mantissa that rounds up to 10^N is scaled down again",
+        "expr": "[$formatNumber(9.99, '0.0e0'), $formatNumber(99.96, '00.0e0'), $formatNumber(0.99999, '.0e0'), $formatNumber(9.5, '0e0')]",
+        "dataset": null,
+        "bindings": {},
+        "result": ["1.0e1", "10.0e1", ".1e1", "1e1"]
+    },
+    {
+        "description": "#865: a small power of ten keeps its exponent",
+        "expr": "$formatNumber(1e-12, '0.0e0')",
+        "dataset": null,
+        "bindings": {},
+        "result": "1.0e-12"
+    },
+    {
+        "description": "#865: zero has a zero exponent, even with no integer digits in the picture",
+        "expr": "[$formatNumber(0, '#.00e0'), $formatNumber(0, '.00e0')]",
+        "dataset": null,
+        "bindings": {},
+        "result": ["0.00e0", ".00e0"]
+    }
+]

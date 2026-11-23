@@ -1,0 +1,16 @@
+[
+    {
+        "description": "rounding carries through every digit",
+        "expr": "$formatNumber(9.99, '0.0')",
+        "dataset": null,
+        "bindings": {},
+        "result": "10.0"
+    },
+    {
+        "description": "rounding to an integer rounds half to even, and can round down to zero",
+        "expr": "[0.4, 0.5, 1.5, 2.5].$formatNumber($, '0')",
+        "dataset": null,
+        "bindings": {},
+        "result": ["0", "0", "2", "2"]
+    }
+]
