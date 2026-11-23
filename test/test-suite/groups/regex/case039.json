@@ -1,0 +1,16 @@
+{
+    "expr": "( $input := \"a,b,c\"; $pattern := /[,-]/; { \"2x\": [$replace($input, $pattern, \"|\"), $replace($input, $pattern, \"|\")], \"3x\": [$replace($input, $pattern, \"|\"), $replace($input, $pattern, \"|\"), $replace($input, $pattern, \"|\")] } )",
+    "dataset": null,
+    "bindings": {},
+    "result": {
+        "2x": [
+            "a|b|c",
+            "a|b|c"
+        ],
+        "3x": [
+            "a|b|c",
+            "a|b|c",
+            "a|b|c"
+        ]
+    }
+}

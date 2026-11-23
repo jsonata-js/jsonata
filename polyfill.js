@@ -7,6 +7,8 @@
 // This file contains polyfills (cut and pasted from MDN docs) required for the ES5 package
 
 
+Number.parseInt = Number.parseInt || parseInt;
+
 Number.isInteger = Number.isInteger || function(value) {
     return typeof value === "number" &&
         isFinite(value) &&

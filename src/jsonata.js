@@ -117,7 +117,7 @@ var jsonata = (function() {
 
         if (Object.prototype.hasOwnProperty.call(expr, 'predicate')) {
             for(var ii = 0; ii < expr.predicate.length; ii++) {
-                result = await evaluateFilter(expr.predicate[ii].expr, result, environment);
+                result = await evaluateFilter(expr.predicate[ii].expr, result, environment, ii < expr.predicate.length - 1);
             }
         }
 
@@ -258,7 +258,7 @@ var jsonata = (function() {
             var res = await evaluate(expr, input[ii], environment);
             if(expr.stages) {
                 for(var ss = 0; ss < expr.stages.length; ss++) {
-                    res = await evaluateFilter(expr.stages[ss].expr, res, environment);
+                    res = await evaluateFilter(expr.stages[ss].expr, res, environment, ss < expr.stages.length - 1);
                 }
             }
             if(typeof res !== 'undefined') {
@@ -291,7 +291,7 @@ var jsonata = (function() {
             var stage = stages[ss];
             switch(stage.type) {
                 case 'filter':
-                    result = await evaluateFilter(stage.expr, result, environment);
+                    result = await evaluateFilter(stage.expr, result, environment, ss < stages.length - 1 && stages[ss + 1].type === 'filter');
                     break;
                 case 'index':
                     for(var ee = 0; ee < result.length; ee++) {
@@ -345,7 +345,7 @@ var jsonata = (function() {
             var res = await evaluate(expr, tupleBindings[ee]['@'], stepEnv);
             // res is the binding sequence for the output tuple stream
             if(typeof res !== 'undefined') {
-                if (!Array.isArray(res)) {
+                if (!Array.isArray(res) || (res.cons && !expr.stages)) {
                     res = [res];
                 }
                 for (var bb = 0; bb < res.length; bb++) {
@@ -384,9 +384,10 @@ var jsonata = (function() {
      * @param {Object} predicate - filter expression
      * @param {Object} input - Input data to apply predicates against
      * @param {Object} environment - Environment
+     * @param {boolean} chained - another predicate will be applied to the result
      * @returns {*} Result after applying predicates
      */
-    async function evaluateFilter(predicate, input, environment) {
+    async function evaluateFilter(predicate, input, environment, chained) {
         var results = environment.base.createSequence();
         if( input && input.tupleStream) {
             results.tupleStream = true;
@@ -409,6 +410,9 @@ var jsonata = (function() {
                 }
             }
         } else {
+            // the position selected by the predicate, while it evaluates to the same number for every item
+            var position;
+            var samePosition = true;
             for (index = 0; index < input.length; index++) {
                 var item = input[index];
                 var context = item;
@@ -420,6 +424,8 @@ var jsonata = (function() {
                 var res = await evaluate(predicate, context, env);
                 if (isNumeric(res)) {
                     res = [res];
+                } else {
+                    samePosition = false;
                 }
                 if (isArrayOfNumbers(res)) {
                     Array.prototype.forEach.call(res, function (ires) {
@@ -429,6 +435,10 @@ var jsonata = (function() {
                             // count in from end of array
                             ii = input.length + ii;
                         }
+                        if (index > 0 && ii !== position) {
+                            samePosition = false;
+                        }
+                        position = ii;
                         if (ii === index) {
                             results.push(item);
                         }
@@ -436,6 +446,12 @@ var jsonata = (function() {
                 } else if (fn.boolean(res)) { // truthy
                     results.push(item);
                 }
+            }
+            if (chained && samePosition && results.length === 1 && Array.isArray(results[0])) {
+                // an expression that evaluates to the same number for every item selects an array the same way
+                // a literal index does, so the next predicate is applied to that array rather than to a sequence
+                // containing it
+                results = results[0];
             }
         }
         return results;
@@ -459,8 +475,12 @@ var jsonata = (function() {
             try {
                 return await evaluateBooleanExpression(lhs, evalrhs, op);
             } catch(err) {
-                err.position = expr.position;
-                err.token = op;
+                if (typeof err.position === 'undefined') {
+                    err.position = expr.position;
+                }
+                if (typeof err.token === 'undefined') {
+                    err.token = op;
+                }
                 throw err;
             }
         }
@@ -1159,11 +1179,12 @@ var jsonata = (function() {
                         result.groups.push(match[i]);
                     }
                 }
+                var lastIndex = re.lastIndex;
                 result.next = function() {
-                    if(re.lastIndex >= str.length) {
+                    if(lastIndex >= str.length) {
                         return undefined;
                     } else {
-                        var next = closure(str, re.lastIndex);
+                        var next = closure(str, lastIndex);
                         if(next && next.match === '') {
                             // matches zero length string; this will never progress
                             throw {
@@ -2137,12 +2158,11 @@ var jsonata = (function() {
         }
         var environment = createFrame(staticFrame);
 
-        var timestamp = new Date(); // will be overridden on each call to evalute()
         environment.bind('now', defineFunction(function(picture, timezone) {
-            return datetime.fromMillis(timestamp.getTime(), picture, timezone);
+            return datetime.fromMillis(this.environment.timestamp.getTime(), picture, timezone);
         }, '<s?s?:s>'));
         environment.bind('millis', defineFunction(function() {
-            return timestamp.getTime();
+            return this.environment.timestamp.getTime();
         }, '<:n>'));
 
         return {
@@ -2169,8 +2189,7 @@ var jsonata = (function() {
 
                 // capture the timestamp and put it in the execution environment
                 // the $now() and $millis() functions will return this value - whenever it is called
-                timestamp = new Date();
-                exec_env.timestamp = timestamp;
+                exec_env.timestamp = new Date();
                 exec_env.options = options;
 
                 exec_env.createSequence = function() {
