@@ -878,7 +878,7 @@ const dateTime = (function () {
                 }
             } else if (markerSpec.component === 'f') {
                 // §9.8.4.5 Formatting Fractional Seconds
-                if (markerSpec.integerFormat.primary !== formats.DECIMAL) {
+                if (markerSpec.integerFormat.primary !== formats.DECIMAL || isNaN(componentValue)) {
                     componentValue = _formatInteger(componentValue, markerSpec.integerFormat);
                 } else {
                     const picture = stringToArray(markerSpec.presentation1);

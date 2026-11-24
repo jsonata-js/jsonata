@@ -405,5 +405,17 @@
             "01.٠;٣٣",
             "01.٥;٠٠"
         ]
+    },
+    {
+        "description": "#853: fractional seconds pad NaN to the picture width for an out-of-range timestamp",
+        "expr": "$fromMillis(8.64e15 + 1, '[f0001]')",
+        "dataset": null,
+        "result": "0NaN"
+    },
+    {
+        "description": "#853: the default picture preserves NaN when a timezone offset exceeds the date range",
+        "expr": "$fromMillis(8.64e15, undefined, '+0100')",
+        "dataset": null,
+        "result": "0NaN-NaN-NaNTNaN:NaN:NaN.NaN+01:00"
     }
 ]
