@@ -33,6 +33,13 @@ evaluates to
 
 If the input argument is an empty array, returns nothing (represented in Javascript as `undefined`)
 
+> :warning: **If your array has exactly one item the returned value won't be an array.** Only that single item will be returned.
+> 
+> In this case, to have the return of `$map()` be a array, please append `[]` to the closing parenthesis of the `$map()` function:
+```
+$map([1], $string)[]
+```
+
 The function that is supplied as the second parameter must have the following signature:
 
 `function(value [, index [, array]])`
