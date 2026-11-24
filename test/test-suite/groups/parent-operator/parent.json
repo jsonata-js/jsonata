@@ -58,14 +58,10 @@
         "dataset": "dataset5",
         "bindings": {},
         "result": [
-            "Bowler Hat",
-            "order103",
-            "Trilby hat",
-            "order103",
-            "Bowler Hat",
-            "order104",
-            "Cloak",
-            "order104"
+            ["Bowler Hat", "order103"],
+            ["Trilby hat", "order103"],
+            ["Bowler Hat", "order104"],
+            ["Cloak", "order104"]
         ]
     },
     {
