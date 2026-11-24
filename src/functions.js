@@ -1054,7 +1054,10 @@ const functions = (() => {
         // TODO cache the result of the analysis
 
         // format the number
-        // bullet 1: TODO: NaN - not sure we'd ever get this in JSON
+        // bullet 1: JSON can't hold NaN or infinity, but a JavaScript caller can pass them in
+        if (isNaN(value)) {
+            return properties.NaN;
+        }
         var pic;
         // bullet 2:
         if (value >= 0) {
@@ -1071,40 +1074,31 @@ const functions = (() => {
         } else {
             adjustedNumber = value;
         }
-        // bullet 4:
-        // TODO: infinity - not sure we'd ever get this in JSON
+        // bullet 4: this includes a finite number that overflows when multiplied by 100 or 1000
+        if (!isFinite(adjustedNumber)) {
+            return pic.prefix + properties.infinity + pic.suffix;
+        }
+        // bullets 5 & 6 work on the decimal digits of the number rather than on the double itself,
+        // so that scaling the mantissa by a power of ten and rounding it are both exact
         // bullet 5:
-        var mantissa, exponent;
-        if (pic.minimumExponentSize === 0) {
-            mantissa = adjustedNumber;
-        } else {
-            // mantissa * 10^exponent = adjustedNumber
-            var maxMantissa = Math.pow(10, pic.scalingFactor);
-            var minMantissa = Math.pow(10, pic.scalingFactor - 1);
-            mantissa = adjustedNumber;
-            exponent = 0;
-            // Compare magnitudes; previously `mantissa < minMantissa` was
-            // true for every negative mantissa and `0 * 10 === 0` never
-            // crossed the threshold, producing an infinite loop on zero
-            // and negative inputs (#785). For zero the desired exponent is
-            // simply zero — the XPath F&O Bullet 5 says "if N is zero, set
-            // M to zero and E to zero".
-            if (mantissa !== 0) {
-                while (Math.abs(mantissa) < minMantissa) {
-                    mantissa *= 10;
-                    exponent -= 1;
-                }
-                while (Math.abs(mantissa) > maxMantissa) {
-                    mantissa /= 10;
-                    exponent += 1;
-                }
-            }
+        var mantissa = utils.decimalDigits(adjustedNumber);
+        var exponent;
+        if (pic.minimumExponentSize !== 0) {
+            // mantissa * 10^exponent = adjustedNumber, with scalingFactor digits before the decimal point of the
+            // mantissa.  If the number is zero, the mantissa and the exponent are both zero
+            exponent = mantissa.digits === '0' ? 0 : mantissa.digits.length + mantissa.exponent - pic.scalingFactor;
+            mantissa.exponent -= exponent;
         }
         // bullet 6:
-        var roundedNumber = round(mantissa, pic.maximumFactionalPartSize);
+        var roundedNumber = utils.roundDecimalDigits(mantissa, pic.maximumFactionalPartSize);
+        if (typeof exponent !== 'undefined' && roundedNumber.digits !== '0' &&
+            roundedNumber.digits.length + roundedNumber.exponent > pic.scalingFactor) {
+            // rounding has carried the mantissa up to 10^scalingFactor, so divide it by ten
+            roundedNumber = utils.roundDecimalDigits({digits: roundedNumber.digits, exponent: roundedNumber.exponent - 1}, pic.maximumFactionalPartSize);
+            exponent += 1;
+        }
         // bullet 7:
-        var makeString = function (value, dp) {
-            var str = Math.abs(value).toFixed(dp);
+        var makeString = function (str) {
             if (zero_digit !== '0') {
                 str = str.split('').map(function (digit) {
                     if (digit >= '0' && digit <= '9') {
@@ -1116,7 +1110,7 @@ const functions = (() => {
             }
             return str;
         };
-        var stringValue = makeString(roundedNumber, pic.maximumFactionalPartSize);
+        var stringValue = makeString(utils.decimalDigitsToString(roundedNumber, pic.maximumFactionalPartSize));
         var decimalPos = stringValue.indexOf('.');
         if (decimalPos === -1) {
             stringValue = stringValue + decimal_separator;
@@ -1144,8 +1138,10 @@ const functions = (() => {
             }
         } else {
             pic.integerPartGroupingPositions.forEach(function (pos) {
-                stringValue = [stringValue.slice(0, decimalPos - pos), grouping_separator, stringValue.slice(decimalPos - pos)].join('');
-                decimalPos++;
+                if (decimalPos > pos) {
+                    stringValue = [stringValue.slice(0, decimalPos - pos), grouping_separator, stringValue.slice(decimalPos - pos)].join('');
+                    decimalPos++;
+                }
             });
         }
         // bullet 11:
@@ -1160,7 +1156,7 @@ const functions = (() => {
         }
         // bullet 13:
         if (typeof exponent !== 'undefined') {
-            var stringExponent = makeString(exponent, 0);
+            var stringExponent = makeString(String(Math.abs(exponent)));
             padLeft = pic.minimumExponentSize - stringExponent.length;
             if (padLeft > 0) {
                 stringExponent = new Array(padLeft + 1).join(zero_digit) + stringExponent;
@@ -1956,24 +1952,31 @@ const functions = (() => {
             comp = comparator;
         }
 
+        // iterative merge: a recursive merge would hold one pending call and one copy of the remaining
+        // input per element, so memory would grow quadratically with the array size
         var merge = async function (l, r) {
-            var merge_iter = async function (result, left, right) {
-                if (left.length === 0) {
-                    Array.prototype.push.apply(result, right);
-                } else if (right.length === 0) {
-                    Array.prototype.push.apply(result, left);
-                } else if (await comp(left[0], right[0])) { // invoke the comparator function
+            var merged = [];
+            var leftIndex = 0;
+            var rightIndex = 0;
+            while (leftIndex < l.length && rightIndex < r.length) {
+                if (await comp(l[leftIndex], r[rightIndex])) { // invoke the comparator function
                     // if it returns true - swap left and right
-                    result.push(right[0]);
-                    await merge_iter(result, left, right.slice(1));
+                    merged.push(r[rightIndex]);
+                    rightIndex++;
                 } else {
                     // otherwise keep the same order
-                    result.push(left[0]);
-                    await merge_iter(result, left.slice(1), right);
+                    merged.push(l[leftIndex]);
+                    leftIndex++;
                 }
-            };
-            var merged = [];
-            await merge_iter(merged, l, r);
+            }
+            while (leftIndex < l.length) {
+                merged.push(l[leftIndex]);
+                leftIndex++;
+            }
+            while (rightIndex < r.length) {
+                merged.push(r[rightIndex]);
+                rightIndex++;
+            }
             return merged;
         };
 

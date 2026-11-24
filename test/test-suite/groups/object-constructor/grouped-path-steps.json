@@ -1,0 +1,51 @@
+[
+    {
+        "description": "a parent reference inside a reduce resolves when a step follows it",
+        "expr": "a.c.(%.b{k:$sum(v)}.x)",
+        "data": {"a": [{"b": [{"k": "x", "v": 1}], "c": [1]}]},
+        "bindings": {},
+        "result": 1
+    },
+    {
+        "description": "an unresolvable parent reference inside a reduce is still a static error",
+        "expr": "%.b{k:$sum(v)}.x",
+        "data": {},
+        "bindings": {},
+        "code": "S0217"
+    },
+    {
+        "description": "a [] within the grouped path doesn't keep the singleton array of the steps that follow it",
+        "expr": "items[]{k:v}.x",
+        "data": {"items": [{"k": "x", "v": 1}]},
+        "bindings": {},
+        "result": 1
+    },
+    {
+        "description": "any step can follow the map that follows a reduce",
+        "expr": "items{k:v}.*",
+        "data": {"items": [{"k": "x", "v": 1}, {"k": "y", "v": 2}]},
+        "bindings": {},
+        "result": [1, 2]
+    },
+    {
+        "description": "a reduce can follow the map that follows a reduce",
+        "expr": "items{k:v}.y{'a':$}",
+        "data": {"items": [{"k": "x", "v": 1}, {"k": "y", "v": 2}]},
+        "bindings": {},
+        "result": {"a": 2}
+    },
+    {
+        "description": "a map can follow a second reduce",
+        "expr": "items{k:v}.y{'a':$}.a",
+        "data": {"items": [{"k": "x", "v": 1}, {"k": "y", "v": 2}]},
+        "bindings": {},
+        "result": 2
+    },
+    {
+        "description": "a reduce cannot directly follow a reduce",
+        "expr": "items{k:v}{'a':1}",
+        "data": {"items": [{"k": "x", "v": 1}, {"k": "y", "v": 2}]},
+        "bindings": {},
+        "code": "S0210"
+    }
+]

@@ -266,7 +266,7 @@ const dateTime = (function () {
                 }
                 break;
             case formats.DECIMAL:
-                formattedInteger = '' + value;
+                formattedInteger = utils.decimalDigitsToString(utils.decimalDigits(value), 0);
                 // TODO use functionPad
                 var padLength = format.mandatoryDigits - formattedInteger.length;
                 if (padLength > 0) {
@@ -839,8 +839,8 @@ const dateTime = (function () {
             // parse the hour and minute offsets
             // assume for now the format supplied is +hhmm
             const offset = parseInt(timezone);
-            offsetHours = Math.floor(offset / 100);
             offsetMinutes = offset % 100;
+            offsetHours = (offset - offsetMinutes) / 100;
         }
 
         var formatComponent = function (date, markerSpec) {
@@ -877,22 +877,61 @@ const dateTime = (function () {
                     componentValue = _formatInteger(componentValue, markerSpec.integerFormat);
                 }
             } else if (markerSpec.component === 'f') {
-                // TODO §9.8.4.5 Formatting Fractional Seconds
-                componentValue = _formatInteger(componentValue, markerSpec.integerFormat);
+                // §9.8.4.5 Formatting Fractional Seconds
+                if (markerSpec.integerFormat.primary !== formats.DECIMAL || isNaN(componentValue)) {
+                    componentValue = _formatInteger(componentValue, markerSpec.integerFormat);
+                } else {
+                    const picture = stringToArray(markerSpec.presentation1);
+                    // Append an empty modifier so semicolons in the primary token remain grouping signs.
+                    const format = analyseIntegerPicture(markerSpec.presentation1 + ';');
+                    let minDigits = format.mandatoryDigits;
+                    let maxDigits = minDigits + format.optionalDigits;
+                    if (markerSpec.width) {
+                        if (markerSpec.width.min !== undefined) {
+                            minDigits = Math.max(minDigits, markerSpec.width.min);
+                        }
+                        maxDigits = Math.max(maxDigits, minDigits);
+                        if (markerSpec.width.max !== undefined) {
+                            maxDigits = Math.max(maxDigits, markerSpec.width.max);
+                        }
+                    } else if (picture.length === 1) {
+                        maxDigits = 3; // a single digit allows the full millisecond precision
+                    }
+
+                    let fraction = ('00' + componentValue).slice(-3).replace(/0+$/, '');
+                    if (fraction.length < minDigits) {
+                        fraction += new Array(minDigits - fraction.length + 1).join('0');
+                    }
+                    // Pad and truncate on the right, without rounding into the next second.
+                    const digits = fraction.substring(0, maxDigits).split('').map(digit =>
+                        String.fromCodePoint(format.zeroCode + Number(digit)));
+                    // Count grouping positions from the left. The output cannot exceed the
+                    // adjusted picture's width, so separators never need to be extrapolated.
+                    let position = 0;
+                    picture.forEach(character => {
+                        const code = character.codePointAt(0);
+                        if (character === '#' || (code >= format.zeroCode && code <= format.zeroCode + 9)) {
+                            position++;
+                        } else if (position < digits.length) {
+                            digits[position] = character + digits[position];
+                        }
+                    });
+                    componentValue = digits.join('');
+                }
             } else if (markerSpec.component === 'Z' || markerSpec.component === 'z') {
                 // §9.8.4.6 Formatting timezones
                 const offset = offsetHours * 100 + offsetMinutes;
                 if (markerSpec.integerFormat.regular) {
-                    componentValue = _formatInteger(offset, markerSpec.integerFormat);
+                    componentValue = _formatInteger(Math.abs(offset), markerSpec.integerFormat);
                 } else {
                     const numDigits = markerSpec.integerFormat.mandatoryDigits;
                     if (numDigits === 1 || numDigits === 2) {
-                        componentValue = _formatInteger(offsetHours, markerSpec.integerFormat);
+                        componentValue = _formatInteger(Math.abs(offsetHours), markerSpec.integerFormat);
                         if (offsetMinutes !== 0) {
-                            componentValue += ':' + formatInteger(offsetMinutes, '00');
+                            componentValue += ':' + formatInteger(Math.abs(offsetMinutes), '00');
                         }
                     } else if (numDigits === 3 || numDigits === 4) {
-                        componentValue = _formatInteger(offset, markerSpec.integerFormat);
+                        componentValue = _formatInteger(Math.abs(offset), markerSpec.integerFormat);
                     } else {
                         throw {
                             code: 'D3134',
@@ -900,9 +939,7 @@ const dateTime = (function () {
                         };
                     }
                 }
-                if (offset >= 0) {
-                    componentValue = '+' + componentValue;
-                }
+                componentValue = (offset < 0 ? '-' : '+') + componentValue;
                 if (markerSpec.component === 'z') {
                     componentValue = 'GMT' + componentValue;
                 }
@@ -972,27 +1009,33 @@ const dateTime = (function () {
                     res.regex += '[-+][0-9]+';
                     if (separator) {
                         res.regex += separator.character + '[0-9]+';
+                    } else if (part.integerFormat.mandatoryDigits <= 2) {
+                        res.regex += '(?::[0-9]{2})?';
                     }
                     res.parse = function(value) {
                         if (part.component === 'z') {
                             value = value.substring(3); // remove the leading GMT
                         }
+                        // The sign applies to both components, including offsets such as -00:30.
+                        const sign = value.charAt(0) === '-' ? -1 : 1;
+                        value = value.substring(1);
                         let offsetHours = 0, offsetMinutes = 0;
-                        if (separator) {
-                            offsetHours = Number.parseInt(value.substring(0, value.indexOf(separator.character)));
-                            offsetMinutes = Number.parseInt(value.substring(value.indexOf(separator.character) + 1));
+                        const separatorPos = value.indexOf(separator ? separator.character : ':');
+                        if (separatorPos !== -1) {
+                            offsetHours = Number.parseInt(value.substring(0, separatorPos));
+                            offsetMinutes = Number.parseInt(value.substring(separatorPos + 1));
                         } else {
                             // depends on number of digits
-                            const numdigits = value.length - 1;
+                            const numdigits = value.length;
                             if (numdigits <= 2) {
                                 // just hour offset
                                 offsetHours = Number.parseInt(value);
                             } else {
-                                offsetHours = Number.parseInt(value.substring(0, 3));
-                                offsetMinutes = Number.parseInt(value.substring(3));
+                                offsetHours = Number.parseInt(value.substring(0, numdigits - 2));
+                                offsetMinutes = Number.parseInt(value.substring(numdigits - 2));
                             }
                         }
-                        return offsetHours * 60 + offsetMinutes;
+                        return sign * (offsetHours * 60 + offsetMinutes);
                     };
                 } else if (part.component === 'f') {
                     res.regex = '[0-9]+';

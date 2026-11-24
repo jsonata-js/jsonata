@@ -121,8 +121,9 @@ describe("Functions with side-effects", () => {
 
         describe("$millis() returns different timestamp for subsequent evaluate() calls", function() {
             it("should return result object", async function() {
-                var expr = jsonata("($sum([1..10000]); $millis())");
+                var expr = jsonata("$millis()");
                 var result = await expr.evaluate(testdata2);
+                await new Promise((resolve) => setTimeout(resolve, 2));
                 var result2 = await expr.evaluate(testdata2);
                 expect(result).to.not.equal(result2);
             });
@@ -169,8 +170,9 @@ describe("Functions with side-effects", () => {
 
     describe("$now() returns different timestamp for subsequent evaluate() calls", function() {
         it("should return result object", async function() {
-            var expr = jsonata("($sum([1..100000]); $now())");
+            var expr = jsonata("$now()");
             var result = await expr.evaluate(testdata2);
+            await new Promise((resolve) => setTimeout(resolve, 2));
             var result2 = await expr.evaluate(testdata2);
             expect(result).to.not.equal(result2);
         });
@@ -1154,6 +1156,249 @@ describe("Test that yield platform specific results", () => {
             var result = await expr.evaluate();
             var expected = 10;
             expect(result).to.be.closeTo(expected, 1e-13);
+        });
+    });
+});
+
+describe("Formatting numbers >= 1e21", () => {
+    // JavaScript numbers are IEEE-754 doubles, and Number.prototype.toString()
+    // switches to exponent notation from 1e21. These tests check that
+    // $formatNumber and $formatInteger still print every digit.
+    // Other implementations may hold such numbers differently, so the
+    // tests live here rather than in the shared test suite.
+    describe("$formatInteger(12345678901234567000, '0')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatInteger(12345678901234567000, '0')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("12345678901234567000");
+        });
+    });
+    describe("$formatInteger(1e21, '#,##0')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatInteger(1e21, '#,##0')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("1,000,000,000,000,000,000,000");
+        });
+    });
+    describe("$formatInteger(-1e21, '0')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatInteger(-1e21, '0')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("-1000000000000000000000");
+        });
+    });
+    describe("$formatInteger(123456789012345678901234, '0')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatInteger(123456789012345678901234, '0')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("123456789012345690000000");
+        });
+    });
+    describe("$formatNumber(1e21, '#,##0')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber(1e21, '#,##0')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("1,000,000,000,000,000,000,000");
+        });
+    });
+    describe("$formatNumber(-1e21, '#,##0')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber(-1e21, '#,##0')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("-1,000,000,000,000,000,000,000");
+        });
+    });
+    describe("$formatNumber(1.5e21, '#,##0.00')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber(1.5e21, '#,##0.00')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("1,500,000,000,000,000,000,000.00");
+        });
+    });
+    describe("$formatNumber(123456789012345678901234, '0')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber(123456789012345678901234, '0')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("123456789012345690000000");
+        });
+    });
+    describe("$formatNumber(1e19, '0%')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber(1e19, '0%')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("1000000000000000000000%");
+        });
+    });
+    describe("$formatNumber(1e20, '#,##0')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber(1e20, '#,##0')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("100,000,000,000,000,000,000");
+        });
+    });
+});
+
+describe("Formatting numbers beyond the precision of a double", () => {
+    // XPath F&O 3.1 section 4.7.5 formats the decimal with the fewest digits that
+    // converts back to the same double, and rounds that decimal. These tests check
+    // that $formatNumber doesn't print digits from the binary value of the double,
+    // or lose digits when rounding, and that scaling a mantissa can't overflow.
+    // Other implementations may hold such numbers differently, so the
+    // tests live here rather than in the shared test suite.
+    describe("$formatNumber(1.1, '0.00000000000000000000')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber(1.1, '0.00000000000000000000')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("1.10000000000000000000");
+        });
+    });
+    describe("$formatNumber(0.1 + 0.2, '0.##################')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber(0.1 + 0.2, '0.##################')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("0.30000000000000004");
+        });
+    });
+    describe("$formatNumber(531135999999999.94, '0.00')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber(531135999999999.94, '0.00')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("531135999999999.94");
+        });
+    });
+    describe("$formatNumber(9007199254740994, '0.00')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber(9007199254740994, '0.00')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("9007199254740994.00");
+        });
+    });
+    describe("$formatNumber(12345678901234567000, '0')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber(12345678901234567000, '0')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("12345678901234567000");
+        });
+    });
+    describe("$formatNumber(123456789012345678901234, '0.000')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber(123456789012345678901234, '0.000')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("123456789012345690000000.000");
+        });
+    });
+    describe("$formatNumber with more than 100 decimal places", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber(1.5, '0.' & $join([1..101].('0'))) = '1.5' & $join([1..100].('0'))");
+            var result = await expr.evaluate();
+            expect(result).to.equal(true);
+        });
+    });
+    describe("$formatNumber with 309 integer digits and an exponent", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber(1, $pad('', 309, '0') & 'e0') = $pad('1', 309, '0') & 'e-308'");
+            var result = await expr.evaluate();
+            expect(result).to.equal(true);
+        });
+    });
+});
+
+describe("Formatting NaN and infinity", () => {
+    // JSON can't hold NaN or infinity, but a JavaScript caller can pass them in.
+    // XPath F&O 3.1 section 4.7.5 formats NaN as the NaN property with no prefix
+    // or suffix, and infinity as the infinity property between the prefix and suffix.
+    describe("$formatNumber(NaN, '£#,##0.00')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber($v, '£#,##0.00')");
+            var result = await expr.evaluate(undefined, {v: NaN});
+            expect(result).to.equal("NaN");
+        });
+    });
+    describe("$formatNumber(Infinity, '£#,##0.00')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber($v, '£#,##0.00')");
+            var result = await expr.evaluate(undefined, {v: Infinity});
+            expect(result).to.equal("£Infinity");
+        });
+    });
+    describe("$formatNumber(-Infinity, '£#,##0.00')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber($v, '£#,##0.00')");
+            var result = await expr.evaluate(undefined, {v: -Infinity});
+            expect(result).to.equal("-£Infinity");
+        });
+    });
+    describe("$formatNumber(-Infinity, '#,##0.00;(#,##0.00)')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber($v, '#,##0.00;(#,##0.00)')");
+            var result = await expr.evaluate(undefined, {v: -Infinity});
+            expect(result).to.equal("(Infinity)");
+        });
+    });
+    describe("$formatNumber(Infinity, '0.0e0')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber($v, '0.0e0')");
+            var result = await expr.evaluate(undefined, {v: Infinity});
+            expect(result).to.equal("Infinity");
+        });
+    });
+    describe("$formatNumber(1e308, '0%')", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("$formatNumber(1e308, '0%')");
+            var result = await expr.evaluate();
+            expect(result).to.equal("Infinity%");
+        });
+    });
+    describe("$formatNumber with the NaN and infinity properties set", function() {
+        it("should return result object", async function() {
+            var expr = jsonata("[$formatNumber($n, '0.00', $o), $formatNumber($i, '0.00', $o)]");
+            var result = await expr.evaluate(undefined, {n: NaN, i: Infinity, o: {'NaN': 'not a number', 'infinity': '∞'}});
+            expect(result).to.deep.equal(["not a number", "∞"]);
+        });
+    });
+});
+
+describe("Sorting large arrays", function() {
+    // a user-defined comparator is called about 1.7 million times for 100,000 items
+    this.timeout(30000);
+
+    // values in a scrambled but deterministic order
+    var largeInput = {
+        items: Array.from({ length: 100000 }, function(_, index) {
+            return { id: index, v: (index * 7919) % 100000 };
+        })
+    };
+
+    var isAscending = function(values) {
+        return values.every(function(value, index) {
+            return index === 0 || values[index - 1] <= value;
+        });
+    };
+
+    describe("$sort() of 100,000 numbers", function() {
+        it("should return the sorted array", async function() {
+            var expr = jsonata("$sort(items.v)");
+            var result = await expr.evaluate(largeInput);
+            expect(result).to.have.lengthOf(100000);
+            expect(isAscending(result)).to.equal(true);
+        });
+    });
+
+    describe("$sort() of 100,000 objects with a comparator function", function() {
+        it("should return the sorted array", async function() {
+            var expr = jsonata("$sort(items, function($l, $r) { $l.v > $r.v }).v");
+            var result = await expr.evaluate(largeInput);
+            expect(result).to.have.lengthOf(100000);
+            expect(isAscending(result)).to.equal(true);
+        });
+    });
+
+    describe("order-by of 100,000 objects", function() {
+        it("should return the sorted array", async function() {
+            var expr = jsonata("items^(v).v");
+            var result = await expr.evaluate(largeInput);
+            expect(result).to.have.lengthOf(100000);
+            expect(isAscending(result)).to.equal(true);
         });
     });
 });

@@ -1,0 +1,239 @@
+[
+    {
+        "description": "#852: format timezone -0330 across numeric pictures",
+        "expr": "pictures.$fromMillis(0, \"[H01]:[m01] \" & $, $$.timezone)",
+        "data": {
+            "timezone": "-0330",
+            "pictures": [
+                "[Z]",
+                "[Z01:01]",
+                "[Z0]",
+                "[Z01]",
+                "[Z001]",
+                "[Z0000]",
+                "[z]",
+                "[z0]"
+            ]
+        },
+        "result": [
+            "20:30 -03:30",
+            "20:30 -03:30",
+            "20:30 -3:30",
+            "20:30 -03:30",
+            "20:30 -330",
+            "20:30 -0330",
+            "20:30 GMT-03:30",
+            "20:30 GMT-3:30"
+        ]
+    },
+    {
+        "description": "#852: format timezone -0030 across numeric pictures",
+        "expr": "pictures.$fromMillis(0, \"[H01]:[m01] \" & $, $$.timezone)",
+        "data": {
+            "timezone": "-0030",
+            "pictures": [
+                "[Z]",
+                "[Z01:01]",
+                "[Z0]",
+                "[Z01]",
+                "[Z001]",
+                "[Z0000]",
+                "[z]",
+                "[z0]"
+            ]
+        },
+        "result": [
+            "23:30 -00:30",
+            "23:30 -00:30",
+            "23:30 -0:30",
+            "23:30 -00:30",
+            "23:30 -030",
+            "23:30 -0030",
+            "23:30 GMT-00:30",
+            "23:30 GMT-0:30"
+        ]
+    },
+    {
+        "description": "#852: format timezone -0001 across numeric pictures",
+        "expr": "pictures.$fromMillis(0, \"[H01]:[m01] \" & $, $$.timezone)",
+        "data": {
+            "timezone": "-0001",
+            "pictures": [
+                "[Z]",
+                "[Z01:01]",
+                "[Z0]",
+                "[Z01]",
+                "[Z001]",
+                "[Z0000]",
+                "[z]",
+                "[z0]"
+            ]
+        },
+        "result": [
+            "23:59 -00:01",
+            "23:59 -00:01",
+            "23:59 -0:01",
+            "23:59 -00:01",
+            "23:59 -001",
+            "23:59 -0001",
+            "23:59 GMT-00:01",
+            "23:59 GMT-0:01"
+        ]
+    },
+    {
+        "description": "#852: format timezone -0059 across numeric pictures",
+        "expr": "pictures.$fromMillis(0, \"[H01]:[m01] \" & $, $$.timezone)",
+        "data": {
+            "timezone": "-0059",
+            "pictures": [
+                "[Z]",
+                "[Z01:01]",
+                "[Z0]",
+                "[Z01]",
+                "[Z001]",
+                "[Z0000]",
+                "[z]",
+                "[z0]"
+            ]
+        },
+        "result": [
+            "23:01 -00:59",
+            "23:01 -00:59",
+            "23:01 -0:59",
+            "23:01 -00:59",
+            "23:01 -059",
+            "23:01 -0059",
+            "23:01 GMT-00:59",
+            "23:01 GMT-0:59"
+        ]
+    },
+    {
+        "description": "#852: format timezone -0300 across numeric pictures",
+        "expr": "pictures.$fromMillis(0, \"[H01]:[m01] \" & $, $$.timezone)",
+        "data": {
+            "timezone": "-0300",
+            "pictures": [
+                "[Z]",
+                "[Z01:01]",
+                "[Z0]",
+                "[Z01]",
+                "[Z001]",
+                "[Z0000]",
+                "[z]",
+                "[z0]"
+            ]
+        },
+        "result": [
+            "21:00 -03:00",
+            "21:00 -03:00",
+            "21:00 -3",
+            "21:00 -03",
+            "21:00 -300",
+            "21:00 -0300",
+            "21:00 GMT-03:00",
+            "21:00 GMT-3"
+        ]
+    },
+    {
+        "description": "#852: format timezone +0330 across numeric pictures",
+        "expr": "pictures.$fromMillis(0, \"[H01]:[m01] \" & $, $$.timezone)",
+        "data": {
+            "timezone": "+0330",
+            "pictures": [
+                "[Z]",
+                "[Z01:01]",
+                "[Z0]",
+                "[Z01]",
+                "[Z001]",
+                "[Z0000]",
+                "[z]",
+                "[z0]"
+            ]
+        },
+        "result": [
+            "03:30 +03:30",
+            "03:30 +03:30",
+            "03:30 +3:30",
+            "03:30 +03:30",
+            "03:30 +330",
+            "03:30 +0330",
+            "03:30 GMT+03:30",
+            "03:30 GMT+3:30"
+        ]
+    },
+    {
+        "description": "#852: format timezone +0030 across numeric pictures",
+        "expr": "pictures.$fromMillis(0, \"[H01]:[m01] \" & $, $$.timezone)",
+        "data": {
+            "timezone": "+0030",
+            "pictures": [
+                "[Z]",
+                "[Z01:01]",
+                "[Z0]",
+                "[Z01]",
+                "[Z001]",
+                "[Z0000]",
+                "[z]",
+                "[z0]"
+            ]
+        },
+        "result": [
+            "00:30 +00:30",
+            "00:30 +00:30",
+            "00:30 +0:30",
+            "00:30 +00:30",
+            "00:30 +030",
+            "00:30 +0030",
+            "00:30 GMT+00:30",
+            "00:30 GMT+0:30"
+        ]
+    },
+    {
+        "description": "#852: format timezone +0000 across numeric pictures",
+        "expr": "pictures.$fromMillis(0, \"[H01]:[m01] \" & $, $$.timezone)",
+        "data": {
+            "timezone": "+0000",
+            "pictures": [
+                "[Z]",
+                "[Z01:01]",
+                "[Z0]",
+                "[Z01]",
+                "[Z001]",
+                "[Z0000]",
+                "[z]",
+                "[z0]"
+            ]
+        },
+        "result": [
+            "00:00 +00:00",
+            "00:00 +00:00",
+            "00:00 +0",
+            "00:00 +00",
+            "00:00 +000",
+            "00:00 +0000",
+            "00:00 GMT+00:00",
+            "00:00 GMT+0"
+        ]
+    },
+    {
+        "description": "#852: UTC and negative zero preserve the Z modifier",
+        "expr": "['+0000', '-0000'].$fromMillis(0, '[Z01:01t]|[z01:01t]|[Z0]|[Z0000]', $)",
+        "dataset": null,
+        "result": [
+            "Z|Z|+0|+0000",
+            "Z|Z|+0|+0000"
+        ]
+    },
+    {
+        "description": "#852: default ISO picture crosses the previous day",
+        "expr": "$fromMillis(0, missing, '-0330')",
+        "data": {},
+        "result": "1969-12-31T20:30:00.000-03:30"
+    },
+    {
+        "description": "#852: offset crosses a leap-day boundary",
+        "expr": "$fromMillis(1583020800000, '[Y0001]-[M01]-[D01] [H01]:[m01] [Z]', '-0945')",
+        "dataset": null,
+        "result": "2020-02-29 14:15 -09:45"
+    }
+]
