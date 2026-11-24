@@ -602,6 +602,7 @@ var jsonata = (function() {
     function evaluateName(expr, input, environment) {
         // lookup the 'name' item in the input
         var focus = {
+            options: environment.base.options,
             createSequence: environment.base.createSequence
         };
         return fn.lookup.call(focus, input, expr.value);
@@ -1351,6 +1352,30 @@ var jsonata = (function() {
     }
 
     /**
+     * Collects the objects and arrays that make up a value, by following their own properties
+     * @param {*} value - the value
+     * @returns {WeakSet} the objects and arrays
+     */
+    function objectsWithin(value) {
+        var objects = new WeakSet();
+        var pending = [value];
+        while (pending.length > 0) {
+            var item = pending.pop();
+            if (item !== null && typeof item === 'object' && !isFunction(item) && !objects.has(item)) {
+                objects.add(item);
+                for (const key of Object.keys(item)) {
+                    // only follow the values of data properties, so that no getters are run
+                    var descriptor = Object.getOwnPropertyDescriptor(item, key);
+                    if ('value' in descriptor) {
+                        pending.push(descriptor.value);
+                    }
+                }
+            }
+        }
+        return objects;
+    }
+
+    /**
      * create a transformer function
      * @param {Object} expr - AST for operator
      * @param {Object} input - Input data to evaluate against
@@ -1380,6 +1405,24 @@ var jsonata = (function() {
             if(typeof matches !== 'undefined') {
                 if(!Array.isArray(matches)) {
                     matches = [matches];
+                }
+                // only the copy can be changed, so check every match before changing any of them.
+                var copy = objectsWithin(result);
+                for (const matched of matches) {
+                    if (Object.prototype.isPrototypeOf.call(Object(matched), result)) {
+                        throw {
+                            code: "D1010",
+                            stack: (new Error()).stack,
+                            position: expr.position
+                        };
+                    }
+                    if (Object(matched) === matched && !copy.has(matched)) {
+                        throw {
+                            code: "D1014",
+                            stack: (new Error()).stack,
+                            position: expr.position
+                        };
+                    }
                 }
                 for(var ii = 0; ii < matches.length; ii++) {
                     var match = matches[ii];
@@ -1814,6 +1857,7 @@ var jsonata = (function() {
 
         var focus = {
             environment: env,
+            options: env.base.options,
             createSequence: env.base.createSequence
         };
         var result = proc.apply(focus, args);
@@ -2077,10 +2121,12 @@ var jsonata = (function() {
         "T1007": "Attempted to partially apply a non-function. Did you mean ${{{token}}}?",
         "T1008": "Attempted to partially apply a non-function",
         "D1009": "Multiple key definitions evaluate to same key: {{value}}",
+        "D1010": "Attempted to access the Javascript object prototype", // Javascript specific
         "T1010": "The matcher function argument passed to function {{token}} does not return the correct object structure",
         "D1011": "Stack overflow. Check for non-terminating recursive function.  Consider rewriting as tail-recursive",
         "D1012": "Evaluation timeout after {{value}} milliseconds. Check for infinite loop",
         "D1013": "Object property names starting with _jsonata_ are reserved for internal use: {{value}}",
+        "D1014": "The location in a transform expression can only match objects in the copy that is being transformed",
         "T2001": "The left side of the {{token}} operator must evaluate to a number",
         "T2002": "The right side of the {{token}} operator must evaluate to a number",
         "T2003": "The left side of the range operator (..) must evaluate to an integer",
@@ -2173,6 +2219,7 @@ var jsonata = (function() {
      * @param {Integer} options.timeout: evaluation timeout
      * @param {Integer} options.stack: max stack depth
      * @param {Integer} options.sequence: max sequence length
+     * @param {Boolean} options.inherited: allow looking up the properties that objects inherit from their prototypes
      * @returns {{evaluate: evaluate, assign: assign}} Evaluated expression
      */
     function jsonata(expr, options) {

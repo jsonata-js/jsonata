@@ -1146,6 +1146,266 @@ describe("Tests that are specific to a Javascript runtime", () => {
             expect(result).to.deep.equal({});
         });
     });
+
+    describe("Expressions that look up the properties that objects inherit, with the inherited option", function() {
+        class Greeter {
+            constructor(name) {
+                this.name = name;
+            }
+            get loud() {
+                return this.name.toUpperCase();
+            }
+            greet() {
+                return 'hi ' + this.name;
+            }
+        }
+        const data = {
+            url: new URL('http://example.com/json/favicon.ico'),
+            greeter: new Greeter('nick'),
+            plain: {"constructor": 1}
+        };
+        const options = {inherited: true};
+
+        it("should not look up inherited properties by default", async function() {
+            const result = await jsonata('url.hostname').evaluate(data);
+            expect(result).to.deep.equal(undefined);
+        });
+
+        it("should look up the properties of a URL", async function() {
+            const result = await jsonata('[url.hostname, url.href, $lookup(url, "pathname")]', options).evaluate(data);
+            expect(result).to.deep.equal(['example.com', 'http://example.com/json/favicon.ico', '/json/favicon.ico']);
+        });
+
+        it("should look up a getter and invoke a method of a class", async function() {
+            const result = await jsonata('[greeter.loud, greeter.greet(), greeter.toString()]', options).evaluate(data);
+            expect(result).to.deep.equal(['NICK', 'hi nick', '[object Object]']);
+        });
+
+        it("should look up inherited properties with a partially applied $lookup", async function() {
+            const expr = jsonata('[$lookup(?, "hostname")(url), $map([url], $lookup(?, "pathname")), url ~> $lookup(?, "protocol")]', options);
+            const result = await expr.evaluate(data);
+            expect(result).to.deep.equal(['example.com', '/json/favicon.ico', 'http:']);
+        });
+
+        it("should only include an object's own properties when listing or serialising it", async function() {
+            const result = await jsonata('[$keys(greeter), greeter.*, $string(greeter)]', options).evaluate(data);
+            expect(result).to.deep.equal(['name', 'nick', '{"name":"nick"}']);
+        });
+
+        it("should pass on an error thrown by a getter", async function() {
+            class Broken {
+                get value() {
+                    throw new RangeError('broken');
+                }
+            }
+            await expect(
+                jsonata('broken.value', options).evaluate({broken: new Broken()})
+            ).to.eventually.be.rejectedWith(RangeError, 'broken');
+        });
+
+        it("should still look up an object's own properties that have blocked names", async function() {
+            const result = await jsonata('plain.constructor', options).evaluate(data);
+            expect(result).to.equal(1);
+        });
+
+        it("should not look up the prototype or constructor of an object", async function() {
+            const expr = jsonata('[greeter.__proto__, greeter.constructor, greeter.prototype, url.constructor.constructor, ' +
+                'greeter.__defineGetter__, greeter.__defineSetter__, greeter.__lookupGetter__, greeter.__lookupSetter__, ' +
+                '$lookup(greeter, "con" & "structor")]', options);
+            const result = await expr.evaluate(data);
+            // each is undefined, so the array is empty
+            expect(result).to.deep.equal([]);
+        });
+
+        it("should not be able to create a function from a string", async function() {
+            const expr = jsonata(`(
+                __lookupSetter__('__proto__')(constructor);
+                __defineGetter__('l', constructor('return 42'));
+                valueOf().l
+            )`, options);
+            await expect(
+                expr.evaluate({})
+            ).to.eventually.be.rejected.to.deep.contain({
+                code: "T1006",
+            });
+        });
+
+        it("should ignore __proto__ in a transform", async function() {
+            const result = await jsonata('{} ~> | __proto__ | {"is_admin": true} |', options).evaluate();
+            expect(result).to.deep.equal({});
+            expect({}.is_admin).to.equal(undefined);
+        });
+
+        it("should throw an error trying to change an inherited function in a transform", async function() {
+            const expr = jsonata('{} ~> | hasOwnProperty | {"x": 1} |', options);
+            await expect(
+                expr.evaluate()
+            ).to.eventually.be.rejected.to.deep.contain({
+                code: "D1014",
+            });
+            expect({}.hasOwnProperty.x).to.equal(undefined);
+        });
+
+        it("should throw an error trying to change an object returned by a getter in a transform", async function() {
+            class Shared {}
+            class Holder {
+                get shared() {
+                    return Shared.prototype;
+                }
+            }
+            // $clone is overridden, so the transform works on the input itself, rather than a copy of it
+            const expr = jsonata('($clone := function($o) { $o }; holder ~> | shared | {"x": 1} |)', options);
+            await expect(
+                expr.evaluate({holder: new Holder()})
+            ).to.eventually.be.rejected.to.deep.contain({
+                code: "D1014",
+            });
+            expect(new Shared().x).to.equal(undefined);
+        });
+    });
+
+    describe("Transforms that match the prototype of the object being transformed", function() {
+        it("should throw an error, rather than change the prototype", async function() {
+            const expr = jsonata('{} ~> | $getPrototype() | {"is_admin": true} |');
+            await expect(
+                expr.evaluate({}, {getPrototype: () => Object.prototype})
+            ).to.eventually.be.rejected.to.deep.contain({
+                code: "D1010",
+            });
+            expect({}.is_admin).to.equal(undefined);
+        });
+
+        it("should throw an error when the prototype is also a property of the object", async function() {
+            const prototype = {};
+            const input = Object.create(prototype);
+            input.parent = prototype;
+            const expr = jsonata('($clone := function($o) { $o }; $ ~> | parent | {"is_admin": true} |)');
+            await expect(
+                expr.evaluate(input)
+            ).to.eventually.be.rejected.to.deep.contain({
+                code: "D1010",
+            });
+            expect(prototype.is_admin).to.equal(undefined);
+        });
+    });
+
+    describe("Transforms that match values that aren't in the copy being transformed", function() {
+        it("should throw an error, rather than change a built-in function", async function() {
+            const expr = jsonata('{} ~> | $string | {"implementation": null} |');
+            await expect(
+                expr.evaluate()
+            ).to.eventually.be.rejected.to.deep.contain({
+                position: 7,
+                code: "D1014",
+            });
+            expect(await jsonata('$string(1)').evaluate()).to.equal('1');
+        });
+
+        it("should throw an error, rather than change a lambda", async function() {
+            const expr = jsonata('($f := function() { 1 }; {} ~> | $f | {"x": 1} |)');
+            await expect(
+                expr.evaluate()
+            ).to.eventually.be.rejected.to.deep.contain({
+                code: "D1014",
+            });
+        });
+
+        it("should throw an error, rather than change a function provided by the host", async function() {
+            const fn = () => 1;
+            const expr = jsonata('{} ~> | $fn | {"x": 1} |');
+            await expect(
+                expr.evaluate({}, {fn})
+            ).to.eventually.be.rejected.to.deep.contain({
+                code: "D1014",
+            });
+            expect(fn.x).to.equal(undefined);
+        });
+
+        it("should throw an error, rather than change an object provided by the host", async function() {
+            const settings = {limit: 10};
+            const expr = jsonata('{} ~> | $settings | {"limit": 0} |');
+            await expect(
+                expr.evaluate({}, {settings})
+            ).to.eventually.be.rejected.to.deep.contain({
+                code: "D1014",
+            });
+            expect(settings.limit).to.equal(10);
+        });
+
+        it("should throw an error, rather than change the prototype of a class", async function() {
+            class Shared {}
+            const expr = jsonata('{} ~> | $getPrototype() | {"x": 1} |');
+            await expect(
+                expr.evaluate({}, {getPrototype: () => Shared.prototype})
+            ).to.eventually.be.rejected.to.deep.contain({
+                code: "D1014",
+            });
+            expect(new Shared().x).to.equal(undefined);
+        });
+
+        it("should throw an error, rather than change Object.prototype when the input has no prototype", async function() {
+            const expr = jsonata('($clone := function($o) { $o }; $ ~> | $getPrototype() | {"is_admin": true} |)');
+            await expect(
+                expr.evaluate(Object.create(null), {getPrototype: () => Object.prototype})
+            ).to.eventually.be.rejected.to.deep.contain({
+                code: "D1014",
+            });
+            expect({}.is_admin).to.equal(undefined);
+        });
+
+        it("should throw an error, rather than change the input through $$", async function() {
+            const input = {foo: {a: 1}};
+            const expr = jsonata('$ ~> | $$.foo | {"x": 1} |');
+            await expect(
+                expr.evaluate(input)
+            ).to.eventually.be.rejected.to.deep.contain({
+                code: "D1014",
+            });
+            expect(input).to.deep.equal({foo: {a: 1}});
+        });
+
+        it("should not change anything if any of the matches aren't in the copy", async function() {
+            const input = {a: {b: 1}};
+            const settings = {limit: 10};
+            // $clone is overridden, so the transform works on the input itself, rather than a copy of it
+            const expr = jsonata('($clone := function($o) { $o }; $ ~> | [a, $settings] | {"changed": true} |)');
+            await expect(
+                expr.evaluate(input, {settings})
+            ).to.eventually.be.rejected.to.deep.contain({
+                code: "D1014",
+            });
+            expect(input).to.deep.equal({a: {b: 1}});
+            expect(settings).to.deep.equal({limit: 10});
+        });
+
+        it("should change the input itself if $clone is overridden to return it", async function() {
+            const input = {a: {b: 1}};
+            const expr = jsonata('($clone := function($o) { $o }; $ ~> | a | {"b": 2} |)');
+            const result = await expr.evaluate(input);
+            expect(result).to.equal(input);
+            expect(input).to.deep.equal({a: {b: 2}});
+        });
+
+        it("should not run any getters when checking the matches", async function() {
+            let called = false;
+            const input = {
+                a: {b: 1},
+                get lazy() {
+                    called = true;
+                    return {};
+                }
+            };
+            const expr = jsonata('($clone := function($o) { $o }; $ ~> | a | {"b": 2} |)');
+            await expr.evaluate(input);
+            expect(called).to.equal(false);
+            expect(input.a).to.deep.equal({b: 2});
+        });
+
+        it("should allow values in the copy that aren't objects to be matched", async function() {
+            const result = await jsonata('{"a": "text"} ~> | a | {} |').evaluate();
+            expect(result).to.deep.equal({a: 'text'});
+        });
+    });
 });
 
 describe("Test that yield platform specific results", () => {

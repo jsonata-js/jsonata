@@ -132,7 +132,7 @@ The syntax has the following structure:
 where
 
 - `head` evaluates to the object that is to be copied and transformed
-- `location` evaluates to the part(s) within the copied object that are to be updated. The `location` expression is evaluated relative to the result of `head`. The result of evaluating `location` must be an object or array of objects.
+- `location` evaluates to the part(s) within the copied object that are to be updated. The `location` expression is evaluated relative to the result of `head`. The result of evaluating `location` must be an object or array of objects, which must be part of the copy.  It is an error (`D1014`) if `location` evaluates to a function, or to an object that isn't part of the copy, such as one that it selects using `$$`.
 - `update` evaluates to an object that is merged into the object matched by each `location`. `update` is evaluated relative to the result of `location` and if `location` matched multiple objects, then the update gets evaluated for each one of these. The result of (each) update is merged into the result of `location`.
 - `delete` (optional) evaluates to a string or an array of strings. Each string is the name of the name/value pair in each object matched by `location` that is to be removed from the resultant object.
 
