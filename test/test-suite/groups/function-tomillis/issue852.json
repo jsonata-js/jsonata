@@ -400,6 +400,24 @@
         ]
     },
     {
+        "description": "#852: parse seconds immediately after a [Z0] timezone offset",
+        "expr": "$toMillis('2020-01-02 11:00 -3:3012', '[Y0001]-[M01]-[D01] [H01]:[m01] [Z0][s01]')",
+        "dataset": null,
+        "result": 1577975412000
+    },
+    {
+        "description": "#852: parse seconds immediately after a [Z01] timezone offset",
+        "expr": "$toMillis('2020-01-02 11:00 -03:3012', '[Y0001]-[M01]-[D01] [H01]:[m01] [Z01][s01]')",
+        "dataset": null,
+        "result": 1577975412000
+    },
+    {
+        "description": "#852: reject a single minute digit in a [Z0] timezone offset",
+        "expr": "$toMillis('2020-01-02 11:00 -3:3', '[Y0001]-[M01]-[D01] [H01]:[m01] [Z0]')",
+        "dataset": null,
+        "undefinedResult": true
+    },
+    {
         "description": "#852: ISO parsing without a picture agrees with numeric timezone pictures",
         "expr": "$toMillis('2020-01-01T00:00:00-03:30')",
         "dataset": null,

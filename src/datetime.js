@@ -971,7 +971,7 @@ const dateTime = (function () {
                     if (separator) {
                         res.regex += separator.character + '[0-9]+';
                     } else if (part.integerFormat.mandatoryDigits <= 2) {
-                        res.regex += '(?::[0-9]+)?';
+                        res.regex += '(?::[0-9]{2})?';
                     }
                     res.parse = function(value) {
                         if (part.component === 'z') {
