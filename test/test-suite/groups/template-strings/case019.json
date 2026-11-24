@@ -1,0 +1,7 @@
+{
+    "description": "string containing braces",
+    "expr": "«{\"}\"} and {\"{\"}»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "} and {"
+}

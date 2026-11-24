@@ -1,0 +1,7 @@
+{
+    "description": "regex containing a brace",
+    "expr": "«{$replace(\"a}b\", /\\}/, \"-\")}»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "a-b"
+}

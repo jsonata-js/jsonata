@@ -1,0 +1,6 @@
+{
+    "expr": "λ($x){\"{\" & $x & \"}\"}(\"a\")",
+    "dataset": null,
+    "bindings": {},
+    "result": "{a}"
+}

@@ -1,0 +1,6 @@
+{
+    "expr": "«{function($x){$x * 2}(bar)}»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "196"
+}

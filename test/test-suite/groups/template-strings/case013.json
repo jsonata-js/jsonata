@@ -1,0 +1,6 @@
+{
+    "expr": "«{$uppercase(foo.blah[0].baz.fud)}!»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "HELLO!"
+}

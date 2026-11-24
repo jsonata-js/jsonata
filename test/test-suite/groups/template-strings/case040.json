@@ -1,0 +1,12 @@
+{
+    "description": "parent operator inside braces",
+    "expr": "Account.Order.Product.«{%.OrderID}: {`Product Name`}»",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        "order103: Bowler Hat",
+        "order103: Trilby hat",
+        "order104: Bowler Hat",
+        "order104: Cloak"
+    ]
+}

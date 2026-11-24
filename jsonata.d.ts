@@ -33,6 +33,7 @@ declare namespace jsonata {
         | "variable"
         | "regexp"
         | "operator"
+        | "template"
         | "error";
     value?: any;
     position?: number;
@@ -44,6 +45,11 @@ declare namespace jsonata {
     stages?: ExprNode[];
     lhs?: ExprNode | ExprNode[] | [ExprNode, ExprNode][];
     rhs?: ExprNode;
+    /**
+     * for a template string: literal text (strings) and embedded expressions, in order;
+     * the position of an embedded expression is that of its opening '{'
+     */
+    parts?: (string | { expression: ExprNode; position: number })[];
   }
 
   interface JsonataError extends Error {

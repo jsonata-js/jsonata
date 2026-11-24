@@ -13,6 +13,27 @@ __Example__
 
 `"Hello" & "World"` => `"HelloWorld"`
 
+## `«...»` (Template string)
+
+A template string builds a string from literal text and embedded expressions. It is enclosed in guillemets (`«` and `»`) or, equivalently, in double angle brackets (`<<` and `>>`), and each embedded expression is written in curly braces. Any expression can go inside the braces, including function calls, object constructors and other template strings. A sequence of expressions separated by `;` needs its own parentheses, e.g. `«{($x := 1; $x + 1)}»`.
+
+The result is always a string. Each embedded value is cast to string using the same rules as the `&` operator, so a missing value gives an empty string. Empty braces `{}` add nothing.
+
+A template string must be closed with the delimiter that matches the one it was opened with. Inside `«...»` the characters `<<` and `>>` are ordinary text, and inside `<<...>>` the guillemets are ordinary text. A `<<...>>` template ends at the first `>>`, so text that ends with `>` needs an escape, e.g. `<<<li>{Name}</li\>>>`.
+
+The text supports the same backslash escapes as string literals. Use `\{` and `\}` for literal braces, and `\«`, `\»`, `\<` and `\>` for literal delimiters. An unescaped `}` in the text is an error.
+
+__Examples__
+
+- `«Hello {FirstName} {Surname}»` is the same as `"Hello " & FirstName & " " & Surname`
+- `<<Hello {FirstName} {Surname}>>` is the same as `«Hello {FirstName} {Surname}»`
+- `«{1 + 2} apples»` => `"3 apples"`
+- `«{missing}»` => `""`
+- `«\{literal\}»` => `"{literal}"`
+- `<<a \>> b>>` => `"a >> b"`
+
+On Windows, `«` and `»` can be typed with Alt+0171 and Alt+0187 on the numeric keypad. On a Mac with a US layout, use Option+\ and Option+Shift+\. On Linux, use the compose key followed by `<<` or `>>`. Alternatively, use `<<` and `>>`, which need no special keys.
+
 ## `? :` (Conditional)
 
 The conditional ternary operator is used to evaluate one of two alternative expressions based on the result of a predicate (test) condition.  The operator takes the form:

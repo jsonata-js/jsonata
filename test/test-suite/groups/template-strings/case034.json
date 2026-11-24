@@ -1,0 +1,7 @@
+{
+    "description": "unclosed brace",
+    "expr": "«abc {bar»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "code": "S0203"
+}

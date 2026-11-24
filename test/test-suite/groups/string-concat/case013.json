@@ -1,0 +1,6 @@
+{
+    "expr": "\"a\" & (nothing ?? \"b\") & (bar ?: \"c\")",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "ab98"
+}

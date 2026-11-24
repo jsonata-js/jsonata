@@ -1,0 +1,7 @@
+{
+    "description": "adjacent interpolations",
+    "expr": "«{foo.bar}{bar}»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "4298"
+}

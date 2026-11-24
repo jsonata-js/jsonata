@@ -1,0 +1,7 @@
+{
+    "description": "regex as the first expression in a block",
+    "expr": "$match(\"xaby\", (/ab/)).match",
+    "dataset": null,
+    "bindings": {},
+    "result": "ab"
+}

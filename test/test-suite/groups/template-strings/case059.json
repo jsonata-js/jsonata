@@ -1,0 +1,10 @@
+{
+    "description": "a template with no braces is a string in a path step (<<...>>)",
+    "expr": "Account.Order.<<OrderID>>",
+    "dataset": "dataset5",
+    "bindings": {},
+    "result": [
+        "OrderID",
+        "OrderID"
+    ]
+}

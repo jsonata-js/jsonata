@@ -1,0 +1,7 @@
+{
+    "description": "empty braces",
+    "expr": "«a{}b»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "ab"
+}

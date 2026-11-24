@@ -1,0 +1,6 @@
+{
+    "expr": "«\\u00e9{bar}»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "é98"
+}

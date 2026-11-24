@@ -1,0 +1,7 @@
+{
+    "description": "\\u with fewer than 4 hex digits at end of input",
+    "expr": "«\\u41",
+    "dataset": null,
+    "bindings": {},
+    "code": "S0104"
+}

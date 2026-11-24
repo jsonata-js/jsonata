@@ -1,0 +1,7 @@
+{
+    "description": "conditional",
+    "expr": "«{bar > 50 ? \"big\" : \"small\"}»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "big"
+}

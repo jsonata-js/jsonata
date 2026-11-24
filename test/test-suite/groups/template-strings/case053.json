@@ -1,0 +1,7 @@
+{
+    "description": "escaped > inside <<...>>",
+    "expr": "<<a \\>> b>>",
+    "dataset": null,
+    "bindings": {},
+    "result": "a >> b"
+}

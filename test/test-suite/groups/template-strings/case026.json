@@ -1,0 +1,7 @@
+{
+    "description": "escaped braces and guillemets",
+    "expr": "«\\{bar\\} \\«x\\»»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "{bar} «x»"
+}

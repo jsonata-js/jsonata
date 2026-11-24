@@ -1,0 +1,7 @@
+{
+    "description": "function value gives empty string",
+    "expr": "«[{$uppercase}]»",
+    "dataset": "dataset0",
+    "bindings": {},
+    "result": "[]"
+}
