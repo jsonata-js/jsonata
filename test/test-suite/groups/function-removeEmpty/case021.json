@@ -1,0 +1,19 @@
+{
+    "expr": "$map(organization.departments, function($dept) { $removeEmpty($dept) })",
+    "dataset": "dataset25",
+    "bindings": {},
+    "result": {
+        "name": "Engineering",
+        "employees": [
+            {
+                "name": "Alice Smith",
+                "role": "Developer",
+                "skills": ["JavaScript", "Python"]
+            }
+        ],
+        "budget": {
+            "allocated": 100000,
+            "spent": 0
+        }
+    }
+}

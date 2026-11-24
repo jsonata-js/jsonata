@@ -76,4 +76,119 @@ Evaluates the type of `value` and returns one of the following strings:
 * `"function"`
 Returns (non-string) `undefined` when `value` is `undefined`.
 
+## `$removeEmpty()`
+__Signature:__ `$removeEmpty(input, exclusionList?, removeEmptyStrings?)`
+
+Recursively removes empty values from objects and arrays, creating a cleaned version of the input data structure. Empty objects `{}`, empty arrays `[]`, `null` values, and optionally empty strings `""` are removed. The function preserves the original structure while eliminating empty elements.
+
+**Parameters:**
+- `input` - The data structure to clean up (object, array, or primitive value)
+- `exclusionList` (optional) - Array of dot-notation paths to exclude from cleaning. Paths can optionally start with `$.`
+- `removeEmptyStrings` (optional) - Boolean flag to control removal of empty strings (default: `true`)
+
+**Examples**
+
+Basic cleanup of an object:
+```
+$removeEmpty({
+  "name": "John",
+  "email": "",
+  "profile": {
+    "bio": null,
+    "settings": {},
+    "preferences": []
+  },
+  "active": true
+})
+```
+=>
+```
+{
+  "name": "John",
+  "active": true
+}
+```
+
+Cleanup with exclusions to preserve specific empty values:
+```
+$removeEmpty({
+  "required": "",
+  "optional": "",
+  "config": {}
+}, ["required", "config"])
+```
+=>
+```
+{
+  "required": "",
+  "config": {}
+}
+```
+
+Preserving empty strings by setting `removeEmptyStrings` to `false`:
+```
+$removeEmpty({
+  "name": "Jane",
+  "middle": "",
+  "last": "Doe",
+  "metadata": null
+}, [], false)
+```
+=>
+```
+{
+  "name": "Jane",
+  "middle": "",
+  "last": "Doe"
+}
+```
+
+Cleaning arrays with mixed content:
+```
+$removeEmpty([
+  "valid",
+  "",
+  null,
+  {"key": "value"},
+  {},
+  [],
+  42
+])
+```
+=>
+```
+[
+  "valid",
+  {"key": "value"},
+  42
+]
+```
+
+Using path exclusions with nested objects:
+```
+$removeEmpty({
+  "user": {
+    "name": "Alice",
+    "bio": "",
+    "social": {
+      "twitter": "",
+      "github": "alice123"
+    }
+  }
+}, ["user.bio", "user.social.twitter"])
+```
+=>
+```
+{
+  "user": {
+    "name": "Alice",
+    "bio": "",
+    "social": {
+      "twitter": "",
+      "github": "alice123"
+    }
+  }
+}
+```
+
 

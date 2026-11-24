@@ -1,0 +1,9 @@
+{
+    "expr": "$removeEmpty(data.objects.partial, [\"empty_string\"], false)",
+    "dataset": "dataset26",
+    "bindings": {},
+    "result": {
+        "valid": "data",
+        "empty_string": ""
+    }
+}

@@ -1,0 +1,12 @@
+{
+    "expr": "$removeEmpty(data.primitives)",
+    "dataset": "dataset26",
+    "bindings": {},
+    "result": {
+        "string": "valid",
+        "number": 42,
+        "zero": 0,
+        "boolean": true,
+        "false": false
+    }
+}

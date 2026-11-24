@@ -1,0 +1,27 @@
+{
+    "expr": "[$removeEmpty(user.profile), $removeEmpty(user.profile, [], true)]",
+    "dataset": "dataset25",
+    "bindings": {},
+    "result": [
+        {
+            "social": {
+                "linkedin": "https://linkedin.com/in/johndoe"
+            },
+            "preferences": {
+                "privacy": {
+                    "public": true
+                }
+            }
+        },
+        {
+            "social": {
+                "linkedin": "https://linkedin.com/in/johndoe"
+            },
+            "preferences": {
+                "privacy": {
+                    "public": true
+                }
+            }
+        }
+    ]
+}

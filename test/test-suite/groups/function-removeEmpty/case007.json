@@ -1,0 +1,12 @@
+{
+    "expr": "$removeEmpty(data.exclusion_test, [\"nested_exclusion.deep.empty_to_keep\"])",
+    "dataset": "dataset26",
+    "bindings": {},
+    "result": {
+        "nested_exclusion": {
+            "deep": {
+                "empty_to_keep": ""
+            }
+        }
+    }
+}

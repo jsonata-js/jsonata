@@ -1,0 +1,18 @@
+{
+    "expr": "data.arrays.nested.{\"id\": id, \"cleaned\": $removeEmpty($)}",
+    "dataset": "dataset26",
+    "bindings": {},
+    "result": [
+        {
+            "id": 1,
+            "cleaned": {
+                "id": 1,
+                "value": "test"
+            }
+        },
+        {
+            "id": null
+        },
+        {}
+    ]
+}
