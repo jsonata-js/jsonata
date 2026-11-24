@@ -1,0 +1,38 @@
+[
+    {
+        "description": "a width modifier greater than 100 is an error, rather than a string of that width",
+        "expr": "$fromMillis(0, '[f,150000000]')",
+        "dataset": null,
+        "code": "D3142"
+    },
+    {
+        "description": "a minimum width greater than 100 is an error",
+        "expr": "$fromMillis(0, '[Y,600000000]')",
+        "dataset": null,
+        "code": "D3142"
+    },
+    {
+        "description": "a maximum width greater than 100 is an error",
+        "expr": "$fromMillis(0, '[MNn,3-99999999999]')",
+        "dataset": null,
+        "code": "D3142"
+    },
+    {
+        "description": "a width modifier hidden after grouping separators is limited too",
+        "expr": "$fromMillis(0, '[Y0,0,1000000]')",
+        "dataset": null,
+        "code": "D3142"
+    },
+    {
+        "description": "a width modifier of 100 is allowed",
+        "expr": "$length($fromMillis(0, '[Y,100]'))",
+        "dataset": null,
+        "result": 100
+    },
+    {
+        "description": "a width modifier greater than 100 is an error when parsing",
+        "expr": "$toMillis('2018', '[Y,1-101]')",
+        "dataset": null,
+        "code": "D3142"
+    }
+]

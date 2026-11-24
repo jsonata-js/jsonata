@@ -1,0 +1,14 @@
+[
+    {
+        "description": "formats a large number in roman numerals without recursing for each numeral",
+        "expr": "$length($formatInteger(1e7, 'I'))",
+        "dataset": null,
+        "result": 10000
+    },
+    {
+        "description": "a number larger than ten million is too large to format in roman numerals",
+        "expr": "$formatInteger(1e7 + 1, 'I')",
+        "dataset": null,
+        "code": "D3143"
+    }
+]
