@@ -1,0 +1,6 @@
+{
+    "expr": "$length($now('[Y0001]-[M01]-[D01]'))",
+    "data": {},
+    "bindings": {},
+    "result": 10
+}

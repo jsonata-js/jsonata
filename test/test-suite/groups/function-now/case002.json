@@ -1,0 +1,6 @@
+{
+    "expr": "$now('[H01]:[m01]', '-0500') = $fromMillis($millis(), '[H01]:[m01]', '-0500')",
+    "data": {},
+    "bindings": {},
+    "result": true
+}

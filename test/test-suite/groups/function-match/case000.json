@@ -1,0 +1,8 @@
+{
+    "expr": "$match(missing, /a/)",
+    "data": {
+        "present": "a"
+    },
+    "bindings": {},
+    "undefinedResult": true
+}
