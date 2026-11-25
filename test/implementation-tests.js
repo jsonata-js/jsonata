@@ -322,9 +322,20 @@ describe("Tests that use the $clone() function", () => {
     });
 
     describe('transform expression with overridden $clone value', function () {
-        it('should throw error', async function () {
+        it('should use the built-in $clone and succeed (expression-level override is ignored for security)', async function () {
+            // Previously this threw T2013, but the fix for issue #859 changed the lookup to use
+            // environment.base so that expression-level $clone bindings can no longer shadow the
+            // built-in and be weaponised.  The transform should now succeed using the built-in.
             var expr = jsonata('( $clone := 5; $ ~> |Account.Order.Product|{"blah":"foo"}| )');
-            expect(
+            var result = await expr.evaluate(testdata2);
+            expect(result).to.have.property('Account');
+        });
+        it('should throw T2013 if the host overrides $clone with a non-function', async function () {
+            // a transform uses the clone provided by the host (via assign/registerFunction), so if that
+            // is not a function, the transform can't make a copy to work on
+            var expr = jsonata('( $ ~> |Account.Order.Product|{"blah":"foo"}| )');
+            expr.assign('clone', 5);
+            await expect(
                 expr.evaluate(testdata2)
             ).to.eventually.be.rejected.to.deep.contain({ code: "T2013" });
         });
@@ -1144,6 +1155,31 @@ describe("Tests that are specific to a Javascript runtime", () => {
             const expr = jsonata('{} ~> | constructor | {"is_admin": true} |');
             const result = await expr.evaluate();
             expect(result).to.deep.equal({});
+        });
+        it("should not allow code execution via $clone override and __proto__ pollution (issue #859)", async function() {
+            // This PoC from issue #859 used an expression-level $clone override combined with
+            // __proto__ pollution via the transform update clause to reach Function() and execute
+            // arbitrary code.  The evaluation must not return any string starting with 'Your'.
+            const code = "return 'Your Node.js version is ' + process.version ";
+            const expression = `(
+  $r := $clone({"a":0,"constructor":0});
+  $clone := function($i){$i};
+  $r ~> | $ | {"__proto__":/x/} |;
+  $each($r, function($v,$k){
+    $k="a" ? ($r ~> | $ | {},"constructor" |; 0)
+           : $v(${JSON.stringify(code)})()
+  })[1]
+)`;
+            const expr = jsonata(expression);
+            // Should either return undefined/non-string or throw — but must NOT execute the code
+            let result;
+            try {
+                result = await expr.evaluate({});
+            } catch(e) {
+                // throwing is also acceptable — the attack was blocked
+                return;
+            }
+            expect(result).to.not.be.a('string');
         });
     });
 });
