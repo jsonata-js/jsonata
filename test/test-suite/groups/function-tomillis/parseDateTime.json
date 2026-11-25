@@ -854,5 +854,29 @@
         "expr": "$toMillis('2018', '[Y١]')",
         "data": {},
         "result": 1514764800000
+    },
+    {
+        "function": "#toMillis",
+        "category": "nothing matches",
+        "description": "picture string with no closing bracket is an error, even for a timestamp that's too short to match it",
+        "expr": "$toMillis('', '[Y][')",
+        "data": {},
+        "code": "D3135"
+    },
+    {
+        "function": "#toMillis",
+        "category": "nothing matches",
+        "description": "picture string with an unknown component is an error, even for a timestamp that's too short to match it",
+        "expr": "$toMillis('2018', '[Y]-[M]-[D][q]')",
+        "data": {},
+        "code": "D3132"
+    },
+    {
+        "function": "#toMillis",
+        "category": "nothing matches",
+        "description": "picture string with an unknown component is an error, even for a timestamp that's too long to match it",
+        "expr": "$toMillis($pad('', 1000001, '1'), '[Y][q]')",
+        "data": {},
+        "code": "D3132"
     }
 ]

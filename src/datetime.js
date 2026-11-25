@@ -147,7 +147,8 @@ const dateTime = (function () {
         [1, 'i']
     ];
 
-    // the largest number that can be formatted in roman numerals - ten thousand Ms
+    // the largest number that is formatted in roman numerals - ten thousand Ms.  §4.6.1 allows an upper bound, and
+    // larger numbers are formatted using the format token 1
     const maxRoman = 1e7;
 
     const romanValues = {'M': 1000, 'D': 500, 'C': 100, 'L': 50, 'X': 10, 'V': 5, 'I': 1};
@@ -158,13 +159,6 @@ const dateTime = (function () {
      * @returns {string} - the number in roman numerals
      */
     function decimalToRoman(value) {
-        // there's no numeral larger than M, so a large number is mostly a run of them
-        if (value > maxRoman) {
-            throw {
-                code: 'D3143',
-                value: value
-            };
-        }
         let roman = '';
         romanNumerals.forEach(function (numeral) {
             const count = Math.floor(value / numeral[0]);
@@ -276,9 +270,14 @@ const dateTime = (function () {
                 formattedInteger = decimalToLetters(value, format.case === tcase.UPPER ? 'A' : 'a');
                 break;
             case formats.ROMAN:
-                formattedInteger = decimalToRoman(value);
-                if (format.case === tcase.UPPER) {
-                    formattedInteger = formattedInteger.toUpperCase();
+                if (value > maxRoman) {
+                    // there's no numeral larger than M, so a large number would be a long run of them
+                    formattedInteger = utils.decimalDigitsToString(utils.decimalDigits(value), 0);
+                } else {
+                    formattedInteger = decimalToRoman(value);
+                    if (format.case === tcase.UPPER) {
+                        formattedInteger = formattedInteger.toUpperCase();
+                    }
                 }
                 break;
             case formats.WORDS:
@@ -543,9 +542,9 @@ const dateTime = (function () {
     /**
      * analyse the date-time picture string
      * @param {string} picture - picture string
-     * @param {number} [maxLength] - when parsing, the length of the timestamp.  The analysis stops as soon as the
-     *   timestamp is too short to match the picture string, or too long to match it in reasonable time
-     * @returns {{type: string, parts: Array}} - the analysed string, or null if the analysis was stopped
+     * @param {number} [maxLength] - when parsing, the length of the timestamp
+     * @returns {{type: string, parts: Array}} - the analysed string, or null if the timestamp is too short to match
+     *   the picture string, or too long to match it in reasonable time
      */
     function analyseDateTimePicture(picture, maxLength) {
         var spec = [];
@@ -570,7 +569,8 @@ const dateTime = (function () {
         };
 
         var start = 0, pos = 0;
-        while (pos < picture.length && !cannotMatch()) {
+        // the whole picture string is analysed, so that it's an error if it's invalid, however long the timestamp is
+        while (pos < picture.length) {
             if (picture.charAt(pos) === '[') {
                 // check it's not a doubled [[
                 if (picture.charAt(pos + 1) === '[') {
