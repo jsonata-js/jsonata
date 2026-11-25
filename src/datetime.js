@@ -30,6 +30,10 @@ const dateTime = (function () {
      * @returns {string} - representation in words
      */
     function numberToWords(value, ordinal) {
+        if (isNaN(value)) {
+            // a component of a date that is out of range - formatted as an empty string, as in roman numerals and letters
+            return '';
+        }
         var lookup = function (num, prev, ord) {
             var words = '';
             if (num <= 19) {
@@ -93,6 +97,14 @@ const dateTime = (function () {
         wordValues[lword] = val;
         wordValues[lword + 'th'] = val;
     });
+    // the words that can make up a number when parsing, in upper case and grouped by their first letter.
+    // The order of the words in each group matters - it's the order that they are tried in (see the words cursor in matchParts)
+    const wordsByInitial = Object.create(null);
+    utils.keys(wordValues).concat('and').forEach(function (word) {
+        const upper = word.toUpperCase();
+        const initial = upper.charAt(0);
+        wordsByInitial[initial] = (wordsByInitial[initial] || []).concat(upper);
+    });
 
     /**
      * Converts a number in english words to numeric value
@@ -135,6 +147,10 @@ const dateTime = (function () {
         [1, 'i']
     ];
 
+    // the largest number that is formatted in roman numerals - ten thousand Ms.  §4.6.1 allows an upper bound, and
+    // larger numbers are formatted using the format token 1
+    const maxRoman = 1e7;
+
     const romanValues = {'M': 1000, 'D': 500, 'C': 100, 'L': 50, 'X': 10, 'V': 5, 'I': 1};
 
     /**
@@ -143,13 +159,15 @@ const dateTime = (function () {
      * @returns {string} - the number in roman numerals
      */
     function decimalToRoman(value) {
-        for (var index = 0; index < romanNumerals.length; index++) {
-            const numeral = romanNumerals[index];
-            if (value >= numeral[0]) {
-                return numeral[1] + decimalToRoman(value - numeral[0]);
+        let roman = '';
+        romanNumerals.forEach(function (numeral) {
+            const count = Math.floor(value / numeral[0]);
+            if (count > 0) {
+                roman += numeral[1].repeat(count);
+                value -= count * numeral[0];
             }
-        }
-        return '';
+        });
+        return roman;
     }
 
     /**
@@ -252,9 +270,14 @@ const dateTime = (function () {
                 formattedInteger = decimalToLetters(value, format.case === tcase.UPPER ? 'A' : 'a');
                 break;
             case formats.ROMAN:
-                formattedInteger = decimalToRoman(value);
-                if (format.case === tcase.UPPER) {
-                    formattedInteger = formattedInteger.toUpperCase();
+                if (value > maxRoman) {
+                    // there's no numeral larger than M, so a large number would be a long run of them
+                    formattedInteger = utils.decimalDigitsToString(utils.decimalDigits(value), 0);
+                } else {
+                    formattedInteger = decimalToRoman(value);
+                    if (format.case === tcase.UPPER) {
+                        formattedInteger = formattedInteger.toUpperCase();
+                    }
                 }
                 break;
             case formats.WORDS:
@@ -443,8 +466,9 @@ const dateTime = (function () {
                         // find the greatest common divisor of all the positions
                         const factor = indexes.reduce(gcd);
                         // is every position separated by this divisor? If so, it's regular
+                        const positions = new Set(indexes);
                         for (let index = 1; index <= indexes.length; index++) {
-                            if (indexes.indexOf(index * factor) === -1) {
+                            if (!positions.has(index * factor)) {
                                 return 0;
                             }
                         }
@@ -480,17 +504,58 @@ const dateTime = (function () {
         P: 'n', m: '01', s: '01', f: '1', Z: '01:01', z: '01:01', C: 'n', E: 'n'
     };
 
+    // the largest width modifier allowed in a date/time picture string.  The width of a component is padded to the minimum
+    // width, so a large width modifier in a short picture string would produce a long string from a small expression
+    const maxWidthModifier = 100;
+
+    // matching a timestamp takes time and memory proportional to the number of positions in it (its length plus one)
+    // times the number of parts in the picture string.  Limit that to one million (1e6), which is far more than any
+    // real timestamp needs
+    const maxMatchSize = 1e6;
+
+    /**
+     * The format of fractional seconds (§9.8.4.5), and the least and most digits that they are formatted with
+     * @param {object} markerSpec - the analysed marker
+     * @returns {{picture: Array, format: object, minDigits: number, maxDigits: number}} - the format
+     */
+    function fractionalSecondsFormat(markerSpec) {
+        const picture = stringToArray(markerSpec.presentation1);
+        // Append an empty modifier so semicolons in the primary token remain grouping signs.
+        const format = analyseIntegerPicture(markerSpec.presentation1 + ';');
+        let minDigits = format.mandatoryDigits;
+        let maxDigits = minDigits + format.optionalDigits;
+        if (markerSpec.width) {
+            if (markerSpec.width.min !== undefined) {
+                minDigits = Math.max(minDigits, markerSpec.width.min);
+            }
+            maxDigits = Math.max(maxDigits, minDigits);
+            if (markerSpec.width.max !== undefined) {
+                maxDigits = Math.max(maxDigits, markerSpec.width.max);
+            }
+        } else if (picture.length === 1) {
+            maxDigits = 3; // a single digit allows the full millisecond precision
+        }
+        return {picture, format, minDigits, maxDigits};
+    }
+
     // §9.8.4.1 the format specifier is an array of string literals and variable markers
     /**
      * analyse the date-time picture string
      * @param {string} picture - picture string
-     * @returns {{type: string, parts: Array}} - the analysed string
+     * @param {number} [maxLength] - when parsing, the length of the timestamp
+     * @returns {{type: string, parts: Array}} - the analysed string, or null if the timestamp is too short to match
+     *   the picture string, or too long to match it in reasonable time
      */
-    function analyseDateTimePicture(picture) {
+    function analyseDateTimePicture(picture, maxLength) {
         var spec = [];
         const format = {
             type: 'datetime',
             parts: spec
+        };
+        // a timestamp needs all the characters of each literal, and at least one character for each marker
+        let minLength = 0;
+        const cannotMatch = function () {
+            return maxLength !== undefined && (minLength > maxLength || spec.length * (maxLength + 1) > maxMatchSize);
         };
         const addLiteral = function (start, end) {
             if (end > start) {
@@ -499,10 +564,12 @@ const dateTime = (function () {
                 // what if there are instances of single ']' ? - the spec doesn't say
                 literal = literal.split(']]').join(']');
                 spec.push({type: 'literal', value: literal});
+                minLength += literal.length;
             }
         };
 
         var start = 0, pos = 0;
+        // the whole picture string is analysed, so that it's an error if it's invalid, however long the timestamp is
         while (pos < picture.length) {
             if (picture.charAt(pos) === '[') {
                 // check it's not a doubled [[
@@ -510,6 +577,7 @@ const dateTime = (function () {
                     // literal [
                     addLiteral(start, pos);
                     spec.push({type: 'literal', value: '['});
+                    minLength++;
                     pos += 2;
                     start = pos;
                     continue;
@@ -546,7 +614,14 @@ const dateTime = (function () {
                             return undefined;
                         } else {
                             // TODO validate wm is an unsigned int
-                            return parseInt(wm);
+                            const width = parseInt(wm);
+                            if (width > maxWidthModifier) {
+                                throw {
+                                    code: 'D3142',
+                                    value: wm
+                                };
+                            }
+                            return width;
                         }
                     };
                     if (dash === -1) {
@@ -625,9 +700,11 @@ const dateTime = (function () {
                             }
                         }
                     }
-                    // if the previous part is also an integer with no intervening markup, then its width for parsing must be precisely defined
+                    // if the previous part is also an integer with no intervening markup, then its width for parsing must be
+                    // precisely defined - unless this part can't start with a digit, so there's no doubt where the previous one ends.
+                    // Fractional seconds are always parsed as digits, whatever their presentation
                     const previousPart = spec[spec.length - 1];
-                    if (previousPart && previousPart.integerFormat) {
+                    if (previousPart && previousPart.integerFormat && (def.integerFormat.primary === formats.DECIMAL || def.component === 'f')) {
                         previousPart.integerFormat.parseWidth = previousPart.integerFormat.mandatoryDigits;
                     }
                 }
@@ -635,12 +712,13 @@ const dateTime = (function () {
                     def.integerFormat = analyseIntegerPicture(def.presentation1);
                 }
                 spec.push(def);
+                minLength++;
                 start = pos + 1;
             }
             pos++;
         }
         addLiteral(start, pos);
-        return format;
+        return cannotMatch() ? null : format;
     }
 
     const days = ['', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -865,6 +943,10 @@ const dateTime = (function () {
                             value: markerSpec.component
                         };
                     }
+                    if (componentValue === undefined) {
+                        // the date is out of range - formatted as an empty string, as in roman numerals and letters
+                        componentValue = '';
+                    }
                     if (markerSpec.names === tcase.UPPER) {
                         componentValue = componentValue.toUpperCase();
                     } else if (markerSpec.names === tcase.LOWER) {
@@ -878,32 +960,23 @@ const dateTime = (function () {
                 }
             } else if (markerSpec.component === 'f') {
                 // §9.8.4.5 Formatting Fractional Seconds
+                if (markerSpec.names) {
+                    throw {
+                        code: 'D3133',
+                        value: markerSpec.component
+                    };
+                }
                 if (markerSpec.integerFormat.primary !== formats.DECIMAL || isNaN(componentValue)) {
                     componentValue = _formatInteger(componentValue, markerSpec.integerFormat);
                 } else {
-                    const picture = stringToArray(markerSpec.presentation1);
-                    // Append an empty modifier so semicolons in the primary token remain grouping signs.
-                    const format = analyseIntegerPicture(markerSpec.presentation1 + ';');
-                    let minDigits = format.mandatoryDigits;
-                    let maxDigits = minDigits + format.optionalDigits;
-                    if (markerSpec.width) {
-                        if (markerSpec.width.min !== undefined) {
-                            minDigits = Math.max(minDigits, markerSpec.width.min);
-                        }
-                        maxDigits = Math.max(maxDigits, minDigits);
-                        if (markerSpec.width.max !== undefined) {
-                            maxDigits = Math.max(maxDigits, markerSpec.width.max);
-                        }
-                    } else if (picture.length === 1) {
-                        maxDigits = 3; // a single digit allows the full millisecond precision
-                    }
+                    const {picture, format, minDigits, maxDigits} = fractionalSecondsFormat(markerSpec);
 
                     let fraction = ('00' + componentValue).slice(-3).replace(/0+$/, '');
                     if (fraction.length < minDigits) {
                         fraction += new Array(minDigits - fraction.length + 1).join('0');
                     }
                     // Pad and truncate on the right, without rounding into the next second.
-                    const digits = fraction.substring(0, maxDigits).split('').map(digit =>
+                    const digits = stringToArray(fraction.substring(0, maxDigits)).map(digit =>
                         String.fromCodePoint(format.zeroCode + Number(digit)));
                     // Count grouping positions from the left. The output cannot exceed the
                     // adjusted picture's width, so separators never need to be extrapolated.
@@ -984,46 +1057,118 @@ const dateTime = (function () {
     }
 
     /**
-     * Generate a regex to parse integers or timestamps
-     * @param {object} formatSpec - object representing the format
-     * @returns {object} - regex
+     * Convert the digits of a number from a decimal digit family to ASCII digits.  Any other characters are left as they
+     * are, so that parseInt reads (or stops at) them as it would anyway
+     * @param {string} digits - the number
+     * @param {number} zeroCode - the code point of the zero digit of the family
+     * @returns {string} - the number in ASCII digits
      */
-    function generateRegex(formatSpec) {
+    function toAsciiDigits(digits, zeroCode) {
+        let result = '', codes = [];
+        for (const char of digits) {
+            const code = char.codePointAt(0);
+            codes.push(code >= zeroCode && code <= zeroCode + 9 ? code - zeroCode + 0x30 : code);
+            // convert in chunks, since String.fromCodePoint can't take an unlimited number of arguments
+            if (codes.length === 8192) {
+                result += String.fromCodePoint.apply(null, codes);
+                codes = [];
+            }
+        }
+        return result + String.fromCodePoint.apply(null, codes);
+    }
+
+    /**
+     * Remove the grouping separators of an integer picture string from a number, in one pass over the number
+     * @param {string} digits - the number
+     * @param {object} formatSpec - the analysed integer picture string
+     * @returns {string} - the number without its grouping separators
+     */
+    function removeGroupingSeparators(digits, formatSpec) {
+        const separators = formatSpec.regular ? [formatSpec.groupingSeparators] : formatSpec.groupingSeparators;
+        if (separators.length === 0) {
+            return digits;
+        }
+        const characters = new Set(separators.map(separator => separator.character));
+        let result = '', start = 0, pos = 0;
+        // step through the code points, since a separator can be outside the Basic Multilingual Plane
+        for (const char of digits) {
+            if (characters.has(char)) {
+                result += digits.substring(start, pos);
+                start = pos + char.length;
+            }
+            pos += char.length;
+        }
+        return result + digits.substring(start);
+    }
+
+    // sets of characters for matching parts of a timestamp - in upper case, since timestamps are matched case-insensitively
+    const digitChars = '0123456789';
+    const letterChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const romanChars = 'MDCLXVI';
+    const wordSeparators = '-, ';
+    const ordinalSuffixes = ['TH', 'ST', 'ND', 'RD'];
+
+    /**
+     * Generate a matcher to parse integers or timestamps
+     * @param {object} formatSpec - object representing the format
+     * @returns {object} - matcher
+     */
+    function generateMatcher(formatSpec) {
         var matcher = Object.create(null);
         if (formatSpec.type === 'datetime') {
             matcher.type = 'datetime';
+            // each part matches one of:
+            //   literal - the given text
+            //   words - a number in words
+            //   chars - a run of these characters, either the longest that lets the rest of the timestamp match,
+            //           or a fixed number of them (width), and optionally followed by an ordinal suffix (ordinal).
+            //           A timezone has a prefix before the run, and the run can be split by a separator (hours and minutes)
             matcher.parts = formatSpec.parts.map(function (part) {
                 var res = Object.create(null);
                 if (part.type === 'literal') {
-                    res.regex = part.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    res.literal = canonicalize(part.value);
                 } else if (part.component === 'Z' || part.component === 'z') {
                     // timezone
                     let separator;
                     if (!Array.isArray(part.integerFormat.groupingSeparators)) {
                         separator = part.integerFormat.groupingSeparators;
                     }
-                    res.regex = '';
-                    if (part.component === 'z') {
-                        res.regex = 'GMT';
-                    }
-                    res.regex += '[-+][0-9]+';
+                    // the possible characters at each position of the prefix
+                    res.prefix = part.component === 'z' ? ['G', 'M', 'T', '-+'] : ['-+'];
+                    res.chars = digitChars;
                     if (separator) {
-                        res.regex += separator.character + '[0-9]+';
+                        res.separator = canonicalize(separator.character);
                     } else if (part.integerFormat.mandatoryDigits <= 2) {
-                        res.regex += '(?::[0-9]{2})?';
+                        // [Z0] and [Z01] format any minutes as two digits after a colon
+                        res.minutes = true;
+                    }
+                    // if directly followed by another number in digits, then the number of digits (after any separator) is fixed,
+                    // if the timezone is always formatted with that many: the minutes after a separator, and the hours in [Z01]
+                    // or the hours and minutes in [Z0001].  Otherwise, it's matched like any other number of digits
+                    if (part.integerFormat.parseWidth) {
+                        if (separator) {
+                            res.width = separator.position;
+                        } else if (part.integerFormat.mandatoryDigits === 2 || part.integerFormat.mandatoryDigits === 4) {
+                            res.width = part.integerFormat.mandatoryDigits;
+                        }
                     }
                     res.parse = function(value) {
                         if (part.component === 'z') {
                             value = value.substring(3); // remove the leading GMT
                         }
-                        // The sign applies to both components, including offsets such as -00:30.
+                        // the sign applies to both the hours and the minutes, including offsets such as -00:30
                         const sign = value.charAt(0) === '-' ? -1 : 1;
                         value = value.substring(1);
                         let offsetHours = 0, offsetMinutes = 0;
-                        const separatorPos = value.indexOf(separator ? separator.character : ':');
-                        if (separatorPos !== -1) {
-                            offsetHours = Number.parseInt(value.substring(0, separatorPos));
-                            offsetMinutes = Number.parseInt(value.substring(separatorPos + 1));
+                        if (separator) {
+                            // the separator could be the same as the sign, and it is matched case-insensitively
+                            const position = canonicalize(value).indexOf(canonicalize(separator.character));
+                            offsetHours = Number.parseInt(value.substring(0, position));
+                            offsetMinutes = Number.parseInt(value.substring(position + separator.character.length));
+                        } else if (value.indexOf(':') !== -1) {
+                            // the minutes after a colon, from [Z0] or [Z01]
+                            offsetHours = Number.parseInt(value.substring(0, value.indexOf(':')));
+                            offsetMinutes = Number.parseInt(value.substring(value.indexOf(':') + 1));
                         } else {
                             // depends on number of digits
                             const numdigits = value.length;
@@ -1038,15 +1183,24 @@ const dateTime = (function () {
                         return sign * (offsetHours * 60 + offsetMinutes);
                     };
                 } else if (part.component === 'f') {
-                    res.regex = '[0-9]+';
+                    res.chars = digitChars;
+                    // if directly followed by another number in digits, then the number of digits is fixed, if the fractional
+                    // seconds are always formatted with the same number of digits.  Otherwise, they're matched like any other
+                    // number of digits
+                    if (part.integerFormat && part.integerFormat.parseWidth && part.integerFormat.primary === formats.DECIMAL) {
+                        const format = fractionalSecondsFormat(part);
+                        if (format.minDigits === format.maxDigits) {
+                            res.width = format.minDigits;
+                        }
+                    }
                     res.parse = function(value) {
                         return parseFloat('0.' + value.substring(0, 3)) * 1000;
                     };
                 } else if (part.integerFormat) {
-                    res = generateRegex(part.integerFormat);
+                    res = generateMatcher(part.integerFormat);
                 } else {
                     // must be a month or day name
-                    res.regex = '[a-zA-Z]+';
+                    res.chars = letterChars;
                     var lookup = Object.create(null);
                     if (part.component === 'M' || part.component === 'x') {
                         // months
@@ -1069,7 +1223,8 @@ const dateTime = (function () {
                             }
                         });
                     } else if (part.component === 'P') {
-                        lookup = {'am': 0, 'AM': 0, 'pm': 1, 'PM': 1};
+                        lookup.am = lookup.AM = 0;
+                        lookup.pm = lookup.PM = 1;
                     } else {
                         // unsupported 'name' option for this component
                         throw {
@@ -1090,34 +1245,27 @@ const dateTime = (function () {
 
             switch (formatSpec.primary) {
                 case formats.LETTERS:
-                    matcher.regex = isUpper ? '[A-Z]+' : '[a-z]+';
+                    matcher.chars = letterChars;
                     matcher.parse = function (value) {
                         return lettersToDecimal(value, isUpper ? 'A' : 'a');
                     };
                     break;
                 case formats.ROMAN:
-                    matcher.regex = isUpper ? '[MDCLXVI]+' : '[mdclxvi]+';
+                    matcher.chars = romanChars;
                     matcher.parse = function (value) {
                         return romanToDecimal(isUpper ? value : value.toUpperCase());
                     };
                     break;
                 case formats.WORDS:
-                    matcher.regex = '(?:' + utils.keys(wordValues).concat('and', '[\\-, ]').join('|') + ')+';
+                    matcher.words = true;
                     matcher.parse = function (value) {
                         return wordsToNumber(value.toLowerCase());
                     };
                     break;
                 case formats.DECIMAL:
-                    matcher.regex = '[0-9]';
-                    if (formatSpec.parseWidth) {
-                        matcher.regex += `{${formatSpec.parseWidth}}`;
-                    } else {
-                        matcher.regex += '+';
-                    }
-                    if (formatSpec.ordinal) {
-                        // ordinals
-                        matcher.regex += '(?:th|st|nd|rd)';
-                    }
+                    matcher.chars = digitChars;
+                    matcher.width = formatSpec.parseWidth;
+                    matcher.ordinal = formatSpec.ordinal;
                     matcher.parse = function (value) {
                         let digits = value;
                         if (formatSpec.ordinal) {
@@ -1125,16 +1273,9 @@ const dateTime = (function () {
                             digits = value.substring(0, value.length - 2);
                         }
                         // strip out the separators
-                        if (formatSpec.regular) {
-                            digits = digits.split(',').join('');
-                        } else {
-                            formatSpec.groupingSeparators.forEach(sep => {
-                                digits = digits.split(sep.character).join('');
-                            });
-                        }
+                        digits = removeGroupingSeparators(digits, formatSpec);
                         if (formatSpec.zeroCode !== 0x30) {
-                            // apply offset
-                            digits = digits.split('').map(char => String.fromCodePoint(char.codePointAt(0) - formatSpec.zeroCode + 0x30)).join('');
+                            digits = toAsciiDigits(digits, formatSpec.zeroCode);
                         }
                         return parseInt(digits);
                     };
@@ -1151,6 +1292,277 @@ const dateTime = (function () {
     }
 
     /**
+     * Converts a string to the form used to compare strings case-insensitively, in the same way as a regex with
+     * the 'i' flag: each character in upper case, unless that would change its length or make a non-ASCII character ASCII
+     * @param {string} str - the string to convert
+     * @returns {string} - the converted string, which has the same length
+     */
+    function canonicalize(str) {
+        if (/^[\x00-\x7f]*$/.test(str)) { // eslint-disable-line no-control-regex
+            return str.toUpperCase();
+        }
+        // build the result in an array of code units, since a string built one character at a time takes many times
+        // more memory than the result
+        const codes = new Uint16Array(str.length);
+        for (let i = 0; i < str.length; i++) {
+            const ch = str.charAt(i);
+            const upper = ch.toUpperCase();
+            codes[i] = (upper.length === 1 && !(ch.charCodeAt(0) >= 128 && upper.charCodeAt(0) < 128) ? upper : ch).charCodeAt(0);
+        }
+        let result = '';
+        for (let i = 0; i < codes.length; i += 8192) {
+            result += String.fromCharCode.apply(null, codes.subarray(i, i + 8192));
+        }
+        return result;
+    }
+
+    // flags recorded for each part of the picture string at each position in the timestamp
+    const FAILED = 1; // the rest of the picture string can't be matched from this part at this position
+    const VISITED = 2; // a number in words has already been continued from this position (see the words cursor)
+
+    /**
+     * Match a timestamp against the parts of a picture string, finding the same match as the regex made by
+     * concatenating a capturing group for each part.  Like a backtracking regex engine, it tries the possible matches
+     * of each part in turn, in the same order, until the rest of the timestamp matches the rest of the parts.
+     * Unlike a regex, it never tries to match the rest of the parts from the same part and position twice, so it takes
+     * time proportional to the length of the timestamp times the number of parts, however the picture string is
+     * constructed.  On a timestamp that doesn't match, a regex can take time that grows exponentially with the number
+     * of parts that can match the same characters (a ReDoS attack).  The timestamp's length plus one, times the number of
+     * parts, must be no more than maxMatchSize, which analyseDateTimePicture checks when parsing
+     * @param {Array} parts - the parts of the picture string, as generated by generateMatcher
+     * @param {string} timestamp - the timestamp to match
+     * @returns {Array} - the text matching each part, or null if the timestamp doesn't match
+     */
+    function matchParts(parts, timestamp) {
+        const count = parts.length;
+        const stride = timestamp.length + 1;
+        if (count === 0) {
+            return timestamp.length === 0 ? [] : null;
+        }
+        const text = canonicalize(timestamp);
+        const length = text.length;
+        const memo = new Uint8Array(stride * count);
+        const runEnds = Object.create(null);
+        const literalStarts = Object.create(null);
+        // for each part that matches a range of positions, the lowest position tried, plus one (zero if none tried yet)
+        const lowestTried = new Int32Array(stride * count);
+
+        // whether the literal text occurs at the given position.  All the positions where it occurs are found the first
+        // time, in one pass over the timestamp (Knuth-Morris-Pratt), so that each test takes constant time however long
+        // the literal is
+        const literalAt = function (literal, pos) {
+            let starts = literalStarts[literal];
+            if (!starts) {
+                // the length of the longest proper prefix of the literal that is also a suffix of each prefix of it
+                const overlap = new Int32Array(literal.length);
+                for (let ii = 1, kk = 0; ii < literal.length; ii++) {
+                    while (kk > 0 && literal.charAt(ii) !== literal.charAt(kk)) {
+                        kk = overlap[kk - 1];
+                    }
+                    if (literal.charAt(ii) === literal.charAt(kk)) {
+                        kk++;
+                    }
+                    overlap[ii] = kk;
+                }
+                starts = new Uint8Array(stride);
+                for (let ii = 0, kk = 0; ii < length; ii++) {
+                    while (kk > 0 && text.charAt(ii) !== literal.charAt(kk)) {
+                        kk = overlap[kk - 1];
+                    }
+                    if (text.charAt(ii) === literal.charAt(kk)) {
+                        kk++;
+                    }
+                    if (kk === literal.length) {
+                        starts[ii - kk + 1] = 1;
+                        kk = overlap[kk - 1];
+                    }
+                }
+                literalStarts[literal] = starts;
+            }
+            return starts[pos] === 1;
+        };
+
+        // the position after the run of characters from the given set that starts at the given position
+        const runEnd = function (chars, pos) {
+            let ends = runEnds[chars];
+            if (!ends) {
+                ends = new Int32Array(stride);
+                ends[length] = length;
+                for (let ii = length - 1; ii >= 0; ii--) {
+                    ends[ii] = chars.indexOf(text.charAt(ii)) === -1 ? ii : ends[ii + 1];
+                }
+                runEnds[chars] = ends;
+            }
+            return ends[pos];
+        };
+
+        const startsWith = function (str, pos) {
+            return text.substring(pos, pos + str.length) === str;
+        };
+
+        // the words (or separator) that a number in words can continue with at the given position, in the order they are tried
+        const nextWords = function (pos) {
+            const ch = text.charAt(pos);
+            return wordsByInitial[ch] || (ch !== '' && wordSeparators.indexOf(ch) !== -1 ? [ch] : []);
+        };
+
+        // a cursor for each part, which steps through the positions where that part can end, given where it starts,
+        // in the order that a regex would try them.  Only one cursor per part is ever in use at a time
+        const cursors = parts.map(function (part, index) {
+            const base = index * stride;
+            if (part.words) {
+                // a number in words matches like the regex (?:word1|word2|...|[-, ])+ which tries to continue with
+                // each word in turn before ending at the current position.  So the possible ends are tried in the
+                // order of a depth first search through the words, but each position is only searched from once,
+                // since the ends found by searching from the same position again would already have failed
+                const positions = [], options = [], tried = [];
+                let depth = 0;
+                const push = function (pos) {
+                    positions[depth] = pos;
+                    options[depth] = nextWords(pos);
+                    tried[depth] = 0;
+                    depth++;
+                };
+                return {
+                    start: function (pos) {
+                        depth = 0;
+                        if (!(memo[base + pos] & VISITED)) {
+                            push(pos);
+                        }
+                    },
+                    next: function () {
+                        while (depth > 0) {
+                            const top = depth - 1;
+                            if (tried[top] < options[top].length) {
+                                const word = options[top][tried[top]++];
+                                const pos = positions[top] + word.length;
+                                if (startsWith(word, positions[top]) && !(memo[base + pos] & VISITED)) {
+                                    memo[base + pos] |= VISITED;
+                                    push(pos);
+                                }
+                            } else {
+                                depth--;
+                                if (top > 0) {
+                                    return positions[top]; // the number has to have at least one word
+                                }
+                            }
+                        }
+                        return -1;
+                    }
+                };
+            }
+            // otherwise the part can end at a single position, or anywhere in a range of positions which are tried from
+            // the highest to the lowest (like a greedy regex).  Ranges that end at the same position share the record of
+            // the lowest position tried, since the higher positions would already have failed
+            let low = 0, high = -1, key = null, first = -1;
+            const only = function (end) {
+                low = high = end;
+            };
+            return {
+                start: function (pos) {
+                    // no possible ends, unless found below
+                    low = 0;
+                    high = -1;
+                    key = null;
+                    first = -1;
+                    if (part.literal !== undefined) {
+                        if (literalAt(part.literal, pos)) {
+                            only(pos + part.literal.length);
+                        }
+                        return;
+                    }
+                    let from = pos;
+                    if (part.prefix) {
+                        for (let ii = 0; ii < part.prefix.length; ii++) {
+                            if (from === length || part.prefix[ii].indexOf(text.charAt(from)) === -1) {
+                                return;
+                            }
+                            from++;
+                        }
+                    }
+                    if (part.separator) {
+                        // the separator isn't one of the characters before it, so they must all be before it
+                        const head = runEnd(part.chars, from);
+                        if (head === from || !startsWith(part.separator, head)) {
+                            return;
+                        }
+                        from = head + part.separator.length;
+                    }
+                    let end = runEnd(part.chars, from);
+                    if (end === from) {
+                        return;
+                    }
+                    if (part.width) {
+                        // a width that isn't a positive whole number (e.g. from the width modifier [Y,1--2]) can't match anything
+                        if (!(part.width > 0) || from + part.width > end) {
+                            return;
+                        }
+                        end = from + part.width;
+                    }
+                    if (part.minutes && text.charAt(end) === ':' && runEnd(digitChars, end + 1) >= end + 3) {
+                        // the optional minutes of a timezone (two digits after a colon) are tried before the hours on their
+                        // own, as the regex (?::[0-9]{2})? would
+                        first = end + 3;
+                    }
+                    if (!part.width && !part.ordinal) {
+                        key = base + end;
+                        low = from + 1;
+                        high = lowestTried[key] === 0 ? end : Math.min(end, lowestTried[key] - 2);
+                        return;
+                    }
+                    // a fixed number of characters, or all of them if followed by an ordinal suffix (which isn't one of them)
+                    if (!part.ordinal) {
+                        only(end);
+                    } else if (ordinalSuffixes.indexOf(text.substring(end, end + 2)) !== -1) {
+                        only(end + 2);
+                    }
+                },
+                next: function () {
+                    if (first !== -1) {
+                        const end = first;
+                        first = -1;
+                        return end;
+                    }
+                    if (high < low) {
+                        return -1;
+                    }
+                    if (key !== null) {
+                        lowestTried[key] = high + 1;
+                    }
+                    return high--;
+                }
+            };
+        });
+
+        // search for the end of each part in turn, backtracking to the previous part when the current one can't be matched
+        const starts = [], ends = [];
+        let depth = 0;
+        const enter = function (index, pos) {
+            starts[index] = pos;
+            cursors[index].start(pos);
+            depth = index + 1;
+        };
+        enter(0, 0);
+        while (depth > 0) {
+            const index = depth - 1;
+            const end = cursors[index].next();
+            if (end === -1) {
+                memo[index * stride + starts[index]] |= FAILED;
+                depth--;
+            } else if (index === count - 1) {
+                if (end === length) {
+                    ends[index] = end;
+                    return starts.map((start, ii) => timestamp.substring(start, ends[ii]));
+                }
+            } else if (!(memo[(index + 1) * stride + end] & FAILED)) {
+                ends[index] = end;
+                enter(index + 1, end);
+            }
+        }
+        return null;
+    }
+
+    /**
      * parse a string containing an integer as specified by the picture string
      * @param {string} value - the string to parse
      * @param {string} picture - the picture string
@@ -1162,10 +1574,8 @@ const dateTime = (function () {
         }
 
         const formatSpec = analyseIntegerPicture(picture);
-        const matchSpec = generateRegex(formatSpec);
-        //const fullRegex = '^' + matchSpec.regex + '$';
-        //const matcher = new RegExp(fullRegex);
-        // TODO validate input based on the matcher regex
+        const matchSpec = generateMatcher(formatSpec);
+        // TODO validate input using matchParts
         const result = matchSpec.parse(value);
         return result;
     }
@@ -1177,12 +1587,12 @@ const dateTime = (function () {
      * @returns {number} - the parsed timestamp in millis since the epoch
      */
     function parseDateTime(timestamp, picture) {
-        const formatSpec = analyseDateTimePicture(picture);
-        const matchSpec = generateRegex(formatSpec);
-        const fullRegex = '^' + matchSpec.parts.map(part => '(' + part.regex + ')').join('') + '$';
-
-        const matcher = new RegExp(fullRegex, 'i'); // TODO can cache this against the picture
-        var info = matcher.exec(timestamp);
+        const formatSpec = analyseDateTimePicture(picture, timestamp.length);
+        if (formatSpec === null) {
+            return undefined;
+        }
+        const matchSpec = generateMatcher(formatSpec);
+        var info = matchParts(matchSpec.parts, timestamp);
         if (info !== null) {
             // validate what we've just parsed - do we have enough information to create a timestamp?
             // rules:
@@ -1231,8 +1641,8 @@ const dateTime = (function () {
             const tmB = 47;   // binary 101111
 
             const components = Object.create(null);
-            for (let i = 1; i < info.length; i++) {
-                const mpart = matchSpec.parts[i - 1];
+            for (let i = 0; i < info.length; i++) {
+                const mpart = matchSpec.parts[i];
                 if (mpart.parse) {
                     components[mpart.component] = mpart.parse(info[i]);
                 }

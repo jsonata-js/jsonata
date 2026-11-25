@@ -1,0 +1,20 @@
+[
+    {
+        "description": "names, words and roman numerals of an out-of-range date are empty, rather than an exception",
+        "expr": "$fromMillis(1e20, '[FNn]|[MNn,3]|[Yw]|[YI]|[Ya]')",
+        "dataset": null,
+        "result": "||||"
+    },
+    {
+        "description": "a timezone that isn't a number makes the date out of range",
+        "expr": "$fromMillis(0.5, '[Dw]', 'abc')",
+        "dataset": null,
+        "result": ""
+    },
+    {
+        "description": "fractional seconds can't be formatted as a name",
+        "expr": "$fromMillis(0, '[fN]')",
+        "dataset": null,
+        "code": "D3133"
+    }
+]

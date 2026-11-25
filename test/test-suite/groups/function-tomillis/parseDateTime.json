@@ -374,5 +374,509 @@
         "expr": "$toMillis('2026-04-08T19:05:04.01987', '[Y0001]-[M01]-[D01]T[H01]:[m01]:[s01].[f1]') ~> $fromMillis() ",
         "data": {},
         "result": "2026-04-08T19:05:04.019Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "regular expression denial of service",
+        "description": "should not backtrack between adjacent fractional seconds markers (issue 833)",
+        "expr": "$toMillis('111111111111111111111111111111111111111111111111111111111111111111111111111x', '[f1][f1][f1][f1][f1][f1][f1]')",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#toMillis",
+        "category": "regular expression denial of service",
+        "description": "should not backtrack between adjacent fractional seconds markers with no fixed width",
+        "expr": "$toMillis('111111111111111111111111111111111111111111111111111111111111111111111111111x', '[f#][f#][f#][f#][f#][f#][f#]')",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#toMillis",
+        "category": "regular expression denial of service",
+        "description": "should not backtrack between adjacent timezone and fractional seconds markers",
+        "expr": "$toMillis('+11111111+11111111+11111111+11111111+11111111+11111111+11111111+11111111+11111111+11111111x', '[Z01][f1][Z01][f1][Z01][f1][Z01][f1][Z01][f1][Z01][f1][Z01][f1][Z01][f1][Z01][f1][Z01][f1]')",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#toMillis",
+        "category": "regular expression denial of service",
+        "description": "should not backtrack between adjacent name markers",
+        "expr": "$toMillis('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1', '[MNn][MNn][MNn][MNn][MNn][MNn][MNn]')",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#toMillis",
+        "category": "regular expression denial of service",
+        "description": "should not backtrack between markers separated by a literal digit",
+        "expr": "$toMillis('111111111111111111111111111111111111111111111111111111111111111111111111111x', '[f1]1[f1]1[f1]1[f1]1[f1]1[f1]1[f1]')",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#toMillis",
+        "category": "regular expression denial of service",
+        "description": "should not backtrack between adjacent numbers in words",
+        "expr": "$toMillis('oneoneoneoneoneoneoneoneoneoneoneoneoneoneoneoneoneoneoneoneoneoneoneoneoneoneoneoneoneoneoneoneoneoneoneoneoneoneoneonex', '[Dw][Dw][Dw][Dw][Dw][Dw][Dw][Dw][Dw][Dw][Dw][Dw]')",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#toMillis",
+        "category": "regular expression denial of service",
+        "description": "should not backtrack over a long timestamp",
+        "expr": "$toMillis($join([1..100000].('1')) & 'x', '[f1][f1][f1][f1][f1][f1][f1][f1][f1]')",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#toMillis",
+        "category": "regular expression denial of service",
+        "description": "should not parse a timestamp that is too long for the picture string",
+        "expr": "$toMillis($join([1..100000].('1')), '[f1][f1][f1][f1][f1][f1][f1][f1][f1][f1]')",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#toMillis",
+        "category": "adjacent markers",
+        "description": "should parse three numbers in words separated by spaces",
+        "expr": "$toMillis('two thousand and twenty one two', '[Yw] [Mw] [Dw]') ~> $fromMillis()",
+        "data": {},
+        "result": "2020-01-02T00:00:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "adjacent markers",
+        "description": "should parse three numbers in words separated by commas",
+        "expr": "$toMillis('one, one, two thousand', '[Dw], [Mw], [Yw]') ~> $fromMillis()",
+        "data": {},
+        "result": "2000-01-01T00:00:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "adjacent markers",
+        "description": "should parse numbers in words separated by hyphens",
+        "expr": "$toMillis('two thousand and twenty-one-fifth', '[Yw]-[Mw]-[Dwo]') ~> $fromMillis()",
+        "data": {},
+        "result": "2020-01-05T00:00:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "adjacent markers",
+        "description": "should parse a year in words followed by a comma and a day in words",
+        "expr": "$toMillis('one thousand, nine hundred and eighty-four, twenty-first August', '[Yw], [Dwo] [MNn]') ~> $fromMillis()",
+        "data": {},
+        "result": "1984-08-21T00:00:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "adjacent markers",
+        "description": "should parse three adjacent roman numerals",
+        "expr": "$toMillis('MMXXIIV', '[YI][MI][DI]') ~> $fromMillis()",
+        "data": {},
+        "result": "2021-01-05T00:00:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "adjacent markers",
+        "description": "should parse three adjacent letter sequences",
+        "expr": "$toMillis('abc', '[Ya][Ma][Da]') ~> $fromMillis()",
+        "data": {},
+        "result": "1901-02-03T00:00:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "adjacent markers",
+        "description": "should parse numbers of variable width separated by literal digits",
+        "expr": "$toMillis('20190011', '[Y]0[M01][D01]') ~> $fromMillis()",
+        "data": {},
+        "result": "2019-01-01T00:00:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "adjacent markers",
+        "description": "should parse fractional seconds directly followed by a year",
+        "expr": "$toMillis('12:00:00.5002018-01-01', '[H01]:[m01]:[s01].[f001][Y0001]-[M01]-[D01]') ~> $fromMillis()",
+        "data": {},
+        "result": "2018-01-01T12:00:00.500Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "adjacent markers",
+        "description": "should parse a timezone directly followed by seconds",
+        "expr": "$toMillis('2020-09-09T08:00+053012', '[Y0001]-[M01]-[D01]T[H01]:[m01][Z0101][s01]') ~> $fromMillis()",
+        "data": {},
+        "result": "2020-09-09T02:30:12.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "adjacent markers",
+        "description": "should parse a timezone with a separator directly followed by seconds",
+        "expr": "$toMillis('2020-09-09T08:00+05:3012', '[Y0001]-[M01]-[D01]T[H01]:[m01][Z01:01][s01]') ~> $fromMillis()",
+        "data": {},
+        "result": "2020-09-09T02:30:12.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "adjacent markers",
+        "description": "should parse an am/pm marker directly followed by a timezone",
+        "expr": "$toMillis('2020-09-09 10:23pmGMT-05:00', '[Y0001]-[M01]-[D01] [h]:[m01][P][z]') ~> $fromMillis()",
+        "data": {},
+        "result": "2020-09-10T03:23:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "case insensitivity",
+        "description": "should parse an upper case ordinal suffix",
+        "expr": "$toMillis('27TH March 2018', '[D1o] [MNn] [Y0001]') ~> $fromMillis()",
+        "data": {},
+        "result": "2018-03-27T00:00:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "case insensitivity",
+        "description": "should parse a lower case literal in a picture string",
+        "expr": "$toMillis('2018-03-27t14:03:00z', '[Y0001]-[M01]-[D01]T[H01]:[m01]:[s01]Z') ~> $fromMillis()",
+        "data": {},
+        "result": "2018-03-27T14:03:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "timezones",
+        "description": "should treat a timezone separator as a literal character",
+        "expr": "$toMillis('2020-09-09 12:00:00 +05*30', '[Y0001]-[M01]-[D01] [H01]:[m01]:[s01] [Z01*01]') ~> $fromMillis()",
+        "data": {},
+        "result": "2020-09-09T06:30:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "timezones",
+        "description": "should not match any character in place of a timezone separator",
+        "expr": "$toMillis('2020-09-09 12:00:00 +05X30', '[Y0001]-[M01]-[D01] [H01]:[m01]:[s01] [Z01.01]')",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#toMillis",
+        "category": "basic date patterns",
+        "description": "should not parse an empty string with an empty picture string",
+        "expr": "$toMillis('', '')",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#toMillis",
+        "category": "basic date patterns",
+        "description": "should not parse a string with an empty picture string",
+        "expr": "$toMillis('2018', '')",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#toMillis",
+        "category": "adjacent markers",
+        "description": "should not parse a fixed width number with too few digits",
+        "expr": "$toMillis('201', '[Y0001][M1]')",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#toMillis",
+        "category": "case insensitivity",
+        "description": "should match a non-ASCII literal case-insensitively",
+        "expr": "$toMillis('é2018', 'É[Y0001]')",
+        "data": {},
+        "result": 1514764800000
+    },
+    {
+        "function": "#toMillis",
+        "category": "case insensitivity",
+        "description": "should match a non-ASCII literal whose upper case is longer",
+        "expr": "$toMillis('ß2018', 'ß[Y0001]')",
+        "data": {},
+        "result": 1514764800000
+    },
+    {
+        "function": "#toMillis",
+        "category": "case insensitivity",
+        "description": "should not match a non-ASCII character with an ASCII literal",
+        "expr": "$toMillis('ſ2018', 's[Y0001]')",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#toMillis",
+        "category": "adjacent markers",
+        "description": "should not parse an ordinal number without its suffix",
+        "expr": "$toMillis('27xx March 2018', '[D1o] [MNn] [Y0001]')",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#toMillis",
+        "category": "adjacent markers",
+        "description": "should not parse a number in words that could end in more than one place, if neither fits",
+        "expr": "$toMillis('sixthtenth 2018x', '[Dwo]th[Mw] [Y0001]')",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#toMillis",
+        "category": "adjacent markers",
+        "description": "should not parse an ordinal number that could start in more than one place, if neither fits",
+        "expr": "$toMillis('1111thy', '[Y]1[D1o]x')",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#toMillis",
+        "category": "regular expression denial of service",
+        "description": "should not take time proportional to the length of a literal in the picture string",
+        "expr": "$toMillis($join([1..300000].('1')) & '€', '[f#]' & $join([1..80000].('1')))",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#toMillis",
+        "category": "regular expression denial of service",
+        "description": "should not parse a long string that isn't a timestamp",
+        "expr": "$toMillis($join([1..200000].('x')), '[Y0001]-[M01]-[D01]')",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#toMillis",
+        "category": "timezones",
+        "description": "should parse a timezone whose separator is the same as its sign",
+        "expr": "$toMillis('2020-09-09 12:00:00 +05+30', '[Y0001]-[M01]-[D01] [H01]:[m01]:[s01] [Z01+01]') ~> $fromMillis()",
+        "data": {},
+        "result": "2020-09-09T06:30:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "timezones",
+        "description": "should parse a timezone whose separator is a letter in a different case",
+        "expr": "$toMillis('2020-09-09 12:00:00 +05H30', '[Y0001]-[M01]-[D01] [H01]:[m01]:[s01] [Z01h01]') ~> $fromMillis()",
+        "data": {},
+        "result": "2020-09-09T06:30:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "timezones",
+        "description": "should parse a GMT timezone whose separator is the same as its sign",
+        "expr": "$toMillis('2020-09-09 12:00:00 GMT+05+30', '[Y0001]-[M01]-[D01] [H01]:[m01]:[s01] [z01+01]') ~> $fromMillis()",
+        "data": {},
+        "result": "2020-09-09T06:30:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "regular expression denial of service",
+        "description": "should not loop on a negative width modifier",
+        "expr": "$toMillis('201801', '[Y,1--2][M01]')",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#toMillis",
+        "category": "regular expression denial of service",
+        "description": "should not loop on a negative width modifier with no minimum width",
+        "expr": "$toMillis('2018x', '[Y,--3][M01]x')",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#toMillis",
+        "category": "regular expression denial of service",
+        "description": "should not match anything with a negative width modifier",
+        "expr": "$toMillis('0101', '[M01][Y,1--1][D01]')",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#toMillis",
+        "category": "basic date patterns",
+        "description": "should parse a timestamp that starts with a long literal",
+        "expr": "$toMillis($join([1..1000].('x')) & '2018', $join([1..1000].('x')) & '[Y0001]')",
+        "data": {},
+        "result": 1514764800000
+    },
+    {
+        "function": "#toMillis",
+        "category": "adjacent markers",
+        "description": "should parse fractional seconds directly followed by a number in words",
+        "expr": "$toMillis('2018-01-01 10:00:00.123first', '[Y0001]-[M01]-[D01] [H01]:[m01]:[s01].[f][Dwo]') ~> $fromMillis()",
+        "data": {},
+        "result": "2018-01-01T10:00:00.123Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "adjacent markers",
+        "description": "should parse a timezone directly followed by a number in words",
+        "expr": "$toMillis('2018-01-01 10:00+530one', '[Y0001]-[M01]-[D01] [H01]:[m01][Z0101][Dw]') ~> $fromMillis()",
+        "data": {},
+        "result": "2018-01-01T04:30:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "adjacent markers",
+        "description": "should parse a number directly followed by a roman numeral",
+        "expr": "$toMillis('2018XI', '[Y][MI]') ~> $fromMillis()",
+        "data": {},
+        "result": "2018-11-01T00:00:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "timezones",
+        "description": "should apply a negative sign to the minutes of a timezone",
+        "expr": "$toMillis('2020-01-01 00:00:00 -03:30', '[Y0001]-[M01]-[D01] [H01]:[m01]:[s01] [Z]') ~> $fromMillis()",
+        "data": {},
+        "result": "2020-01-01T03:30:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "timezones",
+        "description": "should parse a negative timezone of less than an hour",
+        "expr": "$toMillis('2020-01-01 00:00:00 -00:30', '[Y0001]-[M01]-[D01] [H01]:[m01]:[s01] [Z]') ~> $fromMillis()",
+        "data": {},
+        "result": "2020-01-01T00:30:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "timezones",
+        "description": "should apply a negative sign to the minutes of a timezone with no separator",
+        "expr": "$toMillis('2020-01-01 00:00:00 -0330', '[Y0001]-[M01]-[D01] [H01]:[m01]:[s01] [Z0101]') ~> $fromMillis()",
+        "data": {},
+        "result": "2020-01-01T03:30:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "timezones",
+        "description": "should apply a negative sign to the minutes of a GMT timezone",
+        "expr": "$toMillis('2020-01-01 00:00:00 GMT-03:30', '[Y0001]-[M01]-[D01] [H01]:[m01]:[s01] [z]') ~> $fromMillis()",
+        "data": {},
+        "result": "2020-01-01T03:30:00.000Z"
+    },
+    {
+        "function": "#toMillis",
+        "category": "basic date patterns",
+        "description": "should not accept a property of a JavaScript object as am/pm",
+        "expr": "$toMillis('2020-01-01 10:00 constructor', '[Y0001]-[M01]-[D01] [h]:[m01] [P]')",
+        "data": {},
+        "code": "D3136"
+    },
+    {
+        "function": "#toMillis",
+        "category": "regular expression denial of service",
+        "description": "should analyse a picture string with many grouping separators in linear time",
+        "expr": "$type($toMillis('1', '[Y' & $pad('', 600000, '0.') & ']'))",
+        "data": {},
+        "result": "number"
+    },
+    {
+        "function": "#toMillis",
+        "category": "regular expression denial of service",
+        "description": "should remove many different grouping separators in linear time",
+        "expr": "$type($toMillis($pad('', 999990, '0'), '[Y' & $pad('', 800000, '0.0,') & '0]'))",
+        "data": {},
+        "result": "number"
+    },
+    {
+        "function": "#toMillis",
+        "category": "regular expression denial of service",
+        "description": "should not match a picture string with more markers than the timestamp has characters",
+        "expr": "$toMillis('', $pad('', 30000, '[Y]'))",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#toMillis",
+        "category": "regular expression denial of service",
+        "description": "should not match a picture string with so many markers that matching it against the timestamp would take too long",
+        "expr": "$toMillis($pad('', 99999, '1') & 'x', $pad('', 100000, '[Y]1'))",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#toMillis",
+        "category": "regular expression denial of service",
+        "description": "should not convert a literal that is longer than the timestamp",
+        "expr": "$toMillis('x', $pad('', 10000000, 'é'))",
+        "data": {},
+        "undefinedResult": true
+    },
+    {
+        "function": "#toMillis",
+        "category": "case insensitivity",
+        "description": "should match a long non-ASCII literal case-insensitively",
+        "expr": "$toMillis($pad('', 1000, 'é') & '2018', $pad('', 1000, 'É') & '[Y]')",
+        "data": {},
+        "result": 1514764800000
+    },
+    {
+        "function": "#toMillis",
+        "category": "adjacent markers",
+        "description": "should round-trip a timezone with variable width hours directly followed by a number",
+        "expr": "( $p := '[Y0001]-[M01]-[D01] [Z0][H01]:[m01]'; $toMillis($fromMillis(1514808000000, $p, '+1030'), $p) )",
+        "data": {},
+        "result": 1514808000000
+    },
+    {
+        "function": "#toMillis",
+        "category": "adjacent markers",
+        "description": "should round-trip fractional seconds with a variable number of digits directly followed by a number",
+        "expr": "( $p := '[Y0001]-[M01]-[D01] [m01]:[s01].[f][H1]'; $toMillis($fromMillis(1514768523456, $p), $p) )",
+        "data": {},
+        "result": 1514768523456
+    },
+    {
+        "function": "#toMillis",
+        "category": "adjacent markers",
+        "description": "should round-trip fractional seconds with a fixed number of digits directly followed by a number",
+        "expr": "( $p := '[Y0001]-[M01]-[D01] [m01]:[s01].[f001][H1]'; $toMillis($fromMillis(1514768523456, $p), $p) )",
+        "data": {},
+        "result": 1514768523456
+    },
+    {
+        "function": "#toMillis",
+        "category": "adjacent markers",
+        "description": "should fix the width of a number directly followed by fractional seconds in any presentation",
+        "expr": "$toMillis('2018-01-01T12:34:56789', '[Y0001]-[M01]-[D01]T[H01]:[m01]:[s01][fI]')",
+        "data": {},
+        "result": 1514810096789
+    },
+    {
+        "function": "#toMillis",
+        "category": "basic date patterns",
+        "description": "should parse ASCII digits for a picture string in another decimal digit family, rather than throw",
+        "expr": "$toMillis('2018', '[Y١]')",
+        "data": {},
+        "result": 1514764800000
+    },
+    {
+        "function": "#toMillis",
+        "category": "nothing matches",
+        "description": "picture string with no closing bracket is an error, even for a timestamp that's too short to match it",
+        "expr": "$toMillis('', '[Y][')",
+        "data": {},
+        "code": "D3135"
+    },
+    {
+        "function": "#toMillis",
+        "category": "nothing matches",
+        "description": "picture string with an unknown component is an error, even for a timestamp that's too short to match it",
+        "expr": "$toMillis('2018', '[Y]-[M]-[D][q]')",
+        "data": {},
+        "code": "D3132"
+    },
+    {
+        "function": "#toMillis",
+        "category": "nothing matches",
+        "description": "picture string with an unknown component is an error, even for a timestamp that's too long to match it",
+        "expr": "$toMillis($pad('', 1000001, '1'), '[Y][q]')",
+        "data": {},
+        "code": "D3132"
     }
 ]
