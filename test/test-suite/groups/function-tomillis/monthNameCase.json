@@ -1,0 +1,32 @@
+[
+    {
+        "expr": "$toMillis('27 APRIL 2008', '[D1] [MN] [Y0001]')",
+        "data": null,
+        "bindings": {},
+        "result": 1209254400000
+    },
+    {
+        "expr": "$toMillis('27 april 2008', '[D1] [Mn] [Y0001]')",
+        "data": null,
+        "bindings": {},
+        "result": 1209254400000
+    },
+    {
+        "expr": "$toMillis('2 FEB 2012', '[D1] [MN,3-3] [Y0001]')",
+        "data": null,
+        "bindings": {},
+        "result": 1328140800000
+    },
+    {
+        "expr": "$toMillis('MONDAY 2 APRIL 2018', '[FN] [D1] [MN] [Y0001]')",
+        "data": null,
+        "bindings": {},
+        "result": 1522627200000
+    },
+    {
+        "expr": "$toMillis($fromMillis(1522159380000, '[D1] [MN] [Y0001] [h]:[m01] [PN]'), '[D1] [MN] [Y0001] [h]:[m01] [PN]')",
+        "data": null,
+        "bindings": {},
+        "result": 1522159380000
+    }
+]
