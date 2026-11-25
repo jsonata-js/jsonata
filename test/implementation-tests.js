@@ -843,6 +843,14 @@ describe("Tests that are specific to a Javascript runtime", () => {
             const result = expr.evaluate();
             expect(result).to.deep.equal({});
         });
+        it("should not change an object's prototype through a __proto__ update key", function() {
+            const expr = jsonata('{} ~> | $ | {"__proto__": {"injected": true}} |');
+            const result = expr.evaluate();
+            // __proto__ is set as an own data property; the object does not inherit from the update value
+            expect(Object.getPrototypeOf(result)).to.equal(Object.prototype);
+            expect(Object.prototype.hasOwnProperty.call(result, '__proto__')).to.equal(true);
+            expect({}.injected).to.equal(undefined);
+        });
     });
 });
 

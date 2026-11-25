@@ -1319,9 +1319,15 @@ var jsonata = (function() {
                                 value: update
                             };
                         }
-                        // merge the update
+                        // merge the update.  A property named __proto__ is set with defineProperty so that it
+                        // becomes an own data property rather than invoking the prototype setter (which would change
+                        // what the matched object inherits from); all other keys use plain assignment
                         for(const prop of utils.keys(update)) {
-                            match[prop] = update[prop];
+                            if (prop === '__proto__') {
+                                Object.defineProperty(match, prop, {value: update[prop], writable: true, enumerable: true, configurable: true});
+                            } else {
+                                match[prop] = update[prop];
+                            }
                         }
                     }
 
