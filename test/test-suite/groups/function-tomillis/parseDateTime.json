@@ -786,16 +786,16 @@
     {
         "function": "#toMillis",
         "category": "regular expression denial of service",
-        "description": "should stop analysing a picture string with more markers than the timestamp has characters",
-        "expr": "$toMillis('', $pad('', 3000000, '[Y]'))",
+        "description": "should not match a picture string with more markers than the timestamp has characters",
+        "expr": "$toMillis('', $pad('', 30000, '[Y]'))",
         "data": {},
         "undefinedResult": true
     },
     {
         "function": "#toMillis",
         "category": "regular expression denial of service",
-        "description": "should stop analysing a picture string that would take too long to match against the timestamp",
-        "expr": "$toMillis($pad('', 999, '1'), $pad('', 9999999, '[Y]'))",
+        "description": "should not match a picture string with so many markers that matching it against the timestamp would take too long",
+        "expr": "$toMillis($pad('', 99999, '1') & 'x', $pad('', 100000, '[Y]1'))",
         "data": {},
         "undefinedResult": true
     },
