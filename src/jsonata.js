@@ -1391,7 +1391,8 @@ var jsonata = (function() {
             }
 
             // this function returns a copy of obj with changes specified by the pattern/operation
-            var cloneFunction = environment.lookup('clone');
+            // Look up $clone from the top-level execution environment.
+            var cloneFunction = environment.base.lookup('clone');
             if(!isFunction(cloneFunction)) {
                 // throw type error
                 throw {
