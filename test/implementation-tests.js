@@ -1838,6 +1838,30 @@ describe("Tests that the descendant operator is consistent with the single wildc
     });
 });
 
+describe("Tests that $each and $sift only read an object's own properties", () => {
+    // $each and $sift list the keys once, then read each value while the callbacks run.  A callback can
+    // delete a key, so the value must be read as an own property, not looked up along the prototype chain.
+    it("$each should skip a key that a callback deletes, rather than read an inherited property", async function() {
+        // the object has an own 'secret' that shadows an inherited one; a host function deletes the own
+        // property while $each is iterating, which does not depend on how $clone is bound
+        const input = Object.assign(Object.create({secret: "inherited"}), {first: 1, secret: "own"});
+        const expr = jsonata('$each($, function($v, $k){ $k = "first" ? ($drop(); $v) : $v })');
+        expr.registerFunction('drop', () => { delete input.secret; return true; }, '<:b>');
+        const result = await expr.evaluate(input);
+        // 'secret' is no longer an own property when $each reaches it, so it is skipped and the only
+        // result is the value from 'first' (a single-element sequence is returned as the value itself)
+        expect(result).to.equal(1);
+    });
+    it("$sift should skip a key that a callback deletes, rather than read an inherited property", async function() {
+        const input = Object.assign(Object.create({secret: "inherited"}), {first: 1, secret: "own"});
+        const expr = jsonata('$sift($, function($v, $k){ $k = "first" ? $drop() : true })');
+        expr.registerFunction('drop', () => { delete input.secret; return true; }, '<:b>');
+        const result = await expr.evaluate(input);
+        // only 'first' is kept; 'secret' is skipped rather than kept with its inherited value
+        expect(result).to.deep.equal({first: 1});
+    });
+});
+
 describe("Tests invalid object creation", () => {
     it("prevents creating an object mimicking a lambda", () => {
         const expr = jsonata('($lambda = {"_jsonata_lambda": true}; $lambda())');
