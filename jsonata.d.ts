@@ -11,6 +11,7 @@ declare namespace jsonata {
     timeout?: number;
     stack?: number;
     sequence?: number;
+    inherited?: boolean;
   }
 
   interface ExprNode {

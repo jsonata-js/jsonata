@@ -1682,6 +1682,12 @@ const functions = (() => {
         return result;
     }
 
+    // the names of properties that can't be looked up, even when the inherited option allows looking up
+    // properties that an object inherits from its prototype.  They give access to the prototype and constructor of the
+    // object (and so to the Function constructor), or to functions that can change them
+    const blockedProperties = new Set(['__proto__', 'constructor', 'prototype',
+        '__defineGetter__', '__defineSetter__', '__lookupGetter__', '__lookupSetter__']);
+
     /**
      * Return value from an object for a given key
      * @param {Object} input - Object/Array
@@ -1703,7 +1709,10 @@ const functions = (() => {
                     }
                 }
             }
-        } else if (input !== null && typeof input === 'object' && Object.prototype.hasOwnProperty.call(input, key) && !isFunction(input)) {
+        } else if (input !== null && typeof input === 'object' && !isFunction(input) &&
+            (Object.prototype.hasOwnProperty.call(input, key) ||
+             (this.options && this.options.inherited === true && !blockedProperties.has(key)))) {
+            // an object's own properties can always be looked up, and the properties it inherits only if allowed
             result = input[key];
         }
         return result;

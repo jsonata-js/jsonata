@@ -157,3 +157,26 @@ const options = {
 ```
 
 Other similar libraries are available. This is not an endorsement of any particular one. The developer should choose one according to their requirements.
+
+### Properties that JavaScript objects inherit
+
+By default, a JSONata expression can only look up an object's own properties.  It can't look up the properties that the object inherits from its prototype, since they include the object's constructor, from which an expression could reach the `Function` constructor and run arbitrary code.
+
+This means that the properties of some JavaScript objects can't be looked up.  For example, the `hostname` and `href` properties of a [URL](https://developer.mozilla.org/en-US/docs/Web/API/URL) object are getters that it inherits, as are the getters and methods of any class.
+
+If the input to an expression includes such objects, the `inherited` option allows the expression to look up the properties they inherit too.  The inherited properties that give access to an object's prototype and constructor (`__proto__`, `constructor`, `prototype`, `__defineGetter__`, `__defineSetter__`, `__lookupGetter__` and `__lookupSetter__`) still can't be looked up, although an object's own properties with these names can.
+
+```javascript
+const options = {
+    inherited: true
+};
+
+(async () => {
+    const expression = jsonata('hostname', options);
+    const result = await expression.evaluate(new URL('http://example.com/index.html'));  // "example.com"
+})()
+```
+
+The option only applies to looking up a property by name, in a path such as `url.hostname` or with the `$lookup` function.  Functions such as `$keys`, `$each`, `$spread` and `$string`, and the wildcards `*` and `**`, still only see an object's own properties.
+
+This option allows an expression to invoke any method that an object in its input inherits, and to run any getter, which might change the object or have other side effects.  These run as part of the host application, so an error that one throws is passed on as it is, rather than as a JSONata error, and the `timeout` guardrail can't stop one that runs for too long.  Only set the option if the objects passed to the expression are safe for the expression's author to use in this way.
