@@ -1289,8 +1289,9 @@ describe("Tests that are specific to a Javascript runtime", () => {
                     return Shared.prototype;
                 }
             }
-            // $clone is overridden, so the transform works on the input itself, rather than a copy of it
-            const expr = jsonata('($clone := function($o) { $o }; holder ~> | shared | {"x": 1} |)', options);
+            // the host provides an identity clone, so the transform works on the input itself, not a copy of it
+            const expr = jsonata('holder ~> | shared | {"x": 1} |', options);
+            expr.registerFunction('clone', (o) => o, '<x-:x>');
             await expect(
                 expr.evaluate({holder: new Holder()})
             ).to.eventually.be.rejected.to.deep.contain({
@@ -1315,7 +1316,8 @@ describe("Tests that are specific to a Javascript runtime", () => {
             const prototype = {};
             const input = Object.create(prototype);
             input.parent = prototype;
-            const expr = jsonata('($clone := function($o) { $o }; $ ~> | parent | {"is_admin": true} |)');
+            const expr = jsonata('$ ~> | parent | {"is_admin": true} |');
+            expr.registerFunction('clone', (o) => o, '<x-:x>');
             await expect(
                 expr.evaluate(input)
             ).to.eventually.be.rejected.to.deep.contain({
@@ -1380,7 +1382,8 @@ describe("Tests that are specific to a Javascript runtime", () => {
         });
 
         it("should throw an error, rather than change Object.prototype when the input has no prototype", async function() {
-            const expr = jsonata('($clone := function($o) { $o }; $ ~> | $getPrototype() | {"is_admin": true} |)');
+            const expr = jsonata('$ ~> | $getPrototype() | {"is_admin": true} |');
+            expr.registerFunction('clone', (o) => o, '<x-:x>');
             await expect(
                 expr.evaluate(Object.create(null), {getPrototype: () => Object.prototype})
             ).to.eventually.be.rejected.to.deep.contain({
@@ -1414,14 +1417,6 @@ describe("Tests that are specific to a Javascript runtime", () => {
             expect(settings).to.deep.equal({limit: 10});
         });
 
-        it("should change the input itself if $clone is overridden to return it", async function() {
-            const input = {a: {b: 1}};
-            const expr = jsonata('($clone := function($o) { $o }; $ ~> | a | {"b": 2} |)');
-            const result = await expr.evaluate(input);
-            expect(result).to.equal(input);
-            expect(input).to.deep.equal({a: {b: 2}});
-        });
-
         it("should not run any getters when checking the matches", async function() {
             let called = false;
             const input = {
@@ -1431,7 +1426,9 @@ describe("Tests that are specific to a Javascript runtime", () => {
                     return {};
                 }
             };
-            const expr = jsonata('($clone := function($o) { $o }; $ ~> | a | {"b": 2} |)');
+            // the host provides an identity clone, so the transform works on the input itself, not a copy of it
+            const expr = jsonata('$ ~> | a | {"b": 2} |');
+            expr.registerFunction('clone', (o) => o, '<x-:x>');
             await expr.evaluate(input);
             expect(called).to.equal(false);
             expect(input.a).to.deep.equal({b: 2});
