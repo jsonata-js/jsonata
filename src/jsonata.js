@@ -696,7 +696,8 @@ var jsonata = (function() {
      */
     function recurseDescendants(input, results) {
         // this is the equivalent of //* in XPath
-        if (!Array.isArray(input)) {
+        // a function is never a descendant, the same as for the single wildcard (*)
+        if (!Array.isArray(input) && !isFunction(input)) {
             results.push(input);
         }
         if (Array.isArray(input)) {

@@ -1820,6 +1820,24 @@ describe("Tests that include infinite recursion", () => {
     });
 });
 
+describe("Tests that the descendant operator is consistent with the single wildcard for functions", () => {
+    // the single wildcard (*) does not return function values; the descendant operator (**) does the same
+    it("should not include a lambda in the descendants", async function() {
+        const result = await jsonata('($f := function(){1}; [[$f].**])').evaluate();
+        expect(result).to.deep.equal([]);
+    });
+    it("should not include a built-in function in the descendants", async function() {
+        const result = await jsonata('[[$sum].**]').evaluate();
+        expect(result).to.deep.equal([]);
+    });
+    it("should still descend into the other values of an object that holds a function", async function() {
+        // obj holds a function alongside data: the function is skipped, but the data is still returned
+        const data = {obj: {a: {b: "x"}, fn: () => 1}};
+        expect(await jsonata('$count(obj.**)').evaluate(data)).to.equal(3);
+        expect(await jsonata('[obj.**[$type($) = "function"]]').evaluate(data)).to.deep.equal([]);
+    });
+});
+
 describe("Tests invalid object creation", () => {
     it("prevents creating an object mimicking a lambda", () => {
         const expr = jsonata('($lambda = {"_jsonata_lambda": true}; $lambda())');
