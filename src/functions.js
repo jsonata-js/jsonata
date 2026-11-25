@@ -1845,11 +1845,15 @@ const functions = (() => {
         var result = this.createSequence();
 
         for (const key of utils.keys(obj)) {
-            var func_args = hofFuncArgs(func, obj[key], key, obj);
-            // invoke func
-            var val = await func.apply(this, func_args);
-            if(typeof val !== 'undefined') {
-                result.push(val);
+            // only read an own property: a callback for an earlier key may have deleted this key, so that
+            // obj[key] would otherwise resolve to an inherited property
+            if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                var func_args = hofFuncArgs(func, obj[key], key, obj);
+                // invoke func
+                var val = await func.apply(this, func_args);
+                if(typeof val !== 'undefined') {
+                    result.push(val);
+                }
             }
         }
 
@@ -2081,12 +2085,16 @@ const functions = (() => {
         var result = Object.create(null);
 
         for (const item of utils.keys(arg)) {
-            var entry = arg[item];
-            var func_args = hofFuncArgs(func, entry, item, arg);
-            // invoke func
-            var res = await func.apply(this, func_args);
-            if (boolean(res)) {
-                result[item] = entry;
+            // only read an own property: a callback for an earlier key may have deleted this key, so that
+            // arg[item] would otherwise resolve to an inherited property
+            if (Object.prototype.hasOwnProperty.call(arg, item)) {
+                var entry = arg[item];
+                var func_args = hofFuncArgs(func, entry, item, arg);
+                // invoke func
+                var res = await func.apply(this, func_args);
+                if (boolean(res)) {
+                    result[item] = entry;
+                }
             }
         }
 
