@@ -1,0 +1,6 @@
+{
+    "expr": "$toMillis('2024-01-01T12:38:49Z') = $toMillis('20240101123849', '[Y0000][M00][D00][H00][m00][s00]')",
+    "data": null,
+    "bindings": {},
+    "result": true
+}

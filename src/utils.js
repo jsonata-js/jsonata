@@ -198,6 +198,33 @@ const utils = (() => {
         return typeof arg === 'object' && arg !== null ? Object.keys(arg) : [];
     }
 
+    /**
+     * Returns the decimal digits of a finite number.  As XPath F&O 3.1 section 4.7.5 requires, these are the digits
+     * of the shortest decimal that converts back to the same number (which Number.prototype.toString produces),
+     * rather than the digits of its exact binary value (which toFixed uses)
+     * @param {number} value - the number; its sign is ignored
+     * @returns {{digits: string, exponent: number}} - the digits without leading zeros, and the power of ten of the last one
+     */
+    function decimalDigits(value) {
+        var parts = Math.abs(value).toString().split('e');
+        var mantissa = parts[0].split('.');
+        var fraction = mantissa[1] || '';
+        var digits = (mantissa[0] + fraction).replace(/^0+/, '');
+        if (digits === '') {
+            return {digits: '0', exponent: 0};
+        }
+        return {digits: digits, exponent: (parts[1] ? Number(parts[1]) : 0) - fraction.length};
+    }
+
+    /**
+     * Writes the decimal digits of a non-negative integer out in full (never exponent notation)
+     * @param {{digits: string, exponent: number}} number - the digits, and the power of ten of the last one
+     * @returns {string} - the decimal integer string
+     */
+    function decimalDigitsToString(number) {
+        return (number.digits + '0'.repeat(number.exponent)).replace(/^0+/, '') || '0';
+    }
+
     return {
         isNumeric,
         isArrayOfStrings,
@@ -210,7 +237,9 @@ const utils = (() => {
         getFunctionArity,
         isDeepEqual,
         stringToArray,
-        keys
+        keys,
+        decimalDigits,
+        decimalDigitsToString
     };
 })();
 
