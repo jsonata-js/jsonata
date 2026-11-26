@@ -1,3 +1,12 @@
+#### 1.8.10 Maintenance Release
+
+Backport of the transform and enumeration security hardening from 2.3.0:
+- Prevent code execution via the transform operator (GHSA-3x2j-862j-x779)
+- A transform rejects a function as its update value, and sets a `__proto__` update key as an own data property
+- Exclude functions from the descendant operator `**`, consistent with the single wildcard `*`
+- `$each` and `$sift` read only an object's own properties
+- Cap `$pad` string allocation to prevent unbounded memory use (error D2016)
+
 #### 1.8.9 Maintenance Release
 
 - Backport $toMillis security fixes to v1 (PR #825)
