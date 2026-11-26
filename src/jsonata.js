@@ -664,7 +664,8 @@ var jsonata = (function() {
      */
     function recurseDescendants(input, results) {
         // this is the equivalent of //* in XPath
-        if (!Array.isArray(input)) {
+        // a function is never a descendant, the same as for the single wildcard (*)
+        if (!Array.isArray(input) && !isFunction(input)) {
             results.push(input);
         }
         if (Array.isArray(input)) {
@@ -1310,18 +1311,25 @@ var jsonata = (function() {
                     // update must be an object
                     var updateType = typeof update;
                     if(updateType !== 'undefined') {
-                        if(updateType !== 'object' || update === null || Array.isArray(update)) {
-                            // throw type error
+                        if(updateType !== 'object' || update === null || Array.isArray(update) || isFunction(update)) {
+                            // the update must be a plain data object; a function would expose its internal fields,
+                            // and its environment is circular so it is not reported as the offending value
                             throw {
                                 code: "T2011",
                                 stack: (new Error()).stack,
                                 position: expr.update.position,
-                                value: update
+                                value: isFunction(update) ? undefined : update
                             };
                         }
-                        // merge the update
+                        // merge the update.  A property named __proto__ is set with defineProperty so that it
+                        // becomes an own data property rather than invoking the prototype setter (which would change
+                        // what the matched object inherits from); all other keys use plain assignment
                         for(const prop of utils.keys(update)) {
-                            match[prop] = update[prop];
+                            if (prop === '__proto__') {
+                                Object.defineProperty(match, prop, {value: update[prop], writable: true, enumerable: true, configurable: true});
+                            } else {
+                                match[prop] = update[prop];
+                            }
                         }
                     }
 
@@ -1997,6 +2005,7 @@ var jsonata = (function() {
         "T2012": "The delete clause of the transform expression must evaluate to a string or array of strings: {{value}}",
         "T2013": "The transform expression clones the input object using the $clone() function.  This has been overridden in the current scope by a non-function.",
         "D2014": "The size of the sequence allocated by the range operator (..) must not exceed 1e6.  Attempted to allocate {{value}}.",
+        "D2016": "The size of the string requested by the $pad function must not exceed 1e7.  Attempted to allocate {{value}}.",
         "D3001": "Attempting to invoke string function on Infinity or NaN",
         "D3010": "Second argument of replace function cannot be an empty string",
         "D3011": "Fourth argument of replace function must evaluate to a positive number",

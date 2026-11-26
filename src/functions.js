@@ -294,6 +294,13 @@ const functions = (() => {
 
         var result;
         var padLength = Math.abs(width) - length(str);
+        if (padLength > 1e7) {
+            // limit the length of the padding to ten million characters, to protect against a huge allocation
+            throw {
+                code: "D2016",
+                value: Math.abs(width)
+            };
+        }
         if (padLength > 0) {
             var padding = (new Array(padLength + 1)).join(char);
             if (char.length > 1) {
@@ -1807,11 +1814,15 @@ const functions = (() => {
         var result = createSequence();
 
         for (const key of utils.keys(obj)) {
-            var func_args = hofFuncArgs(func, obj[key], key, obj);
-            // invoke func
-            var val = yield* func.apply(this, func_args);
-            if(typeof val !== 'undefined') {
-                result.push(val);
+            // only read an own property: a callback for an earlier key may have deleted this key, so that
+            // obj[key] would otherwise resolve to an inherited property
+            if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                var func_args = hofFuncArgs(func, obj[key], key, obj);
+                // invoke func
+                var val = yield* func.apply(this, func_args);
+                if(typeof val !== 'undefined') {
+                    result.push(val);
+                }
             }
         }
 
@@ -2036,12 +2047,16 @@ const functions = (() => {
         var result = Object.create(null);
 
         for (const item of utils.keys(arg)) {
-            var entry = arg[item];
-            var func_args = hofFuncArgs(func, entry, item, arg);
-            // invoke func
-            var res = yield* func.apply(this, func_args);
-            if (boolean(res)) {
-                result[item] = entry;
+            // only read an own property: a callback for an earlier key may have deleted this key, so that
+            // arg[item] would otherwise resolve to an inherited property
+            if (Object.prototype.hasOwnProperty.call(arg, item)) {
+                var entry = arg[item];
+                var func_args = hofFuncArgs(func, entry, item, arg);
+                // invoke func
+                var res = yield* func.apply(this, func_args);
+                if (boolean(res)) {
+                    result[item] = entry;
+                }
             }
         }
 

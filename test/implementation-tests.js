@@ -843,6 +843,51 @@ describe("Tests that are specific to a Javascript runtime", () => {
             const result = expr.evaluate();
             expect(result).to.deep.equal({});
         });
+        it("should not change an object's prototype through a __proto__ update key", function() {
+            const expr = jsonata('{} ~> | $ | {"__proto__": {"injected": true}} |');
+            const result = expr.evaluate();
+            // __proto__ is set as an own data property; the object does not inherit from the update value
+            expect(Object.getPrototypeOf(result)).to.equal(Object.prototype);
+            expect(Object.prototype.hasOwnProperty.call(result, '__proto__')).to.equal(true);
+            expect({}.injected).to.equal(undefined);
+        });
+    });
+});
+
+describe("Security backports from 2.3.0", () => {
+    it("a transform rejects a function as the update value", function() {
+        expect(function() {
+            jsonata('($f := function(){1}; {} ~> | $ | $f, "_jsonata_lambda" |)').evaluate();
+        }).to.throw().to.deep.contain({ code: "T2011" });
+    });
+    it("the descendant operator (**) does not return a lambda", function() {
+        const result = jsonata('($f := function(){1}; [[$f].**])').evaluate();
+        expect(result).to.deep.equal([]);
+    });
+    it("the descendant operator (**) does not return a built-in function", function() {
+        const result = jsonata('[[$sum].**]').evaluate();
+        expect(result).to.deep.equal([]);
+    });
+    it("$pad rejects a width that would allocate more than 1e7 characters", function() {
+        expect(function() {
+            jsonata('$pad("a", 50000000, "x")').evaluate();
+        }).to.throw().to.deep.contain({ code: "D2016" });
+    });
+    it("$each skips a key that a callback deletes, rather than read an inherited property", function() {
+        const input = Object.assign(Object.create({ secret: "inherited" }), { first: 1, secret: "own" });
+        const expr = jsonata('$each($, function($v, $k){ $k = "first" ? ($drop(); $v) : $v })');
+        expr.registerFunction('drop', function() { delete input.secret; return true; }, '<:b>');
+        const result = expr.evaluate(input);
+        // 'secret' is no longer an own property when $each reaches it, so it is skipped
+        expect(result).to.equal(1);
+    });
+    it("$sift skips a key that a callback deletes, rather than read an inherited property", function() {
+        const input = Object.assign(Object.create({ secret: "inherited" }), { first: 1, secret: "own" });
+        const expr = jsonata('$sift($, function($v, $k){ $k = "first" ? $drop() : true })');
+        expr.registerFunction('drop', function() { delete input.secret; return true; }, '<:b>');
+        const result = expr.evaluate(input);
+        // only 'first' is kept; 'secret' is skipped rather than kept with its inherited value
+        expect(result).to.deep.equal({ first: 1 });
     });
 });
 
