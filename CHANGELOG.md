@@ -1,3 +1,36 @@
+#### 2.3.0 Milestone Release
+
+New features:
+- Template strings using `«...»` for string interpolation (PR #860)
+- New `inherited` option to allow looking up the properties that objects inherit from their prototypes (PR #870)
+
+Security and robustness:
+- Prevent code execution via the transform operator (GHSA-3x2j-862j-x779)
+- Rewrite the date/time functions to parse picture strings in linear time (PR #869)
+- Transforms ignore an expression-level `$clone` override (PR #871)
+- Exclude functions from the descendant operator `**`, consistent with the single wildcard `*` (PR #873)
+- `$each` and `$sift` read only an object's own properties (PR #874)
+- Cap `$pad` string allocation to prevent unbounded memory use (PR #832)
+- Fix race condition with shared regex (PR #845)
+- Fix race condition when `$millis()` / `$now()` are used concurrently (PR #846)
+
+Bug fixes:
+- Fix chained predicates after a computed array index (PR #861, issue #766)
+- Fix field selection after grouping (PR #838)
+- Fix negative timezone offsets with minutes (PR #856)
+- Fix fractional-second formatting in `$fromMillis` (PR #855)
+- Format numbers in `$formatNumber` from their decimal digits (PR #868)
+- Fix `$formatNumber` and `$formatInteger` for numbers >= 1e21 (PR #864)
+- Fix irregular number grouping for short integer parts (PR #854)
+- Preserve constructed arrays in tuple results (PR #841)
+- Preserve operand error locations in boolean expressions (PR #857)
+- Return `undefined` from `$split` / `$replace` when the pattern argument is undefined (PR #831)
+- Make the merge step of sort iterative to avoid quadratic memory use (PR #844)
+- Add `Number.parseInt` polyfill for ES5 date parsing (PR #858)
+
+Documentation:
+- Add jlens (Rust) implementation to the overview (PR #839)
+
 #### 2.2.2 Maintenance Release
 
 - Update TypeScript type definitions (PR #807)
