@@ -107,23 +107,23 @@
         "function": "#formatInteger",
         "category": "decimal-digit-pattern - unicode decimal groups",
         "description": "should insert regular groups",
-        "expr": "$formatInteger(12340, '###١')",
+        "expr": "$formatInteger(12340, '###\u0661')",
         "data": {},
-        "result": "١٢٣٤٠"
+        "result": "\u0661\u0662\u0663\u0664\u0660"
     },
     {
         "function": "#formatInteger",
         "category": "decimal-digit-pattern - unicode decimal groups",
         "description": "should insert regular groups",
-        "expr": "$formatInteger(12340, '###０')",
+        "expr": "$formatInteger(12340, '###\uff10')",
         "data": {},
-        "result": "１２３４０"
+        "result": "\uff11\uff12\uff13\uff14\uff10"
     },
     {
         "function": "#formatInteger",
         "category": "decimal-digit-pattern - unicode decimal groups",
         "description": "should throw error with mixed integer groups",
-        "expr": "$formatInteger(12340, '##0０')",
+        "expr": "$formatInteger(12340, '##0\uff10')",
         "data": {},
         "code": "D3131"
     },
@@ -514,9 +514,25 @@
     {
         "function": "#formatInteger",
         "category": "spreadsheet column names",
-        "description": "sequence starting with greek alpha, α",
-        "expr": "$formatInteger(123456, 'α')",
+        "description": "sequence starting with greek alpha, \u03b1",
+        "expr": "$formatInteger(123456, '\u03b1')",
         "data": {},
         "code": "D3130"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "decimal-digit-pattern - cardinal",
+        "description": "should format zero in the decimal pattern",
+        "expr": "$formatInteger(0, '0')",
+        "data": {},
+        "result": "0"
+    },
+    {
+        "function": "#formatInteger",
+        "category": "decimal-digit-pattern - cardinal",
+        "description": "should format a number >= 1e21 in full (not exponent notation)",
+        "expr": "$formatInteger(1e21, '0')",
+        "data": {},
+        "result": "1000000000000000000000"
     }
 ]

@@ -541,6 +541,22 @@
     },
     {
         "function": "#fromMillis",
+        "category": "Upper case AM/PM presentation",
+        "description": "am/pm presentation should be set to uppercase AM",
+        "expr": "$fromMillis(1521801216617, '[F], [D]/[M]/[Y] [h]:[m]:[s] [PN]')",
+        "data": {},
+        "result": "friday, 23/3/2018 10:33:36 AM"
+    },
+    {
+        "function": "#fromMillis",
+        "category": "Lower case AM/PM presentation",
+        "description": "am/pm presentation should be set to lowercase am",
+        "expr": "$fromMillis(1521801216617, '[F], [D]/[M]/[Y] [h]:[m]:[s] [Pn]')",
+        "data": {},
+        "result": "friday, 23/3/2018 10:33:36 am"
+    },
+    {
+        "function": "#fromMillis",
         "category": "error",
         "description": "throws error asking for year name",
         "expr": "$fromMillis(1419940800000, '[YN]-[M]-[D]')",

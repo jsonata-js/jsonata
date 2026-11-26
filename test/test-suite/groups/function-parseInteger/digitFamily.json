@@ -1,0 +1,20 @@
+[
+    {
+        "description": "digits that aren't in the picture string's decimal digit family are left as they are",
+        "expr": "$parseInteger('12', '١')",
+        "dataset": null,
+        "result": 12
+    },
+    {
+        "description": "removes the grouping separators of a number in another decimal digit family",
+        "expr": "$parseInteger('١٬٢٣٤', '#٬##١')",
+        "dataset": null,
+        "result": 1234
+    },
+    {
+        "description": "converts a long number in another decimal digit family",
+        "expr": "$parseInteger($pad('', 10000, '٠') & '٧', '١')",
+        "dataset": null,
+        "result": 7
+    }
+]

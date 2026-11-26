@@ -1,0 +1,14 @@
+[
+    {
+        "description": "removes many different grouping separators in time proportional to the length of the number",
+        "expr": "$parseInteger($pad('', 1000000, '0'), '#' & $pad('', 800000, '0.0,') & '0')",
+        "dataset": null,
+        "result": 0
+    },
+    {
+        "description": "removes a regular grouping separator other than a comma",
+        "expr": "$parseInteger('1.234.567', '#.##0')",
+        "dataset": null,
+        "result": 1234567
+    }
+]
