@@ -855,6 +855,15 @@ describe("Tests that are specific to a Javascript runtime", () => {
 });
 
 describe("Security backports from 2.3.0", () => {
+    it("a width modifier larger than 100 is rejected (prevents a huge string from a tiny picture)", function() {
+        expect(function() {
+            jsonata("$fromMillis(1000, '[f,100000000]')").evaluate();
+        }).to.throw().to.deep.contain({ code: "D3142" });
+    });
+    it("roman numerals for a large number fall back to decimal rather than overflowing the stack", function() {
+        expect(jsonata("$formatInteger(1000000000, 'I')").evaluate()).to.equal("1000000000");
+        expect(jsonata("$formatInteger(2024, 'I')").evaluate()).to.equal("MMXXIV");
+    });
     it("$toMillis does not backtrack on a long timestamp with adjacent numeric markers", function() {
         // a picture with adjacent variable-width numeric markers can make the matcher regex backtrack
         // catastrophically; a timestamp longer than any real one is rejected before the regex runs

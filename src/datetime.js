@@ -137,19 +137,28 @@ const dateTime = (function () {
 
     const romanValues = {'M': 1000, 'D': 500, 'C': 100, 'L': 50, 'X': 10, 'V': 5, 'I': 1};
 
+    // the largest number formatted as roman numerals; a larger number is formatted in decimal digits instead
+    // (permitted by XPath F&O 4.6.1), which bounds the length of the result
+    const maxRoman = 1e7;
+
+    // a width modifier larger than this would produce a very long string from a tiny picture string
+    const maxWidthModifier = 100;
+
     /**
      * converts a number to roman numerals
      * @param {number} value - the number
      * @returns {string} - the number in roman numerals
      */
     function decimalToRoman(value) {
-        for (var index = 0; index < romanNumerals.length; index++) {
-            const numeral = romanNumerals[index];
-            if (value >= numeral[0]) {
-                return numeral[1] + decimalToRoman(value - numeral[0]);
+        // build iteratively rather than recursively, so a large value cannot overflow the call stack
+        let roman = '';
+        romanNumerals.forEach(function (numeral) {
+            while (value >= numeral[0]) {
+                roman += numeral[1];
+                value -= numeral[0];
             }
-        }
-        return '';
+        });
+        return roman;
     }
 
     /**
@@ -252,9 +261,14 @@ const dateTime = (function () {
                 formattedInteger = decimalToLetters(value, format.case === tcase.UPPER ? 'A' : 'a');
                 break;
             case formats.ROMAN:
-                formattedInteger = decimalToRoman(value);
-                if (format.case === tcase.UPPER) {
-                    formattedInteger = formattedInteger.toUpperCase();
+                if (value > maxRoman) {
+                    // too large for roman numerals; fall back to decimal digits to bound the output length
+                    formattedInteger = '' + value;
+                } else {
+                    formattedInteger = decimalToRoman(value);
+                    if (format.case === tcase.UPPER) {
+                        formattedInteger = formattedInteger.toUpperCase();
+                    }
                 }
                 break;
             case formats.WORDS:
@@ -546,7 +560,14 @@ const dateTime = (function () {
                             return undefined;
                         } else {
                             // TODO validate wm is an unsigned int
-                            return parseInt(wm);
+                            const width = parseInt(wm);
+                            if (width > maxWidthModifier) {
+                                throw {
+                                    code: 'D3142',
+                                    value: wm
+                                };
+                            }
+                            return width;
                         }
                     };
                     if (dash === -1) {
@@ -1123,8 +1144,8 @@ const dateTime = (function () {
 
     // the longest timestamp that parseDateTime will try to match.  The matcher is a regular expression, and a
     // picture string with adjacent variable-width numeric markers (such as [f1][f1]) makes it backtrack for a
-    // time that grows faster than the length of the timestamp.  
-    // For v1.x, we assert that no real timestamp can be this long, so a longer input is rejected before the 
+    // time that grows faster than the length of the timestamp.
+    // For v1.x, we assert that no real timestamp can be this long, so a longer input is rejected before the
     // regex runs (tactical fix to protect against ReDoS - v2.3.0 rewrites this to eliminate regexes).
     const maxTimestampLength = 256;
 
