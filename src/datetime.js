@@ -1142,12 +1142,14 @@ const dateTime = (function () {
         return result;
     }
 
-    // the longest timestamp that parseDateTime will try to match.  The matcher is a regular expression, and a
-    // picture string with adjacent variable-width numeric markers (such as [f1][f1]) makes it backtrack for a
-    // time that grows faster than the length of the timestamp.
-    // For v1.x, we assert that no real timestamp can be this long, so a longer input is rejected before the
-    // regex runs (tactical fix to protect against ReDoS - v2.3.0 rewrites this to eliminate regexes).
+    // the matcher is a regular expression, and a run of adjacent variable-width markers (such as [f1][f1])
+    // makes it backtrack for a time that grows as the length of the timestamp raised to the power of the
+    // number of adjacent markers.  Both are bounded to keep matching fast: no real timestamp is as long as
+    // maxTimestampLength, and a run of more than maxAdjacentMarkers variable-width markers is ambiguous
+    // anyway (there is no way to tell where one value ends and the next begins).
+    // v2.3.0 rewrites this to eliminate the regex; these are the tactical equivalents for the v1.x line.
     const maxTimestampLength = 256;
+    const maxAdjacentMarkers = 3;
 
     /**
      * parse a string containing a timestamp as specified by the picture string
@@ -1161,6 +1163,19 @@ const dateTime = (function () {
         }
         const formatSpec = analyseDateTimePicture(picture);
         const matchSpec = generateRegex(formatSpec);
+        // reject a picture with too many adjacent variable-width markers, which would make the regex below
+        // backtrack catastrophically.  A variable-width marker generates an unbounded ('+' or '*') regex part
+        let adjacent = 0;
+        for (let i = 0; i < matchSpec.parts.length; i++) {
+            var variable = formatSpec.parts[i].type !== 'literal' && /[+*]/.test(matchSpec.parts[i].regex);
+            adjacent = variable ? adjacent + 1 : 0;
+            if (adjacent > maxAdjacentMarkers) {
+                throw {
+                    code: 'D3143',
+                    value: picture
+                };
+            }
+        }
         const fullRegex = '^' + matchSpec.parts.map(part => '(' + part.regex + ')').join('') + '$';
 
         const matcher = new RegExp(fullRegex, 'i'); // TODO can cache this against the picture

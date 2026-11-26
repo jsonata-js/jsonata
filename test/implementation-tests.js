@@ -873,6 +873,14 @@ describe("Security backports from 2.3.0", () => {
         expect(result).to.equal(undefined);
         expect(Date.now() - start).to.be.lessThan(1000);
     });
+    it("$toMillis rejects a picture with too many adjacent variable-width markers", function() {
+        // even a short timestamp would backtrack catastrophically against many adjacent [f1] markers
+        const start = Date.now();
+        expect(function() {
+            jsonata("$toMillis($ts, '[f1][f1][f1][f1][f1]')").evaluate({}, { ts: "1".repeat(255) + "x" });
+        }).to.throw().to.deep.contain({ code: "D3143" });
+        expect(Date.now() - start).to.be.lessThan(1000);
+    });
     it("a transform rejects a function as the update value", function() {
         expect(function() {
             jsonata('($f := function(){1}; {} ~> | $ | $f, "_jsonata_lambda" |)').evaluate();

@@ -2047,7 +2047,8 @@ var jsonata = (function() {
         "D3139": "The $single() function expected exactly 1 matching result.  Instead it matched 0.",
         "D3140": "Malformed URL passed to ${{{functionName}}}(): {{value}}",
         "D3141": "{{{message}}}",
-        "D3142": "The width modifier in a date/time picture string must not exceed 100: {{value}}"
+        "D3142": "The width modifier in a date/time picture string must not exceed 100: {{value}}",
+        "D3143": "The date/time picture string has too many adjacent variable-width markers: {{value}}"
     };
 
     /**
