@@ -855,6 +855,15 @@ describe("Tests that are specific to a Javascript runtime", () => {
 });
 
 describe("Security backports from 2.3.0", () => {
+    it("$toMillis does not backtrack on a long timestamp with adjacent numeric markers", function() {
+        // a picture with adjacent variable-width numeric markers can make the matcher regex backtrack
+        // catastrophically; a timestamp longer than any real one is rejected before the regex runs
+        const timestamp = "1".repeat(100000) + "x";
+        const start = Date.now();
+        const result = jsonata("$toMillis($ts, '[f1][f1]')").evaluate({}, { ts: timestamp });
+        expect(result).to.equal(undefined);
+        expect(Date.now() - start).to.be.lessThan(1000);
+    });
     it("a transform rejects a function as the update value", function() {
         expect(function() {
             jsonata('($f := function(){1}; {} ~> | $ | $f, "_jsonata_lambda" |)').evaluate();

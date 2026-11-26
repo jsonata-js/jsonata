@@ -1121,6 +1121,13 @@ const dateTime = (function () {
         return result;
     }
 
+    // the longest timestamp that parseDateTime will try to match.  The matcher is a regular expression, and a
+    // picture string with adjacent variable-width numeric markers (such as [f1][f1]) makes it backtrack for a
+    // time that grows faster than the length of the timestamp.  
+    // For v1.x, we assert that no real timestamp can be this long, so a longer input is rejected before the 
+    // regex runs (tactical fix to protect against ReDoS - v2.3.0 rewrites this to eliminate regexes).
+    const maxTimestampLength = 256;
+
     /**
      * parse a string containing a timestamp as specified by the picture string
      * @param {string} timestamp - the string to parse
@@ -1128,6 +1135,9 @@ const dateTime = (function () {
      * @returns {number} - the parsed timestamp in millis since the epoch
      */
     function parseDateTime(timestamp, picture) {
+        if (timestamp.length > maxTimestampLength) {
+            return undefined;
+        }
         const formatSpec = analyseDateTimePicture(picture);
         const matchSpec = generateRegex(formatSpec);
         const fullRegex = '^' + matchSpec.parts.map(part => '(' + part.regex + ')').join('') + '$';
