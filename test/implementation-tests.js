@@ -1862,6 +1862,30 @@ describe("Tests that $each and $sift only read an object's own properties", () =
     });
 });
 
+describe("Tests that interpreter internals are not reachable from an expression", () => {
+    // the transform operator copies the update value's own properties onto the matched copy; a function
+    // (lambda or built-in) is rejected so that its internal fields cannot be copied out and read
+    it("a transform rejects a lambda as the update value", async function() {
+        await expect(
+            jsonata('($f := function(){1}; {} ~> | $ | $f, "_jsonata_lambda" |)').evaluate({})
+        ).to.eventually.be.rejected.to.deep.contain({ code: "T2011" });
+    });
+    it("a transform rejects a built-in function as the update value", async function() {
+        await expect(
+            jsonata('{} ~> | $ | $lookup, "_jsonata_function" |').evaluate({})
+        ).to.eventually.be.rejected.to.deep.contain({ code: "T2011" });
+    });
+});
+
+describe("Tests that a transform cannot reparent an object through a __proto__ key", () => {
+    it("sets __proto__ as an own data property without changing the prototype", async function() {
+        const result = await jsonata('{} ~> | $ | {"__proto__": {"injected": true}} |').evaluate({});
+        expect(Object.getPrototypeOf(result)).to.equal(Object.prototype);
+        expect(Object.prototype.hasOwnProperty.call(result, '__proto__')).to.equal(true);
+        expect(({}).injected).to.equal(undefined);
+    });
+});
+
 describe("Tests invalid object creation", () => {
     it("prevents creating an object mimicking a lambda", () => {
         const expr = jsonata('($lambda = {"_jsonata_lambda": true}; $lambda())');

@@ -1711,7 +1711,7 @@ const functions = (() => {
             }
         } else if (input !== null && typeof input === 'object' && !isFunction(input) &&
             (Object.prototype.hasOwnProperty.call(input, key) ||
-             (this.options && this.options.inherited === true && !blockedProperties.has(key)))) {
+             (typeof key === 'string' && this.options && this.options.inherited === true && !blockedProperties.has(key)))) {
             // an object's own properties can always be looked up, and the properties it inherits only if allowed
             result = input[key];
         }
