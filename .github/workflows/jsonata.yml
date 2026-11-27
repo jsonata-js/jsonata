@@ -22,7 +22,7 @@ jobs:
   documentation:
     needs: build    
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && github.repository == 'jsonata-js/jsonata' }}
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'jsonata-js/jsonata' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
