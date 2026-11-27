@@ -1206,9 +1206,9 @@ const dateTime = (function () {
                         // months
                         months.forEach(function (name, index) {
                             if (part.width && part.width.max) {
-                                lookup[name.substring(0, part.width.max)] = index + 1;
+                                lookup[canonicalize(name.substring(0, part.width.max))] = index + 1;
                             } else {
-                                lookup[name] = index + 1;
+                                lookup[canonicalize(name)] = index + 1;
                             }
                         });
                     } else if (part.component === 'F') {
@@ -1216,15 +1216,15 @@ const dateTime = (function () {
                         days.forEach(function (name, index) {
                             if (index > 0) {
                                 if (part.width && part.width.max) {
-                                    lookup[name.substring(0, part.width.max)] = index;
+                                    lookup[canonicalize(name.substring(0, part.width.max))] = index;
                                 } else {
-                                    lookup[name] = index;
+                                    lookup[canonicalize(name)] = index;
                                 }
                             }
                         });
                     } else if (part.component === 'P') {
-                        lookup.am = lookup.AM = 0;
-                        lookup.pm = lookup.PM = 1;
+                        lookup.AM = 0;
+                        lookup.PM = 1;
                     } else {
                         // unsupported 'name' option for this component
                         throw {
@@ -1232,8 +1232,9 @@ const dateTime = (function () {
                             value: part.component
                         };
                     }
+                    // the timestamp is matched case-insensitively, so [MN] and [Mn] read 'APRIL' and 'april'
                     res.parse = function (value) {
-                        return lookup[value];
+                        return lookup[canonicalize(value)];
                     };
                 }
                 res.component = part.component;
