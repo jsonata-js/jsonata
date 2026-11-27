@@ -1,3 +1,9 @@
+#### 1.8.11 Maintenance Release
+
+Backport of the date/time parser hardening from 2.3.0 (PR #880, GHSA-rrrx-x3jf-64f6):
+- Replace the backtracking picture-string matcher with the linear-time matcher from 2.3.0, removing a regular expression denial of service (ReDoS) in `$toMillis`
+- Bound `$fromMillis` width modifiers (error D3142) and roman numerals (decimal fallback above ten million) to prevent large-allocation and stack-overflow denial of service
+
 #### 1.8.10 Maintenance Release
 
 Backport of the transform and enumeration security hardening from 2.3.0:
